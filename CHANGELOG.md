@@ -10,6 +10,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-06: Tahap 2: PWA
+- Ditambah: Konfigurasi PWA (manifest.webmanifest, sw.js, ikon).
+- Ditambah: Link manifest dan service worker di index.html dan js/app.js.
+- Ditambah: Tombol "Install Aplikasi" dengan event beforeinstallprompt.
+
 ## 2026-10-06: Tahap 1: Lokal
 - Diperbaiki: Syntax error pada file `js/app.js` terkait karakter escape di dalam template literal yang menyebabkan error gagal muat.
 - Ditambah: Antarmuka dan logika aplikasi lokal (index.html, style.css, app.js).

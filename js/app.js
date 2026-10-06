@@ -222,3 +222,50 @@ async function init() {
 }
 
 init();
+
+// --- PWA & Service Worker ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker terdaftar!', reg))
+            .catch(err => console.error('Service Worker gagal mendaftar!', err));
+    });
+}
+
+// Install Prompt Logic
+let deferredPrompt;
+const btnInstall = document.getElementById('btn-install');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (btnInstall) {
+        btnInstall.classList.remove('hidden');
+    }
+});
+
+if (btnInstall) {
+    btnInstall.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Pilihan user untuk install: ${outcome}`);
+            deferredPrompt = null;
+            btnInstall.classList.add('hidden');
+        }
+    });
+}
+
+window.addEventListener('appinstalled', () => {
+    console.log('Aplikasi berhasil diinstal');
+    if (btnInstall) {
+        btnInstall.classList.add('hidden');
+    }
+});
+
+/* 
+Catatan PWA untuk iOS:
+Safari di iOS tidak mendukung event `beforeinstallprompt`.
+Untuk "Add to Home Screen" di iPhone/iPad, pengguna harus membuka 
+menu "Share" pada browser Safari, lalu memilih "Add to Home Screen".
+*/

@@ -49,9 +49,9 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - Simpan di IndexedDB
   - Tampilan rapi di HP dan PC
 - [ ] **Tahap 2: Jadi PWA**
-  - Bisa di-install ke homescreen
-  - Bisa dibuka offline
-  - Deploy ke GitHub Pages, tes dari HP
+  - [x] Bisa di-install ke homescreen
+  - [x] Bisa dibuka offline
+  - [ ] Deploy ke GitHub Pages, tes dari HP
 - [ ] **Tahap 3: Login Google dan sinkron Drive**
   - Buat project Google Cloud, aktifkan Drive API, buat OAuth Client ID
   - Tombol login Google
