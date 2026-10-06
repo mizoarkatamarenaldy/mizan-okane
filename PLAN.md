@@ -3,11 +3,30 @@
 Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Drive.
 
 ## Aturan untuk agent (baca ini dulu)
-1. Baca file ini sebelum mengerjakan fitur apa pun.
-2. Kerjakan SATU tahap per sesi. Jangan lompat ke tahap berikutnya.
-3. Bagian "Keputusan terkunci" tidak boleh diubah tanpa izin pemilik.
-4. Setelah fitur selesai, tambahkan entri di `CHANGELOG.md` dan centang tahap di bawah.
-5. Jangan pernah menaruh data transaksi asli di repo. Repo ini publik, isinya hanya kode dan dokumen.
+
+### Aturan kerja
+- Baca PLAN.md sebelum mengerjakan apa pun.
+- Kerjakan SATU tahap per sesi. Jangan lompat ke tahap berikutnya.
+- Jangan ubah file di luar tahap yang sedang dikerjakan.
+- Bagian "Keputusan terkunci" tidak boleh diubah tanpa izin pemilik.
+- Jangan pernah menaruh data transaksi asli, token, kunci, atau file `.env` di repo. Repo ini publik, isinya hanya kode dan dokumen.
+- Di akhir tahap, centang tahap di PLAN.md dan tambahkan satu entri di paling atas `CHANGELOG.md` sesuai format di file itu. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
+- Di awal sesi, baca hanya 5 entri paling atas CHANGELOG.md, jangan seluruh file.
+
+### Alur commit dan push
+Sebelum mulai kerja, jalankan `git branch --show-current`. Hasilnya harus `main`. Kalau bukan, berhenti: jangan pindah branch, jangan buat branch, jangan commit, jangan push. Laporkan nama branch yang aktif ke pemilik. Kalau selama sesi muncul branch atau worktree baru yang dibuat otomatis oleh tool, berhenti dan laporkan juga, jangan push.
+
+Setelah tahap selesai:
+1. Jalankan `git status --short`. Kalau ada file yang muncul tapi bukan bagian dari tahap ini (selain PLAN.md dan CHANGELOG.md), berhenti: jangan commit, jangan push, laporkan ke pemilik.
+2. Tambahkan entri di CHANGELOG.md. Cantumkan file yang diubah berdasarkan hasil `git status --short`.
+3. Stage file dengan menyebut namanya satu per satu. Dilarang `git add -A` dan `git add .`
+4. Commit dengan pesan lengkap: judul singkat dengan format "tahap N: nama singkat", isi penjelasan, lalu dua baris trailer di bawah, dipisah satu baris kosong dari isi pesan.
+
+   Co-authored-by: Claude <noreply@anthropic.com>
+   Co-authored-by: Gemini (Antigravity) <200291788+gemini-code-assist@users.noreply.github.com>
+5. Jalankan `git push` ke branch yang sedang aktif. Dilarang force push, dilarang membuat atau menghapus branch, dilarang mengubah git config.
+6. Kalau commit atau push gagal, jangan coba cara lain. Berhenti dan laporkan error-nya ke pemilik.
+7. Di akhir, kabari file apa saja yang diubah dan hash commit-nya.
 
 ## Keputusan terkunci
 - Bentuk: PWA (web app), bisa di-install di HP dan PC.
