@@ -74,7 +74,7 @@ function render() {
                     <span class="tx-category">${tx.category}</span>
                     <span class="tx-date">${formatDate(tx.date)}</span>
                 </div>
-                ${tx.note ? \`<div class="tx-note">\${tx.note}</div>\` : ''}
+                ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
                 <div class="tx-amount ${amountClass}">${sign} ${currencyFormatter.format(tx.amount)}</div>
             </div>
             <div class="tx-actions">
