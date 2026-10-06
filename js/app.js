@@ -1,4 +1,5 @@
 import { initDB, saveTransaction, getAllTransactions } from './db.js';
+import { initSync, markDirty, signIn, signOut, syncNow, resolveConflict } from './sync.js';
 
 // DOM Elements
 const formTitle = document.getElementById('form-title');
@@ -160,6 +161,7 @@ async function handleSubmit(e) {
         await saveTransaction(tx);
         resetForm();
         await loadData();
+        markDirty().catch(err => console.error("Gagal menandai perubahan untuk sinkron", err));
     } catch (error) {
         console.error("Gagal menyimpan transaksi", error);
         alert("Terjadi kesalahan saat menyimpan data.");
@@ -198,6 +200,7 @@ async function handleDelete(id) {
             tx.updatedAt = Date.now();
             await saveTransaction(tx);
             await loadData();
+            markDirty().catch(err => console.error("Gagal menandai perubahan untuk sinkron", err));
         }
     } catch (error) {
         console.error("Gagal menghapus transaksi", error);
@@ -209,6 +212,78 @@ async function handleDelete(id) {
 txForm.addEventListener('submit', handleSubmit);
 btnCancel.addEventListener('click', resetForm);
 
+// --- Sinkron Google Drive ---
+const syncStatusEl = document.getElementById('sync-status');
+const btnLogin = document.getElementById('btn-login');
+const btnLogout = document.getElementById('btn-logout');
+const btnSyncNow = document.getElementById('btn-sync-now');
+const syncConflictEl = document.getElementById('sync-conflict');
+const btnUseDrive = document.getElementById('btn-use-drive');
+const btnUseLocal = document.getElementById('btn-use-local');
+
+function formatTime(ts) {
+    return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderSyncState(s) {
+    const linked = !!s.email && s.status !== 'signed-out';
+    const busy = s.status === 'syncing';
+    const who = s.email ? ` (${s.email})` : '';
+
+    const views = {
+        'signed-out': ['', 'Belum login. Data hanya tersimpan di perangkat ini.'],
+        'connecting': ['', 'Menyambung ke Google...'],
+        'syncing': ['', `Menyinkronkan dengan Drive${who}...`],
+        'synced': ['ok', `Tersinkron dengan Drive${who}${s.lastSyncAt ? `, pukul ${formatTime(s.lastSyncAt)}` : ''}.`],
+        'offline': ['warn', 'Offline. Perubahan tetap tersimpan di perangkat dan dikirim saat online lagi.'],
+        'needs-login': ['warn', `${s.message || 'Sesi Google berakhir.'} Ketuk Sinkron untuk lanjut.`],
+        'conflict': ['warn', 'Sinkron dijeda: data perlu dipilih.'],
+        'error': ['error', `Gagal sinkron. ${s.message || ''} Data di perangkat aman, ketuk Sinkron untuk coba lagi.`]
+    };
+    const [tone, text] = views[s.status] || views['signed-out'];
+
+    // Pesan gagal login saat belum terhubung tetap ditampilkan.
+    syncStatusEl.textContent = s.status === 'signed-out' && s.message ? `${s.message} ${text}` : text;
+    syncStatusEl.dataset.tone = s.status === 'signed-out' && s.message ? 'error' : tone;
+
+    btnLogin.classList.toggle('hidden', linked);
+    btnLogin.disabled = busy;
+    btnLogout.classList.toggle('hidden', !linked);
+    btnSyncNow.classList.toggle('hidden', !linked);
+    btnSyncNow.disabled = busy;
+    syncConflictEl.classList.toggle('hidden', s.status !== 'conflict');
+    btnUseDrive.disabled = busy;
+    btnUseLocal.disabled = busy;
+}
+
+btnLogin.addEventListener('click', () => {
+    if (!navigator.onLine) {
+        renderSyncState({ status: 'signed-out', message: 'Perlu koneksi internet untuk login.' });
+        return;
+    }
+    signIn();
+});
+
+btnLogout.addEventListener('click', () => {
+    if (confirm('Logout dari Google? Data di perangkat ini tetap ada, tapi tidak disinkronkan lagi sampai login ulang.')) {
+        signOut();
+    }
+});
+
+btnSyncNow.addEventListener('click', () => syncNow({ interactive: true }));
+
+btnUseDrive.addEventListener('click', () => {
+    if (confirm('Data di perangkat ini akan diganti dengan data dari Drive. Lanjutkan?')) {
+        resolveConflict('remote');
+    }
+});
+
+btnUseLocal.addEventListener('click', () => {
+    if (confirm('Data di Drive akan diganti dengan data dari perangkat ini. Lanjutkan?')) {
+        resolveConflict('local');
+    }
+});
+
 // Init
 async function init() {
     try {
@@ -218,7 +293,12 @@ async function init() {
     } catch (error) {
         console.error("Gagal inisialisasi database", error);
         alert("Browser Anda tidak mendukung penyimpanan lokal atau terjadi kesalahan.");
+        return;
     }
+
+    // Sinkron dimulai setelah data lokal tampil, jadi app tetap jalan walau offline atau belum login.
+    initSync({ onState: renderSyncState, onRemoteApplied: loadData })
+        .catch(err => console.error("Gagal memulai sinkron", err));
 }
 
 init();

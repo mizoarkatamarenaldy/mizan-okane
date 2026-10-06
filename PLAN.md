@@ -52,7 +52,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Bisa di-install ke homescreen
   - [x] Bisa dibuka offline
   - [ ] Deploy ke GitHub Pages, tes dari HP
-- [ ] **Tahap 3: Login Google dan sinkron Drive**
+- [x] **Tahap 3: Login Google dan sinkron Drive**
   - Buat project Google Cloud, aktifkan Drive API, buat OAuth Client ID
   - Tombol login Google
   - Simpan dan ambil JSON dari `appDataFolder`
