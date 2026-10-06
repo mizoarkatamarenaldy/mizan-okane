@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mizan Okane</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mizan Okane</h1>
+            <div class="summary">
+                <div class="summary-item balance">
+                    <span>Total Saldo</span>
+                    <strong id="total-balance">Rp 0</strong>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-item income">
+                        <span>Pemasukan</span>
+                        <strong id="total-income">Rp 0</strong>
+                    </div>
+                    <div class="summary-item expense">
+                        <span>Pengeluaran</span>
+                        <strong id="total-expense">Rp 0</strong>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="form-section">
+            <h2 id="form-title">Tambah Transaksi</h2>
+            <form id="tx-form">
+                <input type="hidden" id="tx-id">
+                
+                <div class="form-group">
+                    <label>Tipe Transaksi</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="type" value="expense" checked>
+                            Pengeluaran
+                        </label>
+                        <label>
+                            <input type="radio" name="type" value="income">
+                            Pemasukan
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tx-date">Tanggal</label>
+                    <input type="date" id="tx-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tx-amount">Jumlah (Rp)</label>
+                    <input type="number" id="tx-amount" min="1" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tx-category">Kategori</label>
+                    <input type="text" id="tx-category" list="category-list" required autocomplete="off">
+                    <datalist id="category-list">
+                        <option value="Makan"></option>
+                        <option value="Transport"></option>
+                        <option value="Belanja"></option>
+                        <option value="Tagihan"></option>
+                        <option value="Pendidikan"></option>
+                        <option value="Hiburan"></option>
+                        <option value="Gaji"></option>
+                        <option value="Lainnya"></option>
+                    </datalist>
+                </div>
+
+                <div class="form-group">
+                    <label for="tx-note">Catatan (opsional)</label>
+                    <input type="text" id="tx-note">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="btn-save" class="btn-primary">Simpan</button>
+                    <button type="button" id="btn-cancel" class="btn-secondary hidden">Batal</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="list-section">
+            <h2>Riwayat Transaksi</h2>
+            <div id="tx-list" class="tx-list">
+                <!-- Data will be populated here -->
+            </div>
+        </section>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

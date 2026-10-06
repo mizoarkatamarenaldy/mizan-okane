@@ -23,7 +23,7 @@ Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Dr
 Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
 
 ## Tahap
-- [ ] **Tahap 1: Lokal dulu (tanpa Drive)**
+- [x] **Tahap 1: Lokal dulu (tanpa Drive)**
   - Form tambah transaksi (tanggal, jumlah, kategori, catatan, tipe)
   - Daftar transaksi dan total saldo
   - Edit dan hapus transaksi
