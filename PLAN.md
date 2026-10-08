@@ -48,20 +48,20 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - Edit dan hapus transaksi
   - Simpan di IndexedDB
   - Tampilan rapi di HP dan PC
-- [ ] **Tahap 2: Jadi PWA**
+- [x] **Tahap 2: Jadi PWA**
   - [x] Bisa di-install ke homescreen
   - [x] Bisa dibuka offline
-  - [ ] Deploy ke GitHub Pages, tes dari HP
+  - [x] Deploy ke GitHub Pages, tes dari HP
 - [x] **Tahap 3: Login Google dan sinkron Drive**
   - Buat project Google Cloud, aktifkan Drive API, buat OAuth Client ID
   - Tombol login Google
   - Simpan dan ambil JSON dari `appDataFolder`
   - Sinkron otomatis saat aplikasi dibuka dan saat ada perubahan
-- [ ] **Tahap 4: Aturan konflik data**
-  - ID unik + waktu ubah per transaksi
-  - Gabungkan data dua perangkat, yang terbaru menang
-  - Soft delete
-  - Tes: ubah data di HP dan PC saat offline, lalu online-kan keduanya
+- [x] **Tahap 4: Aturan konflik data**
+  - [x] ID unik + waktu ubah per transaksi
+  - [x] Gabungkan data dua perangkat, yang terbaru menang
+  - [x] Soft delete
+  - [x] Tes: ubah data di HP dan PC saat offline, lalu online-kan keduanya
 - [ ] **Tahap 5: Fitur tambahan (pilih sesuai kebutuhan)**
   - Budget per kategori
   - Grafik pengeluaran bulanan

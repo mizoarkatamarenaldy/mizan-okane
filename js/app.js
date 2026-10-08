@@ -1,5 +1,5 @@
 import { initDB, saveTransaction, getAllTransactions } from './db.js';
-import { initSync, markDirty, signIn, signOut, syncNow, resolveConflict } from './sync.js';
+import { initSync, markDirty, signIn, signOut, syncNow } from './sync.js';
 
 // DOM Elements
 const formTitle = document.getElementById('form-title');
@@ -217,9 +217,7 @@ const syncStatusEl = document.getElementById('sync-status');
 const btnLogin = document.getElementById('btn-login');
 const btnLogout = document.getElementById('btn-logout');
 const btnSyncNow = document.getElementById('btn-sync-now');
-const syncConflictEl = document.getElementById('sync-conflict');
-const btnUseDrive = document.getElementById('btn-use-drive');
-const btnUseLocal = document.getElementById('btn-use-local');
+const btnExport = document.getElementById('btn-export');
 
 function formatTime(ts) {
     return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -237,7 +235,6 @@ function renderSyncState(s) {
         'synced': ['ok', `Tersinkron dengan Drive${who}${s.lastSyncAt ? `, pukul ${formatTime(s.lastSyncAt)}` : ''}.`],
         'offline': ['warn', 'Offline. Perubahan tetap tersimpan di perangkat dan dikirim saat online lagi.'],
         'needs-login': ['warn', `${s.message || 'Sesi Google berakhir.'} Ketuk Sinkron untuk lanjut.`],
-        'conflict': ['warn', 'Sinkron dijeda: data perlu dipilih.'],
         'error': ['error', `Gagal sinkron. ${s.message || ''} Data di perangkat aman, ketuk Sinkron untuk coba lagi.`]
     };
     const [tone, text] = views[s.status] || views['signed-out'];
@@ -251,9 +248,6 @@ function renderSyncState(s) {
     btnLogout.classList.toggle('hidden', !linked);
     btnSyncNow.classList.toggle('hidden', !linked);
     btnSyncNow.disabled = busy;
-    syncConflictEl.classList.toggle('hidden', s.status !== 'conflict');
-    btnUseDrive.disabled = busy;
-    btnUseLocal.disabled = busy;
 }
 
 btnLogin.addEventListener('click', () => {
@@ -272,15 +266,27 @@ btnLogout.addEventListener('click', () => {
 
 btnSyncNow.addEventListener('click', () => syncNow({ interactive: true }));
 
-btnUseDrive.addEventListener('click', () => {
-    if (confirm('Data di perangkat ini akan diganti dengan data dari Drive. Lanjutkan?')) {
-        resolveConflict('remote');
-    }
-});
-
-btnUseLocal.addEventListener('click', () => {
-    if (confirm('Data di Drive akan diganti dengan data dari perangkat ini. Lanjutkan?')) {
-        resolveConflict('local');
+btnExport.addEventListener('click', async () => {
+    try {
+        const allTx = await getAllTransactions();
+        const data = {
+            app: 'mizan-okane',
+            schemaVersion: 1,
+            exportedAt: new Date().toISOString(),
+            transactions: allTx
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mizan-okane-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Gagal mengekspor data", error);
+        alert("Terjadi kesalahan saat mengekspor data.");
     }
 });
 

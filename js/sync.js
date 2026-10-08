@@ -269,11 +269,10 @@ async function saveSyncMeta(meta) {
     await setMeta('sync', meta);
 }
 
-// Aturan Tahap 3 (sebelum aturan gabung per transaksi di Tahap 4):
-// - Drive belum ada file: unggah data lokal.
-// - Drive tidak berubah sejak sinkron terakhir: unggah kalau lokal berubah.
-// - Drive berubah, lokal tidak berubah (atau kosong): ambil data Drive.
-// - Keduanya berubah: jangan timpa apa pun, minta pemilik memilih.
+// Aturan Tahap 4: Gabung per transaksi.
+// - ID sama: waktu ubah (updatedAt) yang lebih baru menang.
+// - ID hanya ada di satu sisi: ambil.
+// - Soft delete (deleted: true) ikut digabung dan bisa menang jika updatedAt lebih baru.
 async function runSync(force = null) {
     const account = getAccount();
     let meta = await getSyncMeta();
@@ -318,8 +317,26 @@ async function runSync(force = null) {
         } else if (remoteData.transactions.length === 0) {
             meta = await push();
         } else {
-            await saveSyncMeta(meta);
-            throw new ConflictError();
+            // Gabung data
+            const merged = new Map();
+            for (const tx of remoteData.transactions) {
+                merged.set(tx.id, tx);
+            }
+            for (const tx of local) {
+                const existing = merged.get(tx.id);
+                if (!existing || (tx.updatedAt || 0) > (existing.updatedAt || 0)) {
+                    merged.set(tx.id, tx);
+                }
+            }
+            const mergedList = Array.from(merged.values());
+            
+            // Simpan hasil gabungan ke Drive
+            const saved = await uploadRemote(remoteFile.id, mergedList);
+            // Simpan ke lokal
+            await replaceAllTransactions(mergedList);
+            await listeners.onRemoteApplied();
+            
+            meta = { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };
         }
     }
 
@@ -410,11 +427,6 @@ export function signOut() {
     clearTimeout(debounceTimer);
     setAccount(null);
     setState({ status: 'signed-out', email: null, lastSyncAt: null, message: '' });
-}
-
-export async function resolveConflict(choice) {
-    if (choice !== 'local' && choice !== 'remote') return;
-    await syncNow({ interactive: true, force: choice });
 }
 
 // Dipanggil setiap kali data lokal berubah (tambah, edit, hapus).
