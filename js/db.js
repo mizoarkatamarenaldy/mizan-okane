@@ -87,3 +87,13 @@ export function setMeta(key, value) {
     request.onerror = (event) => reject(event.target.error);
   });
 }
+
+export function deleteMeta(key) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([META_STORE], 'readwrite');
+    const request = transaction.objectStore(META_STORE).delete(key);
+    request.onsuccess = () => resolve();
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+

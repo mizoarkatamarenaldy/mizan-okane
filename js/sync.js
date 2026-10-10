@@ -1,7 +1,7 @@
 // Sinkron Google Drive (appDataFolder) dengan Google Identity Services token flow.
 // IndexedDB tetap sumber utama; modul ini hanya menyalin snapshot ke/dari Drive.
 // Access token hanya disimpan di memori (variabel JS), tidak pernah ke storage.
-import { getAllTransactions, replaceAllTransactions, getMeta, setMeta } from './db.js';
+import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta } from './db.js';
 
 const CLIENT_ID = '663070681186-pjrnce0fcpjecvbf9o2fj99e59e3s0un.apps.googleusercontent.com';
 const SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
@@ -13,6 +13,8 @@ const SCHEMA_VERSION = 1;
 const SYNC_DEBOUNCE_MS = 1500;
 const SILENT_TOKEN_TIMEOUT_MS = 15000;
 
+// Penanda boolean di IndexedDB store meta bahwa perangkat ini pernah login Google.
+const META_KEY_LINKED = 'googleLoggedIn';
 // Hanya email akun (untuk login_hint dan tampilan), bukan token.
 const ACCOUNT_KEY = 'mizan-okane:google-account';
 
@@ -25,6 +27,8 @@ let gisPromise = null;
 let accessToken = null;
 let tokenExpiresAt = 0;
 let pendingToken = null;
+let isGoogleLinked = false;
+let cachedLoginHint = '';
 
 let syncing = false;
 let syncAgain = false;
@@ -55,7 +59,7 @@ function setAccount(account) {
 }
 
 export function isLinked() {
-    return !!getAccount();
+    return isGoogleLinked || !!getAccount();
 }
 
 // --- Google Identity Services ---
@@ -132,8 +136,7 @@ function tokenValid() {
 // supaya popup Google tidak diblokir, terutama di Safari.
 function requestToken() {
     if (pendingToken) {
-        pendingToken.reject(new SupersededError());
-        pendingToken = null;
+        return pendingToken.promise;
     }
 
     let resolve, reject;
@@ -141,8 +144,8 @@ function requestToken() {
     pendingToken = { promise, resolve, reject };
 
     const open = () => {
-        const account = getAccount();
-        tokenClient.requestAccessToken({ prompt: '', login_hint: account?.email || '' });
+        const hint = cachedLoginHint || getAccount()?.email || '';
+        tokenClient.requestAccessToken({ prompt: '', login_hint: hint });
     };
 
     if (tokenClient) {
@@ -155,6 +158,12 @@ function requestToken() {
     }
     return promise;
 }
+
+export function ensureToken() {
+    if (!isLinked() || tokenValid() || !navigator.onLine) return null;
+    return requestToken();
+}
+
 
 // --- Drive API v3 ---
 
@@ -346,6 +355,46 @@ async function runSync(force = null) {
 
 // --- API untuk app.js ---
 
+let firstTapListenerActive = false;
+export let removeFirstTapListener = () => {};
+
+export function setupFirstTapListener() {
+    if (firstTapListenerActive || typeof window === 'undefined') return;
+    firstTapListenerActive = true;
+
+    const onFirstTap = (event) => {
+        // Jangan jalankan jika pengguna menekan tombol logout atau login
+        if (event.target.closest('#btn-logout') || event.target.closest('#btn-login')) {
+            return;
+        }
+
+        removeFirstTapListener();
+
+        // Tombol sinkron sudah punya handler sendiri
+        if (event.target.closest('#btn-sync-now')) {
+            return;
+        }
+
+        if (isLinked() && !tokenValid() && navigator.onLine) {
+            ensureTokenAndSync();
+        }
+    };
+
+    window.addEventListener('click', onFirstTap, { capture: true });
+    removeFirstTapListener = () => {
+        window.removeEventListener('click', onFirstTap, { capture: true });
+        firstTapListenerActive = false;
+    };
+}
+
+async function ensureTokenAndSync() {
+    if (!tokenValid() && navigator.onLine) {
+        requestToken();
+        setState({ status: 'connecting', message: '' });
+    }
+    await syncNow();
+}
+
 export async function syncNow({ interactive = false, force = null } = {}) {
     if (!isLinked()) {
         setState({ status: 'signed-out', email: null, message: '' });
@@ -377,6 +426,8 @@ export async function syncNow({ interactive = false, force = null } = {}) {
     try {
         if (tokenPromise) {
             await tokenPromise;
+        } else if (pendingToken) {
+            await pendingToken.promise;
         } else if (!tokenValid()) {
             throw new AuthRequiredError('Sesi Google berakhir.');
         }
@@ -389,6 +440,7 @@ export async function syncNow({ interactive = false, force = null } = {}) {
             setState({ status: 'conflict', message: '' });
         } else if (err instanceof AuthRequiredError) {
             setState({ status: 'needs-login', message: err.message });
+            setupFirstTapListener();
         } else {
             console.error('Sinkron gagal', err);
             setState({ status: navigator.onLine ? 'error' : 'offline', message: err.message });
@@ -411,6 +463,9 @@ export async function signIn() {
         await tokenPromise;
         const email = await fetchEmail();
         setAccount({ email });
+        cachedLoginHint = email || '';
+        isGoogleLinked = true;
+        await setMeta(META_KEY_LINKED, true);
         setState({ email });
     } catch (err) {
         if (err instanceof SupersededError) return;
@@ -420,12 +475,16 @@ export async function signIn() {
     await syncNow();
 }
 
-export function signOut() {
+export async function signOut() {
     // Token dibuang dari memori dan akun dilupakan. Data lokal tidak disentuh.
     accessToken = null;
     tokenExpiresAt = 0;
     clearTimeout(debounceTimer);
     setAccount(null);
+    cachedLoginHint = '';
+    isGoogleLinked = false;
+    removeFirstTapListener();
+    await deleteMeta(META_KEY_LINKED);
     setState({ status: 'signed-out', email: null, lastSyncAt: null, message: '' });
 }
 
@@ -446,48 +505,60 @@ export async function initSync({ onState, onRemoteApplied }) {
     listeners = { onState, onRemoteApplied };
 
     window.addEventListener('online', () => {
-        if (isLinked()) syncNow();
+        if (isLinked()) {
+            if (tokenValid()) {
+                syncNow();
+            } else {
+                setState({ status: 'standby', message: 'Ketuk di mana saja untuk lanjut sinkron.' });
+                setupFirstTapListener();
+            }
+        }
     });
     window.addEventListener('offline', () => {
         if (isLinked()) setState({ status: 'offline', message: '' });
     });
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && isLinked() && tokenValid()) {
-            syncNow();
+        if (document.visibilityState === 'visible' && isLinked()) {
+            if (tokenValid()) {
+                syncNow();
+            } else {
+                setState({ status: 'standby', message: 'Ketuk di mana saja untuk lanjut sinkron.' });
+                setupFirstTapListener();
+            }
         }
     });
 
+    const marker = await getMeta(META_KEY_LINKED);
     const account = getAccount();
-    if (!account) {
-        setState({ status: 'signed-out', email: null });
+    const hasMarker = !!marker || !!account;
+    isGoogleLinked = hasMarker;
+
+    if (!hasMarker) {
+        setState({ status: 'signed-out', email: null, message: '' });
         if (navigator.onLine) loadGis().catch(() => {});
         return;
     }
 
+    if (!marker && account) {
+        await setMeta(META_KEY_LINKED, true);
+    }
+
     const meta = await getSyncMeta();
-    setState({ email: account.email, lastSyncAt: meta.account === account.email ? meta.lastSyncAt : null });
+    const email = account?.email || meta?.account || null;
+    cachedLoginHint = email || '';
+    setState({ email, lastSyncAt: meta.account === email ? meta.lastSyncAt : null });
 
     if (!navigator.onLine) {
-        setState({ status: 'offline' });
+        setState({ status: 'offline', message: '' });
         return;
     }
 
-    // Coba ambil token tanpa interaksi saat app dibuka. Kalau browser memblokir
-    // popup atau tidak ada jawaban, status jadi "needs-login" dan pemilik cukup ketuk Sinkron.
-    setState({ status: 'connecting', message: '' });
-    try {
-        await loadGis();
-        await Promise.race([
-            requestToken(),
-            new Promise((_, reject) => setTimeout(
-                () => reject(new AuthRequiredError('Ketuk Sinkron untuk menyambung ke Google.')),
-                SILENT_TOKEN_TIMEOUT_MS
-            ))
-        ]);
-    } catch (err) {
-        if (err instanceof SupersededError || tokenValid()) return;
-        setState({ status: 'needs-login', message: err.message });
-        return;
-    }
-    await syncNow();
+    // Preload GIS di latar belakang supaya siap saat ada ketukan pengguna
+    loadGis().catch(() => {});
+
+    // Saat aplikasi dibuka: jangan meminta token otomatis yang membuka jendela.
+    // Tampilkan status netral dan siapkan listener ketukan pertama.
+    setState({ status: 'standby', message: 'Ketuk di mana saja untuk lanjut sinkron.' });
+    setupFirstTapListener();
 }
+

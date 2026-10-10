@@ -1,5 +1,5 @@
 import { initDB, saveTransaction, getAllTransactions } from './db.js';
-import { initSync, markDirty, signIn, signOut, syncNow } from './sync.js';
+import { initSync, markDirty, signIn, signOut, syncNow, ensureToken } from './sync.js';
 
 // DOM Elements
 const formTitle = document.getElementById('form-title');
@@ -144,6 +144,9 @@ async function handleSubmit(e) {
         return;
     }
 
+    // Minta token dalam handler interaksi pengguna bila token sudah habis
+    ensureToken();
+
     let selectedType = 'expense';
     for (const radio of txTypeInputs) {
         if (radio.checked) {
@@ -216,6 +219,9 @@ async function handleDelete(id) {
         return;
     }
 
+    // Minta token dalam handler interaksi pengguna bila token sudah habis
+    ensureToken();
+
     try {
         const allTx = await getAllTransactions();
         const tx = allTx.find(t => t.id === id);
@@ -257,6 +263,8 @@ function renderSyncState(s) {
     const views = {
         'signed-out': ['', 'Belum login. Data hanya tersimpan di perangkat ini.'],
         'connecting': ['', 'Menyambung ke Google...'],
+        'standby': ['', s.message || 'Ketuk di mana saja untuk lanjut sinkron.'],
+        'waiting-tap': ['', s.message || 'Ketuk di mana saja untuk lanjut sinkron.'],
         'syncing': ['', `Menyinkronkan dengan Drive${who}...`],
         'synced': ['ok', `Tersinkron dengan Drive${who}${s.lastSyncAt ? `, pukul ${formatTime(s.lastSyncAt)}` : ''}.`],
         'offline': ['warn', 'Offline. Perubahan tetap tersimpan di perangkat dan dikirim saat online lagi.'],
@@ -284,9 +292,9 @@ btnLogin.addEventListener('click', () => {
     signIn();
 });
 
-btnLogout.addEventListener('click', () => {
+btnLogout.addEventListener('click', async () => {
     if (confirm('Logout dari Google? Data di perangkat ini tetap ada, tapi tidak disinkronkan lagi sampai login ulang.')) {
-        signOut();
+        await signOut();
     }
 });
 
