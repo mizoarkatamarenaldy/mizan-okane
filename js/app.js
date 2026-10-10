@@ -18,7 +18,12 @@ const totalBalanceEl = document.getElementById('total-balance');
 const totalIncomeEl = document.getElementById('total-income');
 const totalExpenseEl = document.getElementById('total-expense');
 
+const confirmDialog = document.getElementById('confirm-dialog');
+const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
+const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+
 let currentTransactions = [];
+let pendingDeleteId = null;
 
 // Formatter
 const currencyFormatter = new Intl.NumberFormat('id-ID', {
@@ -214,11 +219,15 @@ function handleEdit(id) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function handleDelete(id) {
-    if (!confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) {
-        return;
+function handleDelete(id) {
+    if (!id) return;
+    pendingDeleteId = id;
+    if (confirmDialog && typeof confirmDialog.showModal === 'function') {
+        confirmDialog.showModal();
     }
+}
 
+async function performDelete(id) {
     // Minta token dalam handler interaksi pengguna bila token sudah habis
     ensureToken();
 
@@ -242,6 +251,49 @@ async function handleDelete(id) {
 // Event Listeners
 txForm.addEventListener('submit', handleSubmit);
 btnCancel.addEventListener('click', resetForm);
+
+if (confirmDialog) {
+    btnConfirmCancel.addEventListener('click', () => {
+        confirmDialog.close();
+    });
+
+    btnConfirmDelete.addEventListener('click', async () => {
+        const id = pendingDeleteId;
+        if (!id) {
+            confirmDialog.close();
+            return;
+        }
+
+        btnConfirmDelete.disabled = true;
+        try {
+            await performDelete(id);
+        } finally {
+            btnConfirmDelete.disabled = false;
+            confirmDialog.close();
+        }
+    });
+
+    confirmDialog.addEventListener('close', () => {
+        pendingDeleteId = null;
+    });
+
+    // Fallback ketukan di luar kotak untuk browser yang belum mendukung closedby="any"
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+        confirmDialog.addEventListener('click', (event) => {
+            if (event.target !== confirmDialog) return;
+            const rect = confirmDialog.getBoundingClientRect();
+            const isInside = (
+                rect.top <= event.clientY &&
+                event.clientY <= rect.top + rect.height &&
+                rect.left <= event.clientX &&
+                event.clientX <= rect.left + rect.width
+            );
+            if (!isInside) {
+                confirmDialog.close();
+            }
+        });
+    }
+}
 
 // --- Sinkron Google Drive ---
 const syncStatusEl = document.getElementById('sync-status');

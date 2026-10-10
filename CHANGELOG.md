@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-10: Tahap 5: Konfirmasi hapus transaksi lewat UI web
+- Ditambah: Kotak dialog konfirmasi hapus transaksi di dalam halaman menggunakan elemen `<dialog>` dengan teks "Hapus transaksi ini?", tombol "Hapus", dan tombol "Batal" (`index.html`).
+- Ditambah: Gaya untuk `.confirm-dialog` dan `.btn-danger` yang selaras dengan tema, responsif untuk HP dan PC, serta mudah diketuk pada layar kecil (`css/style.css`).
+- Diperbaiki: Mengganti pemakaian `confirm()` bawaan browser pada hapus transaksi dengan kotak dialog konfirmasi web (`js/app.js`).
+- Diubah: Penutupan kotak konfirmasi tanpa menghapus saat menekan tombol "Batal", menekan tombol Escape, atau mengetuk area di luar kotak (`js/app.js`).
+- Diubah: Tombol "Hapus" pada dialog menjalankan logika soft delete yang sudah ada lalu menutup kotak (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v7` untuk memperbarui cache aset.
+- Diubah: `PLAN.md` menambahkan dan mencentang perbaikan "konfirmasi hapus lewat UI web (ganti confirm bawaan browser)" pada Tahap 5.
+
 ## 2026-10-10: Tahap 5: Perbaikan login Google lebih mulus
 - Ditambah: Penanda boolean `googleLoggedIn` pada store `meta` IndexedDB untuk mencatat perangkat yang pernah login Google tanpa menyimpan token (`js/db.js`, `js/sync.js`).
 - Ditambah: Status netral "Ketuk di mana saja untuk lanjut sinkron" dan listener ketukan pertama pengguna saat aplikasi dibuka jika perangkat sudah terhubung tapi belum memiliki token di memori (`js/sync.js`, `js/app.js`).

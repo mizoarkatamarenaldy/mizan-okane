@@ -66,6 +66,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Ekspor CSV
   - [x] Jam:menit pada transaksi (field opsional `time` format "HH:mm", form otomatis terisi jam sekarang, transaksi lama tetap aman)
   - [x] Perbaikan: login Google lebih mulus (tanpa popup terblokir)
+  - [x] Perbaikan: konfirmasi hapus lewat UI web (ganti confirm bawaan browser)
   - [ ] Budget per kategori
   - [ ] Grafik pengeluaran bulanan
   - [ ] Beberapa dompet
