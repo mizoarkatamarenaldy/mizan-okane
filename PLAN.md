@@ -6,11 +6,11 @@ Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Dr
 
 ### Aturan kerja
 - Baca PLAN.md sebelum mengerjakan apa pun.
-- Kerjakan SATU tahap per sesi. Jangan lompat ke tahap berikutnya.
+- Kerjakan SATU tahap per sesi. Khusus Tahap 5, kerjakan SATU fitur per sesi. Jangan lompat ke tahap atau fitur lain.
 - Jangan ubah file di luar tahap yang sedang dikerjakan.
 - Bagian "Keputusan terkunci" tidak boleh diubah tanpa izin pemilik.
 - Jangan pernah menaruh data transaksi asli, token, kunci, atau file `.env` di repo. Repo ini publik, isinya hanya kode dan dokumen.
-- Di akhir tahap, centang tahap di PLAN.md dan tambahkan satu entri di paling atas `CHANGELOG.md` sesuai format di file itu. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
+- Di akhir tahap atau fitur, centang tahap atau fitur itu di PLAN.md dan tambahkan satu entri di paling atas `CHANGELOG.md` sesuai format di file itu. Tahap 5 baru dicentang setelah semua fiturnya tercentang. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
 - Di awal sesi, baca hanya 5 entri paling atas CHANGELOG.md, jangan seluruh file.
 
 ### Alur commit dan push
@@ -63,10 +63,8 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Soft delete
   - [x] Tes: ubah data di HP dan PC saat offline, lalu online-kan keduanya
 - [ ] **Tahap 5: Fitur tambahan (pilih sesuai kebutuhan)**
-  - Budget per kategori
-  - Grafik pengeluaran bulanan
   - [x] Ekspor CSV
-  - Beberapa dompet
-
-## Catatan
-- Tambahkan tombol ekspor JSON manual sebelum mengerjakan Tahap 4.
+  - [ ] Jam:menit pada transaksi (field opsional `time` format "HH:mm", form otomatis terisi jam sekarang, transaksi lama tetap aman)
+  - [ ] Budget per kategori
+  - [ ] Grafik pengeluaran bulanan
+  - [ ] Beberapa dompet
