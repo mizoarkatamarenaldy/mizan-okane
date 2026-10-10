@@ -9,6 +9,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diperbaiki: ...
 - Diubah: ...
 ```
+## 2026-10-10: Tahap 5: Jam:menit pada transaksi
+- Ditambah: Field opsional `time` (format "HH:mm") pada data transaksi, input jam pada form transaksi (`index.html`, `js/app.js`), dan dukungan gaya input waktu (`css/style.css`).
+- Ditambah: Pengisian otomatis input jam dengan waktu sekarang untuk transaksi baru, serta dukungan edit/kosongkan jam (`js/app.js`).
+- Ditambah: Tampilan jam di samping tanggal pada daftar riwayat transaksi untuk transaksi yang memiliki jam (`js/app.js`).
+- Diubah: Pengurutan riwayat transaksi dan ekspor CSV berdasarkan tanggal lalu jam terbaru (`js/app.js`).
+- Diubah: Penambahan kolom `jam` setelah kolom `tanggal` pada ekspor CSV (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v5` untuk memperbarui cache aset.
+- Diubah: `PLAN.md` mencentang fitur "Jam:menit pada transaksi" pada Tahap 5.
+
 ## 2026-10-10: Tahap 5: Revisi PLAN.md
 - Diubah: `PLAN.md` pada bagian "Aturan kerja" (pengerjaan satu fitur per sesi untuk Tahap 5 dan aturan bahwa Tahap 5 baru dicentang setelah semua fiturnya tercentang), penambahan kotak centang pada tiap fitur Tahap 5 beserta opsi fitur jam:menit transaksi, dan penghapusan bagian "Catatan".
 

@@ -7,6 +7,7 @@ const txForm = document.getElementById('tx-form');
 const txIdInput = document.getElementById('tx-id');
 const txTypeInputs = document.getElementsByName('type');
 const txDateInput = document.getElementById('tx-date');
+const txTimeInput = document.getElementById('tx-time');
 const txAmountInput = document.getElementById('tx-amount');
 const txCategoryInput = document.getElementById('tx-category');
 const txNoteInput = document.getElementById('tx-note');
@@ -32,16 +33,33 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('id-ID', options);
 }
 
+function formatDateTime(tx) {
+    const dateFormatted = formatDate(tx.date);
+    return tx.time ? `${dateFormatted} ${tx.time}` : dateFormatted;
+}
+
+function getCurrentTimeString() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
+
 async function loadData() {
     try {
         const allTx = await getAllTransactions();
         currentTransactions = allTx.filter(tx => !tx.deleted);
-        // Sort by date descending, then by createdAt descending
+        // Sort by date descending, then by time descending, then by createdAt descending
         currentTransactions.sort((a, b) => {
             if (a.date !== b.date) {
                 return a.date > b.date ? -1 : 1;
             }
-            return b.createdAt - a.createdAt;
+            const timeA = a.time || '';
+            const timeB = b.time || '';
+            if (timeA !== timeB) {
+                return timeA > timeB ? -1 : 1;
+            }
+            return (b.createdAt || 0) - (a.createdAt || 0);
         });
         render();
     } catch (error) {
@@ -73,7 +91,7 @@ function render() {
             <div class="tx-info">
                 <div class="tx-header">
                     <span class="tx-category">${tx.category}</span>
-                    <span class="tx-date">${formatDate(tx.date)}</span>
+                    <span class="tx-date">${formatDateTime(tx)}</span>
                 </div>
                 ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
                 <div class="tx-amount ${amountClass}">${sign} ${currencyFormatter.format(tx.amount)}</div>
@@ -109,6 +127,7 @@ function resetForm() {
     // Offset for local timezone
     const localToday = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
     txDateInput.value = localToday;
+    txTimeInput.value = getCurrentTimeString();
     
     formTitle.textContent = 'Tambah Transaksi';
     btnCancel.classList.add('hidden');
@@ -157,6 +176,11 @@ async function handleSubmit(e) {
         deleted: false
     };
 
+    const timeValue = txTimeInput.value.trim();
+    if (timeValue) {
+        tx.time = timeValue;
+    }
+
     try {
         await saveTransaction(tx);
         resetForm();
@@ -177,6 +201,7 @@ function handleEdit(id) {
         radio.checked = (radio.value === tx.type);
     }
     txDateInput.value = tx.date;
+    txTimeInput.value = tx.time || '';
     txAmountInput.value = tx.amount;
     txCategoryInput.value = tx.category;
     txNoteInput.value = tx.note || '';
@@ -320,20 +345,26 @@ btnExportCsv.addEventListener('click', async () => {
             return;
         }
 
-        // Urutkan dari tanggal terbaru, lalu createdAt terbaru
+        // Urutkan dari tanggal terbaru, lalu jam terbaru, lalu createdAt terbaru
         activeTx.sort((a, b) => {
             if (a.date !== b.date) {
                 return a.date > b.date ? -1 : 1;
             }
+            const timeA = a.time || '';
+            const timeB = b.time || '';
+            if (timeA !== timeB) {
+                return timeA > timeB ? -1 : 1;
+            }
             return (b.createdAt || 0) - (a.createdAt || 0);
         });
 
-        const headers = ['tanggal', 'tipe', 'kategori', 'jumlah', 'catatan'];
+        const headers = ['tanggal', 'jam', 'tipe', 'kategori', 'jumlah', 'catatan'];
         const rows = [headers.join(',')];
 
         for (const tx of activeTx) {
             const row = [
                 escapeCSVField(tx.date),
+                escapeCSVField(tx.time || ''),
                 escapeCSVField(tx.type),
                 escapeCSVField(tx.category),
                 escapeCSVField(tx.amount),
