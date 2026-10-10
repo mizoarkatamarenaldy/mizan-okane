@@ -218,6 +218,7 @@ const btnLogin = document.getElementById('btn-login');
 const btnLogout = document.getElementById('btn-logout');
 const btnSyncNow = document.getElementById('btn-sync-now');
 const btnExport = document.getElementById('btn-export');
+const btnExportCsv = document.getElementById('btn-export-csv');
 
 function formatTime(ts) {
     return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -287,6 +288,74 @@ btnExport.addEventListener('click', async () => {
     } catch (error) {
         console.error("Gagal mengekspor data", error);
         alert("Terjadi kesalahan saat mengekspor data.");
+    }
+});
+
+function escapeCSVField(value) {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    const str = String(value);
+    if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+        return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+}
+
+function getLocalDateString() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+btnExportCsv.addEventListener('click', async () => {
+    try {
+        const allTx = await getAllTransactions();
+        const activeTx = allTx.filter(tx => !tx.deleted);
+
+        if (activeTx.length === 0) {
+            alert('Belum ada transaksi untuk diekspor.');
+            return;
+        }
+
+        // Urutkan dari tanggal terbaru, lalu createdAt terbaru
+        activeTx.sort((a, b) => {
+            if (a.date !== b.date) {
+                return a.date > b.date ? -1 : 1;
+            }
+            return (b.createdAt || 0) - (a.createdAt || 0);
+        });
+
+        const headers = ['tanggal', 'tipe', 'kategori', 'jumlah', 'catatan'];
+        const rows = [headers.join(',')];
+
+        for (const tx of activeTx) {
+            const row = [
+                escapeCSVField(tx.date),
+                escapeCSVField(tx.type),
+                escapeCSVField(tx.category),
+                escapeCSVField(tx.amount),
+                escapeCSVField(tx.note || '')
+            ];
+            rows.push(row.join(','));
+        }
+
+        const csvContent = rows.join('\r\n');
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mizan-okane-transaksi-${getLocalDateString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Gagal mengekspor CSV", error);
+        alert("Terjadi kesalahan saat mengekspor CSV.");
     }
 });
 

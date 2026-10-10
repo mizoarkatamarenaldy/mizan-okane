@@ -65,7 +65,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
 - [ ] **Tahap 5: Fitur tambahan (pilih sesuai kebutuhan)**
   - Budget per kategori
   - Grafik pengeluaran bulanan
-  - Ekspor CSV
+  - [x] Ekspor CSV
   - Beberapa dompet
 
 ## Catatan
