@@ -82,6 +82,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Diagram donut per kategori untuk bulan yang dipilih (pilihan pemasukan atau pengeluaran, transfer antar dompet tidak dihitung)
   - [x] Mode tanpa login (cek semua fitur jalan tanpa login Google, status sinkron netral "Belum terhubung", tidak ada pesan error)
   - [x] Impor JSON (pulihkan data dari file ekspor, gabung dengan aturan updatedAt terbaru menang, transaksi lama tanpa walletId tetap aman)
+  - [x] Mode gelap (dark mode) dengan pilihan Ikuti sistem / Terang / Gelap di Pengaturan
   - [x] Halaman kebijakan privasi (satu halaman statis di GitHub Pages, ditautkan dari aplikasi)
   - [x] Halaman syarat dan ketentuan (satu halaman statis di GitHub Pages, ditautkan dari aplikasi di samping tautan kebijakan privasi)
   - [x] Perbaikan UI/UX multi halaman (dikerjakan paling akhir, butuh peta halaman dulu)

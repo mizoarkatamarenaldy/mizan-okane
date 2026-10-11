@@ -16,6 +16,7 @@ const txTimeAmpmSelect = document.getElementById('tx-time-ampm');
 const txTimeLabel = document.getElementById('tx-time-label');
 const txTimeError = document.getElementById('tx-time-error');
 const timeFormatRadios = document.getElementsByName('time-format-setting');
+const themeRadios = document.getElementsByName('theme-setting');
 const txAmountInput = document.getElementById('tx-amount');
 const txWalletLabel = document.getElementById('tx-wallet-label');
 const txWalletInput = document.getElementById('tx-wallet');
@@ -102,7 +103,43 @@ let currentDonutType = 'expense';
 let selectedDonutMonth = '';
 let activeDonutCategory = null;
 
-const DONUT_COLORS = [
+const THEME_STORAGE_KEY = 'mizan-theme';
+const VALID_THEMES = ['system', 'light', 'dark'];
+
+function getStoredTheme() {
+    try {
+        const val = localStorage.getItem(THEME_STORAGE_KEY);
+        return VALID_THEMES.includes(val) ? val : 'system';
+    } catch (e) {
+        return 'system';
+    }
+}
+
+function resolveIsDark(themeSetting) {
+    if (themeSetting === 'dark') return true;
+    if (themeSetting === 'light') return false;
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
+function applyTheme(themeSetting) {
+    const isDark = resolveIsDark(themeSetting);
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', isDark ? '#121212' : '#4CAF50');
+    }
+}
+
+function applyThemeUI(themeSetting) {
+    if (themeRadios) {
+        for (const radio of themeRadios) {
+            radio.checked = (radio.value === themeSetting);
+        }
+    }
+    applyTheme(themeSetting);
+}
+
+const DONUT_COLORS_LIGHT = [
     '#2563eb', // Biru
     '#e11d48', // Merah / Rose
     '#059669', // Hijau Zamrud
@@ -116,6 +153,23 @@ const DONUT_COLORS = [
     '#0d9488', // Teal
     '#ea580c'  // Oranye Tua
 ];
+
+const DONUT_COLORS_DARK = [
+    '#3b82f6', // Biru
+    '#f43f5e', // Merah / Rose
+    '#10b981', // Hijau Zamrud
+    '#f59e0b', // Jingga / Amber
+    '#8b5cf6', // Ungu / Violet
+    '#06b6d4', // Sian / Cyan
+    '#ec4899', // Merah Muda / Pink
+    '#6366f1', // Nila / Indigo
+    '#84cc16', // Limau / Lime
+    '#d946ef', // Fuchsia
+    '#14b8a6', // Teal
+    '#f97316'  // Oranye Tua
+];
+
+const DONUT_COLORS = DONUT_COLORS_LIGHT;
 
 let selectedBudgetMonth = '';
 let currentBudgets = {
@@ -1033,6 +1087,7 @@ function renderDonutChart(transactions) {
         return;
     }
 
+    const activeDonutPalette = resolveIsDark(getStoredTheme()) ? DONUT_COLORS_DARK : DONUT_COLORS_LIGHT;
     const sortedCategories = Array.from(categoryMap.entries())
         .sort((a, b) => b[1].amount - a[1].amount)
         .map(([category, data], index) => {
@@ -1042,7 +1097,7 @@ function renderDonutChart(transactions) {
                 amount: data.amount,
                 count: data.count,
                 percentage,
-                color: DONUT_COLORS[index % DONUT_COLORS.length]
+                color: activeDonutPalette[index % activeDonutPalette.length]
             };
         });
 
@@ -3178,6 +3233,48 @@ async function init() {
                     render();
                 }
             });
+        }
+    }
+
+    // Inisialisasi tema tampilan
+    const initialTheme = getStoredTheme();
+    applyThemeUI(initialTheme);
+
+    if (themeRadios) {
+        for (const radio of themeRadios) {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    const newTheme = e.target.value;
+                    try {
+                        localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+                    } catch (err) {
+                        console.warn('Gagal menyimpan tema:', err);
+                    }
+                    applyThemeUI(newTheme);
+                    if (currentTransactions && currentTransactions.length > 0) {
+                        renderMonthlyChart(currentTransactions);
+                        renderDonutChart(currentTransactions);
+                    }
+                }
+            });
+        }
+    }
+
+    if (window.matchMedia) {
+        const colorSchemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+        const onSystemThemeChange = () => {
+            if (getStoredTheme() === 'system') {
+                applyTheme('system');
+                if (currentTransactions && currentTransactions.length > 0) {
+                    renderMonthlyChart(currentTransactions);
+                    renderDonutChart(currentTransactions);
+                }
+            }
+        };
+        if (colorSchemeMedia.addEventListener) {
+            colorSchemeMedia.addEventListener('change', onSystemThemeChange);
+        } else if (colorSchemeMedia.addListener) {
+            colorSchemeMedia.addListener(onSystemThemeChange);
         }
     }
 

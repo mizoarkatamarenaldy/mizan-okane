@@ -7,6 +7,19 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <meta name="theme-color" content="#4CAF50">
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('mizan-theme') || 'system';
+                var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) {
+                    meta.setAttribute('content', isDark ? '#121212' : '#4CAF50');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -213,6 +226,27 @@
                         <label>
                             <input type="radio" name="time-format-setting" value="12">
                             12 jam (AM/PM) (contoh: 02:30 PM)
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <section class="theme-settings-section" aria-labelledby="theme-section-title">
+                <h2 id="theme-section-title">Tampilan</h2>
+                <div class="theme-card">
+                    <p class="theme-desc">Pilihan tema untuk tampilan di perangkat ini (disimpan lokal, tidak ikut sinkron).</p>
+                    <div class="radio-group" id="theme-options">
+                        <label>
+                            <input type="radio" name="theme-setting" value="system" checked>
+                            Ikuti sistem
+                        </label>
+                        <label>
+                            <input type="radio" name="theme-setting" value="light">
+                            Terang
+                        </label>
+                        <label>
+                            <input type="radio" name="theme-setting" value="dark">
+                            Gelap
                         </label>
                     </div>
                 </div>

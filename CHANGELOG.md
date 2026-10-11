@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Mode gelap
+- Ditambah: Bagian pengaturan "Tampilan" pada halaman Pengaturan dengan tiga pilihan tema (Ikuti sistem, Terang, Gelap) yang disimpan lokal di perangkat tanpa sinkron ke Drive (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Dukungan mode gelap menyeluruh berbasis variabel CSS untuk semua komponen aplikasi: bilah navigasi desktop & mobile, kartu ringkasan saldo, formulir tambah/edit, daftar riwayat transaksi, dialog konfirmasi hapus, pengaturan dompet/kategori/budget, serta warna garis, label, sumbu pada grafik bulanan dan diagram donut per kategori (`css/style.css`, `js/app.js`).
+- Ditambah: Deteksi preferensi tema perangkat otomatis (`prefers-color-scheme`) saat opsi "Ikuti sistem" aktif yang langsung menyesuaikan tema tanpa reload halaman (`js/app.js`, `privasi.html`, `syarat.html`).
+- Ditambah: Pencegahan kilatan tema terang (FOUC) lewat skrip inisialisasi di `<head>` sebelum CSS dimuat dan pembaruan dinamis meta `theme-color` agar bar status HP ikut menyesuaikan tema aktif (`index.html`, `privasi.html`, `syarat.html`).
+- Ditambah: Dukungan mode gelap yang serasi pada halaman kebijakan privasi dan syarat & ketentuan yang otomatis mengikuti preferensi tema (`privasi.html`, `syarat.html`, `css/style.css`).
+- Diubah: `sw.js` naik ke versi `mizan-v24` untuk memperbarui cache aset PWA secara offline (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur "Mode gelap (dark mode) dengan pilihan Ikuti sistem / Terang / Gelap di Pengaturan" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Perbaikan UI/UX multi halaman
 - Ditambah: Struktur antarmuka multi halaman dengan 4 tab utama (Beranda, Riwayat, Statistik, Pengaturan) yang responsif: bilah navigasi bawah (bottom navigation bar) tetap di layar ponsel (HP) dan bilah navigasi atas (top bar) pada layar komputer (PC) (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Halaman Beranda memuat total saldo, pemasukan, pengeluaran, saldo per dompet, ringkasan budget per kategori, 5 transaksi terakhir dengan tombol pintas "Lihat Semua", dan satu baris status sinkronisasi ringkas (`index.html`, `js/app.js`, `css/style.css`).
