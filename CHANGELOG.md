@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Pisah kategori pemasukan dan pengeluaran
+- Ditambah: Dua daftar kategori default terpisah untuk pemasukan (Gaji, Bonus, Hadiah, Lainnya) dan pengeluaran (Makan, Transport, Hiburan, Belanja, Tagihan, Lainnya), serta fungsi `getCategories` dan `saveCategories` pada IndexedDB (`js/db.js`).
+- Ditambah: Bagian antarmuka pengaturan kategori di halaman web dengan daftar kategori pemasukan dan pengeluaran, formulir penambahan kategori, ubah nama kategori secara inline, dan tombol hapus kategori (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Integrasi kotak dialog konfirmasi web (`<dialog>`) yang sudah ada untuk konfirmasi hapus kategori tanpa `confirm()` bawaan browser (`js/app.js`).
+- Ditambah: Dukungan sinkronisasi kategori ke Google Drive dengan aturan konflik waktu ubah (`updatedAt`) terbaru menang, sambil mempertahankan pembacaan file cadangan lama yang belum memiliki data kategori (`js/sync.js`).
+- Diubah: Pilihan dropdown kategori pada formulir transaksi mengikuti tipe transaksi yang dipilih (berpindah otomatis saat tipe diganti), serta meminta pemilihan kategori yang sesuai saat mengedit transaksi lama berkategori di luar daftar tipenya tanpa mengubah riwayat transaksi lama (`index.html`, `js/app.js`, `css/style.css`).
+- Diubah: Ekspor JSON menyertakan objek `categories` cadangan bersama daftar transaksi (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v9` untuk memperbarui cache aset.
+- Diubah: `PLAN.md` mencentang fitur "Pisah kategori pemasukan dan pengeluaran" pada Tahap 5.
+
 ## 2026-10-11: Tahap 5: Grafik pengeluaran bulanan
 - Ditambah: Bagian antarmuka grafik pengeluaran bulanan dengan judul, teks ringkasan rata-rata, rincian bulan aktif, dan area grafik (`index.html`).
 - Ditambah: Visualisasi grafik batang SVG tanpa library luar untuk menampilkan total pengeluaran per bulan, responsif di HP dan PC dengan dukungan scroll horizontal jika banyak bulan (`js/app.js`, `css/style.css`).

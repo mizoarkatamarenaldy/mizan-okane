@@ -1,7 +1,7 @@
 // Sinkron Google Drive (appDataFolder) dengan Google Identity Services token flow.
 // IndexedDB tetap sumber utama; modul ini hanya menyalin snapshot ke/dari Drive.
 // Access token hanya disimpan di memori (variabel JS), tidak pernah ke storage.
-import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta } from './db.js';
+import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta, getCategories, saveCategories } from './db.js';
 
 const CLIENT_ID = '663070681186-pjrnce0fcpjecvbf9o2fj99e59e3s0un.apps.googleusercontent.com';
 const SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
@@ -227,17 +227,21 @@ async function downloadRemote(fileId) {
     return data;
 }
 
-function buildPayload(transactions) {
-    return JSON.stringify({
+function buildPayload(transactions, categories) {
+    const payload = {
         app: 'mizan-okane',
         schemaVersion: SCHEMA_VERSION,
         exportedAt: new Date().toISOString(),
         transactions
-    });
+    };
+    if (categories) {
+        payload.categories = categories;
+    }
+    return JSON.stringify(payload);
 }
 
-async function uploadRemote(fileId, transactions) {
-    const content = buildPayload(transactions);
+async function uploadRemote(fileId, transactions, categories) {
+    const content = buildPayload(transactions, categories);
 
     if (fileId) {
         const res = await driveFetch(
@@ -282,6 +286,7 @@ async function saveSyncMeta(meta) {
 // - ID sama: waktu ubah (updatedAt) yang lebih baru menang.
 // - ID hanya ada di satu sisi: ambil.
 // - Soft delete (deleted: true) ikut digabung dan bisa menang jika updatedAt lebih baru.
+// Aturan Tahap 5: Kategori ikut digabung (yang terbaru menang berdasarkan updatedAt).
 async function runSync(force = null) {
     const account = getAccount();
     let meta = await getSyncMeta();
@@ -291,40 +296,70 @@ async function runSync(force = null) {
 
     const revAtStart = await getLocalRev();
     const local = await getAllTransactions();
-    const dirty = meta.syncedRev === null ? local.length > 0 : meta.syncedRev !== revAtStart;
+    const localCategories = await getCategories();
+    const dirty = meta.syncedRev === null ? (local.length > 0 || (localCategories.updatedAt || 0) > 0) : meta.syncedRev !== revAtStart;
 
     const remoteFile = await findRemoteFile();
 
-    const push = async () => {
-        const saved = await uploadRemote(remoteFile?.id || null, local);
+    const push = async (categoriesToPush = localCategories) => {
+        const saved = await uploadRemote(remoteFile?.id || null, local, categoriesToPush);
         return { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };
     };
 
     const pull = async (remoteData, version) => {
         await replaceAllTransactions(remoteData.transactions);
+        if (remoteData.categories && Array.isArray(remoteData.categories.income) && Array.isArray(remoteData.categories.expense)) {
+            if ((remoteData.categories.updatedAt || 0) > (localCategories.updatedAt || 0)) {
+                await saveCategories(remoteData.categories);
+            }
+        }
         await listeners.onRemoteApplied();
         return { ...meta, syncedRev: revAtStart, remoteVersion: version, lastSyncAt: Date.now() };
     };
 
     if (force === 'local') {
-        meta = await push();
+        meta = await push(localCategories);
     } else if (force === 'remote') {
         if (!remoteFile) throw new Error('File di Drive sudah tidak ada. Ketuk Sinkron untuk mengunggah data perangkat ini.');
-        meta = await pull(await downloadRemote(remoteFile.id), remoteFile.version);
+        const remoteData = await downloadRemote(remoteFile.id);
+        if (remoteData.categories && Array.isArray(remoteData.categories.income) && Array.isArray(remoteData.categories.expense)) {
+            await saveCategories(remoteData.categories);
+        }
+        meta = await pull(remoteData, remoteFile.version);
     } else if (!remoteFile) {
-        meta = await push();
+        meta = await push(localCategories);
     } else if (remoteFile.version === meta.remoteVersion) {
         if (dirty) {
-            meta = await push();
+            meta = await push(localCategories);
         } else {
             meta = { ...meta, lastSyncAt: Date.now() };
         }
     } else {
         const remoteData = await downloadRemote(remoteFile.id);
-        if (!dirty || local.length === 0) {
+        const remoteHasCats = remoteData.categories && Array.isArray(remoteData.categories.income) && Array.isArray(remoteData.categories.expense);
+        const remoteCatTime = remoteHasCats ? (remoteData.categories.updatedAt || 0) : -1;
+        const localCatTime = localCategories.updatedAt || 0;
+        const remoteCatWins = remoteHasCats && remoteCatTime > localCatTime;
+        const finalCategories = remoteCatWins ? remoteData.categories : localCategories;
+
+        if (!dirty) {
+            if (remoteCatWins) {
+                await saveCategories(remoteData.categories);
+            }
+            meta = await pull(remoteData, remoteFile.version);
+        } else if (local.length === 0 && !remoteCatWins) {
+            const saved = await uploadRemote(remoteFile.id, remoteData.transactions, finalCategories);
+            await replaceAllTransactions(remoteData.transactions);
+            await saveCategories(finalCategories);
+            await listeners.onRemoteApplied();
+            meta = { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };
+        } else if (local.length === 0) {
+            if (remoteCatWins) {
+                await saveCategories(remoteData.categories);
+            }
             meta = await pull(remoteData, remoteFile.version);
         } else if (remoteData.transactions.length === 0) {
-            meta = await push();
+            meta = await push(finalCategories);
         } else {
             // Gabung data
             const merged = new Map();
@@ -340,9 +375,10 @@ async function runSync(force = null) {
             const mergedList = Array.from(merged.values());
             
             // Simpan hasil gabungan ke Drive
-            const saved = await uploadRemote(remoteFile.id, mergedList);
+            const saved = await uploadRemote(remoteFile.id, mergedList, finalCategories);
             // Simpan ke lokal
             await replaceAllTransactions(mergedList);
+            await saveCategories(finalCategories);
             await listeners.onRemoteApplied();
             
             meta = { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };

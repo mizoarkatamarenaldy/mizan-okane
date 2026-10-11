@@ -80,17 +80,9 @@
 
                 <div class="form-group">
                     <label for="tx-category">Kategori</label>
-                    <input type="text" id="tx-category" list="category-list" required autocomplete="off">
-                    <datalist id="category-list">
-                        <option value="Makan"></option>
-                        <option value="Transport"></option>
-                        <option value="Belanja"></option>
-                        <option value="Tagihan"></option>
-                        <option value="Pendidikan"></option>
-                        <option value="Hiburan"></option>
-                        <option value="Gaji"></option>
-                        <option value="Lainnya"></option>
-                    </datalist>
+                    <select id="tx-category" required>
+                        <option value="" disabled selected>Pilih kategori</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -120,6 +112,28 @@
             <h2>Riwayat Transaksi</h2>
             <div id="tx-list" class="tx-list">
                 <!-- Data will be populated here -->
+            </div>
+        </section>
+
+        <section class="category-section" aria-labelledby="category-section-title">
+            <h2 id="category-section-title">Pengaturan Kategori</h2>
+            <div class="category-grid">
+                <div class="category-card">
+                    <h3 class="category-group-title expense">Pengeluaran</h3>
+                    <ul id="expense-category-list" class="category-items" aria-label="Daftar kategori pengeluaran"></ul>
+                    <form id="form-add-expense-cat" class="category-add-form">
+                        <input type="text" id="input-add-expense-cat" placeholder="Tambah kategori pengeluaran..." required autocomplete="off">
+                        <button type="submit" class="btn-primary btn-small">Tambah</button>
+                    </form>
+                </div>
+                <div class="category-card">
+                    <h3 class="category-group-title income">Pemasukan</h3>
+                    <ul id="income-category-list" class="category-items" aria-label="Daftar kategori pemasukan"></ul>
+                    <form id="form-add-income-cat" class="category-add-form">
+                        <input type="text" id="input-add-income-cat" placeholder="Tambah kategori pemasukan..." required autocomplete="off">
+                        <button type="submit" class="btn-primary btn-small">Tambah</button>
+                    </form>
+                </div>
             </div>
         </section>
     </div>

@@ -1,4 +1,4 @@
-import { initDB, saveTransaction, getAllTransactions } from './db.js';
+import { initDB, saveTransaction, getAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES } from './db.js';
 import { initSync, markDirty, signIn, signOut, syncNow, ensureToken } from './sync.js';
 
 // DOM Elements
@@ -19,6 +19,7 @@ const totalIncomeEl = document.getElementById('total-income');
 const totalExpenseEl = document.getElementById('total-expense');
 
 const confirmDialog = document.getElementById('confirm-dialog');
+const confirmDialogTitle = document.getElementById('confirm-dialog-title');
 const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
 const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
@@ -26,8 +27,65 @@ const chartContainer = document.getElementById('chart-container');
 const chartSummaryText = document.getElementById('chart-summary-text');
 const chartDetail = document.getElementById('chart-detail');
 
+const expenseCategoryList = document.getElementById('expense-category-list');
+const incomeCategoryList = document.getElementById('income-category-list');
+const formAddExpenseCat = document.getElementById('form-add-expense-cat');
+const inputAddExpenseCat = document.getElementById('input-add-expense-cat');
+const formAddIncomeCat = document.getElementById('form-add-income-cat');
+const inputAddIncomeCat = document.getElementById('input-add-income-cat');
+
 let currentTransactions = [];
 let pendingDeleteId = null;
+let pendingCategoryDelete = null;
+let editingCategory = null;
+let currentCategories = {
+    income: [...DEFAULT_CATEGORIES.income],
+    expense: [...DEFAULT_CATEGORIES.expense],
+    updatedAt: 0
+};
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function getSelectedType() {
+    for (const radio of txTypeInputs) {
+        if (radio.checked) return radio.value;
+    }
+    return 'expense';
+}
+
+function populateCategoryOptions(selectedVal = null, oldCustomCategory = null) {
+    if (!txCategoryInput) return;
+    const type = getSelectedType();
+    const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
+
+    let html = '';
+    if (oldCustomCategory && !list.includes(oldCustomCategory)) {
+        html += `<option value="" disabled selected>Pilih kategori (sebelumnya: ${escapeHTML(oldCustomCategory)})</option>`;
+    } else {
+        html += `<option value="" disabled ${!selectedVal ? 'selected' : ''}>Pilih kategori</option>`;
+    }
+
+    for (const cat of list) {
+        const isSelected = selectedVal === cat;
+        html += `<option value="${escapeHTML(cat)}" ${isSelected ? 'selected' : ''}>${escapeHTML(cat)}</option>`;
+    }
+
+    txCategoryInput.innerHTML = html;
+
+    if (selectedVal && list.includes(selectedVal)) {
+        txCategoryInput.value = selectedVal;
+    } else {
+        txCategoryInput.value = '';
+    }
+}
 
 // Formatter
 const currencyFormatter = new Intl.NumberFormat('id-ID', {
@@ -56,6 +114,10 @@ function getCurrentTimeString() {
 
 async function loadData() {
     try {
+        currentCategories = await getCategories();
+        renderCategorySettings();
+        populateCategoryOptions(txCategoryInput.value);
+
         const allTx = await getAllTransactions();
         currentTransactions = allTx.filter(tx => !tx.deleted);
         // Sort by date descending, then by time descending, then by createdAt descending
@@ -378,6 +440,198 @@ function render() {
     });
 }
 
+function renderCategorySettings() {
+    renderCategoryGroup('expense', expenseCategoryList);
+    renderCategoryGroup('income', incomeCategoryList);
+}
+
+function renderCategoryGroup(type, container) {
+    if (!container) return;
+    container.innerHTML = '';
+    const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
+
+    if (list.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'category-empty-item';
+        emptyLi.textContent = 'Belum ada kategori.';
+        container.appendChild(emptyLi);
+        return;
+    }
+
+    list.forEach(cat => {
+        const li = document.createElement('li');
+        li.className = 'category-item';
+
+        const isEditing = editingCategory && editingCategory.type === type && editingCategory.name === cat;
+
+        if (isEditing) {
+            li.classList.add('editing');
+            li.innerHTML = `
+                <form class="category-inline-edit-form">
+                    <input type="text" class="category-edit-input" value="${escapeHTML(cat)}" required autocomplete="off" aria-label="Ubah nama kategori ${escapeHTML(cat)}">
+                    <div class="category-item-actions">
+                        <button type="submit" class="btn-icon btn-save-cat">Simpan</button>
+                        <button type="button" class="btn-icon btn-cancel-cat">Batal</button>
+                    </div>
+                </form>
+            `;
+
+            const editForm = li.querySelector('.category-inline-edit-form');
+            const editInput = li.querySelector('.category-edit-input');
+            const btnCancelCat = li.querySelector('.btn-cancel-cat');
+
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleSaveCategoryName(type, cat, editInput.value.trim());
+            });
+
+            btnCancelCat.addEventListener('click', () => {
+                editingCategory = null;
+                renderCategorySettings();
+            });
+
+            editInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    editingCategory = null;
+                    renderCategorySettings();
+                }
+            });
+
+            container.appendChild(li);
+            requestAnimationFrame(() => {
+                editInput.focus();
+                editInput.select();
+            });
+        } else {
+            li.innerHTML = `
+                <span class="category-name">${escapeHTML(cat)}</span>
+                <div class="category-item-actions">
+                    <button type="button" class="btn-icon btn-edit-cat" data-type="${type}" data-name="${escapeHTML(cat)}" aria-label="Ubah nama kategori ${escapeHTML(cat)}">Ubah</button>
+                    <button type="button" class="btn-icon btn-delete-cat" data-type="${type}" data-name="${escapeHTML(cat)}" aria-label="Hapus kategori ${escapeHTML(cat)}">Hapus</button>
+                </div>
+            `;
+
+            li.querySelector('.btn-edit-cat').addEventListener('click', () => {
+                editingCategory = { type, name: cat };
+                renderCategorySettings();
+            });
+
+            li.querySelector('.btn-delete-cat').addEventListener('click', () => {
+                handleDeleteCategoryPrompt(type, cat);
+            });
+
+            container.appendChild(li);
+        }
+    });
+}
+
+async function handleSaveCategoryName(type, oldName, newName) {
+    if (!newName) {
+        alert('Nama kategori tidak boleh kosong.');
+        return;
+    }
+    if (newName === oldName) {
+        editingCategory = null;
+        renderCategorySettings();
+        return;
+    }
+
+    const list = currentCategories[type] || [];
+    const exists = list.some(c => c !== oldName && c.toLowerCase() === newName.toLowerCase());
+    if (exists) {
+        alert(`Kategori "${newName}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`);
+        return;
+    }
+
+    ensureToken();
+
+    const idx = list.indexOf(oldName);
+    if (idx !== -1) {
+        list[idx] = newName;
+        currentCategories[type] = list;
+        currentCategories.updatedAt = Date.now();
+        try {
+            await saveCategories(currentCategories);
+            editingCategory = null;
+            renderCategorySettings();
+            if (txCategoryInput.value === oldName) {
+                populateCategoryOptions(newName);
+            } else {
+                populateCategoryOptions(txCategoryInput.value);
+            }
+            markDirty().catch(err => console.error("Gagal menandai perubahan kategori untuk sinkron", err));
+        } catch (error) {
+            console.error("Gagal mengubah nama kategori", error);
+            alert("Terjadi kesalahan saat menyimpan kategori.");
+        }
+    }
+}
+
+async function handleAddCategory(type, inputEl) {
+    const name = inputEl.value.trim();
+    if (!name) {
+        alert('Nama kategori tidak boleh kosong.');
+        return;
+    }
+
+    const list = currentCategories[type] || [];
+    const exists = list.some(c => c.toLowerCase() === name.toLowerCase());
+    if (exists) {
+        alert(`Kategori "${name}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`);
+        return;
+    }
+
+    ensureToken();
+
+    list.push(name);
+    currentCategories[type] = list;
+    currentCategories.updatedAt = Date.now();
+
+    try {
+        await saveCategories(currentCategories);
+        inputEl.value = '';
+        renderCategorySettings();
+        populateCategoryOptions(txCategoryInput.value);
+        markDirty().catch(err => console.error("Gagal menambah kategori untuk sinkron", err));
+    } catch (error) {
+        console.error("Gagal menambah kategori", error);
+        alert("Terjadi kesalahan saat menyimpan kategori.");
+    }
+}
+
+function handleDeleteCategoryPrompt(type, name) {
+    pendingDeleteId = null;
+    pendingCategoryDelete = { type, name };
+    if (confirmDialogTitle) {
+        confirmDialogTitle.textContent = `Hapus kategori "${name}"?`;
+    }
+    if (confirmDialog && typeof confirmDialog.showModal === 'function') {
+        confirmDialog.showModal();
+    }
+}
+
+async function performDeleteCategory(type, name) {
+    ensureToken();
+
+    const list = currentCategories[type] || [];
+    currentCategories[type] = list.filter(c => c !== name);
+    currentCategories.updatedAt = Date.now();
+
+    try {
+        await saveCategories(currentCategories);
+        renderCategorySettings();
+        if (txCategoryInput.value === name) {
+            populateCategoryOptions(null);
+        } else {
+            populateCategoryOptions(txCategoryInput.value);
+        }
+        markDirty().catch(err => console.error("Gagal menandai penghapusan kategori untuk sinkron", err));
+    } catch (error) {
+        console.error("Gagal menghapus kategori", error);
+        alert("Terjadi kesalahan saat menghapus kategori.");
+    }
+}
+
 function resetForm() {
     txForm.reset();
     txIdInput.value = '';
@@ -392,6 +646,7 @@ function resetForm() {
     btnCancel.classList.add('hidden');
     // Default to expense
     txTypeInputs[0].checked = true;
+    populateCategoryOptions();
 }
 
 async function handleSubmit(e) {
@@ -465,8 +720,17 @@ function handleEdit(id) {
     txDateInput.value = tx.date;
     txTimeInput.value = tx.time || '';
     txAmountInput.value = tx.amount;
-    txCategoryInput.value = tx.category;
     txNoteInput.value = tx.note || '';
+
+    // Pilihan kategori mengikuti tipe yang dipilih
+    const list = (currentCategories && currentCategories[tx.type]) ? currentCategories[tx.type] : [];
+    if (list.includes(tx.category)) {
+        populateCategoryOptions(tx.category);
+    } else {
+        // Transaksi lama dengan kategori yang tidak ada di daftar tipenya
+        // Minta pengguna memilih kategori dari daftar yang sesuai
+        populateCategoryOptions(null, tx.category);
+    }
 
     formTitle.textContent = 'Edit Transaksi';
     btnCancel.classList.remove('hidden');
@@ -476,6 +740,10 @@ function handleEdit(id) {
 function handleDelete(id) {
     if (!id) return;
     pendingDeleteId = id;
+    pendingCategoryDelete = null;
+    if (confirmDialogTitle) {
+        confirmDialogTitle.textContent = 'Hapus transaksi ini?';
+    }
     if (confirmDialog && typeof confirmDialog.showModal === 'function') {
         confirmDialog.showModal();
     }
@@ -506,21 +774,38 @@ async function performDelete(id) {
 txForm.addEventListener('submit', handleSubmit);
 btnCancel.addEventListener('click', resetForm);
 
+txTypeInputs.forEach(radio => {
+    radio.addEventListener('change', () => {
+        // Ganti tipe, pilihan kategori ikut berganti
+        const currentVal = txCategoryInput.value;
+        const newType = radio.value;
+        const list = (currentCategories && currentCategories[newType]) ? currentCategories[newType] : [];
+        const keepVal = list.includes(currentVal) ? currentVal : null;
+        populateCategoryOptions(keepVal);
+    });
+});
+
 if (confirmDialog) {
     btnConfirmCancel.addEventListener('click', () => {
         confirmDialog.close();
     });
 
     btnConfirmDelete.addEventListener('click', async () => {
-        const id = pendingDeleteId;
-        if (!id) {
+        const txId = pendingDeleteId;
+        const catDelete = pendingCategoryDelete;
+
+        if (!txId && !catDelete) {
             confirmDialog.close();
             return;
         }
 
         btnConfirmDelete.disabled = true;
         try {
-            await performDelete(id);
+            if (txId) {
+                await performDelete(txId);
+            } else if (catDelete) {
+                await performDeleteCategory(catDelete.type, catDelete.name);
+            }
         } finally {
             btnConfirmDelete.disabled = false;
             confirmDialog.close();
@@ -529,6 +814,10 @@ if (confirmDialog) {
 
     confirmDialog.addEventListener('close', () => {
         pendingDeleteId = null;
+        pendingCategoryDelete = null;
+        if (confirmDialogTitle) {
+            confirmDialogTitle.textContent = 'Hapus transaksi ini?';
+        }
     });
 
     // Fallback ketukan di luar kotak untuk browser yang belum mendukung closedby="any"
@@ -609,11 +898,13 @@ btnSyncNow.addEventListener('click', () => syncNow({ interactive: true }));
 btnExport.addEventListener('click', async () => {
     try {
         const allTx = await getAllTransactions();
+        const cats = await getCategories();
         const data = {
             app: 'mizan-okane',
             schemaVersion: 1,
             exportedAt: new Date().toISOString(),
-            transactions: allTx
+            transactions: allTx,
+            categories: cats
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -708,12 +999,27 @@ btnExportCsv.addEventListener('click', async () => {
 async function init() {
     try {
         await initDB();
-        resetForm(); // Set default date
+        currentCategories = await getCategories();
+        resetForm(); // Set default date dan kategori
         await loadData();
     } catch (error) {
         console.error("Gagal inisialisasi database", error);
         alert("Browser Anda tidak mendukung penyimpanan lokal atau terjadi kesalahan.");
         return;
+    }
+
+    if (formAddExpenseCat && inputAddExpenseCat) {
+        formAddExpenseCat.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleAddCategory('expense', inputAddExpenseCat);
+        });
+    }
+
+    if (formAddIncomeCat && inputAddIncomeCat) {
+        formAddIncomeCat.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleAddCategory('income', inputAddIncomeCat);
+        });
     }
 
     // Sinkron dimulai setelah data lokal tampil, jadi app tetap jalan walau offline atau belum login.

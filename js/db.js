@@ -97,3 +97,47 @@ export function deleteMeta(key) {
   });
 }
 
+export const DEFAULT_CATEGORIES = {
+  income: ['Gaji', 'Bonus', 'Hadiah', 'Lainnya'],
+  expense: ['Makan', 'Transport', 'Hiburan', 'Belanja', 'Tagihan', 'Lainnya'],
+  updatedAt: 0
+};
+
+export function getCategories() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([META_STORE], 'readonly');
+    const request = transaction.objectStore(META_STORE).get('categories');
+    request.onsuccess = (event) => {
+      const stored = event.target.result;
+      if (stored && Array.isArray(stored.income) && Array.isArray(stored.expense)) {
+        resolve(stored);
+      } else {
+        const initial = {
+          income: [...DEFAULT_CATEGORIES.income],
+          expense: [...DEFAULT_CATEGORIES.expense],
+          updatedAt: 0
+        };
+        const writeTx = db.transaction([META_STORE], 'readwrite');
+        writeTx.objectStore(META_STORE).put(initial, 'categories');
+        writeTx.oncomplete = () => resolve(initial);
+        writeTx.onerror = () => resolve(initial);
+      }
+    };
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+export function saveCategories(categories) {
+  return new Promise((resolve, reject) => {
+    const toSave = {
+      income: Array.isArray(categories.income) ? categories.income : [...DEFAULT_CATEGORIES.income],
+      expense: Array.isArray(categories.expense) ? categories.expense : [...DEFAULT_CATEGORIES.expense],
+      updatedAt: typeof categories.updatedAt === 'number' ? categories.updatedAt : Date.now()
+    };
+    const transaction = db.transaction([META_STORE], 'readwrite');
+    const request = transaction.objectStore(META_STORE).put(toSave, 'categories');
+    request.onsuccess = () => resolve(toSave);
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
