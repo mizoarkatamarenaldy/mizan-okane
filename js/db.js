@@ -252,4 +252,28 @@ export function saveWallets(wallets) {
   });
 }
 
+export const DEFAULT_TIME_FORMAT = '24';
+
+export function getTimeFormat() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([META_STORE], 'readonly');
+    const request = transaction.objectStore(META_STORE).get('timeFormat');
+    request.onsuccess = (event) => {
+      const stored = event.target.result;
+      resolve(stored === '12' ? '12' : DEFAULT_TIME_FORMAT);
+    };
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+export function saveTimeFormat(format) {
+  return new Promise((resolve, reject) => {
+    const value = format === '12' ? '12' : DEFAULT_TIME_FORMAT;
+    const transaction = db.transaction([META_STORE], 'readwrite');
+    const request = transaction.objectStore(META_STORE).put(value, 'timeFormat');
+    request.onsuccess = () => resolve(value);
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
 

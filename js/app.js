@@ -1,4 +1,4 @@
-import { initDB, saveTransaction, getAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME } from './db.js';
+import { initDB, saveTransaction, getAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT } from './db.js';
 import { initSync, markDirty, signIn, signOut, syncNow, ensureToken } from './sync.js';
 
 // DOM Elements
@@ -8,6 +8,14 @@ const txIdInput = document.getElementById('tx-id');
 const txTypeInputs = document.getElementsByName('type');
 const txDateInput = document.getElementById('tx-date');
 const txTimeInput = document.getElementById('tx-time');
+const timeInput24Container = document.getElementById('time-input-24');
+const timeInput12Container = document.getElementById('time-input-12');
+const txTimeHourSelect = document.getElementById('tx-time-hour');
+const txTimeMinuteSelect = document.getElementById('tx-time-minute');
+const txTimeAmpmSelect = document.getElementById('tx-time-ampm');
+const txTimeLabel = document.getElementById('tx-time-label');
+const btnClearTime = document.getElementById('btn-clear-time');
+const timeFormatRadios = document.getElementsByName('time-format-setting');
 const txAmountInput = document.getElementById('tx-amount');
 const txWalletLabel = document.getElementById('tx-wallet-label');
 const txWalletInput = document.getElementById('tx-wallet');
@@ -68,6 +76,7 @@ let editingBudgetCategory = null;
 let editingWalletId = null;
 let currentWalletFilter = 'all';
 const LAST_WALLET_KEY = 'mizan-okane:last-wallet-id';
+let currentTimeFormat = DEFAULT_TIME_FORMAT;
 
 let selectedBudgetMonth = '';
 let currentBudgets = {
@@ -263,9 +272,101 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('id-ID', options);
 }
 
+export function formatTimeDisplay(timeStr, format = '24') {
+    if (!timeStr) return '';
+    const match = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return timeStr;
+    const h24 = parseInt(match[1], 10);
+    const m = match[2];
+    if (format !== '12') {
+        return `${String(h24).padStart(2, '0')}:${m}`;
+    }
+    const ampm = h24 >= 12 ? 'PM' : 'AM';
+    let h12 = h24 % 12;
+    if (h12 === 0) h12 = 12;
+    return `${String(h12).padStart(2, '0')}:${m} ${ampm}`;
+}
+
 function formatDateTime(tx) {
     const dateFormatted = formatDate(tx.date);
-    return tx.time ? `${dateFormatted} ${tx.time}` : dateFormatted;
+    if (!tx.time) return dateFormatted;
+    const timeFormatted = formatTimeDisplay(tx.time, currentTimeFormat);
+    return `${dateFormatted} ${timeFormatted}`;
+}
+
+function getTimeValueFromForm() {
+    if (currentTimeFormat === '12') {
+        const hVal = txTimeHourSelect ? txTimeHourSelect.value : '';
+        const mVal = txTimeMinuteSelect ? txTimeMinuteSelect.value : '';
+        if (!hVal && !mVal) {
+            return '';
+        }
+        if (!hVal || !mVal) {
+            return '';
+        }
+        let h = parseInt(hVal, 10);
+        const m = parseInt(mVal, 10);
+        const ampm = txTimeAmpmSelect ? txTimeAmpmSelect.value : 'AM';
+        if (ampm === 'AM') {
+            if (h === 12) h = 0;
+        } else if (ampm === 'PM') {
+            if (h !== 12) h += 12;
+        }
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+    return txTimeInput ? txTimeInput.value.trim() : '';
+}
+
+function setTimeValueToForm(timeStr) {
+    if (timeStr) {
+        const match = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})$/);
+        if (match) {
+            const h24 = parseInt(match[1], 10);
+            const m = match[2];
+            if (txTimeInput) {
+                txTimeInput.value = `${String(h24).padStart(2, '0')}:${m}`;
+            }
+            const ampm = h24 >= 12 ? 'PM' : 'AM';
+            let h12 = h24 % 12;
+            if (h12 === 0) h12 = 12;
+            const hStr = String(h12).padStart(2, '0');
+            if (txTimeHourSelect) {
+                txTimeHourSelect.value = hStr;
+                if (!txTimeHourSelect.value) {
+                    txTimeHourSelect.value = String(h12);
+                }
+            }
+            if (txTimeMinuteSelect) {
+                txTimeMinuteSelect.value = m;
+            }
+            if (txTimeAmpmSelect) {
+                txTimeAmpmSelect.value = ampm;
+            }
+            return;
+        }
+    }
+    if (txTimeInput) txTimeInput.value = '';
+    if (txTimeHourSelect) txTimeHourSelect.value = '';
+    if (txTimeMinuteSelect) txTimeMinuteSelect.value = '';
+    if (txTimeAmpmSelect) txTimeAmpmSelect.value = 'AM';
+}
+
+function applyTimeFormatUI(format) {
+    currentTimeFormat = format === '12' ? '12' : '24';
+    if (timeFormatRadios) {
+        for (const radio of timeFormatRadios) {
+            radio.checked = (radio.value === currentTimeFormat);
+        }
+    }
+    if (currentTimeFormat === '12') {
+        if (timeInput24Container) timeInput24Container.classList.add('hidden');
+        if (timeInput12Container) timeInput12Container.classList.remove('hidden');
+        if (txTimeLabel) txTimeLabel.setAttribute('for', 'tx-time-hour');
+    } else {
+        if (timeInput24Container) timeInput24Container.classList.remove('hidden');
+        if (timeInput12Container) timeInput12Container.classList.add('hidden');
+        if (txTimeLabel) txTimeLabel.setAttribute('for', 'tx-time');
+    }
 }
 
 function getCurrentTimeString() {
@@ -277,6 +378,8 @@ function getCurrentTimeString() {
 
 async function loadData() {
     try {
+        currentTimeFormat = await getTimeFormat();
+        applyTimeFormatUI(currentTimeFormat);
         currentCategories = await getCategories();
         currentBudgets = await getBudgets();
         currentWallets = await getWallets();
@@ -1486,7 +1589,7 @@ function resetForm() {
     // Offset for local timezone
     const localToday = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
     txDateInput.value = localToday;
-    txTimeInput.value = getCurrentTimeString();
+    setTimeValueToForm(getCurrentTimeString());
     
     formTitle.textContent = 'Tambah Transaksi';
     btnCancel.classList.add('hidden');
@@ -1574,7 +1677,16 @@ async function handleSubmit(e) {
         tx.toWalletId = selectedToWalletId;
     }
 
-    const timeValue = txTimeInput.value.trim();
+    if (currentTimeFormat === '12') {
+        const hVal = txTimeHourSelect ? txTimeHourSelect.value : '';
+        const mVal = txTimeMinuteSelect ? txTimeMinuteSelect.value : '';
+        if ((hVal && !mVal) || (!hVal && mVal)) {
+            alert('Mohon lengkapi jam dan menit, atau kosongkan keduanya.');
+            return;
+        }
+    }
+
+    const timeValue = getTimeValueFromForm();
     if (timeValue) {
         tx.time = timeValue;
     }
@@ -1599,7 +1711,7 @@ function handleEdit(id) {
         radio.checked = (radio.value === tx.type);
     }
     txDateInput.value = tx.date;
-    txTimeInput.value = tx.time || '';
+    setTimeValueToForm(tx.time || '');
     txAmountInput.value = tx.amount;
     txNoteInput.value = tx.note || '';
 
@@ -2014,6 +2126,44 @@ async function init() {
                 renderBudgetSection();
             }
         });
+    }
+
+    if (btnClearTime) {
+        btnClearTime.addEventListener('click', () => {
+            setTimeValueToForm('');
+        });
+    }
+
+    if (txTimeInput) {
+        const sync24to12 = () => {
+            setTimeValueToForm(txTimeInput.value);
+        };
+        txTimeInput.addEventListener('change', sync24to12);
+        txTimeInput.addEventListener('input', sync24to12);
+    }
+
+    const sync12to24 = () => {
+        const timeVal = getTimeValueFromForm();
+        if (txTimeInput) {
+            txTimeInput.value = timeVal;
+        }
+    };
+    if (txTimeHourSelect) txTimeHourSelect.addEventListener('change', sync12to24);
+    if (txTimeMinuteSelect) txTimeMinuteSelect.addEventListener('change', sync12to24);
+    if (txTimeAmpmSelect) txTimeAmpmSelect.addEventListener('change', sync12to24);
+
+    if (timeFormatRadios) {
+        for (const radio of timeFormatRadios) {
+            radio.addEventListener('change', async (e) => {
+                if (e.target.checked) {
+                    const newFormat = e.target.value === '12' ? '12' : '24';
+                    currentTimeFormat = newFormat;
+                    await saveTimeFormat(newFormat);
+                    applyTimeFormatUI(newFormat);
+                    render();
+                }
+            });
+        }
     }
 
     // Sinkron dimulai setelah data lokal tampil, jadi app tetap jalan walau offline atau belum login.

@@ -958,4 +958,79 @@ button:focus-visible {
     border: 0;
 }
 
+/* Pengaturan Format Jam */
+.time-format-settings-section {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+}
+
+.time-format-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    background: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+}
+
+.time-format-desc {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+/* Form Waktu: 24 jam & 12 jam */
+.time-label-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.time-label-wrapper label {
+    margin-bottom: 0;
+}
+
+.btn-clear-time {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-decoration: underline;
+    width: auto;
+    flex: none;
+}
+
+.btn-clear-time:hover,
+.btn-clear-time:focus-visible {
+    color: var(--danger);
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+.time-input-12 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.time-input-12 select {
+    flex: 1;
+    min-width: 0;
+}
+
+.time-separator {
+    font-weight: bold;
+    font-size: 18px;
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+
 

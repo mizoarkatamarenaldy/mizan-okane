@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Pilihan format jam 12 jam (AM/PM) atau 24 jam
+- Ditambah: Pengaturan format jam pada bagian pengaturan dengan pilihan 24 jam dan 12 jam (AM/PM), default 24 jam, disimpan per perangkat di store `meta` IndexedDB dan tidak ikut sinkron (`index.html`, `js/db.js`, `js/app.js`, `css/style.css`).
+- Ditambah: Antarmuka input waktu mode 12 jam pada formulir transaksi menggunakan kombinasi pilihan jam (01-12), menit (00-59), dan AM/PM, serta tombol "Kosongkan" untuk mengosongkan jam pada kedua mode (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Pengisian otomatis jam sekarang serta pengisian saat edit/kosongkan transaksi yang mendukung mode 24 jam dan 12 jam (`js/app.js`).
+- Diubah: Tampilan jam pada riwayat transaksi mengikuti format yang dipilih (24 jam atau 12 jam AM/PM) secara realtime saat pengaturan diubah tanpa perlu memuat ulang halaman (`js/app.js`).
+- Diubah: Data transaksi tetap disimpan dan diekspor ke CSV dalam format 24 jam "HH:mm" tanpa mengubah data transaksi lama (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v14` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur "Pilihan format jam 12 jam (AM/PM) atau 24 jam" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Ganti label Jam (opsional) jadi Waktu
 - Diubah: Label input waktu pada formulir transaksi diganti dari "Jam (opsional)" menjadi "Waktu" (`index.html`).
 - Diubah: `sw.js` naik ke versi `mizan-v13` untuk memperbarui cache aset (`sw.js`).
