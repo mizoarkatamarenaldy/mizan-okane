@@ -9,6 +9,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diperbaiki: ...
 - Diubah: ...
 ```
+
+## 2026-10-11: Tahap 5: Perbaikan field Waktu wajib diisi
+- Ditambah: Elemen pesan error "Waktu wajib diisi" di bawah field Waktu pada formulir transaksi (`index.html`).
+- Ditambah: Kelas styling `.form-error-message` untuk menampilkan pesan validasi form dengan warna teks bahaya (`css/style.css`).
+- Ditambah: Validasi field Waktu wajib diisi saat simpan transaksi pada form tambah dan form edit (mode 24 jam dan 12 jam) yang menampilkan pesan error inline tanpa alert dan tanpa popup bawaan browser (`js/app.js`).
+- Diubah: Pesan error waktu disembunyikan secara otomatis saat formulir di-reset, dibatalkan, atau saat nilai waktu diisi (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v17` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencatat dan mencentang perbaikan field Waktu wajib diisi pada Tahap 5 (`PLAN.md`).
 ## 2026-10-11: Tahap 5: Perbaikan hapus tombol Kosongkan di field Waktu
 - Dihapus: Tombol "Kosongkan" di sebelah label "Waktu" pada formulir transaksi beserta elemen pembungkus `.time-label-wrapper` (`index.html`).
 - Dihapus: Aturan CSS `.time-label-wrapper` dan `.btn-clear-time` (`css/style.css`).

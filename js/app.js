@@ -14,6 +14,7 @@ const txTimeHourSelect = document.getElementById('tx-time-hour');
 const txTimeMinuteSelect = document.getElementById('tx-time-minute');
 const txTimeAmpmSelect = document.getElementById('tx-time-ampm');
 const txTimeLabel = document.getElementById('tx-time-label');
+const txTimeError = document.getElementById('tx-time-error');
 const timeFormatRadios = document.getElementsByName('time-format-setting');
 const txAmountInput = document.getElementById('tx-amount');
 const txWalletLabel = document.getElementById('tx-wallet-label');
@@ -301,9 +302,6 @@ function getTimeValueFromForm() {
     if (currentTimeFormat === '12') {
         const hVal = txTimeHourSelect ? txTimeHourSelect.value : '';
         const mVal = txTimeMinuteSelect ? txTimeMinuteSelect.value : '';
-        if (!hVal && !mVal) {
-            return '';
-        }
         if (!hVal || !mVal) {
             return '';
         }
@@ -317,7 +315,12 @@ function getTimeValueFromForm() {
         }
         return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     }
-    return txTimeInput ? txTimeInput.value.trim() : '';
+    const raw = txTimeInput ? txTimeInput.value.trim() : '';
+    const match = raw.match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return '';
+    const h24 = parseInt(match[1], 10);
+    const m = match[2];
+    return `${String(h24).padStart(2, '0')}:${m}`;
 }
 
 function setTimeValueToForm(timeStr) {
@@ -352,6 +355,29 @@ function setTimeValueToForm(timeStr) {
     if (txTimeHourSelect) txTimeHourSelect.value = '';
     if (txTimeMinuteSelect) txTimeMinuteSelect.value = '';
     if (txTimeAmpmSelect) txTimeAmpmSelect.value = 'AM';
+}
+
+function showTimeError() {
+    if (txTimeError) {
+        txTimeError.classList.remove('hidden');
+    }
+    if (currentTimeFormat === '12') {
+        if (txTimeHourSelect && !txTimeHourSelect.value) {
+            txTimeHourSelect.focus();
+        } else if (txTimeMinuteSelect && !txTimeMinuteSelect.value) {
+            txTimeMinuteSelect.focus();
+        } else if (txTimeHourSelect) {
+            txTimeHourSelect.focus();
+        }
+    } else if (txTimeInput) {
+        txTimeInput.focus();
+    }
+}
+
+function hideTimeError() {
+    if (txTimeError) {
+        txTimeError.classList.add('hidden');
+    }
 }
 
 function applyTimeFormatUI(format) {
@@ -1628,6 +1654,7 @@ function resetForm() {
     const localToday = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
     txDateInput.value = localToday;
     setTimeValueToForm(getCurrentTimeString());
+    hideTimeError();
     
     formTitle.textContent = 'Tambah Transaksi';
     btnCancel.classList.add('hidden');
@@ -1639,6 +1666,13 @@ function resetForm() {
 
 async function handleSubmit(e) {
     e.preventDefault();
+
+    const timeValue = getTimeValueFromForm();
+    if (!timeValue) {
+        showTimeError();
+        return;
+    }
+    hideTimeError();
 
     const amount = parseInt(txAmountInput.value, 10);
     if (isNaN(amount) || amount <= 0) {
@@ -1705,6 +1739,7 @@ async function handleSubmit(e) {
         walletId: selectedWalletId,
         category: selectedCategory,
         date: txDateInput.value,
+        time: timeValue,
         note: txNoteInput.value.trim(),
         createdAt,
         updatedAt: now,
@@ -1713,20 +1748,6 @@ async function handleSubmit(e) {
 
     if (selectedType === 'transfer') {
         tx.toWalletId = selectedToWalletId;
-    }
-
-    if (currentTimeFormat === '12') {
-        const hVal = txTimeHourSelect ? txTimeHourSelect.value : '';
-        const mVal = txTimeMinuteSelect ? txTimeMinuteSelect.value : '';
-        if ((hVal && !mVal) || (!hVal && mVal)) {
-            alert('Mohon lengkapi jam dan menit, atau kosongkan keduanya.');
-            return;
-        }
-    }
-
-    const timeValue = getTimeValueFromForm();
-    if (timeValue) {
-        tx.time = timeValue;
     }
 
     try {
@@ -1750,6 +1771,7 @@ function handleEdit(id) {
     }
     txDateInput.value = tx.date;
     setTimeValueToForm(tx.time || '');
+    hideTimeError();
     txAmountInput.value = tx.amount;
     txNoteInput.value = tx.note || '';
 
@@ -2187,6 +2209,9 @@ async function init() {
     if (txTimeInput) {
         const sync24to12 = () => {
             setTimeValueToForm(txTimeInput.value);
+            if (txTimeInput.value) {
+                hideTimeError();
+            }
         };
         txTimeInput.addEventListener('change', sync24to12);
         txTimeInput.addEventListener('input', sync24to12);
@@ -2196,6 +2221,9 @@ async function init() {
         const timeVal = getTimeValueFromForm();
         if (txTimeInput) {
             txTimeInput.value = timeVal;
+        }
+        if (timeVal) {
+            hideTimeError();
         }
     };
     if (txTimeHourSelect) txTimeHourSelect.addEventListener('change', sync12to24);
