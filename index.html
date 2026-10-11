@@ -11,24 +11,38 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h1 style="margin-bottom: 0;">Mizan Okane</h1>
-                <button id="btn-install" class="btn-primary hidden" style="font-size: 12px; padding: 6px 12px; flex: none;">Install Aplikasi</button>
+        <!-- Header aplikasi dengan navigasi desktop (bar atas pada layar PC) -->
+        <header class="app-header">
+            <div class="app-brand">
+                <h1 class="app-title">Mizan Okane</h1>
             </div>
-            <section class="sync-bar" aria-label="Sinkron Google Drive">
+            <nav class="desktop-nav" role="tablist" aria-label="Navigasi Utama">
+                <button type="button" class="nav-tab-btn is-active" data-tab="beranda" role="tab" aria-selected="true" aria-controls="page-beranda">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Beranda</span>
+                </button>
+                <button type="button" class="nav-tab-btn" data-tab="riwayat" role="tab" aria-selected="false" aria-controls="page-riwayat">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    <span>Riwayat</span>
+                </button>
+                <button type="button" class="nav-tab-btn" data-tab="statistik" role="tab" aria-selected="false" aria-controls="page-statistik">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span>Statistik</span>
+                </button>
+                <button type="button" class="nav-tab-btn" data-tab="pengaturan" role="tab" aria-selected="false" aria-controls="page-pengaturan">
+                    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Pengaturan</span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- 1. Halaman Beranda -->
+        <main id="page-beranda" class="page-view" role="tabpanel" aria-label="Beranda">
+            <section class="sync-banner-compact" aria-label="Status Sinkron">
                 <p id="sync-status" class="sync-status" role="status" aria-live="polite">Belum login. Data hanya tersimpan di perangkat ini.</p>
-                <div class="sync-actions">
-                    <button type="button" id="btn-sync-now" class="btn-secondary btn-small hidden">Sinkron</button>
-                    <button type="button" id="btn-logout" class="btn-secondary btn-small hidden">Logout</button>
-                    <button type="button" id="btn-login" class="btn-primary btn-small">Login Google</button>
-                    <button type="button" id="btn-export" class="btn-secondary btn-small">Ekspor JSON</button>
-                    <button type="button" id="btn-import-json" class="btn-secondary btn-small">Impor JSON</button>
-                    <button type="button" id="btn-export-csv" class="btn-secondary btn-small">Ekspor CSV</button>
-                    <input type="file" id="input-import-json" accept=".json,application/json" class="hidden" aria-label="Pilih file JSON untuk impor">
-                </div>
             </section>
-            <div class="summary">
+
+            <section class="summary" aria-label="Ringkasan Saldo">
                 <div class="summary-item balance">
                     <span>Total Saldo</span>
                     <strong id="total-balance">Rp 0</strong>
@@ -44,323 +58,396 @@
                     </div>
                 </div>
                 <div id="wallet-balances" class="wallet-balances" aria-label="Saldo per dompet"></div>
-            </div>
-        </header>
+            </section>
 
-        <section class="form-section">
-            <h2 id="form-title">Tambah Transaksi</h2>
-            <form id="tx-form">
-                <input type="hidden" id="tx-id">
-                
-                <div class="form-group">
-                    <label>Tipe Transaksi</label>
-                    <div class="radio-group">
-                        <label>
-                            <input type="radio" name="type" value="expense" checked>
-                            Pengeluaran
-                        </label>
-                        <label>
-                            <input type="radio" name="type" value="income">
-                            Pemasukan
-                        </label>
-                        <label>
-                            <input type="radio" name="type" value="transfer">
-                            Transfer
-                        </label>
+            <section class="budget-section" aria-labelledby="budget-section-title">
+                <div class="budget-header">
+                    <div class="budget-header-title">
+                        <h2 id="budget-section-title">Budget per Kategori</h2>
+                        <span id="budget-month-label" class="budget-month-label"></span>
+                    </div>
+                    <div class="budget-month-controls">
+                        <button type="button" id="btn-budget-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">&larr;</button>
+                        <input type="month" id="budget-month-input" class="budget-month-input" aria-label="Pilih bulan budget">
+                        <button type="button" id="btn-budget-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">&rarr;</button>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="tx-date">Tanggal</label>
-                    <input type="date" id="tx-date" required>
+                <div id="budget-summary-banner" class="budget-summary-banner hidden" aria-live="polite"></div>
+                <div id="budget-list" class="budget-list">
+                    <!-- Data budget per kategori diisi lewat JS -->
                 </div>
+            </section>
 
-                <div class="form-group" id="form-group-time">
-                    <label for="tx-time" id="tx-time-label">Waktu</label>
-                    <div id="time-input-24" class="time-input-24">
-                        <input type="time" id="tx-time">
-                    </div>
-                    <div id="time-input-12" class="time-input-12 hidden">
-                        <select id="tx-time-hour" aria-label="Jam">
-                            <option value="">Jam</option>
-                            <option value="01">01</option>
-                            <option value="02">02</option>
-                            <option value="03">03</option>
-                            <option value="04">04</option>
-                            <option value="05">05</option>
-                            <option value="06">06</option>
-                            <option value="07">07</option>
-                            <option value="08">08</option>
-                            <option value="09">09</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                        </select>
-                        <span class="time-separator" aria-hidden="true">:</span>
-                        <select id="tx-time-minute" aria-label="Menit">
-                            <option value="">Menit</option>
-                            <option value="00">00</option>
-                            <option value="01">01</option>
-                            <option value="02">02</option>
-                            <option value="03">03</option>
-                            <option value="04">04</option>
-                            <option value="05">05</option>
-                            <option value="06">06</option>
-                            <option value="07">07</option>
-                            <option value="08">08</option>
-                            <option value="09">09</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                            <option value="13">13</option>
-                            <option value="14">14</option>
-                            <option value="15">15</option>
-                            <option value="16">16</option>
-                            <option value="17">17</option>
-                            <option value="18">18</option>
-                            <option value="19">19</option>
-                            <option value="20">20</option>
-                            <option value="21">21</option>
-                            <option value="22">22</option>
-                            <option value="23">23</option>
-                            <option value="24">24</option>
-                            <option value="25">25</option>
-                            <option value="26">26</option>
-                            <option value="27">27</option>
-                            <option value="28">28</option>
-                            <option value="29">29</option>
-                            <option value="30">30</option>
-                            <option value="31">31</option>
-                            <option value="32">32</option>
-                            <option value="33">33</option>
-                            <option value="34">34</option>
-                            <option value="35">35</option>
-                            <option value="36">36</option>
-                            <option value="37">37</option>
-                            <option value="38">38</option>
-                            <option value="39">39</option>
-                            <option value="40">40</option>
-                            <option value="41">41</option>
-                            <option value="42">42</option>
-                            <option value="43">43</option>
-                            <option value="44">44</option>
-                            <option value="45">45</option>
-                            <option value="46">46</option>
-                            <option value="47">47</option>
-                            <option value="48">48</option>
-                            <option value="49">49</option>
-                            <option value="50">50</option>
-                            <option value="51">51</option>
-                            <option value="52">52</option>
-                            <option value="53">53</option>
-                            <option value="54">54</option>
-                            <option value="55">55</option>
-                            <option value="56">56</option>
-                            <option value="57">57</option>
-                            <option value="58">58</option>
-                            <option value="59">59</option>
-                        </select>
-                        <select id="tx-time-ampm" aria-label="AM atau PM">
-                            <option value="AM">AM</option>
-                            <option value="PM">PM</option>
+            <section class="recent-tx-section" aria-labelledby="recent-tx-title">
+                <div class="recent-tx-header">
+                    <h2 id="recent-tx-title">5 Transaksi Terakhir</h2>
+                    <button type="button" id="btn-see-all-tx" class="btn-link-action">Lihat Semua &rarr;</button>
+                </div>
+                <div id="recent-tx-list" class="tx-list">
+                    <!-- 5 transaksi terakhir diisi lewat JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- 2. Halaman Riwayat -->
+        <main id="page-riwayat" class="page-view hidden" role="tabpanel" aria-label="Riwayat Transaksi">
+            <section class="list-section">
+                <div class="list-header">
+                    <h2>Riwayat Transaksi</h2>
+                    <div class="list-filter">
+                        <label for="filter-wallet" class="sr-only">Filter Dompet</label>
+                        <select id="filter-wallet" class="filter-select" aria-label="Filter dompet">
+                            <option value="all">Semua Dompet</option>
                         </select>
                     </div>
-                    <div id="tx-time-error" class="form-error-message hidden" role="alert">Waktu wajib diisi</div>
                 </div>
+                <div id="tx-list" class="tx-list">
+                    <!-- Data transaksi lengkap diisi lewat JS -->
+                </div>
+            </section>
+        </main>
 
-                <div class="form-group">
-                    <label for="tx-amount">Jumlah (Rp)</label>
-                    <input type="text" inputmode="numeric" id="tx-amount" required autocomplete="off">
-                </div>
-
-                <div class="form-group">
-                    <label for="tx-wallet" id="tx-wallet-label">Dompet</label>
-                    <select id="tx-wallet" required>
-                        <option value="" disabled selected>Pilih dompet</option>
-                    </select>
-                </div>
-
-                <div class="form-group hidden" id="form-group-to-wallet">
-                    <label for="tx-to-wallet">Ke Dompet</label>
-                    <select id="tx-to-wallet">
-                        <option value="" disabled selected>Pilih dompet tujuan</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="form-group-category">
-                    <label for="tx-category">Kategori</label>
-                    <select id="tx-category" required>
-                        <option value="" disabled selected>Pilih kategori</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="tx-note">Catatan (opsional)</label>
-                    <input type="text" id="tx-note">
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" id="btn-save" class="btn-primary">Simpan</button>
-                    <button type="button" id="btn-cancel" class="btn-secondary hidden">Batal</button>
-                </div>
-            </form>
-        </section>
-
-        <section class="budget-section" aria-labelledby="budget-section-title">
-            <div class="budget-header">
-                <div class="budget-header-title">
-                    <h2 id="budget-section-title">Budget per Kategori</h2>
-                    <span id="budget-month-label" class="budget-month-label"></span>
-                </div>
-                <div class="budget-month-controls">
-                    <button type="button" id="btn-budget-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">&larr;</button>
-                    <input type="month" id="budget-month-input" class="budget-month-input" aria-label="Pilih bulan budget">
-                    <button type="button" id="btn-budget-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">&rarr;</button>
-                </div>
-            </div>
-            <div id="budget-summary-banner" class="budget-summary-banner hidden" aria-live="polite"></div>
-            <div id="budget-list" class="budget-list">
-                <!-- Data budget per kategori diisi lewat JS -->
-            </div>
-        </section>
-
-        <section class="chart-section" aria-labelledby="chart-section-title">
-            <div class="chart-header">
-                <div class="chart-header-title">
-                    <h2 id="chart-section-title">Grafik Pengeluaran Bulanan</h2>
-                    <span id="chart-summary-text" class="chart-summary-text"></span>
-                </div>
-                <div class="chart-toggle-group" role="group" aria-label="Pilihan jenis grafik bulanan">
-                    <button type="button" id="btn-chart-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
-                    <button type="button" id="btn-chart-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
-                </div>
-            </div>
-            <div id="chart-detail" class="chart-detail hidden" aria-live="polite"></div>
-            <div id="chart-container" class="chart-container">
-                <!-- Konten grafik SVG atau pesan kosong diisi lewat JS -->
-            </div>
-        </section>
-
-        <section class="donut-section" aria-labelledby="donut-section-title">
-            <div class="donut-header">
-                <div class="donut-header-title">
-                    <h2 id="donut-section-title">Diagram Pengeluaran per Kategori</h2>
-                    <span id="donut-month-label" class="donut-month-label"></span>
-                </div>
-                <div class="donut-controls">
-                    <div class="donut-month-controls">
-                        <button type="button" id="btn-donut-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">&larr;</button>
-                        <input type="month" id="donut-month-input" class="donut-month-input" aria-label="Pilih bulan diagram kategori">
-                        <button type="button" id="btn-donut-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">&rarr;</button>
+        <!-- 3. Halaman Statistik -->
+        <main id="page-statistik" class="page-view hidden" role="tabpanel" aria-label="Statistik">
+            <section class="chart-section" aria-labelledby="chart-section-title">
+                <div class="chart-header">
+                    <div class="chart-header-title">
+                        <h2 id="chart-section-title">Grafik Pengeluaran Bulanan</h2>
+                        <span id="chart-summary-text" class="chart-summary-text"></span>
                     </div>
-                    <div class="chart-toggle-group" role="group" aria-label="Pilihan jenis transaksi diagram kategori">
-                        <button type="button" id="btn-donut-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
-                        <button type="button" id="btn-donut-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
+                    <div class="chart-toggle-group" role="group" aria-label="Pilihan jenis grafik bulanan">
+                        <button type="button" id="btn-chart-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
+                        <button type="button" id="btn-chart-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
                     </div>
                 </div>
-            </div>
-            <div id="donut-detail" class="chart-detail hidden" aria-live="polite"></div>
-            <div id="donut-container" class="donut-container">
-                <!-- Konten diagram donut SVG dan rincian kategori diisi lewat JS -->
-            </div>
-        </section>
-
-        <section class="list-section">
-            <div class="list-header">
-                <h2>Riwayat Transaksi</h2>
-                <div class="list-filter">
-                    <label for="filter-wallet" class="sr-only">Filter Dompet</label>
-                    <select id="filter-wallet" class="filter-select" aria-label="Filter dompet">
-                        <option value="all">Semua Dompet</option>
-                    </select>
+                <div id="chart-detail" class="chart-detail hidden" aria-live="polite"></div>
+                <div id="chart-container" class="chart-container">
+                    <!-- Konten grafik SVG diisi lewat JS -->
                 </div>
-            </div>
-            <div id="tx-list" class="tx-list">
-                <!-- Data will be populated here -->
-            </div>
-        </section>
+            </section>
 
-        <section class="wallet-settings-section" aria-labelledby="wallet-section-title">
-            <h2 id="wallet-section-title">Pengaturan Dompet</h2>
-            <div class="wallet-settings-card">
-                <ul id="wallet-settings-list" class="category-items" aria-label="Daftar dompet"></ul>
-                <form id="form-add-wallet" class="category-add-form">
-                    <input type="text" id="input-add-wallet" placeholder="Tambah dompet baru..." required autocomplete="off">
-                    <button type="submit" class="btn-primary btn-small">Tambah</button>
-                </form>
-            </div>
-        </section>
+            <section class="donut-section" aria-labelledby="donut-section-title">
+                <div class="donut-header">
+                    <div class="donut-header-title">
+                        <h2 id="donut-section-title">Diagram Pengeluaran per Kategori</h2>
+                        <span id="donut-month-label" class="donut-month-label"></span>
+                    </div>
+                    <div class="donut-controls">
+                        <div class="donut-month-controls">
+                            <button type="button" id="btn-donut-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">&larr;</button>
+                            <input type="month" id="donut-month-input" class="donut-month-input" aria-label="Pilih bulan diagram kategori">
+                            <button type="button" id="btn-donut-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">&rarr;</button>
+                        </div>
+                        <div class="chart-toggle-group" role="group" aria-label="Pilihan jenis transaksi diagram kategori">
+                            <button type="button" id="btn-donut-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
+                            <button type="button" id="btn-donut-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="donut-detail" class="chart-detail hidden" aria-live="polite"></div>
+                <div id="donut-container" class="donut-container">
+                    <!-- Konten diagram donut SVG diisi lewat JS -->
+                </div>
+            </section>
+        </main>
 
-        <section class="category-section" aria-labelledby="category-section-title">
-            <h2 id="category-section-title">Pengaturan Kategori &amp; Budget</h2>
-            <div class="category-grid">
-                <div class="category-card">
-                    <h3 class="category-group-title expense">Pengeluaran</h3>
-                    <ul id="expense-category-list" class="category-items" aria-label="Daftar kategori pengeluaran"></ul>
-                    <form id="form-add-expense-cat" class="category-add-form">
-                        <input type="text" id="input-add-expense-cat" placeholder="Tambah kategori pengeluaran..." required autocomplete="off">
+        <!-- 4. Halaman Pengaturan -->
+        <main id="page-pengaturan" class="page-view hidden" role="tabpanel" aria-label="Pengaturan">
+            <section class="wallet-settings-section" aria-labelledby="wallet-section-title">
+                <h2 id="wallet-section-title">Pengaturan Dompet</h2>
+                <div class="wallet-settings-card">
+                    <ul id="wallet-settings-list" class="category-items" aria-label="Daftar dompet"></ul>
+                    <form id="form-add-wallet" class="category-add-form">
+                        <input type="text" id="input-add-wallet" placeholder="Tambah dompet baru..." required autocomplete="off">
                         <button type="submit" class="btn-primary btn-small">Tambah</button>
                     </form>
                 </div>
-                <div class="category-card">
-                    <h3 class="category-group-title income">Pemasukan</h3>
-                    <ul id="income-category-list" class="category-items" aria-label="Daftar kategori pemasukan"></ul>
-                    <form id="form-add-income-cat" class="category-add-form">
-                        <input type="text" id="input-add-income-cat" placeholder="Tambah kategori pemasukan..." required autocomplete="off">
-                        <button type="submit" class="btn-primary btn-small">Tambah</button>
+            </section>
+
+            <section class="category-section" aria-labelledby="category-section-title">
+                <h2 id="category-section-title">Pengaturan Kategori &amp; Budget</h2>
+                <div class="category-grid">
+                    <div class="category-card">
+                        <h3 class="category-group-title expense">Pengeluaran</h3>
+                        <ul id="expense-category-list" class="category-items" aria-label="Daftar kategori pengeluaran"></ul>
+                        <form id="form-add-expense-cat" class="category-add-form">
+                            <input type="text" id="input-add-expense-cat" placeholder="Tambah kategori pengeluaran..." required autocomplete="off">
+                            <button type="submit" class="btn-primary btn-small">Tambah</button>
+                        </form>
+                    </div>
+                    <div class="category-card">
+                        <h3 class="category-group-title income">Pemasukan</h3>
+                        <ul id="income-category-list" class="category-items" aria-label="Daftar kategori pemasukan"></ul>
+                        <form id="form-add-income-cat" class="category-add-form">
+                            <input type="text" id="input-add-income-cat" placeholder="Tambah kategori pemasukan..." required autocomplete="off">
+                            <button type="submit" class="btn-primary btn-small">Tambah</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="budget-settings-card">
+                    <h3 class="category-group-title expense">Budget Pengeluaran Bulanan</h3>
+                    <p class="budget-settings-desc">Batas pengeluaran per bulan untuk tiap kategori pengeluaran (berlaku terus setiap bulan).</p>
+                    <ul id="budget-settings-list" class="category-items" aria-label="Daftar budget per kategori"></ul>
+                    <form id="form-set-budget" class="budget-add-form">
+                        <div class="budget-form-row">
+                            <select id="select-budget-cat" required aria-label="Pilih kategori pengeluaran untuk budget">
+                                <option value="" disabled selected>Pilih kategori pengeluaran</option>
+                            </select>
+                            <input type="text" inputmode="numeric" id="input-budget-amount" placeholder="Batas bulanan (Rp)..." required aria-label="Batas bulanan dalam rupiah" autocomplete="off">
+                            <button type="submit" class="btn-primary btn-small">Simpan</button>
+                        </div>
                     </form>
                 </div>
-            </div>
+            </section>
 
-            <div class="budget-settings-card">
-                <h3 class="category-group-title expense">Budget Pengeluaran Bulanan</h3>
-                <p class="budget-settings-desc">Batas pengeluaran per bulan untuk tiap kategori pengeluaran (berlaku terus setiap bulan).</p>
-                <ul id="budget-settings-list" class="category-items" aria-label="Daftar budget per kategori"></ul>
-                <form id="form-set-budget" class="budget-add-form">
-                    <div class="budget-form-row">
-                        <select id="select-budget-cat" required aria-label="Pilih kategori pengeluaran untuk budget">
-                            <option value="" disabled selected>Pilih kategori pengeluaran</option>
-                        </select>
-                        <input type="text" inputmode="numeric" id="input-budget-amount" placeholder="Batas bulanan (Rp)..." required aria-label="Batas bulanan dalam rupiah" autocomplete="off">
-                        <button type="submit" class="btn-primary btn-small">Simpan</button>
+            <section class="time-format-settings-section" aria-labelledby="time-format-section-title">
+                <h2 id="time-format-section-title">Pengaturan Format Jam</h2>
+                <div class="time-format-card">
+                    <p class="time-format-desc">Pilihan format jam untuk formulir dan tampilan riwayat di perangkat ini (disimpan lokal, tidak ikut sinkron).</p>
+                    <div class="radio-group" id="time-format-options">
+                        <label>
+                            <input type="radio" name="time-format-setting" value="24" checked>
+                            24 jam (contoh: 14:30)
+                        </label>
+                        <label>
+                            <input type="radio" name="time-format-setting" value="12">
+                            12 jam (AM/PM) (contoh: 02:30 PM)
+                        </label>
                     </div>
-                </form>
-            </div>
-        </section>
-
-        <section class="time-format-settings-section" aria-labelledby="time-format-section-title">
-            <h2 id="time-format-section-title">Pengaturan Format Jam</h2>
-            <div class="time-format-card">
-                <p class="time-format-desc">Pilihan format jam untuk formulir dan tampilan riwayat di perangkat ini (disimpan lokal, tidak ikut sinkron).</p>
-                <div class="radio-group" id="time-format-options">
-                    <label>
-                        <input type="radio" name="time-format-setting" value="24" checked>
-                        24 jam (contoh: 14:30)
-                    </label>
-                    <label>
-                        <input type="radio" name="time-format-setting" value="12">
-                        12 jam (AM/PM) (contoh: 02:30 PM)
-                    </label>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <footer class="app-footer">
-            <a href="privasi.html" class="footer-link">Kebijakan Privasi</a>
-            <span class="footer-separator" style="margin: 0 8px; color: var(--text-light);">&bull;</span>
-            <a href="syarat.html" class="footer-link">Syarat dan Ketentuan</a>
-        </footer>
-    </div>
+            <!-- Bagian Data dan Akun -->
+            <section class="data-account-section" aria-labelledby="data-account-title">
+                <h2 id="data-account-title">Data dan Akun</h2>
+                <div class="data-account-card">
+                    <p id="settings-sync-status" class="sync-status" role="status">Belum login. Data hanya tersimpan di perangkat ini.</p>
+                    <div class="data-account-actions">
+                        <button type="button" id="btn-login" class="btn-primary btn-small">Login Google</button>
+                        <button type="button" id="btn-sync-now" class="btn-secondary btn-small hidden">Sinkron</button>
+                        <button type="button" id="btn-logout" class="btn-secondary btn-small hidden">Logout</button>
+                        <button type="button" id="btn-export" class="btn-secondary btn-small">Ekspor JSON</button>
+                        <button type="button" id="btn-import-json" class="btn-secondary btn-small">Impor JSON</button>
+                        <input type="file" id="input-import-json" accept=".json,application/json" class="hidden" aria-label="Pilih file JSON untuk impor">
+                        <button type="button" id="btn-export-csv" class="btn-secondary btn-small">Ekspor CSV</button>
+                        <button type="button" id="btn-install" class="btn-primary btn-small hidden">Install Aplikasi</button>
+                    </div>
+                    <div class="data-account-links">
+                        <a href="privasi.html" class="footer-link">Kebijakan Privasi</a>
+                        <span class="footer-separator" aria-hidden="true">&bull;</span>
+                        <a href="syarat.html" class="footer-link">Syarat dan Ketentuan</a>
+                    </div>
+                </div>
+            </section>
+        </main>
 
-    <dialog id="confirm-dialog" class="confirm-dialog" closedby="any" aria-labelledby="confirm-dialog-title">
-        <div class="confirm-dialog-content">
-            <p id="confirm-dialog-title" class="confirm-dialog-message">Hapus transaksi ini?</p>
-            <div class="confirm-dialog-actions">
-                <button type="button" id="btn-confirm-cancel" class="btn-secondary" autofocus>Batal</button>
-                <button type="button" id="btn-confirm-delete" class="btn-danger">Hapus</button>
+        <!-- 5. Tombol Melayang Tambah Transaksi -->
+        <button type="button" id="btn-fab-add" class="fab-btn" aria-label="Tambah Transaksi" title="Tambah Transaksi">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </button>
+
+        <!-- Form Layar Sendiri (Tambah / Edit Transaksi) -->
+        <div id="form-screen" class="form-screen hidden" role="dialog" aria-modal="true" aria-labelledby="form-title">
+            <div class="form-screen-container">
+                <div class="form-screen-header">
+                    <button type="button" id="btn-form-back" class="btn-icon btn-form-back" aria-label="Tutup form">&larr; Kembali</button>
+                    <h2 id="form-title">Tambah Transaksi</h2>
+                </div>
+                <div class="form-screen-card">
+                    <form id="tx-form">
+                        <input type="hidden" id="tx-id">
+                        
+                        <div class="form-group">
+                            <label>Tipe Transaksi</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="type" value="expense" checked>
+                                    Pengeluaran
+                                </label>
+                                <label>
+                                    <input type="radio" name="type" value="income">
+                                    Pemasukan
+                                </label>
+                                <label>
+                                    <input type="radio" name="type" value="transfer">
+                                    Transfer
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tx-date">Tanggal</label>
+                            <input type="date" id="tx-date" required>
+                        </div>
+
+                        <div class="form-group" id="form-group-time">
+                            <label for="tx-time" id="tx-time-label">Waktu</label>
+                            <div id="time-input-24" class="time-input-24">
+                                <input type="time" id="tx-time">
+                            </div>
+                            <div id="time-input-12" class="time-input-12 hidden">
+                                <select id="tx-time-hour" aria-label="Jam">
+                                    <option value="">Jam</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                </select>
+                                <span class="time-separator" aria-hidden="true">:</span>
+                                <select id="tx-time-minute" aria-label="Menit">
+                                    <option value="">Menit</option>
+                                    <option value="00">00</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                    <option value="14">14</option>
+                                    <option value="15">15</option>
+                                    <option value="16">16</option>
+                                    <option value="17">17</option>
+                                    <option value="18">18</option>
+                                    <option value="19">19</option>
+                                    <option value="20">20</option>
+                                    <option value="21">21</option>
+                                    <option value="22">22</option>
+                                    <option value="23">23</option>
+                                    <option value="24">24</option>
+                                    <option value="25">25</option>
+                                    <option value="26">26</option>
+                                    <option value="27">27</option>
+                                    <option value="28">28</option>
+                                    <option value="29">29</option>
+                                    <option value="30">30</option>
+                                    <option value="31">31</option>
+                                    <option value="32">32</option>
+                                    <option value="33">33</option>
+                                    <option value="34">34</option>
+                                    <option value="35">35</option>
+                                    <option value="36">36</option>
+                                    <option value="37">37</option>
+                                    <option value="38">38</option>
+                                    <option value="39">39</option>
+                                    <option value="40">40</option>
+                                    <option value="41">41</option>
+                                    <option value="42">42</option>
+                                    <option value="43">43</option>
+                                    <option value="44">44</option>
+                                    <option value="45">45</option>
+                                    <option value="46">46</option>
+                                    <option value="47">47</option>
+                                    <option value="48">48</option>
+                                    <option value="49">49</option>
+                                    <option value="50">50</option>
+                                    <option value="51">51</option>
+                                    <option value="52">52</option>
+                                    <option value="53">53</option>
+                                    <option value="54">54</option>
+                                    <option value="55">55</option>
+                                    <option value="56">56</option>
+                                    <option value="57">57</option>
+                                    <option value="58">58</option>
+                                    <option value="59">59</option>
+                                </select>
+                                <select id="tx-time-ampm" aria-label="AM atau PM">
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                </select>
+                            </div>
+                            <div id="tx-time-error" class="form-error-message hidden" role="alert">Waktu wajib diisi</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tx-amount">Jumlah (Rp)</label>
+                            <input type="text" inputmode="numeric" id="tx-amount" required autocomplete="off">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tx-wallet" id="tx-wallet-label">Dompet</label>
+                            <select id="tx-wallet" required>
+                                <option value="" disabled selected>Pilih dompet</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group hidden" id="form-group-to-wallet">
+                            <label for="tx-to-wallet">Ke Dompet</label>
+                            <select id="tx-to-wallet">
+                                <option value="" disabled selected>Pilih dompet tujuan</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="form-group-category">
+                            <label for="tx-category">Kategori</label>
+                            <select id="tx-category" required>
+                                <option value="" disabled selected>Pilih kategori</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tx-note">Catatan (opsional)</label>
+                            <input type="text" id="tx-note">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="btn-save" class="btn-primary">Simpan</button>
+                            <button type="button" id="btn-cancel" class="btn-secondary">Batal</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </dialog>
+
+        <!-- Dialog Konfirmasi Hapus -->
+        <dialog id="confirm-dialog" class="confirm-dialog" closedby="any" aria-labelledby="confirm-dialog-title">
+            <div class="confirm-dialog-content">
+                <p id="confirm-dialog-title" class="confirm-dialog-message">Hapus transaksi ini?</p>
+                <div class="confirm-dialog-actions">
+                    <button type="button" id="btn-confirm-cancel" class="btn-secondary" autofocus>Batal</button>
+                    <button type="button" id="btn-confirm-delete" class="btn-danger">Hapus</button>
+                </div>
+            </div>
+        </dialog>
+    </div>
+
+    <!-- Navigasi Bawah di Layar HP (4 tab) -->
+    <nav class="bottom-nav" role="tablist" aria-label="Navigasi Bawah HP">
+        <button type="button" class="nav-tab-btn is-active" data-tab="beranda" role="tab" aria-selected="true" aria-controls="page-beranda">
+            <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span class="nav-label">Beranda</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="riwayat" role="tab" aria-selected="false" aria-controls="page-riwayat">
+            <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            <span class="nav-label">Riwayat</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="statistik" role="tab" aria-selected="false" aria-controls="page-statistik">
+            <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <span class="nav-label">Statistik</span>
+        </button>
+        <button type="button" class="nav-tab-btn" data-tab="pengaturan" role="tab" aria-selected="false" aria-controls="page-pengaturan">
+            <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span class="nav-label">Pengaturan</span>
+        </button>
+    </nav>
 
     <script type="module" src="js/app.js"></script>
 </body>

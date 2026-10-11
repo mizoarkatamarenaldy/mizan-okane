@@ -22,17 +22,26 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 680px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 16px 16px calc(76px + env(safe-area-inset-bottom, 0px)) 16px;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 24px 20px 32px 20px;
+    }
 }
 
 h1, h2 {
     margin-bottom: 12px;
 }
 
-header {
-    margin-bottom: 24px;
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 .summary {
@@ -1440,5 +1449,298 @@ button:focus-visible {
 .btn-back-link:hover,
 .btn-back-link:focus-visible {
     text-decoration: underline;
+}
+
+/* Navigasi Desktop (PC) */
+.desktop-nav {
+    display: none;
+    gap: 8px;
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    .desktop-nav {
+        display: flex;
+    }
+}
+
+.desktop-nav .nav-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-light);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex: none;
+}
+
+.desktop-nav .nav-tab-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text);
+}
+
+.desktop-nav .nav-tab-btn.is-active {
+    background-color: var(--primary);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.desktop-nav .nav-tab-btn .nav-icon {
+    flex-shrink: 0;
+}
+
+/* Navigasi Bawah (Mobile / HP) */
+.bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 40;
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    align-items: stretch;
+    justify-content: space-around;
+}
+
+@media (min-width: 768px) {
+    .bottom-nav {
+        display: none;
+    }
+}
+
+.bottom-nav .nav-tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    padding: 6px 4px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: color 0.15s ease;
+    min-height: 48px;
+}
+
+.bottom-nav .nav-tab-btn:hover {
+    color: var(--text);
+}
+
+.bottom-nav .nav-tab-btn.is-active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.bottom-nav .nav-tab-btn .nav-icon {
+    flex-shrink: 0;
+}
+
+.bottom-nav .nav-label {
+    font-size: 11px;
+    line-height: 1.1;
+}
+
+/* Floating Action Button (+) */
+.fab-btn {
+    position: fixed;
+    right: 20px;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 12px);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(76, 175, 80, 0.45);
+    z-index: 50;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    padding: 0;
+    flex: none;
+}
+
+@media (min-width: 768px) {
+    .fab-btn {
+        right: 32px;
+        bottom: 32px;
+    }
+}
+
+.fab-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 6px 18px rgba(76, 175, 80, 0.55);
+}
+
+.fab-btn:active {
+    transform: scale(0.95);
+}
+
+.fab-btn:focus-visible {
+    outline: 3px solid var(--text);
+    outline-offset: 3px;
+}
+
+/* Layar Sendiri Formulir Transaksi */
+.form-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background-color: var(--bg);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.form-screen-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px 16px 40px 16px;
+}
+
+.form-screen-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.form-screen-header h2 {
+    margin-bottom: 0;
+    font-size: 20px;
+}
+
+.btn-form-back {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 500;
+    flex: none;
+}
+
+.btn-form-back:hover {
+    background-color: #f0f0f0;
+}
+
+.form-screen-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Status Sinkron Singkat di Beranda */
+.sync-banner-compact {
+    background: var(--card-bg);
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+}
+
+.sync-banner-compact .sync-status {
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* 5 Transaksi Terakhir di Beranda */
+.recent-tx-section {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 24px;
+}
+
+.recent-tx-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.recent-tx-header h2 {
+    margin-bottom: 0;
+    font-size: 18px;
+}
+
+.btn-link-action {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 4px;
+    flex: none;
+}
+
+.btn-link-action:hover {
+    text-decoration: underline;
+}
+
+/* Bagian Data dan Akun di Pengaturan */
+.data-account-section {
+    margin-top: 24px;
+}
+
+.data-account-card {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.data-account-card .sync-status {
+    font-size: 13px;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background: var(--bg);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.data-account-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.data-account-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+}
+
+/* Modal Open Body Class */
+body.modal-open {
+    overflow: hidden;
 }
 

@@ -27,6 +27,13 @@ const txNoteInput = document.getElementById('tx-note');
 const btnCancel = document.getElementById('btn-cancel');
 
 const txListContainer = document.getElementById('tx-list');
+const recentTxListContainer = document.getElementById('recent-tx-list');
+const btnSeeAllTx = document.getElementById('btn-see-all-tx');
+const formScreen = document.getElementById('form-screen');
+const btnFabAdd = document.getElementById('btn-fab-add');
+const btnFormBack = document.getElementById('btn-form-back');
+const settingsSyncStatusEl = document.getElementById('settings-sync-status');
+
 const filterWalletSelect = document.getElementById('filter-wallet');
 const totalBalanceEl = document.getElementById('total-balance');
 const totalIncomeEl = document.getElementById('total-income');
@@ -120,6 +127,51 @@ let currentCategories = {
     expense: [...DEFAULT_CATEGORIES.expense],
     updatedAt: 0
 };
+
+const VALID_TABS = ['beranda', 'riwayat', 'statistik', 'pengaturan'];
+
+function getTabFromHash() {
+    const raw = window.location.hash.replace('#', '').trim();
+    return VALID_TABS.includes(raw) ? raw : 'beranda';
+}
+
+function switchTab(tabId) {
+    if (!VALID_TABS.includes(tabId)) {
+        tabId = 'beranda';
+    }
+
+    // Tampilkan panel halaman yang sesuai, sembunyikan yang lain
+    document.querySelectorAll('.page-view').forEach(view => {
+        const isTarget = view.id === `page-${tabId}`;
+        view.classList.toggle('hidden', !isTarget);
+    });
+
+    // Perbarui status aktif tombol tab pada desktop nav dan mobile nav
+    document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        const isTarget = btn.dataset.tab === tabId;
+        btn.classList.toggle('is-active', isTarget);
+        btn.setAttribute('aria-selected', String(isTarget));
+    });
+
+    window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function openFormScreen() {
+    if (!formScreen) return;
+    formScreen.classList.remove('hidden');
+    if (btnFabAdd) btnFabAdd.classList.add('hidden');
+    document.body.classList.add('modal-open');
+    if (txAmountInput) {
+        setTimeout(() => txAmountInput.focus(), 50);
+    }
+}
+
+function closeFormScreen() {
+    if (!formScreen) return;
+    formScreen.classList.add('hidden');
+    if (btnFabAdd) btnFabAdd.classList.remove('hidden');
+    document.body.classList.remove('modal-open');
+}
 
 function escapeHTML(str) {
     if (!str) return '';
@@ -1227,9 +1279,52 @@ function renderDonutChart(transactions) {
     });
 }
 
-function render() {
-    txListContainer.innerHTML = '';
+function createTxItemElement(tx, filterWallet) {
+    const txEl = document.createElement('div');
+    txEl.className = 'tx-item';
     
+    let sign = '';
+    let amountClass = '';
+    let categoryText = escapeHTML(tx.category || '');
+    let walletBadgeText = '';
+
+    if (tx.type === 'transfer') {
+        const fromName = getWalletName(tx.walletId);
+        const toName = getWalletName(tx.toWalletId);
+        categoryText = 'Transfer';
+        walletBadgeText = `${escapeHTML(fromName)} &rarr; ${escapeHTML(toName)}`;
+        amountClass = 'transfer';
+        if (filterWallet === 'all') {
+            sign = '';
+        } else if (filterWallet === (tx.walletId || DEFAULT_WALLET_ID)) {
+            sign = '- ';
+        } else if (filterWallet === tx.toWalletId) {
+            sign = '+ ';
+        }
+    } else {
+        sign = tx.type === 'income' ? '+ ' : '- ';
+        amountClass = tx.type === 'income' ? 'income' : 'expense';
+        walletBadgeText = escapeHTML(getWalletName(tx.walletId));
+    }
+
+    txEl.innerHTML = `
+        <div class="tx-info">
+            <div class="tx-header">
+                <span class="tx-category">${categoryText} <span class="tx-wallet-badge">${walletBadgeText}</span></span>
+                <span class="tx-date">${formatDateTime(tx)}</span>
+            </div>
+            ${tx.note ? `<div class="tx-note">${escapeHTML(tx.note)}</div>` : ''}
+            <div class="tx-amount ${amountClass}">${sign}${currencyFormatter.format(tx.amount)}</div>
+        </div>
+        <div class="tx-actions">
+            <button type="button" class="btn-icon btn-edit" data-id="${tx.id}">Edit</button>
+            <button type="button" class="btn-icon btn-delete" data-id="${tx.id}">Hapus</button>
+        </div>
+    `;
+    return txEl;
+}
+
+function render() {
     let totalIncome = 0;
     let totalExpense = 0;
 
@@ -1284,63 +1379,39 @@ function render() {
         return (tx.walletId || DEFAULT_WALLET_ID) === currentWalletFilter;
     });
 
-    if (filteredTx.length === 0) {
-        txListContainer.innerHTML = '<p class="tx-empty">Belum ada transaksi.</p>';
-    } else {
-        filteredTx.forEach(tx => {
-            const txEl = document.createElement('div');
-            txEl.className = 'tx-item';
-            
-            let sign = '';
-            let amountClass = '';
-            let categoryText = escapeHTML(tx.category || '');
-            let walletBadgeText = '';
+    if (txListContainer) {
+        txListContainer.innerHTML = '';
+        if (filteredTx.length === 0) {
+            txListContainer.innerHTML = '<p class="tx-empty">Belum ada transaksi.</p>';
+        } else {
+            filteredTx.forEach(tx => {
+                txListContainer.appendChild(createTxItemElement(tx, currentWalletFilter));
+            });
+        }
+    }
 
-            if (tx.type === 'transfer') {
-                const fromName = getWalletName(tx.walletId);
-                const toName = getWalletName(tx.toWalletId);
-                categoryText = 'Transfer';
-                walletBadgeText = `${escapeHTML(fromName)} &rarr; ${escapeHTML(toName)}`;
-                amountClass = 'transfer';
-                if (currentWalletFilter === 'all') {
-                    sign = '';
-                } else if (currentWalletFilter === (tx.walletId || DEFAULT_WALLET_ID)) {
-                    sign = '- ';
-                } else if (currentWalletFilter === tx.toWalletId) {
-                    sign = '+ ';
-                }
-            } else {
-                sign = tx.type === 'income' ? '+ ' : '- ';
-                amountClass = tx.type === 'income' ? 'income' : 'expense';
-                walletBadgeText = escapeHTML(getWalletName(tx.walletId));
-            }
-
-            txEl.innerHTML = `
-                <div class="tx-info">
-                    <div class="tx-header">
-                        <span class="tx-category">${categoryText} <span class="tx-wallet-badge">${walletBadgeText}</span></span>
-                        <span class="tx-date">${formatDateTime(tx)}</span>
-                    </div>
-                    ${tx.note ? `<div class="tx-note">${escapeHTML(tx.note)}</div>` : ''}
-                    <div class="tx-amount ${amountClass}">${sign}${currencyFormatter.format(tx.amount)}</div>
-                </div>
-                <div class="tx-actions">
-                    <button class="btn-icon btn-edit" data-id="${tx.id}">Edit</button>
-                    <button class="btn-icon btn-delete" data-id="${tx.id}">Hapus</button>
-                </div>
-            `;
-            
-            txListContainer.appendChild(txEl);
-        });
+    if (recentTxListContainer) {
+        recentTxListContainer.innerHTML = '';
+        const recentTx = currentTransactions.slice(0, 5);
+        if (recentTx.length === 0) {
+            recentTxListContainer.innerHTML = '<p class="tx-empty">Belum ada transaksi.</p>';
+        } else {
+            recentTx.forEach(tx => {
+                recentTxListContainer.appendChild(createTxItemElement(tx, 'all'));
+            });
+        }
     }
 
     renderMonthlyChart(currentTransactions);
     renderBudgetSection();
     renderDonutChart(currentTransactions);
 
-    // Attach event listeners to generated buttons
+    // Pasang event listener tombol edit dan hapus pada kedua daftar transaksi
     document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', (e) => handleEdit(e.target.dataset.id));
+        btn.addEventListener('click', (e) => {
+            handleEdit(e.target.dataset.id);
+            openFormScreen();
+        });
     });
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', (e) => handleDelete(e.target.dataset.id));
@@ -2158,7 +2229,7 @@ function resetForm() {
     hideTimeError();
     
     formTitle.textContent = 'Tambah Transaksi';
-    btnCancel.classList.add('hidden');
+    btnCancel.classList.remove('hidden');
     // Default to expense
     txTypeInputs[0].checked = true;
     updateTypeUI('expense');
@@ -2254,6 +2325,7 @@ async function handleSubmit(e) {
     try {
         await saveTransaction(tx);
         resetForm();
+        closeFormScreen();
         await loadData();
         markDirty().catch(err => console.error("Gagal menandai perubahan untuk sinkron", err));
     } catch (error) {
@@ -2298,7 +2370,7 @@ function handleEdit(id) {
     }
 
     btnCancel.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    openFormScreen();
 }
 
 function handleDelete(id) {
@@ -2339,7 +2411,10 @@ async function performDelete(id) {
 
 // Event Listeners
 txForm.addEventListener('submit', handleSubmit);
-btnCancel.addEventListener('click', resetForm);
+btnCancel.addEventListener('click', () => {
+    resetForm();
+    closeFormScreen();
+});
 attachAmountInputFormatting(txAmountInput);
 attachAmountInputFormatting(inputBudgetAmount);
 
@@ -2451,8 +2526,18 @@ function renderSyncState(s) {
     const [tone, text] = views[s.status] || views['signed-out'];
 
     // Pesan gagal login saat belum terhubung tetap ditampilkan.
-    syncStatusEl.textContent = s.status === 'signed-out' && s.message ? `${s.message} ${text}` : text;
-    syncStatusEl.dataset.tone = s.status === 'signed-out' && s.message ? 'error' : tone;
+    const finalSyncText = s.status === 'signed-out' && s.message ? `${s.message} ${text}` : text;
+    const finalSyncTone = s.status === 'signed-out' && s.message ? 'error' : tone;
+
+    if (syncStatusEl) {
+        syncStatusEl.textContent = finalSyncText;
+        syncStatusEl.dataset.tone = finalSyncTone;
+    }
+
+    if (settingsSyncStatusEl) {
+        settingsSyncStatusEl.textContent = finalSyncText;
+        settingsSyncStatusEl.dataset.tone = finalSyncTone;
+    }
 
     btnLogin.classList.toggle('hidden', linked);
     btnLogin.disabled = busy;
@@ -2862,11 +2947,56 @@ async function init() {
         selectedDonutMonth = getLocalYearMonthString();
         resetForm(); // Set default date, kategori, dan dompet
         await loadData();
+        switchTab(getTabFromHash());
     } catch (error) {
         console.error("Gagal inisialisasi database", error);
         alert("Browser Anda tidak mendukung penyimpanan lokal atau terjadi kesalahan.");
         return;
     }
+
+    if (btnFabAdd) {
+        btnFabAdd.addEventListener('click', () => {
+            resetForm();
+            openFormScreen();
+        });
+    }
+
+    if (btnFormBack) {
+        btnFormBack.addEventListener('click', () => {
+            resetForm();
+            closeFormScreen();
+        });
+    }
+
+    if (btnSeeAllTx) {
+        btnSeeAllTx.addEventListener('click', () => {
+            window.location.hash = 'riwayat';
+            switchTab('riwayat');
+        });
+    }
+
+    document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            if (tab) {
+                window.location.hash = tab;
+                switchTab(tab);
+            }
+        });
+    });
+
+    window.addEventListener('hashchange', () => {
+        switchTab(getTabFromHash());
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && formScreen && !formScreen.classList.contains('hidden')) {
+            if (!confirmDialog || !confirmDialog.open) {
+                resetForm();
+                closeFormScreen();
+            }
+        }
+    });
 
     if (formAddWallet && inputAddWallet) {
         formAddWallet.addEventListener('submit', (e) => {

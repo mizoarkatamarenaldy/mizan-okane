@@ -84,6 +84,6 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Impor JSON (pulihkan data dari file ekspor, gabung dengan aturan updatedAt terbaru menang, transaksi lama tanpa walletId tetap aman)
   - [x] Halaman kebijakan privasi (satu halaman statis di GitHub Pages, ditautkan dari aplikasi)
   - [x] Halaman syarat dan ketentuan (satu halaman statis di GitHub Pages, ditautkan dari aplikasi di samping tautan kebijakan privasi)
-  - [ ] Perbaikan UI/UX multi halaman (dikerjakan paling akhir, butuh peta halaman dulu)
+  - [x] Perbaikan UI/UX multi halaman (dikerjakan paling akhir, butuh peta halaman dulu)
   - [ ] Persiapan rilis publik (README berisi cara pakai, cara install, catatan peringatan "belum diverifikasi Google", dan cara hapus data; pastikan tidak ada keystore, token, atau data asli di repo)
   - [ ] Bungkus jadi APK dan rilis lewat GitHub Releases (dikerjakan setelah UI/UX selesai, tes login Google di HP asli, keystore disimpan di luar repo)

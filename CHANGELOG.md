@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Perbaikan UI/UX multi halaman
+- Ditambah: Struktur antarmuka multi halaman dengan 4 tab utama (Beranda, Riwayat, Statistik, Pengaturan) yang responsif: bilah navigasi bawah (bottom navigation bar) tetap di layar ponsel (HP) dan bilah navigasi atas (top bar) pada layar komputer (PC) (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Halaman Beranda memuat total saldo, pemasukan, pengeluaran, saldo per dompet, ringkasan budget per kategori, 5 transaksi terakhir dengan tombol pintas "Lihat Semua", dan satu baris status sinkronisasi ringkas (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Halaman Riwayat memuat filter dompet dan daftar transaksi lengkap yang tetap mendukung pengeditan dan penghapusan transaksi (`index.html`, `js/app.js`).
+- Ditambah: Halaman Statistik memuat grafik pengeluaran/pemasukan bulanan dan diagram donut per kategori (`index.html`, `css/style.css`).
+- Ditambah: Halaman Pengaturan memuat pengaturan dompet, pengaturan kategori & budget, pengaturan format jam (24 jam / 12 jam), serta bagian terpadu "Data dan Akun" berisi tombol Login Google, Sinkron, Logout, Ekspor JSON, Impor JSON, Ekspor CSV, Install Aplikasi, dan tautan ke Kebijakan Privasi serta Syarat dan Ketentuan (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Tombol mengambang (Floating Action Button / FAB) '+' untuk membuka formulir transaksi di layar sendiri, yang dipakai bersama untuk tambah dan edit transaksi tanpa mengubah validasi waktu wajib dan format ribuan (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Header lama yang padat tombol digantikan oleh header aplikasi bersih dan navigasi modern (`index.html`, `css/style.css`).
+- Diubah: `sw.js` naik ke versi `mizan-v23` untuk memperbarui cache aset PWA secara offline (`sw.js`).
+- Diubah: `PLAN.md` mencentang item "Perbaikan UI/UX multi halaman" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Halaman syarat dan ketentuan
 - Ditambah: Halaman statis syarat dan ketentuan berbahasa Indonesia (`syarat.html`) dengan tampilan responsif untuk HP dan PC yang memuat ketentuan aplikasi pencatat keuangan pribadi gratis tanpa jaminan (as is), penegasan bukan layanan/nasihat keuangan dan tanggung jawab pengguna, penjelasan penyimpanan data lokal IndexedDB dan Google Drive appDataFolder tanpa server pihak ketiga, tanggung jawab pencadangan data mandiri via ekspor, login Google opsional, larangan penggunaan melanggar hukum, hak pembaruan syarat, tautan ke kebijakan privasi, kontak via GitHub Issues tanpa nama/email asli, dan tanggal pembaruan.
 - Ditambah: Tautan ke halaman syarat dan ketentuan pada bagian footer aplikasi bersebelahan dengan tautan kebijakan privasi (`index.html`).
