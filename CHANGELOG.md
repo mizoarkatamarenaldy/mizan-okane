@@ -10,6 +10,19 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Transfer antar dompet
+- Ditambah: Opsi tipe transaksi "Transfer" pada formulir transaksi untuk memindahkan uang dari satu dompet ke dompet lain (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Dropdown pilihan dompet tujuan ("Ke Dompet") yang otomatis aktif saat tipe transfer dipilih serta penyesuaian label dompet asal menjadi "Dari Dompet" (`index.html`, `js/app.js`).
+- Ditambah: Validasi transfer membutuhkan minimal dua dompet aktif dan dompet tujuan tidak boleh sama dengan dompet asal (`js/app.js`).
+- Ditambah: Perhitungan saldo per dompet yang berkurang pada dompet asal dan bertambah pada dompet tujuan tanpa mengubah total saldo, total pemasukan, dan total pengeluaran (`js/app.js`).
+- Ditambah: Tampilan riwayat transaksi transfer dengan badge alur perpindahan dompet (`Dompet Asal → Dompet Tujuan`), warna jumlah transfer netral, dan tanda alur keluar/masuk saat memfilter dompet tertentu (`js/app.js`, `css/style.css`).
+- Ditambah: Filter dompet pada riwayat transaksi yang menampilkan transfer jika dompet yang difilter terlibat baik sebagai dompet asal maupun tujuan (`js/app.js`).
+- Ditambah: Dukungan soft delete pada transfer dengan konfirmasi dialog web (`<dialog>`) serta pembaruan otomatis saldo kedua dompet dan sinkronisasi ke Google Drive (`js/app.js`).
+- Diubah: Perlindungan hapus dompet yang mencakup pemeriksaan transaksi transfer aktif baik sebagai dompet asal maupun dompet tujuan (`js/app.js`).
+- Diubah: Format ekspor CSV untuk transfer menampilkan alur dompet `Dompet Asal -> Dompet Tujuan` pada kolom `dompet` dan kategori `Transfer` (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v12` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur "Transfer antar dompet" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Beberapa dompet
 - Ditambah: Model data dompet dengan dompet default "Dompet Utama" serta fungsi `getWallets` dan `saveWallets` pada store `meta` IndexedDB (`js/db.js`).
 - Ditambah: Bagian antarmuka pengaturan dompet di halaman web dengan daftar dompet aktif, formulir penambahan dompet, ubah nama dompet secara inline, dan tombol hapus dompet dengan proteksi transaksi aktif dan konfirmasi dialog web (`index.html`, `js/app.js`, `css/style.css`).

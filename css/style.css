@@ -205,6 +205,10 @@ button {
     color: var(--danger);
 }
 
+.tx-amount.transfer {
+    color: #1976d2;
+}
+
 .tx-actions {
     display: flex;
     flex-direction: column;

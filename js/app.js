@@ -9,7 +9,11 @@ const txTypeInputs = document.getElementsByName('type');
 const txDateInput = document.getElementById('tx-date');
 const txTimeInput = document.getElementById('tx-time');
 const txAmountInput = document.getElementById('tx-amount');
+const txWalletLabel = document.getElementById('tx-wallet-label');
 const txWalletInput = document.getElementById('tx-wallet');
+const formGroupToWallet = document.getElementById('form-group-to-wallet');
+const txToWalletInput = document.getElementById('tx-to-wallet');
+const formGroupCategory = document.getElementById('form-group-category');
 const txCategoryInput = document.getElementById('tx-category');
 const txNoteInput = document.getElementById('tx-note');
 const btnCancel = document.getElementById('btn-cancel');
@@ -119,6 +123,34 @@ function populateCategoryOptions(selectedVal = null, oldCustomCategory = null) {
     }
 }
 
+function updateTypeUI(type) {
+    const isTransfer = type === 'transfer';
+    if (txWalletLabel) {
+        txWalletLabel.textContent = isTransfer ? 'Dari Dompet' : 'Dompet';
+    }
+    if (formGroupToWallet) {
+        formGroupToWallet.classList.toggle('hidden', !isTransfer);
+    }
+    if (txToWalletInput) {
+        txToWalletInput.required = isTransfer;
+    }
+    if (formGroupCategory) {
+        formGroupCategory.classList.toggle('hidden', isTransfer);
+    }
+    if (txCategoryInput) {
+        txCategoryInput.required = !isTransfer;
+    }
+
+    if (isTransfer) {
+        populateWalletOptions(txWalletInput ? txWalletInput.value : null, txToWalletInput ? txToWalletInput.value : null);
+    } else {
+        const currentVal = txCategoryInput ? txCategoryInput.value : '';
+        const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
+        const keepVal = list.includes(currentVal) ? currentVal : null;
+        populateCategoryOptions(keepVal);
+    }
+}
+
 function getActiveWallets() {
     return (currentWallets || []).filter(w => !w.deleted);
 }
@@ -131,10 +163,10 @@ function getWalletName(walletId) {
     return DEFAULT_WALLET_NAME;
 }
 
-function populateWalletOptions(selectedVal = null) {
+function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
     if (!txWalletInput) return;
     const active = getActiveWallets();
-    let targetId = selectedVal;
+    let targetId = selectedFromVal;
     if (!targetId || !active.some(w => w.id === targetId)) {
         const lastUsed = localStorage.getItem(LAST_WALLET_KEY);
         if (lastUsed && active.some(w => w.id === lastUsed)) {
@@ -150,9 +182,9 @@ function populateWalletOptions(selectedVal = null) {
 
     let html = '';
     // Jika dompet yang dipilih sebelumnya sudah di-soft-delete (misal saat edit transaksi lama)
-    if (selectedVal && !active.some(w => w.id === selectedVal)) {
-        const oldWalletName = getWalletName(selectedVal);
-        html += `<option value="${escapeHTML(selectedVal)}" selected>${escapeHTML(oldWalletName)} (Dihapus)</option>`;
+    if (selectedFromVal && !active.some(w => w.id === selectedFromVal)) {
+        const oldWalletName = getWalletName(selectedFromVal);
+        html += `<option value="${escapeHTML(selectedFromVal)}" selected>${escapeHTML(oldWalletName)} (Dihapus)</option>`;
     }
 
     for (const w of active) {
@@ -163,6 +195,34 @@ function populateWalletOptions(selectedVal = null) {
     txWalletInput.innerHTML = html;
     if (targetId) {
         txWalletInput.value = targetId;
+    }
+
+    if (txToWalletInput) {
+        let targetToId = selectedToVal;
+        if (!targetToId || !active.some(w => w.id === targetToId) || targetToId === targetId) {
+            const other = active.find(w => w.id !== targetId);
+            if (other) {
+                targetToId = other.id;
+            } else {
+                targetToId = '';
+            }
+        }
+
+        let toHtml = `<option value="" disabled ${!targetToId ? 'selected' : ''}>Pilih dompet tujuan</option>`;
+        if (selectedToVal && !active.some(w => w.id === selectedToVal)) {
+            const oldWalletName = getWalletName(selectedToVal);
+            toHtml += `<option value="${escapeHTML(selectedToVal)}" selected>${escapeHTML(oldWalletName)} (Dihapus)</option>`;
+        }
+
+        for (const w of active) {
+            const isSelected = targetToId === w.id;
+            toHtml += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)}</option>`;
+        }
+
+        txToWalletInput.innerHTML = toHtml;
+        if (targetToId) {
+            txToWalletInput.value = targetToId;
+        }
     }
 }
 
@@ -223,8 +283,12 @@ async function loadData() {
         renderCategorySettings();
         renderBudgetSettings();
         renderWalletSettings();
-        populateCategoryOptions(txCategoryInput.value);
-        populateWalletOptions(txWalletInput ? txWalletInput.value : null);
+        if (getActiveWallets().length < 2 && getSelectedType() === 'transfer') {
+            txTypeInputs[0].checked = true;
+            updateTypeUI('expense');
+        } else {
+            updateTypeUI(getSelectedType());
+        }
         populateWalletFilterOptions();
 
         const allTx = await getAllTransactions();
@@ -514,9 +578,16 @@ function render() {
         if (tx.type === 'income') {
             totalIncome += tx.amount;
             walletBalances.set(wId, (walletBalances.get(wId) || 0) + tx.amount);
-        } else {
+        } else if (tx.type === 'expense') {
             totalExpense += tx.amount;
             walletBalances.set(wId, (walletBalances.get(wId) || 0) - tx.amount);
+        } else if (tx.type === 'transfer') {
+            const fromId = tx.walletId || DEFAULT_WALLET_ID;
+            const toId = tx.toWalletId;
+            walletBalances.set(fromId, (walletBalances.get(fromId) || 0) - tx.amount);
+            if (toId) {
+                walletBalances.set(toId, (walletBalances.get(toId) || 0) + tx.amount);
+            }
         }
     });
 
@@ -541,6 +612,9 @@ function render() {
 
     const filteredTx = currentTransactions.filter(tx => {
         if (currentWalletFilter === 'all') return true;
+        if (tx.type === 'transfer') {
+            return (tx.walletId || DEFAULT_WALLET_ID) === currentWalletFilter || tx.toWalletId === currentWalletFilter;
+        }
         return (tx.walletId || DEFAULT_WALLET_ID) === currentWalletFilter;
     });
 
@@ -551,18 +625,38 @@ function render() {
             const txEl = document.createElement('div');
             txEl.className = 'tx-item';
             
-            const sign = tx.type === 'income' ? '+' : '-';
-            const amountClass = tx.type === 'income' ? 'income' : 'expense';
-            const walletName = getWalletName(tx.walletId);
+            let sign = '';
+            let amountClass = '';
+            let categoryText = escapeHTML(tx.category || '');
+            let walletBadgeText = '';
+
+            if (tx.type === 'transfer') {
+                const fromName = getWalletName(tx.walletId);
+                const toName = getWalletName(tx.toWalletId);
+                categoryText = 'Transfer';
+                walletBadgeText = `${escapeHTML(fromName)} &rarr; ${escapeHTML(toName)}`;
+                amountClass = 'transfer';
+                if (currentWalletFilter === 'all') {
+                    sign = '';
+                } else if (currentWalletFilter === (tx.walletId || DEFAULT_WALLET_ID)) {
+                    sign = '- ';
+                } else if (currentWalletFilter === tx.toWalletId) {
+                    sign = '+ ';
+                }
+            } else {
+                sign = tx.type === 'income' ? '+ ' : '- ';
+                amountClass = tx.type === 'income' ? 'income' : 'expense';
+                walletBadgeText = escapeHTML(getWalletName(tx.walletId));
+            }
 
             txEl.innerHTML = `
                 <div class="tx-info">
                     <div class="tx-header">
-                        <span class="tx-category">${escapeHTML(tx.category)} <span class="tx-wallet-badge">${escapeHTML(walletName)}</span></span>
+                        <span class="tx-category">${categoryText} <span class="tx-wallet-badge">${walletBadgeText}</span></span>
                         <span class="tx-date">${formatDateTime(tx)}</span>
                     </div>
                     ${tx.note ? `<div class="tx-note">${escapeHTML(tx.note)}</div>` : ''}
-                    <div class="tx-amount ${amountClass}">${sign} ${currencyFormatter.format(tx.amount)}</div>
+                    <div class="tx-amount ${amountClass}">${sign}${currencyFormatter.format(tx.amount)}</div>
                 </div>
                 <div class="tx-actions">
                     <button class="btn-icon btn-edit" data-id="${tx.id}">Edit</button>
@@ -947,7 +1041,10 @@ function handleDeleteWalletPrompt(walletId) {
     if (!wallet) return;
 
     // Dompet yang masih punya transaksi aktif tidak bisa dihapus.
-    const hasActiveTransactions = currentTransactions.some(tx => !tx.deleted && (tx.walletId || DEFAULT_WALLET_ID) === walletId);
+    const hasActiveTransactions = currentTransactions.some(tx => !tx.deleted && (
+        (tx.walletId || DEFAULT_WALLET_ID) === walletId ||
+        (tx.type === 'transfer' && tx.toWalletId === walletId)
+    ));
     if (hasActiveTransactions) {
         alert(`Dompet "${wallet.name}" tidak bisa dihapus karena masih memiliki transaksi aktif.`);
         return;
@@ -990,7 +1087,12 @@ async function performDeleteWallet(walletId) {
             }
             render();
             renderWalletSettings();
-            populateWalletOptions();
+            if (getActiveWallets().length < 2 && getSelectedType() === 'transfer') {
+                txTypeInputs[0].checked = true;
+                updateTypeUI('expense');
+            } else {
+                updateTypeUI(getSelectedType());
+            }
             populateWalletFilterOptions();
             markDirty().catch(err => console.error("Gagal menandai penghapusan dompet untuk sinkron", err));
         } catch (error) {
@@ -1390,7 +1492,7 @@ function resetForm() {
     btnCancel.classList.add('hidden');
     // Default to expense
     txTypeInputs[0].checked = true;
-    populateCategoryOptions();
+    updateTypeUI('expense');
     populateWalletOptions();
 }
 
@@ -1417,6 +1519,32 @@ async function handleSubmit(e) {
     const selectedWalletId = (txWalletInput && txWalletInput.value) ? txWalletInput.value : DEFAULT_WALLET_ID;
     localStorage.setItem(LAST_WALLET_KEY, selectedWalletId);
 
+    let selectedToWalletId = null;
+    let selectedCategory = '';
+
+    if (selectedType === 'transfer') {
+        selectedToWalletId = txToWalletInput ? txToWalletInput.value : '';
+        if (!selectedWalletId) {
+            alert('Pilih dompet asal.');
+            return;
+        }
+        if (!selectedToWalletId) {
+            alert('Pilih dompet tujuan.');
+            return;
+        }
+        if (selectedWalletId === selectedToWalletId) {
+            alert('Dompet tujuan harus berbeda dari dompet asal.');
+            return;
+        }
+        selectedCategory = 'Transfer';
+    } else {
+        selectedCategory = txCategoryInput ? txCategoryInput.value.trim() : '';
+        if (!selectedCategory) {
+            alert('Pilih kategori.');
+            return;
+        }
+    }
+
     const now = Date.now();
     const id = txIdInput.value || crypto.randomUUID();
     
@@ -1434,13 +1562,17 @@ async function handleSubmit(e) {
         type: selectedType,
         amount,
         walletId: selectedWalletId,
-        category: txCategoryInput.value.trim(),
+        category: selectedCategory,
         date: txDateInput.value,
         note: txNoteInput.value.trim(),
         createdAt,
         updatedAt: now,
         deleted: false
     };
+
+    if (selectedType === 'transfer') {
+        tx.toWalletId = selectedToWalletId;
+    }
 
     const timeValue = txTimeInput.value.trim();
     if (timeValue) {
@@ -1471,32 +1603,40 @@ function handleEdit(id) {
     txAmountInput.value = tx.amount;
     txNoteInput.value = tx.note || '';
 
-    // Pilihan dompet: gunakan walletId transaksi atau fallback DEFAULT_WALLET_ID
-    populateWalletOptions(tx.walletId || DEFAULT_WALLET_ID);
+    updateTypeUI(tx.type);
 
-    // Pilihan kategori mengikuti tipe yang dipilih
-    const list = (currentCategories && currentCategories[tx.type]) ? currentCategories[tx.type] : [];
-    if (list.includes(tx.category)) {
-        populateCategoryOptions(tx.category);
+    if (tx.type === 'transfer') {
+        populateWalletOptions(tx.walletId || DEFAULT_WALLET_ID, tx.toWalletId || null);
+        formTitle.textContent = 'Edit Transfer';
     } else {
-        // Transaksi lama dengan kategori yang tidak ada di daftar tipenya
-        // Minta pengguna memilih kategori dari daftar yang sesuai
-        populateCategoryOptions(null, tx.category);
+        // Pilihan dompet: gunakan walletId transaksi atau fallback DEFAULT_WALLET_ID
+        populateWalletOptions(tx.walletId || DEFAULT_WALLET_ID);
+
+        // Pilihan kategori mengikuti tipe yang dipilih
+        const list = (currentCategories && currentCategories[tx.type]) ? currentCategories[tx.type] : [];
+        if (list.includes(tx.category)) {
+            populateCategoryOptions(tx.category);
+        } else {
+            // Transaksi lama dengan kategori yang tidak ada di daftar tipenya
+            // Minta pengguna memilih kategori dari daftar yang sesuai
+            populateCategoryOptions(null, tx.category);
+        }
+        formTitle.textContent = 'Edit Transaksi';
     }
 
-    formTitle.textContent = 'Edit Transaksi';
     btnCancel.classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function handleDelete(id) {
     if (!id) return;
+    const tx = currentTransactions.find(t => t.id === id);
     pendingDeleteId = id;
     pendingCategoryDelete = null;
     pendingBudgetDelete = null;
     pendingWalletDelete = null;
     if (confirmDialogTitle) {
-        confirmDialogTitle.textContent = 'Hapus transaksi ini?';
+        confirmDialogTitle.textContent = (tx && tx.type === 'transfer') ? 'Hapus transfer ini?' : 'Hapus transaksi ini?';
     }
     if (confirmDialog && typeof confirmDialog.showModal === 'function') {
         confirmDialog.showModal();
@@ -1530,12 +1670,15 @@ btnCancel.addEventListener('click', resetForm);
 
 txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {
-        // Ganti tipe, pilihan kategori ikut berganti
-        const currentVal = txCategoryInput.value;
-        const newType = radio.value;
-        const list = (currentCategories && currentCategories[newType]) ? currentCategories[newType] : [];
-        const keepVal = list.includes(currentVal) ? currentVal : null;
-        populateCategoryOptions(keepVal);
+        if (radio.value === 'transfer') {
+            if (getActiveWallets().length < 2) {
+                alert('Transfer membutuhkan minimal 2 dompet. Silakan tambah dompet baru terlebih dahulu di Pengaturan Dompet.');
+                txTypeInputs[0].checked = true;
+                updateTypeUI('expense');
+                return;
+            }
+        }
+        updateTypeUI(radio.value);
     });
 });
 
@@ -1733,13 +1876,18 @@ btnExportCsv.addEventListener('click', async () => {
         const rows = [headers.join(',')];
 
         for (const tx of activeTx) {
-            const walletName = getWalletName(tx.walletId);
+            let walletName;
+            if (tx.type === 'transfer') {
+                walletName = `${getWalletName(tx.walletId)} -> ${getWalletName(tx.toWalletId)}`;
+            } else {
+                walletName = getWalletName(tx.walletId);
+            }
             const row = [
                 escapeCSVField(tx.date),
                 escapeCSVField(tx.time || ''),
                 escapeCSVField(walletName),
                 escapeCSVField(tx.type),
-                escapeCSVField(tx.category),
+                escapeCSVField(tx.category || (tx.type === 'transfer' ? 'Transfer' : '')),
                 escapeCSVField(tx.amount),
                 escapeCSVField(tx.note || '')
             ];
@@ -1790,6 +1938,34 @@ async function init() {
         filterWalletSelect.addEventListener('change', () => {
             currentWalletFilter = filterWalletSelect.value;
             render();
+        });
+    }
+
+    if (txWalletInput) {
+        txWalletInput.addEventListener('change', () => {
+            if (getSelectedType() === 'transfer' && txToWalletInput) {
+                if (txToWalletInput.value === txWalletInput.value) {
+                    const active = getActiveWallets();
+                    const other = active.find(w => w.id !== txWalletInput.value);
+                    if (other) {
+                        txToWalletInput.value = other.id;
+                    }
+                }
+            }
+        });
+    }
+
+    if (txToWalletInput) {
+        txToWalletInput.addEventListener('change', () => {
+            if (getSelectedType() === 'transfer' && txWalletInput) {
+                if (txWalletInput.value === txToWalletInput.value) {
+                    const active = getActiveWallets();
+                    const other = active.find(w => w.id !== txToWalletInput.value);
+                    if (other) {
+                        txWalletInput.value = other.id;
+                    }
+                }
+            }
         });
     }
 

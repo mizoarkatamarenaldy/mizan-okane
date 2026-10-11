@@ -61,6 +61,10 @@
                             <input type="radio" name="type" value="income">
                             Pemasukan
                         </label>
+                        <label>
+                            <input type="radio" name="type" value="transfer">
+                            Transfer
+                        </label>
                     </div>
                 </div>
 
@@ -80,13 +84,20 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="tx-wallet">Dompet</label>
+                    <label for="tx-wallet" id="tx-wallet-label">Dompet</label>
                     <select id="tx-wallet" required>
                         <option value="" disabled selected>Pilih dompet</option>
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group hidden" id="form-group-to-wallet">
+                    <label for="tx-to-wallet">Ke Dompet</label>
+                    <select id="tx-to-wallet">
+                        <option value="" disabled selected>Pilih dompet tujuan</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="form-group-category">
                     <label for="tx-category">Kategori</label>
                     <select id="tx-category" required>
                         <option value="" disabled selected>Pilih kategori</option>
