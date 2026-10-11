@@ -9,6 +9,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diperbaiki: ...
 - Diubah: ...
 ```
+## 2026-10-11: Tahap 5: Grafik pemasukan bulanan
+- Ditambah: Toggle "Pengeluaran / Pemasukan" pada header grafik bulanan untuk beralih antara grafik pengeluaran dan grafik pemasukan (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Dukungan grafik pemasukan bulanan yang menampilkan total pemasukan per bulan, warna batang hijau, rincian tooltip bulan terpilih, serta perhitungan rata-rata pemasukan per bulan (`js/app.js`, `css/style.css`).
+- Diubah: Pemfilteran transaksi pada grafik bulanan mengecualikan transaksi transfer antar dompet dan transaksi yang dihapus (soft delete) baik pada mode pengeluaran maupun pemasukan (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v15` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur "Grafik pemasukan bulanan (bisa dipilih lewat toggle Pengeluaran / Pemasukan, transfer antar dompet tidak dihitung)" pada Tahap 5 (`PLAN.md`).
 
 ## 2026-10-11: Tahap 5: Pilihan format jam 12 jam (AM/PM) atau 24 jam
 - Ditambah: Pengaturan format jam pada bagian pengaturan dengan pilihan 24 jam dan 12 jam (AM/PM), default 24 jam, disimpan per perangkat di store `meta` IndexedDB dan tidak ikut sinkron (`index.html`, `js/db.js`, `js/app.js`, `css/style.css`).

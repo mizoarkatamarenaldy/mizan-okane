@@ -226,8 +226,14 @@
 
         <section class="chart-section" aria-labelledby="chart-section-title">
             <div class="chart-header">
-                <h2 id="chart-section-title">Grafik Pengeluaran Bulanan</h2>
-                <span id="chart-summary-text" class="chart-summary-text"></span>
+                <div class="chart-header-title">
+                    <h2 id="chart-section-title">Grafik Pengeluaran Bulanan</h2>
+                    <span id="chart-summary-text" class="chart-summary-text"></span>
+                </div>
+                <div class="chart-toggle-group" role="group" aria-label="Pilihan jenis grafik bulanan">
+                    <button type="button" id="btn-chart-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
+                    <button type="button" id="btn-chart-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
+                </div>
             </div>
             <div id="chart-detail" class="chart-detail hidden" aria-live="polite"></div>
             <div id="chart-container" class="chart-container">

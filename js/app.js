@@ -38,6 +38,9 @@ const confirmDialogTitle = document.getElementById('confirm-dialog-title');
 const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
 const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
+const chartSectionTitle = document.getElementById('chart-section-title');
+const btnChartExpense = document.getElementById('btn-chart-expense');
+const btnChartIncome = document.getElementById('btn-chart-income');
 const chartContainer = document.getElementById('chart-container');
 const chartSummaryText = document.getElementById('chart-summary-text');
 const chartDetail = document.getElementById('chart-detail');
@@ -77,6 +80,7 @@ let editingWalletId = null;
 let currentWalletFilter = 'all';
 const LAST_WALLET_KEY = 'mizan-okane:last-wallet-id';
 let currentTimeFormat = DEFAULT_TIME_FORMAT;
+let currentChartType = 'expense';
 
 let selectedBudgetMonth = '';
 let currentBudgets = {
@@ -457,14 +461,40 @@ function getNiceCeiling(maxVal) {
     return niceFraction * factor;
 }
 
-function renderExpenseChart(transactions) {
+function updateChartTypeUI() {
+    const isIncome = currentChartType === 'income';
+    if (btnChartExpense) {
+        btnChartExpense.classList.toggle('is-active', !isIncome);
+        btnChartExpense.setAttribute('aria-pressed', String(!isIncome));
+    }
+    if (btnChartIncome) {
+        btnChartIncome.classList.toggle('is-active', isIncome);
+        btnChartIncome.setAttribute('aria-pressed', String(isIncome));
+    }
+    if (chartSectionTitle) {
+        chartSectionTitle.textContent = isIncome ? 'Grafik Pemasukan Bulanan' : 'Grafik Pengeluaran Bulanan';
+    }
+}
+
+function renderMonthlyChart(transactions) {
     if (!chartContainer) return;
 
-    // Filter hanya transaksi pengeluaran aktif (tidak terhapus) dengan jumlah > 0
-    const expenseTx = (transactions || []).filter(tx => tx.type === 'expense' && !tx.deleted && tx.amount > 0);
+    updateChartTypeUI();
 
-    if (expenseTx.length === 0) {
-        chartContainer.innerHTML = '<p class="chart-empty">Belum ada transaksi pengeluaran untuk ditampilkan.</p>';
+    const isIncome = currentChartType === 'income';
+    const typeLabel = isIncome ? 'pemasukan' : 'pengeluaran';
+
+    // Filter transaksi aktif (tidak terhapus) sesuai tipe (pengeluaran atau pemasukan),
+    // transfer antar dompet tidak dihitung, dan jumlah > 0
+    const chartTx = (transactions || []).filter(tx => 
+        tx.type === currentChartType && 
+        tx.type !== 'transfer' && 
+        !tx.deleted && 
+        tx.amount > 0
+    );
+
+    if (chartTx.length === 0) {
+        chartContainer.innerHTML = `<p class="chart-empty">Belum ada transaksi ${typeLabel} untuk ditampilkan.</p>`;
         if (chartSummaryText) chartSummaryText.textContent = '';
         if (chartDetail) {
             chartDetail.textContent = '';
@@ -479,7 +509,7 @@ function renderExpenseChart(transactions) {
 
     // Kelompokkan per bulan (YYYY-MM)
     const monthData = new Map();
-    for (const tx of expenseTx) {
+    for (const tx of chartTx) {
         if (!tx.date) continue;
         const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
         if (!match) continue;
@@ -493,7 +523,7 @@ function renderExpenseChart(transactions) {
     }
 
     if (monthData.size === 0) {
-        chartContainer.innerHTML = '<p class="chart-empty">Belum ada transaksi pengeluaran untuk ditampilkan.</p>';
+        chartContainer.innerHTML = `<p class="chart-empty">Belum ada transaksi ${typeLabel} untuk ditampilkan.</p>`;
         if (chartSummaryText) chartSummaryText.textContent = '';
         if (chartDetail) {
             chartDetail.textContent = '';
@@ -526,28 +556,28 @@ function renderExpenseChart(transactions) {
         displayMonths = rawKeys;
     }
 
-    let totalExpenseAll = 0;
-    let maxMonthExpense = 0;
-    let monthsWithExpense = 0;
+    let totalAmountAll = 0;
+    let maxMonthAmount = 0;
+    let monthsWithAmount = 0;
 
     for (const key of displayMonths) {
         const item = monthData.get(key);
         const amt = item ? item.total : 0;
-        totalExpenseAll += amt;
-        if (amt > maxMonthExpense) {
-            maxMonthExpense = amt;
+        totalAmountAll += amt;
+        if (amt > maxMonthAmount) {
+            maxMonthAmount = amt;
         }
         if (amt > 0) {
-            monthsWithExpense++;
+            monthsWithAmount++;
         }
     }
 
-    const avgExpense = monthsWithExpense > 0 ? Math.round(totalExpenseAll / monthsWithExpense) : 0;
+    const avgAmount = monthsWithAmount > 0 ? Math.round(totalAmountAll / monthsWithAmount) : 0;
     if (chartSummaryText) {
-        chartSummaryText.textContent = `Rata-rata: ${currencyFormatter.format(avgExpense)} / bulan`;
+        chartSummaryText.textContent = `Rata-rata: ${currencyFormatter.format(avgAmount)} / bulan`;
     }
 
-    const ceiling = getNiceCeiling(maxMonthExpense);
+    const ceiling = getNiceCeiling(maxMonthAmount);
     const midCeiling = ceiling / 2;
 
     const svgHeight = 220;
@@ -572,24 +602,29 @@ function renderExpenseChart(transactions) {
         const item = monthData.get(key);
         const total = item ? item.total : 0;
         const count = item ? item.count : 0;
+        const amountClass = isIncome ? 'chart-detail-amount income' : 'chart-detail-amount';
+        const emptyLabel = isIncome ? '(tidak ada pemasukan)' : '(tidak ada pengeluaran)';
 
         chartDetail.innerHTML = `
             <span class="chart-detail-month">${fullLabel}:</span>
-            <strong class="chart-detail-amount">${currencyFormatter.format(total)}</strong>
-            <span class="chart-detail-count">${count > 0 ? `(${count} transaksi)` : '(tidak ada pengeluaran)'}</span>
+            <strong class="${amountClass}">${currencyFormatter.format(total)}</strong>
+            <span class="chart-detail-count">${count > 0 ? `(${count} transaksi)` : emptyLabel}</span>
         `;
     }
 
     const latestKey = displayMonths[displayMonths.length - 1];
     updateDetail(latestKey);
 
+    const chartSvgClass = isIncome ? 'expense-chart monthly-chart is-income' : 'expense-chart monthly-chart is-expense';
+    const chartAriaLabel = `Grafik total ${typeLabel} per bulan`;
+
     let svgHtml = `
-        <svg class="expense-chart"
+        <svg class="${chartSvgClass}"
              viewBox="0 0 ${svgWidth} ${svgHeight}"
              width="${isScrollable ? svgWidth + 'px' : '100%'}"
              height="${isScrollable ? svgHeight + 'px' : 'auto'}"
              role="img"
-             aria-label="Grafik total pengeluaran per bulan">
+             aria-label="${chartAriaLabel}">
             <line class="chart-grid-line" x1="${paddingLeft}" y1="${paddingTop}" x2="${svgWidth - paddingRight}" y2="${paddingTop}" />
             <text class="chart-axis-label" x="${paddingLeft - 8}" y="${paddingTop + 4}" text-anchor="end">${formatCompactCurrency(ceiling)}</text>
 
@@ -662,6 +697,10 @@ function renderExpenseChart(transactions) {
             chartContainer.scrollLeft = chartContainer.scrollWidth;
         });
     }
+}
+
+function renderExpenseChart(transactions) {
+    renderMonthlyChart(transactions);
 }
 
 function render() {
@@ -771,7 +810,7 @@ function render() {
         });
     }
 
-    renderExpenseChart(currentTransactions);
+    renderMonthlyChart(currentTransactions);
     renderBudgetSection();
 
     // Attach event listeners to generated buttons
@@ -2124,6 +2163,24 @@ async function init() {
             if (budgetMonthInput.value) {
                 selectedBudgetMonth = budgetMonthInput.value;
                 renderBudgetSection();
+            }
+        });
+    }
+
+    if (btnChartExpense) {
+        btnChartExpense.addEventListener('click', () => {
+            if (currentChartType !== 'expense') {
+                currentChartType = 'expense';
+                renderMonthlyChart(currentTransactions);
+            }
+        });
+    }
+
+    if (btnChartIncome) {
+        btnChartIncome.addEventListener('click', () => {
+            if (currentChartType !== 'income') {
+                currentChartType = 'income';
+                renderMonthlyChart(currentTransactions);
             }
         });
     }

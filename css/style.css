@@ -343,10 +343,16 @@ button:focus-visible {
 .chart-header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 12px;
+}
+
+.chart-header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .chart-header h2 {
@@ -356,6 +362,57 @@ button:focus-visible {
 .chart-summary-text {
     font-size: 13px;
     color: var(--text-light);
+}
+
+.chart-toggle-group {
+    display: inline-flex;
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px;
+    gap: 4px;
+}
+
+.chart-toggle-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    min-height: 38px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    flex: none;
+}
+
+.chart-toggle-btn:hover {
+    color: var(--text);
+}
+
+.chart-toggle-btn.is-active {
+    background-color: var(--card-bg);
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-toggle-btn.is-active[data-type="expense"] {
+    color: #c62828;
+}
+
+.chart-toggle-btn.is-active[data-type="income"] {
+    color: #2e7d32;
+}
+
+.chart-toggle-btn:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 1px;
 }
 
 .chart-detail {
@@ -380,6 +437,10 @@ button:focus-visible {
     font-weight: 700;
 }
 
+.chart-detail-amount.income {
+    color: #2e7d32;
+}
+
 .chart-detail-count {
     color: var(--text-light);
     font-size: 13px;
@@ -398,7 +459,8 @@ button:focus-visible {
     font-size: 14px;
 }
 
-.expense-chart {
+.expense-chart,
+.monthly-chart {
     display: block;
     user-select: none;
 }
@@ -442,6 +504,21 @@ button:focus-visible {
     stroke: var(--text);
     stroke-width: 2px;
     fill: #c62828;
+}
+
+.monthly-chart.is-income .chart-bar {
+    fill: var(--primary);
+}
+
+.monthly-chart.is-income .chart-bar-group:hover .chart-bar,
+.monthly-chart.is-income .chart-bar-group.is-selected .chart-bar {
+    fill: #2e7d32;
+}
+
+.monthly-chart.is-income .chart-bar-group:focus-visible .chart-bar {
+    stroke: var(--text);
+    stroke-width: 2px;
+    fill: #2e7d32;
 }
 
 .chart-bar-value {

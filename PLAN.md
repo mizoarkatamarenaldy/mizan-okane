@@ -75,7 +75,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Transfer antar dompet (pindah uang dari satu dompet ke dompet lain, tidak dihitung sebagai pemasukan atau pengeluaran, saldo kedua dompet ikut berubah, ikut sinkron, tidak masuk budget dan grafik pengeluaran)
   - [x] Ganti label "Jam (opsional)" jadi "Waktu" (hanya teks label di form, field tetap boleh kosong, nama kolom CSV `jam` tidak diubah)
   - [x] Pilihan format jam 12 jam (AM/PM) atau 24 jam (pengaturan per perangkat, data tetap disimpan "HH:mm" 24 jam, hanya input dan tampilan yang berubah)
-  - [ ] Grafik pemasukan bulanan (bisa dipilih lewat toggle Pengeluaran / Pemasukan, transfer antar dompet tidak dihitung)
+  - [x] Grafik pemasukan bulanan (bisa dipilih lewat toggle Pengeluaran / Pemasukan, transfer antar dompet tidak dihitung)
   - [ ] Diagram donut per kategori untuk bulan yang dipilih (pilihan pemasukan atau pengeluaran, transfer antar dompet tidak dihitung)
   - [ ] Mode tanpa login (cek semua fitur jalan tanpa login Google, status sinkron netral "Belum terhubung", tidak ada pesan error)
   - [ ] Impor JSON (pulihkan data dari file ekspor, gabung dengan aturan updatedAt terbaru menang, transaksi lama tanpa walletId tetap aman)
