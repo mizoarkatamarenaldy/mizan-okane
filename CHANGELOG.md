@@ -10,6 +10,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Mode tanpa login
+- Ditambah: Pengujian otomatis komprehensif mode tanpa login untuk memastikan seluruh alur fitur berjalan normal tanpa akun Google (tambah dompet, tambah kategori pengeluaran dan pemasukan, tambah transaksi, transfer antar dompet, edit transaksi, hapus transaksi soft delete dengan modal konfirmasi, grafik batang bulanan, diagram donut kategori, ekspor CSV, ekspor JSON, dan impor JSON).
+- Dipastikan: Status sinkronisasi netral ("Belum login. Data hanya tersimpan di perangkat ini.") tanpa pesan error dan tanpa runtime exception.
+- Diubah: `PLAN.md` mencentang fitur "Mode tanpa login" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Impor JSON
 - Ditambah: Tombol "Impor JSON" pada bilah sinkronisasi dan elemen input berkas untuk memulihkan data dari file cadangan JSON (`index.html`, `js/app.js`).
 - Ditambah: Logika penggabungan data cadangan dengan aturan konflik waktu ubah (`updatedAt`) terbaru menang untuk transaksi, kategori, budget, dan daftar dompet (`js/app.js`).
