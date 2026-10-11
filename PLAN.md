@@ -81,7 +81,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Grafik pemasukan bulanan (bisa dipilih lewat toggle Pengeluaran / Pemasukan, transfer antar dompet tidak dihitung)
   - [x] Diagram donut per kategori untuk bulan yang dipilih (pilihan pemasukan atau pengeluaran, transfer antar dompet tidak dihitung)
   - [ ] Mode tanpa login (cek semua fitur jalan tanpa login Google, status sinkron netral "Belum terhubung", tidak ada pesan error)
-  - [ ] Impor JSON (pulihkan data dari file ekspor, gabung dengan aturan updatedAt terbaru menang, transaksi lama tanpa walletId tetap aman)
+  - [x] Impor JSON (pulihkan data dari file ekspor, gabung dengan aturan updatedAt terbaru menang, transaksi lama tanpa walletId tetap aman)
   - [ ] Halaman kebijakan privasi (satu halaman statis di GitHub Pages, ditautkan dari aplikasi)
   - [ ] Perbaikan UI/UX multi halaman (dikerjakan paling akhir, butuh peta halaman dulu)
   - [ ] Persiapan rilis publik (README berisi cara pakai, cara install, catatan peringatan "belum diverifikasi Google", dan cara hapus data; pastikan tidak ada keystore, token, atau data asli di repo)

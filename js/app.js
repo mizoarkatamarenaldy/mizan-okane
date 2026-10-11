@@ -1,4 +1,4 @@
-import { initDB, saveTransaction, getAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT } from './db.js';
+import { initDB, saveTransaction, getAllTransactions, replaceAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT } from './db.js';
 import { initSync, markDirty, signIn, signOut, syncNow, ensureToken } from './sync.js';
 
 // DOM Elements
@@ -2424,6 +2424,8 @@ const btnLogin = document.getElementById('btn-login');
 const btnLogout = document.getElementById('btn-logout');
 const btnSyncNow = document.getElementById('btn-sync-now');
 const btnExport = document.getElementById('btn-export');
+const btnImportJson = document.getElementById('btn-import-json');
+const inputImportJson = document.getElementById('input-import-json');
 const btnExportCsv = document.getElementById('btn-export-csv');
 
 function formatTime(ts) {
@@ -2504,6 +2506,269 @@ btnExport.addEventListener('click', async () => {
         alert("Terjadi kesalahan saat mengekspor data.");
     }
 });
+
+function isValidTransaction(item) {
+    if (!item || typeof item !== 'object') return false;
+    if (typeof item.id !== 'string' || item.id.trim() === '') return false;
+    if (item.type !== 'income' && item.type !== 'expense' && item.type !== 'transfer') return false;
+    const amt = typeof item.amount === 'number' ? item.amount : Number(item.amount);
+    if (!Number.isFinite(amt) || amt <= 0) return false;
+    if (typeof item.date !== 'string' || item.date.trim() === '') return false;
+    return true;
+}
+
+function sanitizeImportedTx(item) {
+    const amt = typeof item.amount === 'number' ? item.amount : Number(item.amount);
+    const createdAt = typeof item.createdAt === 'number' ? item.createdAt : Date.now();
+    const updatedAt = typeof item.updatedAt === 'number' ? item.updatedAt : createdAt;
+    const tx = {
+        id: String(item.id).trim(),
+        type: item.type,
+        amount: Math.round(amt),
+        date: String(item.date).trim(),
+        createdAt,
+        updatedAt,
+        deleted: !!item.deleted
+    };
+    if (typeof item.category === 'string') {
+        tx.category = item.category;
+    }
+    if (typeof item.note === 'string') {
+        tx.note = item.note;
+    }
+    if (typeof item.time === 'string' && item.time) {
+        tx.time = item.time;
+    }
+    // Field walletId opsional; transaksi lama tanpa walletId tetap aman tanpa field ini
+    if (typeof item.walletId === 'string' && item.walletId) {
+        tx.walletId = item.walletId;
+    }
+    if (typeof item.toWalletId === 'string' && item.toWalletId) {
+        tx.toWalletId = item.toWalletId;
+    }
+    return tx;
+}
+
+function mergeWalletsList(localWallets, importedWallets) {
+    const map = new Map();
+    if (Array.isArray(importedWallets)) {
+        for (const w of importedWallets) {
+            if (w && typeof w.id === 'string') {
+                map.set(w.id, {
+                    id: String(w.id),
+                    name: String(w.name || '').trim(),
+                    createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
+                    updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
+                    deleted: !!w.deleted
+                });
+            }
+        }
+    }
+    if (Array.isArray(localWallets)) {
+        for (const w of localWallets) {
+            if (w && typeof w.id === 'string') {
+                const existing = map.get(w.id);
+                if (!existing || (w.updatedAt || 0) >= (existing.updatedAt || 0)) {
+                    map.set(w.id, {
+                        id: String(w.id),
+                        name: String(w.name || '').trim(),
+                        createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
+                        updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
+                        deleted: !!w.deleted
+                    });
+                }
+            }
+        }
+    }
+    if (!map.has(DEFAULT_WALLET_ID)) {
+        map.set(DEFAULT_WALLET_ID, {
+            id: DEFAULT_WALLET_ID,
+            name: DEFAULT_WALLET_NAME,
+            createdAt: 0,
+            updatedAt: 0,
+            deleted: false
+        });
+    }
+    return Array.from(map.values());
+}
+
+function walletsDiffer(w1, w2) {
+    if (w1.length !== w2.length) return true;
+    const m1 = new Map(w1.map(w => [w.id, w]));
+    for (const item of w2) {
+        const exist = m1.get(item.id);
+        if (!exist) return true;
+        if (exist.name !== item.name || exist.deleted !== item.deleted || exist.updatedAt !== item.updatedAt) {
+            return true;
+        }
+    }
+    return false;
+}
+
+async function handleImportJson(file) {
+    let text;
+    try {
+        text = await file.text();
+    } catch (readErr) {
+        console.error("Gagal membaca file", readErr);
+        alert("Gagal membaca file yang dipilih.");
+        return;
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(text);
+    } catch (jsonErr) {
+        console.error("JSON tidak valid", jsonErr);
+        alert("File tidak valid atau bukan format JSON.");
+        return;
+    }
+
+    let rawTransactions = null;
+    let rawCategories = null;
+    let rawBudgets = null;
+    let rawWallets = null;
+
+    if (Array.isArray(parsed)) {
+        rawTransactions = parsed;
+    } else if (parsed && typeof parsed === 'object') {
+        if (Array.isArray(parsed.transactions)) {
+            rawTransactions = parsed.transactions;
+        }
+        if (parsed.categories && typeof parsed.categories === 'object') {
+            rawCategories = parsed.categories;
+        }
+        if (parsed.budgets && typeof parsed.budgets === 'object') {
+            rawBudgets = parsed.budgets;
+        }
+        if (Array.isArray(parsed.wallets)) {
+            rawWallets = parsed.wallets;
+        }
+    }
+
+    if (!rawTransactions && !rawCategories && !rawBudgets && !rawWallets) {
+        alert("Format file cadangan tidak dikenali. Pastikan file berisi data cadangan mizan-okane.");
+        return;
+    }
+
+    const validImportedTx = [];
+    if (Array.isArray(rawTransactions)) {
+        for (const item of rawTransactions) {
+            if (isValidTransaction(item)) {
+                validImportedTx.push(sanitizeImportedTx(item));
+            }
+        }
+    }
+
+    if (rawTransactions && rawTransactions.length > 0 && validImportedTx.length === 0) {
+        alert("Tidak ada transaksi valid yang ditemukan di dalam file cadangan.");
+        return;
+    }
+
+    try {
+        const localTx = await getAllTransactions();
+        const txMap = new Map();
+        for (const tx of localTx) {
+            if (tx && typeof tx.id === 'string') {
+                txMap.set(tx.id, tx);
+            }
+        }
+
+        let txAdded = 0;
+        let txUpdated = 0;
+
+        for (const impTx of validImportedTx) {
+            const existing = txMap.get(impTx.id);
+            if (!existing) {
+                txMap.set(impTx.id, impTx);
+                txAdded++;
+            } else {
+                const impTime = typeof impTx.updatedAt === 'number' ? impTx.updatedAt : (impTx.createdAt || 0);
+                const existTime = typeof existing.updatedAt === 'number' ? existing.updatedAt : (existing.createdAt || 0);
+                if (impTime > existTime) {
+                    txMap.set(impTx.id, impTx);
+                    txUpdated++;
+                }
+            }
+        }
+
+        if (txAdded > 0 || txUpdated > 0) {
+            await replaceAllTransactions(Array.from(txMap.values()));
+        }
+
+        let categoriesChanged = false;
+        if (rawCategories && Array.isArray(rawCategories.income) && Array.isArray(rawCategories.expense)) {
+            const localCategories = await getCategories();
+            const remoteCatTime = typeof rawCategories.updatedAt === 'number' ? rawCategories.updatedAt : -1;
+            const localCatTime = localCategories.updatedAt || 0;
+            if (remoteCatTime > localCatTime) {
+                await saveCategories(rawCategories);
+                categoriesChanged = true;
+            }
+        }
+
+        let budgetsChanged = false;
+        if (rawBudgets && typeof rawBudgets.items === 'object' && !Array.isArray(rawBudgets.items)) {
+            const localBudgets = await getBudgets();
+            const remoteBudgetTime = typeof rawBudgets.updatedAt === 'number' ? rawBudgets.updatedAt : -1;
+            const localBudgetTime = localBudgets.updatedAt || 0;
+            if (remoteBudgetTime > localBudgetTime) {
+                await saveBudgets(rawBudgets);
+                budgetsChanged = true;
+            }
+        }
+
+        let walletsChanged = false;
+        if (Array.isArray(rawWallets) && rawWallets.length > 0) {
+            const localWallets = await getWallets();
+            const finalWallets = mergeWalletsList(localWallets, rawWallets);
+            if (walletsDiffer(localWallets, finalWallets)) {
+                await saveWallets(finalWallets);
+                walletsChanged = true;
+            }
+        }
+
+        const hasChanges = (txAdded > 0 || txUpdated > 0 || categoriesChanged || budgetsChanged || walletsChanged);
+
+        if (hasChanges) {
+            resetForm();
+            await loadData();
+            await markDirty();
+
+            const details = [];
+            if (txAdded > 0) details.push(`${txAdded} transaksi baru ditambahkan`);
+            if (txUpdated > 0) details.push(`${txUpdated} transaksi diperbarui`);
+            if (walletsChanged) details.push('daftar dompet diperbarui');
+            if (categoriesChanged) details.push('kategori diperbarui');
+            if (budgetsChanged) details.push('budget diperbarui');
+
+            const detailStr = details.length > 0 ? details.join(', ') : 'data diperbarui';
+            alert(`Impor data berhasil (${detailStr}).`);
+        } else {
+            alert("Semua data pada file cadangan sudah sesuai dengan data saat ini (tidak ada perubahan).");
+        }
+    } catch (err) {
+        console.error("Gagal mengimpor data", err);
+        alert("Terjadi kesalahan saat memproses data cadangan.");
+    }
+}
+
+if (btnImportJson && inputImportJson) {
+    btnImportJson.addEventListener('click', () => {
+        ensureToken();
+        inputImportJson.click();
+    });
+
+    inputImportJson.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+            await handleImportJson(file);
+        } finally {
+            inputImportJson.value = '';
+        }
+    });
+}
 
 function escapeCSVField(value) {
     if (value === null || value === undefined) {

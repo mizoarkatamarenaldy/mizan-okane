@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Impor JSON
+- Ditambah: Tombol "Impor JSON" pada bilah sinkronisasi dan elemen input berkas untuk memulihkan data dari file cadangan JSON (`index.html`, `js/app.js`).
+- Ditambah: Logika penggabungan data cadangan dengan aturan konflik waktu ubah (`updatedAt`) terbaru menang untuk transaksi, kategori, budget, dan daftar dompet (`js/app.js`).
+- Ditambah: Dukungan penuh kompatibilitas transaksi lama tanpa `walletId` yang otomatis aman diimpor dan dipetakan ke Dompet Utama tanpa merusak data (`js/app.js`).
+- Ditambah: Validasi struktur data cadangan, sanitasi transaksi, serta notifikasi hasil impor transaksi baru dan transaksi yang diperbarui (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v20` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur "Impor JSON" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Diagram donut per kategori
 - Ditambah: Bagian antarmuka diagram donut per kategori dengan navigasi bulan (tombol bulan sebelumnya/berikutnya dan input bulan) serta toggle pilihan jenis transaksi Pengeluaran atau Pemasukan (`index.html`).
 - Ditambah: Visualisasi diagram donut SVG berbasis proporsi kategori untuk bulan yang dipilih dengan lingkaran donut interaktif, label total/kategori di tengah, dan daftar rincian kategori beserta persentase dan nominal uang (`index.html`, `js/app.js`, `css/style.css`).
