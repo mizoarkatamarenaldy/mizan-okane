@@ -263,13 +263,131 @@ function populateWalletFilterOptions() {
     }
 }
 
-// Formatter
-const currencyFormatter = new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-});
+// Formatter angka dan uang (titik pemisah ribuan)
+export function formatNumber(val) {
+    if (val === null || val === undefined || val === '') return '';
+    const str = String(val);
+    const isNegative = str.startsWith('-');
+    let digits = str.replace(/\D/g, '');
+    if (!digits) return '';
+    digits = digits.replace(/^0+(?=\d)/, '');
+    const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return isNegative ? `-${formatted}` : formatted;
+}
+
+export function parseAmount(str) {
+    if (str === null || str === undefined) return 0;
+    const digits = String(str).replace(/\D/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+}
+
+export function formatCurrency(val) {
+    if (val === null || val === undefined || val === '') return 'Rp 0';
+    const num = typeof val === 'number' ? Math.round(val) : parseAmount(val);
+    if (isNaN(num)) return 'Rp 0';
+    if (num < 0) {
+        return `-Rp ${formatNumber(Math.abs(num))}`;
+    }
+    return `Rp ${formatNumber(num)}`;
+}
+
+export const currencyFormatter = {
+    format(val) {
+        return formatCurrency(val);
+    }
+};
+
+export function formatInputWithCursor(input) {
+    if (!input) return;
+    const originalValue = input.value;
+    const originalCursor = input.selectionStart !== null ? input.selectionStart : originalValue.length;
+
+    const textBeforeCursor = originalValue.slice(0, originalCursor);
+    const digitsBeforeCursor = textBeforeCursor.replace(/\D/g, '').length;
+
+    const rawDigits = originalValue.replace(/\D/g, '');
+    if (!rawDigits) {
+        input.value = '';
+        return;
+    }
+
+    const cleanDigits = rawDigits.replace(/^0+(?=\d)/, '');
+    const formatted = formatNumber(cleanDigits);
+    input.value = formatted;
+
+    if (digitsBeforeCursor === 0) {
+        input.setSelectionRange(0, 0);
+        return;
+    }
+
+    const targetDigits = Math.min(digitsBeforeCursor, cleanDigits.length);
+    let digitCount = 0;
+    let newCursor = formatted.length;
+
+    for (let i = 0; i < formatted.length; i++) {
+        if (/\d/.test(formatted[i])) {
+            digitCount++;
+            if (digitCount === targetDigits) {
+                newCursor = i + 1;
+                break;
+            }
+        }
+    }
+
+    input.setSelectionRange(newCursor, newCursor);
+}
+
+export function attachAmountInputFormatting(input) {
+    if (!input) return;
+
+    input.addEventListener('keydown', (e) => {
+        if (
+            e.key === 'Backspace' ||
+            e.key === 'Delete' ||
+            e.key === 'Tab' ||
+            e.key === 'Escape' ||
+            e.key === 'Enter' ||
+            e.key === 'ArrowLeft' ||
+            e.key === 'ArrowRight' ||
+            e.key === 'ArrowUp' ||
+            e.key === 'ArrowDown' ||
+            e.key === 'Home' ||
+            e.key === 'End' ||
+            e.ctrlKey ||
+            e.metaKey ||
+            e.altKey
+        ) {
+            if (e.key === 'Backspace' && input.selectionStart === input.selectionEnd && input.selectionStart > 0) {
+                if (input.value[input.selectionStart - 1] === '.') {
+                    e.preventDefault();
+                    const pos = input.selectionStart;
+                    const val = input.value;
+                    input.value = val.slice(0, pos - 2) + val.slice(pos - 1);
+                    input.setSelectionRange(pos - 2, pos - 2);
+                    formatInputWithCursor(input);
+                }
+            } else if (e.key === 'Delete' && input.selectionStart === input.selectionEnd && input.selectionStart < input.value.length) {
+                if (input.value[input.selectionStart] === '.') {
+                    e.preventDefault();
+                    const pos = input.selectionStart;
+                    const val = input.value;
+                    input.value = val.slice(0, pos) + val.slice(pos + 2);
+                    input.setSelectionRange(pos, pos);
+                    formatInputWithCursor(input);
+                }
+            }
+            return;
+        }
+
+        if (e.key.length === 1 && !/^\d$/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    input.addEventListener('input', () => {
+        formatInputWithCursor(input);
+    });
+}
 
 function formatDate(dateString) {
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
@@ -468,7 +586,7 @@ function formatCompactCurrency(value) {
         const val = value / 1_000;
         return (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' rb';
     }
-    return String(value);
+    return formatNumber(value);
 }
 
 function getNiceCeiling(maxVal) {
@@ -1490,7 +1608,7 @@ function renderBudgetSettings() {
             li.classList.add('editing');
             li.innerHTML = `
                 <form class="category-inline-edit-form">
-                    <input type="number" class="category-edit-input" value="${amount}" min="1" step="1" required autocomplete="off" aria-label="Ubah budget kategori ${escapeHTML(cat)}">
+                    <input type="text" inputmode="numeric" class="category-edit-input" value="${formatNumber(amount)}" required autocomplete="off" aria-label="Ubah budget kategori ${escapeHTML(cat)}">
                     <div class="category-item-actions">
                         <button type="submit" class="btn-icon btn-save-cat">Simpan</button>
                         <button type="button" class="btn-icon btn-cancel-cat">Batal</button>
@@ -1501,10 +1619,11 @@ function renderBudgetSettings() {
             const editForm = li.querySelector('.category-inline-edit-form');
             const editInput = li.querySelector('.category-edit-input');
             const btnCancelEdit = li.querySelector('.btn-cancel-cat');
+            attachAmountInputFormatting(editInput);
 
             editForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const newAmount = parseInt(editInput.value, 10);
+                const newAmount = parseAmount(editInput.value);
                 await handleSaveBudgetAmount(cat, newAmount);
             });
 
@@ -1581,7 +1700,7 @@ async function handleSaveBudgetAmount(cat, newAmount) {
 async function handleSetBudgetSubmit(e) {
     e.preventDefault();
     const cat = selectBudgetCat ? selectBudgetCat.value.trim() : '';
-    const amount = inputBudgetAmount ? parseInt(inputBudgetAmount.value, 10) : 0;
+    const amount = inputBudgetAmount ? parseAmount(inputBudgetAmount.value) : 0;
 
     if (!cat) {
         alert('Pilih kategori pengeluaran.');
@@ -1674,7 +1793,7 @@ async function handleSubmit(e) {
     }
     hideTimeError();
 
-    const amount = parseInt(txAmountInput.value, 10);
+    const amount = parseAmount(txAmountInput.value);
     if (isNaN(amount) || amount <= 0) {
         alert("Jumlah harus berupa angka lebih dari 0.");
         return;
@@ -1772,7 +1891,7 @@ function handleEdit(id) {
     txDateInput.value = tx.date;
     setTimeValueToForm(tx.time || '');
     hideTimeError();
-    txAmountInput.value = tx.amount;
+    txAmountInput.value = formatNumber(tx.amount);
     txNoteInput.value = tx.note || '';
 
     updateTypeUI(tx.type);
@@ -1839,6 +1958,8 @@ async function performDelete(id) {
 // Event Listeners
 txForm.addEventListener('submit', handleSubmit);
 btnCancel.addEventListener('click', resetForm);
+attachAmountInputFormatting(txAmountInput);
+attachAmountInputFormatting(inputBudgetAmount);
 
 txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -2164,7 +2285,7 @@ async function init() {
             const cat = selectBudgetCat.value;
             const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
             if (cat && budgetMap[cat]) {
-                inputBudgetAmount.value = budgetMap[cat];
+                inputBudgetAmount.value = formatNumber(budgetMap[cat]);
             } else {
                 inputBudgetAmount.value = '';
             }

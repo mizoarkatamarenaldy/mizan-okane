@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Angka uang pakai titik pemisah ribuan
+- Ditambah: Fungsi pemformat bersama `formatNumber`, `parseAmount`, dan `formatCurrency` untuk menampilkan angka dan nilai uang dengan pemisah ribuan titik sesuai format Indonesia (`js/app.js`).
+- Ditambah: Penanganan otomatis pemisah ribuan pada input jumlah uang di form tambah, form edit, form transfer antar dompet, dan form budget (`index.html`, `js/app.js`).
+- Ditambah: Penjagaan posisi kursor saat mengetik atau mengedit angka di tengah dan dukungan tempel (paste) nilai uang berformat titik atau dengan simbol lain (`js/app.js`).
+- Diubah: Field input uang menggunakan `type="text"` dengan `inputmode="numeric"` agar titik ribuan dapat tampil saat mengetik (`index.html`, `js/app.js`).
+- Diubah: Form edit transaksi dan pilihan budget menampilkan jumlah lama yang telah diformat dengan titik ribuan (`js/app.js`).
+- Diubah: Tampilan seluruh nominal uang (daftar transaksi, total saldo, saldo per dompet, budget dan sisa budget, label dan tooltip grafik) konsisten menggunakan titik pemisah ribuan (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v18` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencatat dan mencentang perbaikan angka uang pakai titik pemisah ribuan pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Perbaikan field Waktu wajib diisi
 - Ditambah: Elemen pesan error "Waktu wajib diisi" di bawah field Waktu pada formulir transaksi (`index.html`).
 - Ditambah: Kelas styling `.form-error-message` untuk menampilkan pesan validasi form dengan warna teks bahaya (`css/style.css`).
