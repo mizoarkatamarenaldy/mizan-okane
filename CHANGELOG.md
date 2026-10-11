@@ -10,6 +10,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Ganti label Jam (opsional) jadi Waktu
+- Diubah: Label input waktu pada formulir transaksi diganti dari "Jam (opsional)" menjadi "Waktu" (`index.html`).
+- Diubah: `sw.js` naik ke versi `mizan-v13` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur "Ganti label 'Jam (opsional)' jadi 'Waktu'" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Transfer antar dompet
 - Ditambah: Opsi tipe transaksi "Transfer" pada formulir transaksi untuk memindahkan uang dari satu dompet ke dompet lain (`index.html`, `js/app.js`, `css/style.css`).
 - Ditambah: Dropdown pilihan dompet tujuan ("Ke Dompet") yang otomatis aktif saat tipe transfer dipilih serta penyesuaian label dompet asal menjadi "Dari Dompet" (`index.html`, `js/app.js`).

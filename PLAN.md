@@ -73,7 +73,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Beberapa dompet
   - [ ] Rollover budget (opsional per kategori)
   - [x] Transfer antar dompet (pindah uang dari satu dompet ke dompet lain, tidak dihitung sebagai pemasukan atau pengeluaran, saldo kedua dompet ikut berubah, ikut sinkron, tidak masuk budget dan grafik pengeluaran)
-  - [ ] Ganti label "Jam (opsional)" jadi "Waktu" (hanya teks label di form, field tetap boleh kosong, nama kolom CSV `jam` tidak diubah)
+  - [x] Ganti label "Jam (opsional)" jadi "Waktu" (hanya teks label di form, field tetap boleh kosong, nama kolom CSV `jam` tidak diubah)
   - [ ] Grafik pemasukan bulanan (bisa dipilih lewat toggle Pengeluaran / Pemasukan, transfer antar dompet tidak dihitung)
   - [ ] Diagram donut per kategori untuk bulan yang dipilih (pilihan pemasukan atau pengeluaran, transfer antar dompet tidak dihitung)
   - [ ] Mode tanpa login (cek semua fitur jalan tanpa login Google, status sinkron netral "Belum terhubung", tidak ada pesan error)
