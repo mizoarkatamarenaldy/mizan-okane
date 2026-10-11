@@ -10,6 +10,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Halaman syarat dan ketentuan
+- Ditambah: Halaman statis syarat dan ketentuan berbahasa Indonesia (`syarat.html`) dengan tampilan responsif untuk HP dan PC yang memuat ketentuan aplikasi pencatat keuangan pribadi gratis tanpa jaminan (as is), penegasan bukan layanan/nasihat keuangan dan tanggung jawab pengguna, penjelasan penyimpanan data lokal IndexedDB dan Google Drive appDataFolder tanpa server pihak ketiga, tanggung jawab pencadangan data mandiri via ekspor, login Google opsional, larangan penggunaan melanggar hukum, hak pembaruan syarat, tautan ke kebijakan privasi, kontak via GitHub Issues tanpa nama/email asli, dan tanggal pembaruan.
+- Ditambah: Tautan ke halaman syarat dan ketentuan pada bagian footer aplikasi bersebelahan dengan tautan kebijakan privasi (`index.html`).
+- Diubah: `sw.js` mendaftarkan `syarat.html` ke daftar aset cache dan naik ke versi `mizan-v22` agar halaman dapat diakses secara offline (`sw.js`).
+- Diubah: `PLAN.md` menambahkan dan mencentang fitur "Halaman syarat dan ketentuan" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Halaman kebijakan privasi
 - Ditambah: Halaman statis kebijakan privasi berbahasa Indonesia (`privasi.html`) yang memuat rincian penyimpanan data di IndexedDB & Google Drive `appDataFolder`, ketiadaan server pihak ketiga, rincian OAuth scope `drive.appdata`, ketiadaan iklan/pelacak/analitik, panduan hapus data & cabut izin akun Google, klausul kepatuhan Google API Services User Data Policy, tautan kontak via GitHub Issues, dan tanggal pembaruan.
 - Ditambah: Tautan ke halaman kebijakan privasi pada bagian footer aplikasi (`index.html`).
