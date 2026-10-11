@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Grafik pengeluaran bulanan
+- Ditambah: Bagian antarmuka grafik pengeluaran bulanan dengan judul, teks ringkasan rata-rata, rincian bulan aktif, dan area grafik (`index.html`).
+- Ditambah: Visualisasi grafik batang SVG tanpa library luar untuk menampilkan total pengeluaran per bulan, responsif di HP dan PC dengan dukungan scroll horizontal jika banyak bulan (`js/app.js`, `css/style.css`).
+- Ditambah: Agregasi data pengeluaran per bulan dari transaksi aktif (mengabaikan transaksi soft delete), perhitungan batas sumbu Y otomatis, dan tampilan pesan kosong saat belum ada pengeluaran (`js/app.js`).
+- Ditambah: Interaksi klik, sentuh di HP, dan navigasi keyboard pada batang grafik untuk memeriksa rincian pengeluaran per bulan (`js/app.js`, `css/style.css`).
+- Diubah: `sw.js` naik ke versi `mizan-v8` untuk memperbarui cache aset.
+- Diubah: `PLAN.md` mencentang fitur "Grafik pengeluaran bulanan" pada Tahap 5.
+
 ## 2026-10-10: Tahap 5: Konfirmasi hapus transaksi lewat UI web
 - Ditambah: Kotak dialog konfirmasi hapus transaksi di dalam halaman menggunakan elemen `<dialog>` dengan teks "Hapus transaksi ini?", tombol "Hapus", dan tombol "Batal" (`index.html`).
 - Ditambah: Gaya untuk `.confirm-dialog` dan `.btn-danger` yang selaras dengan tema, responsif untuk HP dan PC, serta mudah diketuk pada layar kecil (`css/style.css`).

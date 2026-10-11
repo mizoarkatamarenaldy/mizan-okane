@@ -324,3 +324,133 @@ button:focus-visible {
     min-height: 44px;
 }
 
+/* Grafik Pengeluaran Bulanan */
+.chart-section {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.chart-header h2 {
+    margin-bottom: 0;
+}
+
+.chart-summary-text {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.chart-detail {
+    font-size: 14px;
+    background: var(--bg);
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.chart-detail-month {
+    font-weight: 600;
+}
+
+.chart-detail-amount {
+    color: #c62828;
+    font-weight: 700;
+}
+
+.chart-detail-count {
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+.chart-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.chart-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.expense-chart {
+    display: block;
+    user-select: none;
+}
+
+.chart-grid-line {
+    stroke: var(--border);
+    stroke-width: 1;
+    stroke-dasharray: 3, 3;
+}
+
+.chart-axis-line {
+    stroke: var(--border);
+    stroke-width: 1.5;
+}
+
+.chart-axis-label {
+    fill: #555555;
+    font-size: 11px;
+    font-family: inherit;
+}
+
+.chart-bar-group {
+    cursor: pointer;
+}
+
+.chart-bar-group:focus-visible {
+    outline: none;
+}
+
+.chart-bar {
+    fill: var(--danger);
+    transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.chart-bar-group:hover .chart-bar,
+.chart-bar-group.is-selected .chart-bar {
+    fill: #c62828;
+}
+
+.chart-bar-group:focus-visible .chart-bar {
+    stroke: var(--text);
+    stroke-width: 2px;
+    fill: #c62828;
+}
+
+.chart-bar-value {
+    fill: #555555;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: inherit;
+}
+
+.chart-month-label {
+    fill: var(--text);
+    font-size: 12px;
+    font-family: inherit;
+}
+
+.chart-bar-group.is-selected .chart-month-label {
+    font-weight: 700;
+}
+
