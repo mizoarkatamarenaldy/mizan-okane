@@ -239,6 +239,30 @@
             </div>
         </section>
 
+        <section class="donut-section" aria-labelledby="donut-section-title">
+            <div class="donut-header">
+                <div class="donut-header-title">
+                    <h2 id="donut-section-title">Diagram Pengeluaran per Kategori</h2>
+                    <span id="donut-month-label" class="donut-month-label"></span>
+                </div>
+                <div class="donut-controls">
+                    <div class="donut-month-controls">
+                        <button type="button" id="btn-donut-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">&larr;</button>
+                        <input type="month" id="donut-month-input" class="donut-month-input" aria-label="Pilih bulan diagram kategori">
+                        <button type="button" id="btn-donut-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">&rarr;</button>
+                    </div>
+                    <div class="chart-toggle-group" role="group" aria-label="Pilihan jenis transaksi diagram kategori">
+                        <button type="button" id="btn-donut-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
+                        <button type="button" id="btn-donut-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
+                    </div>
+                </div>
+            </div>
+            <div id="donut-detail" class="chart-detail hidden" aria-live="polite"></div>
+            <div id="donut-container" class="donut-container">
+                <!-- Konten diagram donut SVG dan rincian kategori diisi lewat JS -->
+            </div>
+        </section>
+
         <section class="list-section">
             <div class="list-header">
                 <h2>Riwayat Transaksi</h2>

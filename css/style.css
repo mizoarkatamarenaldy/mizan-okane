@@ -538,6 +538,234 @@ button:focus-visible {
     font-weight: 700;
 }
 
+/* Diagram Donut per Kategori */
+.donut-section {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+}
+
+.donut-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.donut-header-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.donut-header-title h2 {
+    margin-bottom: 2px;
+}
+
+.donut-month-label {
+    font-size: 13px;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.donut-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.donut-month-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.donut-month-input {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text);
+    min-height: 40px;
+    width: auto;
+}
+
+.donut-container {
+    width: 100%;
+}
+
+.donut-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+
+@media (min-width: 520px) {
+    .donut-content {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+    }
+}
+
+.donut-svg-wrapper {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 0 auto;
+}
+
+.donut-chart-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.donut-bg-ring {
+    stroke: var(--border);
+    opacity: 0.35;
+}
+
+.donut-segment {
+    cursor: pointer;
+    transition: stroke-width 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+}
+
+.donut-segment:hover,
+.donut-segment.is-active {
+    stroke-width: 40;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.donut-segment:focus-visible {
+    outline: none;
+    stroke-width: 40;
+    filter: drop-shadow(0 0 0 2px var(--text));
+}
+
+.donut-chart-svg.has-active .donut-segment:not(.is-active) {
+    opacity: 0.55;
+}
+
+.donut-center-title {
+    fill: var(--text-light);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+}
+
+.donut-center-value {
+    fill: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+}
+
+.donut-center-sub {
+    fill: var(--text-light);
+    font-size: 11px;
+    font-weight: 500;
+    font-family: inherit;
+}
+
+.donut-legend {
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+}
+
+.donut-legend-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+}
+
+.donut-legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    cursor: pointer;
+    min-height: 44px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.donut-legend-item:hover,
+.donut-legend-item.is-active {
+    background: #eef2f6;
+    border-color: #9e9e9e;
+}
+
+.donut-legend-item:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 1px;
+}
+
+.donut-legend-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.donut-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.donut-legend-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.donut-legend-side {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.donut-legend-percent {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-light);
+    min-width: 38px;
+    text-align: right;
+}
+
+.donut-legend-amount {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+}
+
 /* Pengaturan Kategori */
 .category-section {
     background: var(--card-bg);

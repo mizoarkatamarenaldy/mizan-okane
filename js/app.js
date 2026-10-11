@@ -45,6 +45,16 @@ const chartContainer = document.getElementById('chart-container');
 const chartSummaryText = document.getElementById('chart-summary-text');
 const chartDetail = document.getElementById('chart-detail');
 
+const donutSectionTitle = document.getElementById('donut-section-title');
+const donutMonthLabel = document.getElementById('donut-month-label');
+const btnDonutPrevMonth = document.getElementById('btn-donut-prev-month');
+const donutMonthInput = document.getElementById('donut-month-input');
+const btnDonutNextMonth = document.getElementById('btn-donut-next-month');
+const btnDonutExpense = document.getElementById('btn-donut-expense');
+const btnDonutIncome = document.getElementById('btn-donut-income');
+const donutDetail = document.getElementById('donut-detail');
+const donutContainer = document.getElementById('donut-container');
+
 const budgetMonthLabel = document.getElementById('budget-month-label');
 const btnBudgetPrevMonth = document.getElementById('btn-budget-prev-month');
 const btnBudgetNextMonth = document.getElementById('btn-budget-next-month');
@@ -81,6 +91,24 @@ let currentWalletFilter = 'all';
 const LAST_WALLET_KEY = 'mizan-okane:last-wallet-id';
 let currentTimeFormat = DEFAULT_TIME_FORMAT;
 let currentChartType = 'expense';
+let currentDonutType = 'expense';
+let selectedDonutMonth = '';
+let activeDonutCategory = null;
+
+const DONUT_COLORS = [
+    '#2563eb', // Biru
+    '#e11d48', // Merah / Rose
+    '#059669', // Hijau Zamrud
+    '#d97706', // Jingga / Amber
+    '#7c3aed', // Ungu / Violet
+    '#0891b2', // Sian / Cyan
+    '#db2777', // Merah Muda / Pink
+    '#4f46e5', // Nila / Indigo
+    '#65a30d', // Limau / Lime
+    '#c026d3', // Fuchsia
+    '#0d9488', // Teal
+    '#ea580c'  // Oranye Tua
+];
 
 let selectedBudgetMonth = '';
 let currentBudgets = {
@@ -846,6 +874,359 @@ function renderExpenseChart(transactions) {
     renderMonthlyChart(transactions);
 }
 
+function shiftDonutMonth(delta) {
+    if (!selectedDonutMonth) {
+        selectedDonutMonth = getLocalYearMonthString();
+    }
+    const [yStr, mStr] = selectedDonutMonth.split('-');
+    let y = parseInt(yStr, 10);
+    let m = parseInt(mStr, 10) + delta;
+    if (m < 1) {
+        m = 12;
+        y--;
+    } else if (m > 12) {
+        m = 1;
+        y++;
+    }
+    selectedDonutMonth = `${y}-${String(m).padStart(2, '0')}`;
+    activeDonutCategory = null;
+    if (donutMonthInput) {
+        donutMonthInput.value = selectedDonutMonth;
+    }
+    renderDonutChart(currentTransactions);
+}
+
+function updateDonutTypeUI() {
+    const isIncome = currentDonutType === 'income';
+    if (btnDonutExpense) {
+        btnDonutExpense.classList.toggle('is-active', !isIncome);
+        btnDonutExpense.setAttribute('aria-pressed', String(!isIncome));
+    }
+    if (btnDonutIncome) {
+        btnDonutIncome.classList.toggle('is-active', isIncome);
+        btnDonutIncome.setAttribute('aria-pressed', String(isIncome));
+    }
+    if (donutSectionTitle) {
+        donutSectionTitle.textContent = isIncome ? 'Diagram Pemasukan per Kategori' : 'Diagram Pengeluaran per Kategori';
+    }
+}
+
+function renderDonutChart(transactions) {
+    if (!donutContainer) return;
+
+    if (!selectedDonutMonth) {
+        selectedDonutMonth = getLocalYearMonthString();
+    }
+
+    if (donutMonthInput && donutMonthInput.value !== selectedDonutMonth) {
+        donutMonthInput.value = selectedDonutMonth;
+    }
+
+    if (donutMonthLabel) {
+        const [yStr, mStr] = selectedDonutMonth.split('-');
+        const mNum = parseInt(mStr, 10);
+        const monthName = INDO_MONTHS_FULL[mNum - 1] || '';
+        donutMonthLabel.textContent = `${monthName} ${yStr}`;
+    }
+
+    updateDonutTypeUI();
+
+    const isIncome = currentDonutType === 'income';
+    const typeLabel = isIncome ? 'pemasukan' : 'pengeluaran';
+
+    // Filter transaksi untuk bulan yang dipilih sesuai tipe (pengeluaran atau pemasukan),
+    // transfer antar dompet tidak dihitung, tidak terhapus, dan jumlah > 0
+    const monthTx = (transactions || []).filter(tx => {
+        if (tx.type !== currentDonutType) return false;
+        if (tx.type === 'transfer') return false;
+        if (tx.deleted) return false;
+        if (!(tx.amount > 0)) return false;
+        if (!tx.date) return false;
+        const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
+        if (!match) return false;
+        const year = match[1];
+        const month = String(parseInt(match[2], 10)).padStart(2, '0');
+        return `${year}-${month}` === selectedDonutMonth;
+    });
+
+    if (monthTx.length === 0) {
+        donutContainer.innerHTML = `<p class="chart-empty">Belum ada transaksi ${typeLabel} pada bulan ini.</p>`;
+        if (donutDetail) {
+            donutDetail.textContent = '';
+            donutDetail.classList.add('hidden');
+        }
+        activeDonutCategory = null;
+        return;
+    }
+
+    // Kelompokkan per kategori
+    const categoryMap = new Map();
+    let totalAmount = 0;
+    for (const tx of monthTx) {
+        const cat = (tx.category && tx.category.trim()) ? tx.category.trim() : 'Lainnya';
+        const item = categoryMap.get(cat) || { amount: 0, count: 0 };
+        item.amount += tx.amount;
+        item.count += 1;
+        categoryMap.set(cat, item);
+        totalAmount += tx.amount;
+    }
+
+    if (totalAmount <= 0) {
+        donutContainer.innerHTML = `<p class="chart-empty">Belum ada transaksi ${typeLabel} pada bulan ini.</p>`;
+        if (donutDetail) {
+            donutDetail.textContent = '';
+            donutDetail.classList.add('hidden');
+        }
+        activeDonutCategory = null;
+        return;
+    }
+
+    const sortedCategories = Array.from(categoryMap.entries())
+        .sort((a, b) => b[1].amount - a[1].amount)
+        .map(([category, data], index) => {
+            const percentage = totalAmount > 0 ? (data.amount / totalAmount) * 100 : 0;
+            return {
+                category,
+                amount: data.amount,
+                count: data.count,
+                percentage,
+                color: DONUT_COLORS[index % DONUT_COLORS.length]
+            };
+        });
+
+    if (activeDonutCategory && !sortedCategories.some(c => c.category === activeDonutCategory)) {
+        activeDonutCategory = null;
+    }
+
+    function formatPercent(pct) {
+        if (pct < 0.1 && pct > 0) return '< 0.1%';
+        return (pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)) + '%';
+    }
+
+    function updateDonutDetail(catItem) {
+        if (!donutDetail) return;
+        donutDetail.classList.remove('hidden');
+        const amountClass = isIncome ? 'chart-detail-amount income' : 'chart-detail-amount';
+        if (!catItem) {
+            donutDetail.innerHTML = `
+                <span class="chart-detail-month">Total ${typeLabel}:</span>
+                <strong class="${amountClass}">${currencyFormatter.format(totalAmount)}</strong>
+                <span class="chart-detail-count">(${sortedCategories.length} kategori, ${monthTx.length} transaksi)</span>
+            `;
+        } else {
+            donutDetail.innerHTML = `
+                <span class="chart-detail-month">${escapeHTML(catItem.category)}:</span>
+                <strong class="${amountClass}">${currencyFormatter.format(catItem.amount)}</strong>
+                <span class="chart-detail-count">(${formatPercent(catItem.percentage)} - ${catItem.count} transaksi)</span>
+            `;
+        }
+    }
+
+    const radius = 75;
+    const circumference = 2 * Math.PI * radius;
+    const n = sortedCategories.length;
+    const gap = n > 1 ? 2 : 0;
+    let accumulatedOffset = 0;
+    let segmentsHtml = '';
+
+    for (const cat of sortedCategories) {
+        const segLength = (cat.amount / totalAmount) * circumference;
+        const visibleLength = n > 1 ? Math.max(0.5, segLength - gap) : circumference;
+        const dashArray = n > 1 ? `${visibleLength} ${circumference - visibleLength}` : `${circumference} 0`;
+        const dashOffset = -accumulatedOffset;
+        accumulatedOffset += segLength;
+
+        const percentStr = formatPercent(cat.percentage);
+        const isSelected = activeDonutCategory === cat.category;
+
+        segmentsHtml += `
+            <circle
+                class="donut-segment ${isSelected ? 'is-active' : ''}"
+                cx="110"
+                cy="110"
+                r="75"
+                fill="none"
+                stroke="${cat.color}"
+                stroke-width="34"
+                stroke-dasharray="${dashArray}"
+                stroke-dashoffset="${dashOffset}"
+                transform="rotate(-90 110 110)"
+                data-category="${escapeHTML(cat.category)}"
+                tabindex="0"
+                role="button"
+                aria-label="${escapeHTML(cat.category)}: ${currencyFormatter.format(cat.amount)} (${percentStr})">
+            </circle>
+        `;
+    }
+
+    const selectedCatObj = activeDonutCategory
+        ? sortedCategories.find(c => c.category === activeDonutCategory)
+        : null;
+
+    updateDonutDetail(selectedCatObj);
+
+    const centerTitleText = selectedCatObj
+        ? (selectedCatObj.category.length > 13 ? escapeHTML(selectedCatObj.category.slice(0, 11)) + '…' : escapeHTML(selectedCatObj.category))
+        : 'Total';
+    const centerValueText = selectedCatObj ? formatCompactCurrency(selectedCatObj.amount) : formatCompactCurrency(totalAmount);
+    const centerSubText = selectedCatObj
+        ? formatPercent(selectedCatObj.percentage)
+        : `${sortedCategories.length} kategori`;
+
+    let legendHtml = '<ul class="donut-legend-list" role="list" aria-label="Rincian kategori">';
+    for (const cat of sortedCategories) {
+        const isSelected = activeDonutCategory === cat.category;
+        const percentStr = formatPercent(cat.percentage);
+        legendHtml += `
+            <li class="donut-legend-item ${isSelected ? 'is-active' : ''}"
+                data-category="${escapeHTML(cat.category)}"
+                tabindex="0"
+                role="button"
+                aria-label="${escapeHTML(cat.category)}: ${currencyFormatter.format(cat.amount)} (${percentStr})">
+                <div class="donut-legend-main">
+                    <span class="donut-legend-color" style="background-color: ${cat.color}"></span>
+                    <span class="donut-legend-name" title="${escapeHTML(cat.category)}">${escapeHTML(cat.category)}</span>
+                </div>
+                <div class="donut-legend-side">
+                    <span class="donut-legend-percent">${percentStr}</span>
+                    <strong class="donut-legend-amount">${currencyFormatter.format(cat.amount)}</strong>
+                </div>
+            </li>
+        `;
+    }
+    legendHtml += '</ul>';
+
+    donutContainer.innerHTML = `
+        <div class="donut-content">
+            <div class="donut-svg-wrapper">
+                <svg class="donut-chart-svg ${activeDonutCategory ? 'has-active' : ''}"
+                     viewBox="0 0 220 220"
+                     role="img"
+                     aria-label="Diagram donut per kategori untuk ${typeLabel}">
+                    <circle cx="110" cy="110" r="75" fill="none" stroke-width="34" class="donut-bg-ring" />
+                    ${segmentsHtml}
+                    <g class="donut-center-group" aria-hidden="true">
+                        <text x="110" y="98" text-anchor="middle" class="donut-center-title" id="donut-center-title">${centerTitleText}</text>
+                        <text x="110" y="118" text-anchor="middle" class="donut-center-value" id="donut-center-value">${centerValueText}</text>
+                        <text x="110" y="134" text-anchor="middle" class="donut-center-sub" id="donut-center-sub">${centerSubText}</text>
+                    </g>
+                </svg>
+            </div>
+            <div class="donut-legend">
+                ${legendHtml}
+            </div>
+        </div>
+    `;
+
+    const segments = donutContainer.querySelectorAll('.donut-segment');
+    const legendItems = donutContainer.querySelectorAll('.donut-legend-item');
+    const svgEl = donutContainer.querySelector('.donut-chart-svg');
+    const centerTitleEl = donutContainer.querySelector('#donut-center-title');
+    const centerValueEl = donutContainer.querySelector('#donut-center-value');
+    const centerSubEl = donutContainer.querySelector('#donut-center-sub');
+
+    function highlightCategory(catName) {
+        const catObj = sortedCategories.find(c => c.category === catName);
+        if (catObj) {
+            if (centerTitleEl) {
+                const displayName = catObj.category.length > 13 ? catObj.category.slice(0, 11) + '…' : catObj.category;
+                centerTitleEl.textContent = displayName;
+            }
+            if (centerValueEl) centerValueEl.textContent = formatCompactCurrency(catObj.amount);
+            if (centerSubEl) centerSubEl.textContent = formatPercent(catObj.percentage);
+            updateDonutDetail(catObj);
+            if (svgEl) svgEl.classList.add('has-active');
+            segments.forEach(seg => seg.classList.toggle('is-active', seg.dataset.category === catName));
+            legendItems.forEach(item => item.classList.toggle('is-active', item.dataset.category === catName));
+        } else {
+            if (centerTitleEl) centerTitleEl.textContent = 'Total';
+            if (centerValueEl) centerValueEl.textContent = formatCompactCurrency(totalAmount);
+            if (centerSubEl) centerSubEl.textContent = `${sortedCategories.length} kategori`;
+            updateDonutDetail(null);
+            if (svgEl) svgEl.classList.remove('has-active');
+            segments.forEach(seg => seg.classList.remove('is-active'));
+            legendItems.forEach(item => item.classList.remove('is-active'));
+        }
+    }
+
+    function toggleCategory(catName) {
+        if (activeDonutCategory === catName) {
+            activeDonutCategory = null;
+            highlightCategory(null);
+        } else {
+            activeDonutCategory = catName;
+            highlightCategory(catName);
+        }
+    }
+
+    segments.forEach(seg => {
+        const catName = seg.dataset.category;
+        seg.addEventListener('mouseenter', () => {
+            if (!activeDonutCategory) highlightCategory(catName);
+        });
+        seg.addEventListener('mouseleave', () => {
+            if (!activeDonutCategory) highlightCategory(null);
+        });
+        seg.addEventListener('focus', () => {
+            if (!activeDonutCategory) highlightCategory(catName);
+        });
+        seg.addEventListener('blur', () => {
+            if (!activeDonutCategory) highlightCategory(null);
+        });
+        seg.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleCategory(catName);
+        });
+        seg.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleCategory(catName);
+            } else if (e.key === 'Escape') {
+                activeDonutCategory = null;
+                highlightCategory(null);
+            }
+        });
+    });
+
+    legendItems.forEach(item => {
+        const catName = item.dataset.category;
+        item.addEventListener('mouseenter', () => {
+            if (!activeDonutCategory) highlightCategory(catName);
+        });
+        item.addEventListener('mouseleave', () => {
+            if (!activeDonutCategory) highlightCategory(null);
+        });
+        item.addEventListener('focus', () => {
+            if (!activeDonutCategory) highlightCategory(catName);
+        });
+        item.addEventListener('blur', () => {
+            if (!activeDonutCategory) highlightCategory(null);
+        });
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleCategory(catName);
+        });
+        item.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleCategory(catName);
+            } else if (e.key === 'Escape') {
+                activeDonutCategory = null;
+                highlightCategory(null);
+            }
+        });
+    });
+
+    donutContainer.addEventListener('click', (e) => {
+        if (!e.target.closest('.donut-segment') && !e.target.closest('.donut-legend-item')) {
+            if (activeDonutCategory) {
+                activeDonutCategory = null;
+                highlightCategory(null);
+            }
+        }
+    });
+}
+
 function render() {
     txListContainer.innerHTML = '';
     
@@ -955,6 +1336,7 @@ function render() {
 
     renderMonthlyChart(currentTransactions);
     renderBudgetSection();
+    renderDonutChart(currentTransactions);
 
     // Attach event listeners to generated buttons
     document.querySelectorAll('.btn-edit').forEach(btn => {
@@ -2212,6 +2594,7 @@ async function init() {
         currentBudgets = await getBudgets();
         currentWallets = await getWallets();
         selectedBudgetMonth = getLocalYearMonthString();
+        selectedDonutMonth = getLocalYearMonthString();
         resetForm(); // Set default date, kategori, dan dompet
         await loadData();
     } catch (error) {
@@ -2323,6 +2706,44 @@ async function init() {
             if (currentChartType !== 'income') {
                 currentChartType = 'income';
                 renderMonthlyChart(currentTransactions);
+            }
+        });
+    }
+
+    if (btnDonutPrevMonth) {
+        btnDonutPrevMonth.addEventListener('click', () => shiftDonutMonth(-1));
+    }
+
+    if (btnDonutNextMonth) {
+        btnDonutNextMonth.addEventListener('click', () => shiftDonutMonth(1));
+    }
+
+    if (donutMonthInput) {
+        donutMonthInput.addEventListener('change', () => {
+            if (donutMonthInput.value) {
+                selectedDonutMonth = donutMonthInput.value;
+                activeDonutCategory = null;
+                renderDonutChart(currentTransactions);
+            }
+        });
+    }
+
+    if (btnDonutExpense) {
+        btnDonutExpense.addEventListener('click', () => {
+            if (currentDonutType !== 'expense') {
+                currentDonutType = 'expense';
+                activeDonutCategory = null;
+                renderDonutChart(currentTransactions);
+            }
+        });
+    }
+
+    if (btnDonutIncome) {
+        btnDonutIncome.addEventListener('click', () => {
+            if (currentDonutType !== 'income') {
+                currentDonutType = 'income';
+                activeDonutCategory = null;
+                renderDonutChart(currentTransactions);
             }
         });
     }

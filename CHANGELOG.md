@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Diagram donut per kategori
+- Ditambah: Bagian antarmuka diagram donut per kategori dengan navigasi bulan (tombol bulan sebelumnya/berikutnya dan input bulan) serta toggle pilihan jenis transaksi Pengeluaran atau Pemasukan (`index.html`).
+- Ditambah: Visualisasi diagram donut SVG berbasis proporsi kategori untuk bulan yang dipilih dengan lingkaran donut interaktif, label total/kategori di tengah, dan daftar rincian kategori beserta persentase dan nominal uang (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Interaksi klik, hover, dan navigasi keyboard (Tab, Enter, Spasi, Escape) pada segmen donut dan daftar rincian untuk menyorot kategori dan menampilkan detail transaksi (`js/app.js`, `css/style.css`).
+- Diubah: Pemfilteran transaksi diagram donut secara ketat mengecualikan transfer antar dompet, transaksi terhapus, transaksi bernilai nol, serta membatasi hanya pada bulan dan jenis transaksi yang dipilih (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v19` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur diagram donut per kategori untuk bulan yang dipilih pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Angka uang pakai titik pemisah ribuan
 - Ditambah: Fungsi pemformat bersama `formatNumber`, `parseAmount`, dan `formatCurrency` untuk menampilkan angka dan nilai uang dengan pemisah ribuan titik sesuai format Indonesia (`js/app.js`).
 - Ditambah: Penanganan otomatis pemisah ribuan pada input jumlah uang di form tambah, form edit, form transfer antar dompet, dan form budget (`index.html`, `js/app.js`).
