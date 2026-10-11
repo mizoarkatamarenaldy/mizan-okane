@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Halaman kebijakan privasi
+- Ditambah: Halaman statis kebijakan privasi berbahasa Indonesia (`privasi.html`) yang memuat rincian penyimpanan data di IndexedDB & Google Drive `appDataFolder`, ketiadaan server pihak ketiga, rincian OAuth scope `drive.appdata`, ketiadaan iklan/pelacak/analitik, panduan hapus data & cabut izin akun Google, klausul kepatuhan Google API Services User Data Policy, tautan kontak via GitHub Issues, dan tanggal pembaruan.
+- Ditambah: Tautan ke halaman kebijakan privasi pada bagian footer aplikasi (`index.html`).
+- Ditambah: Styling halaman kebijakan privasi dan footer aplikasi yang responsif untuk tampilan HP dan PC (`css/style.css`).
+- Diubah: `sw.js` mendaftarkan `privasi.html` ke daftar aset cache dan naik ke versi `mizan-v21` agar halaman dapat diakses secara offline (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur "Halaman kebijakan privasi" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Mode tanpa login
 - Ditambah: Pengujian otomatis komprehensif mode tanpa login untuk memastikan seluruh alur fitur berjalan normal tanpa akun Google (tambah dompet, tambah kategori pengeluaran dan pemasukan, tambah transaksi, transfer antar dompet, edit transaksi, hapus transaksi soft delete dengan modal konfirmasi, grafik batang bulanan, diagram donut kategori, ekspor CSV, ekspor JSON, dan impor JSON).
 - Dipastikan: Status sinkronisasi netral ("Belum login. Data hanya tersimpan di perangkat ini.") tanpa pesan error dan tanpa runtime exception.

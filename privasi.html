@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kebijakan Privasi - Mizan Okane</title>
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="privacy-nav-top" aria-label="Navigasi kembali">
+            <a href="index.html" class="btn-back-link">&larr; Kembali ke Aplikasi</a>
+        </nav>
+
+        <main class="privacy-card">
+            <header class="privacy-header">
+                <h1>Kebijakan Privasi</h1>
+                <p class="privacy-updated">Terakhir diperbarui: 11 Oktober 2026</p>
+            </header>
+
+            <section class="privacy-section">
+                <h2>1. Penyimpanan Data</h2>
+                <p>Mizan Okane dirancang dengan prinsip bahwa data keuangan Anda adalah milik pribadi Anda sepenuhnya. Data disimpan dengan cara berikut:</p>
+                <ul>
+                    <li><strong>Penyimpanan Lokal (IndexedDB):</strong> Seluruh data transaksi, dompet, kategori, dan budget disimpan langsung di perangkat Anda menggunakan IndexedDB browser. Data ini memungkinkan aplikasi berfungsi penuh saat offline (tanpa koneksi internet).</li>
+                    <li><strong>Folder Tersembunyi Google Drive (appDataFolder):</strong> Jika Anda mengaktifkan sinkronisasi Google Drive, berkas data cadangan disimpan di folder khusus aplikasi yang tersembunyi (<code>appDataFolder</code>) di akun Google Drive milik Anda sendiri.</li>
+                </ul>
+            </section>
+
+            <section class="privacy-section">
+                <h2>2. Tidak Ada Server Pihak Ketiga</h2>
+                <p>Aplikasi ini berjalan sepenuhnya di sisi klien (client-side) tanpa server perantara atau server pihak ketiga.</p>
+                <p>Pengembang aplikasi tidak dapat melihat, menyimpan, mengumpulkan, ataupun mengirim data keuangan pengguna ke mana pun. Semua proses pengolahan data transaksi berlangsung langsung di perangkat Anda.</p>
+            </section>
+
+            <section class="privacy-section">
+                <h2>3. Penggunaan Akun Google dan Izin (Scope)</h2>
+                <p>Login Google bersifat opsional dan hanya dipakai untuk keperluan sinkronisasi data antar perangkat Anda.</p>
+                <p>Izin (OAuth scope) yang diminta oleh aplikasi:</p>
+                <p><code>https://www.googleapis.com/auth/drive.appdata</code></p>
+                <p><strong>Fungsi scope dalam bahasa awam:</strong> Izin ini hanya memberikan akses ke folder tersembunyi khusus aplikasi (Application Data folder) di dalam Google Drive Anda. Aplikasi hanya dapat membaca, membuat, dan memperbarui berkas cadangannya sendiri di folder khusus tersebut. Aplikasi sama sekali tidak memiliki izin untuk melihat, membaca, mengakses, mengubah, ataupun menghapus berkas, foto, dokumen, atau folder lain di Google Drive Anda.</p>
+                <p>Alamat email Google Anda hanya dibaca untuk menampilkan informasi akun yang sedang terhubung di aplikasi dan mempermudah proses masuk kembali. Token otorisasi hanya disimpan sementara di memori peramban selama aplikasi dibuka dan tidak disimpan secara permanen di penyimpanan perangkat.</p>
+            </section>
+
+            <section class="privacy-section">
+                <h2>4. Tanpa Iklan, Pelacak, atau Analitik</h2>
+                <p>Aplikasi ini bebas dari segala bentuk iklan, pelacak (trackers), maupun layanan analitik pihak ketiga (seperti Google Analytics). Tidak ada aktivitas penelusuran perilaku atau pengumpulan data statistik penggunaan aplikasi.</p>
+            </section>
+
+            <section class="privacy-section">
+                <h2>5. Cara Menghapus Data</h2>
+                <p>Karena seluruh data hanya berada di perangkat Anda dan di Google Drive pribadi Anda, Anda dapat menghapus data sepenuhnya kapan saja:</p>
+                <ol>
+                    <li><strong>Hapus data lokal di perangkat:</strong> Hapus data penjelajahan dan penyimpanan situs untuk Mizan Okane melalui pengaturan peramban (browser) Anda. Jika diinstal sebagai aplikasi (PWA), Anda dapat menghapus penyimpanan aplikasi melalui pengaturan perangkat atau melakukan uninstall (copot pemasangan) aplikasi.</li>
+                    <li><strong>Hapus data cadangan di Google Drive:</strong> Buka Google Drive di komputer atau browser (drive.google.com) &rarr; klik ikon Gerigi (Setelan) &rarr; pilih <em>Setelan</em> &rarr; pilih <em>Kelola Aplikasi</em> (Manage Apps) &rarr; cari <em>Mizan Okane</em> &rarr; klik <em>Opsi</em> &rarr; pilih <em>Hapus data aplikasi tersembunyi</em> (Delete hidden app data).</li>
+                    <li><strong>Cabut akses aplikasi dari akun Google:</strong> Buka halaman keamanan akun Google di <a href="https://myaccount.google.com/connections" target="_blank" rel="noopener noreferrer">myaccount.google.com/connections</a> &rarr; pilih <em>Mizan Okane</em> &rarr; klik <em>Hapus Akses</em> atau <em>Cabut Akses</em>.</li>
+                </ol>
+            </section>
+
+            <section class="privacy-section">
+                <h2>6. Kepatuhan Kebijakan Data Pengguna Google API</h2>
+                <p class="privacy-quote">The app's use and transfer of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements.</p>
+            </section>
+
+            <section class="privacy-section">
+                <h2>7. Kontak</h2>
+                <p>Jika Anda memiliki pertanyaan atau kendala terkait privasi, silakan buka laporan atau diskusi melalui halaman Issues repositori GitHub proyek ini:</p>
+                <p><a href="https://github.com/mizoarkatamarenaldy/mizan-okane/issues" target="_blank" rel="noopener noreferrer">Halaman Issues GitHub Mizan Okane</a></p>
+            </section>
+
+            <footer class="app-footer">
+                <a href="index.html" class="footer-link">&larr; Kembali ke Aplikasi</a>
+            </footer>
+        </main>
+    </div>
+</body>
+</html>

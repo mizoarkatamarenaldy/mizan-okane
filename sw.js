@@ -1,7 +1,8 @@
-const CACHE_NAME = 'mizan-v20';
+const CACHE_NAME = 'mizan-v21';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './privasi.html',
   './css/style.css',
   './js/app.js',
   './js/db.js',

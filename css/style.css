@@ -1311,3 +1311,134 @@ button:focus-visible {
     font-size: 13px;
     margin-top: 6px;
 }
+
+/* Footer */
+.app-footer {
+    text-align: center;
+    padding: 16px 0 24px;
+    margin-top: 8px;
+}
+
+.footer-link {
+    color: var(--text-light);
+    font-size: 14px;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.footer-link:hover,
+.footer-link:focus-visible {
+    color: var(--primary);
+}
+
+/* Halaman Kebijakan Privasi */
+.privacy-card {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+}
+
+.privacy-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.privacy-header h1 {
+    font-size: 24px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.privacy-updated {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.privacy-section {
+    margin-bottom: 24px;
+}
+
+.privacy-section:last-child {
+    margin-bottom: 0;
+}
+
+.privacy-section h2 {
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.privacy-section p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.privacy-section ul,
+.privacy-section ol {
+    margin-left: 20px;
+    margin-bottom: 12px;
+}
+
+.privacy-section li {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.privacy-section a {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.privacy-section a:hover,
+.privacy-section a:focus-visible {
+    color: #3d8b40;
+}
+
+.privacy-section code {
+    background: #eef2f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: monospace;
+    word-break: break-all;
+}
+
+.privacy-quote {
+    background: #f0fdf4;
+    border-left: 4px solid var(--primary);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1e3a1e;
+}
+
+.privacy-nav-top {
+    margin-bottom: 16px;
+}
+
+.btn-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 6px 0;
+}
+
+.btn-back-link:hover,
+.btn-back-link:focus-visible {
+    text-decoration: underline;
+}
+
