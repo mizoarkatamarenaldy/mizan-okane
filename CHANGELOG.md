@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Budget per kategori
+- Ditambah: Model data budget per kategori pengeluaran dengan fungsi `getBudgets` dan `saveBudgets` pada store `meta` IndexedDB (`js/db.js`).
+- Ditambah: Bagian antarmuka budget per kategori di halaman utama dengan pemilihan bulan (default bulan berjalan, tombol bulan sebelumnya/berikutnya, dan input pemilih bulan), ringkasan total budget, kartu status per kategori (budget, terpakai, dan sisa), serta bar progres dengan tiga status warna (normal <80%, peringatan 80-100%, dan merah >100% dengan teks "Lebih Rp ...") (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Bagian pengaturan budget di bawah pengaturan kategori untuk mengisi, mengubah (inline edit), dan mengosongkan/menghapus budget per kategori pengeluaran dengan konfirmasi dialog web (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Dukungan sinkronisasi data budget ke Google Drive (`appDataFolder`) dengan aturan konflik waktu ubah (`updatedAt`) terbaru menang, serta toleransi terhadap file cadangan Drive lama yang belum memiliki data budget (`js/sync.js`).
+- Diubah: Ekspor JSON menyertakan objek `budgets` bersama data transaksi dan kategori (`js/app.js`).
+- Diubah: Pertahanan nama budget lama saat kategori pengeluaran dihapus atau diganti nama, tetap dapat dilihat dan dihapus di pengaturan budget (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v10` untuk memperbarui cache aset.
+- Diubah: `PLAN.md` mencentang fitur "Budget per kategori" pada Tahap 5.
+
 ## 2026-10-11: Tahap 5: Pisah kategori pemasukan dan pengeluaran
 - Ditambah: Dua daftar kategori default terpisah untuk pemasukan (Gaji, Bonus, Hadiah, Lainnya) dan pengeluaran (Makan, Transport, Hiburan, Belanja, Tagihan, Lainnya), serta fungsi `getCategories` dan `saveCategories` pada IndexedDB (`js/db.js`).
 - Ditambah: Bagian antarmuka pengaturan kategori di halaman web dengan daftar kategori pemasukan dan pengeluaran, formulir penambahan kategori, ubah nama kategori secara inline, dan tombol hapus kategori (`index.html`, `js/app.js`, `css/style.css`).

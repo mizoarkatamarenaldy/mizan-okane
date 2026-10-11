@@ -141,3 +141,53 @@ export function saveCategories(categories) {
   });
 }
 
+export const DEFAULT_BUDGETS = {
+  items: {},
+  updatedAt: 0
+};
+
+export function getBudgets() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([META_STORE], 'readonly');
+    const request = transaction.objectStore(META_STORE).get('budgets');
+    request.onsuccess = (event) => {
+      const stored = event.target.result;
+      if (stored && typeof stored === 'object' && stored.items && typeof stored.items === 'object' && !Array.isArray(stored.items)) {
+        resolve(stored);
+      } else {
+        const initial = {
+          items: {},
+          updatedAt: 0
+        };
+        const writeTx = db.transaction([META_STORE], 'readwrite');
+        writeTx.objectStore(META_STORE).put(initial, 'budgets');
+        writeTx.oncomplete = () => resolve(initial);
+        writeTx.onerror = () => resolve(initial);
+      }
+    };
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+export function saveBudgets(budgets) {
+  return new Promise((resolve, reject) => {
+    const cleanItems = {};
+    if (budgets && typeof budgets.items === 'object' && !Array.isArray(budgets.items)) {
+      for (const [k, v] of Object.entries(budgets.items)) {
+        const num = Number(v);
+        if (k && Number.isFinite(num) && num > 0) {
+          cleanItems[k] = Math.round(num);
+        }
+      }
+    }
+    const toSave = {
+      items: cleanItems,
+      updatedAt: typeof budgets?.updatedAt === 'number' ? budgets.updatedAt : Date.now()
+    };
+    const transaction = db.transaction([META_STORE], 'readwrite');
+    const request = transaction.objectStore(META_STORE).put(toSave, 'budgets');
+    request.onsuccess = () => resolve(toSave);
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+

@@ -97,6 +97,24 @@
             </form>
         </section>
 
+        <section class="budget-section" aria-labelledby="budget-section-title">
+            <div class="budget-header">
+                <div class="budget-header-title">
+                    <h2 id="budget-section-title">Budget per Kategori</h2>
+                    <span id="budget-month-label" class="budget-month-label"></span>
+                </div>
+                <div class="budget-month-controls">
+                    <button type="button" id="btn-budget-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">&larr;</button>
+                    <input type="month" id="budget-month-input" class="budget-month-input" aria-label="Pilih bulan budget">
+                    <button type="button" id="btn-budget-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">&rarr;</button>
+                </div>
+            </div>
+            <div id="budget-summary-banner" class="budget-summary-banner hidden" aria-live="polite"></div>
+            <div id="budget-list" class="budget-list">
+                <!-- Data budget per kategori diisi lewat JS -->
+            </div>
+        </section>
+
         <section class="chart-section" aria-labelledby="chart-section-title">
             <div class="chart-header">
                 <h2 id="chart-section-title">Grafik Pengeluaran Bulanan</h2>
@@ -116,7 +134,7 @@
         </section>
 
         <section class="category-section" aria-labelledby="category-section-title">
-            <h2 id="category-section-title">Pengaturan Kategori</h2>
+            <h2 id="category-section-title">Pengaturan Kategori &amp; Budget</h2>
             <div class="category-grid">
                 <div class="category-card">
                     <h3 class="category-group-title expense">Pengeluaran</h3>
@@ -134,6 +152,21 @@
                         <button type="submit" class="btn-primary btn-small">Tambah</button>
                     </form>
                 </div>
+            </div>
+
+            <div class="budget-settings-card">
+                <h3 class="category-group-title expense">Budget Pengeluaran Bulanan</h3>
+                <p class="budget-settings-desc">Batas pengeluaran per bulan untuk tiap kategori pengeluaran (berlaku terus setiap bulan).</p>
+                <ul id="budget-settings-list" class="category-items" aria-label="Daftar budget per kategori"></ul>
+                <form id="form-set-budget" class="budget-add-form">
+                    <div class="budget-form-row">
+                        <select id="select-budget-cat" required aria-label="Pilih kategori pengeluaran untuk budget">
+                            <option value="" disabled selected>Pilih kategori pengeluaran</option>
+                        </select>
+                        <input type="number" id="input-budget-amount" placeholder="Batas bulanan (Rp)..." min="1" step="1" required aria-label="Batas bulanan dalam rupiah">
+                        <button type="submit" class="btn-primary btn-small">Simpan</button>
+                    </div>
+                </form>
             </div>
         </section>
     </div>
