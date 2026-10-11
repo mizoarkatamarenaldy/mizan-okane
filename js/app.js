@@ -14,7 +14,6 @@ const txTimeHourSelect = document.getElementById('tx-time-hour');
 const txTimeMinuteSelect = document.getElementById('tx-time-minute');
 const txTimeAmpmSelect = document.getElementById('tx-time-ampm');
 const txTimeLabel = document.getElementById('tx-time-label');
-const btnClearTime = document.getElementById('btn-clear-time');
 const timeFormatRadios = document.getElementsByName('time-format-setting');
 const txAmountInput = document.getElementById('tx-amount');
 const txWalletLabel = document.getElementById('tx-wallet-label');
@@ -2182,12 +2181,6 @@ async function init() {
                 currentChartType = 'income';
                 renderMonthlyChart(currentTransactions);
             }
-        });
-    }
-
-    if (btnClearTime) {
-        btnClearTime.addEventListener('click', () => {
-            setTimeValueToForm('');
         });
     }
 

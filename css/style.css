@@ -1060,37 +1060,6 @@ button:focus-visible {
 }
 
 /* Form Waktu: 24 jam & 12 jam */
-.time-label-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.time-label-wrapper label {
-    margin-bottom: 0;
-}
-
-.btn-clear-time {
-    background: none;
-    border: none;
-    color: var(--text-light);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 2px 8px;
-    border-radius: 4px;
-    text-decoration: underline;
-    width: auto;
-    flex: none;
-}
-
-.btn-clear-time:hover,
-.btn-clear-time:focus-visible {
-    color: var(--danger);
-    background-color: rgba(239, 68, 68, 0.08);
-}
-
 .time-input-12 {
     display: flex;
     align-items: center;

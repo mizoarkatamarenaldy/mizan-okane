@@ -9,6 +9,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diperbaiki: ...
 - Diubah: ...
 ```
+## 2026-10-11: Tahap 5: Perbaikan hapus tombol Kosongkan di field Waktu
+- Dihapus: Tombol "Kosongkan" di sebelah label "Waktu" pada formulir transaksi beserta elemen pembungkus `.time-label-wrapper` (`index.html`).
+- Dihapus: Aturan CSS `.time-label-wrapper` dan `.btn-clear-time` (`css/style.css`).
+- Dihapus: Referensi elemen DOM dan event listener untuk `btnClearTime` (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v16` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencatat dan mencentang perbaikan hapus tombol "Kosongkan" di field Waktu pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Grafik pemasukan bulanan
 - Ditambah: Toggle "Pengeluaran / Pemasukan" pada header grafik bulanan untuk beralih antara grafik pengeluaran dan grafik pemasukan (`index.html`, `js/app.js`, `css/style.css`).
 - Ditambah: Dukungan grafik pemasukan bulanan yang menampilkan total pemasukan per bulan, warna batang hijau, rincian tooltip bulan terpilih, serta perhitungan rata-rata pemasukan per bulan (`js/app.js`, `css/style.css`).
