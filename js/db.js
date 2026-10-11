@@ -191,3 +191,65 @@ export function saveBudgets(budgets) {
   });
 }
 
+export const DEFAULT_WALLET_ID = 'default';
+export const DEFAULT_WALLET_NAME = 'Dompet Utama';
+
+export const DEFAULT_WALLETS = [
+  {
+    id: DEFAULT_WALLET_ID,
+    name: DEFAULT_WALLET_NAME,
+    createdAt: 0,
+    updatedAt: 0,
+    deleted: false
+  }
+];
+
+export function getWallets() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([META_STORE], 'readonly');
+    const request = transaction.objectStore(META_STORE).get('wallets');
+    request.onsuccess = (event) => {
+      const stored = event.target.result;
+      if (Array.isArray(stored) && stored.length > 0) {
+        const clean = stored.filter(w => w && typeof w.id === 'string' && typeof w.name === 'string');
+        if (clean.length > 0) {
+          resolve(clean);
+          return;
+        }
+      }
+      const initial = [
+        {
+          id: DEFAULT_WALLET_ID,
+          name: DEFAULT_WALLET_NAME,
+          createdAt: Date.now(),
+          updatedAt: 0,
+          deleted: false
+        }
+      ];
+      const writeTx = db.transaction([META_STORE], 'readwrite');
+      writeTx.objectStore(META_STORE).put(initial, 'wallets');
+      writeTx.oncomplete = () => resolve(initial);
+      writeTx.onerror = () => resolve(initial);
+    };
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+export function saveWallets(wallets) {
+  return new Promise((resolve, reject) => {
+    const list = Array.isArray(wallets) ? wallets : [];
+    const clean = list.map(w => ({
+      id: String(w.id),
+      name: String(w.name).trim(),
+      createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
+      updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : Date.now(),
+      deleted: !!w.deleted
+    }));
+    const transaction = db.transaction([META_STORE], 'readwrite');
+    const request = transaction.objectStore(META_STORE).put(clean, 'wallets');
+    request.onsuccess = () => resolve(clean);
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+

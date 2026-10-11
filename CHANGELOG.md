@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-11: Tahap 5: Beberapa dompet
+- Ditambah: Model data dompet dengan dompet default "Dompet Utama" serta fungsi `getWallets` dan `saveWallets` pada store `meta` IndexedDB (`js/db.js`).
+- Ditambah: Bagian antarmuka pengaturan dompet di halaman web dengan daftar dompet aktif, formulir penambahan dompet, ubah nama dompet secara inline, dan tombol hapus dompet dengan proteksi transaksi aktif dan konfirmasi dialog web (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Field `walletId` pada formulir transaksi yang mengingat pilihan dompet terakhir yang dipakai serta rincian saldo per dompet pada ringkasan saldo (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Label nama dompet pada riwayat transaksi serta dropdown filter dompet ("Semua Dompet" atau dompet spesifik) (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Dukungan sinkronisasi daftar dompet ke Google Drive (`appDataFolder`) dengan aturan konflik waktu ubah (`updatedAt`) per dompet terbaru menang, serta toleransi terhadap file cadangan Drive lama (`js/sync.js`).
+- Diubah: Kompatibilitas pembacaan transaksi lama tanpa `walletId` yang otomatis dianggap milik "Dompet Utama" tanpa menulis ulang data (`js/app.js`).
+- Diubah: Ekspor CSV menyertakan kolom `dompet` setelah kolom `jam`, dan ekspor JSON ikut menyertakan daftar `wallets` (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v11` untuk memperbarui cache aset (`sw.js`).
+- Diubah: `PLAN.md` mencentang fitur "Beberapa dompet" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Budget per kategori
 - Ditambah: Model data budget per kategori pengeluaran dengan fungsi `getBudgets` dan `saveBudgets` pada store `meta` IndexedDB (`js/db.js`).
 - Ditambah: Bagian antarmuka budget per kategori di halaman utama dengan pemilihan bulan (default bulan berjalan, tombol bulan sebelumnya/berikutnya, dan input pemilih bulan), ringkasan total budget, kartu status per kategori (budget, terpakai, dan sisa), serta bar progres dengan tiga status warna (normal <80%, peringatan 80-100%, dan merah >100% dengan teks "Lebih Rp ...") (`index.html`, `js/app.js`, `css/style.css`).

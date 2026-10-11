@@ -41,6 +41,7 @@
                         <strong id="total-expense">Rp 0</strong>
                     </div>
                 </div>
+                <div id="wallet-balances" class="wallet-balances" aria-label="Saldo per dompet"></div>
             </div>
         </header>
 
@@ -76,6 +77,13 @@
                 <div class="form-group">
                     <label for="tx-amount">Jumlah (Rp)</label>
                     <input type="number" id="tx-amount" min="1" step="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tx-wallet">Dompet</label>
+                    <select id="tx-wallet" required>
+                        <option value="" disabled selected>Pilih dompet</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -127,9 +135,28 @@
         </section>
 
         <section class="list-section">
-            <h2>Riwayat Transaksi</h2>
+            <div class="list-header">
+                <h2>Riwayat Transaksi</h2>
+                <div class="list-filter">
+                    <label for="filter-wallet" class="sr-only">Filter Dompet</label>
+                    <select id="filter-wallet" class="filter-select" aria-label="Filter dompet">
+                        <option value="all">Semua Dompet</option>
+                    </select>
+                </div>
+            </div>
             <div id="tx-list" class="tx-list">
                 <!-- Data will be populated here -->
+            </div>
+        </section>
+
+        <section class="wallet-settings-section" aria-labelledby="wallet-section-title">
+            <h2 id="wallet-section-title">Pengaturan Dompet</h2>
+            <div class="wallet-settings-card">
+                <ul id="wallet-settings-list" class="category-items" aria-label="Daftar dompet"></ul>
+                <form id="form-add-wallet" class="category-add-form">
+                    <input type="text" id="input-add-wallet" placeholder="Tambah dompet baru..." required autocomplete="off">
+                    <button type="submit" class="btn-primary btn-small">Tambah</button>
+                </form>
             </div>
         </section>
 

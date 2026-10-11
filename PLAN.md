@@ -70,4 +70,5 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Pisah kategori pemasukan dan pengeluaran (dua daftar kategori terpisah, bisa diatur lewat pengaturan, ikut sinkron)
   - [x] Budget per kategori
   - [x] Grafik pengeluaran bulanan
-  - [ ] Beberapa dompet
+  - [x] Beberapa dompet
+  - [ ] Rollover budget (opsional per kategori)

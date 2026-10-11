@@ -1,4 +1,4 @@
-import { initDB, saveTransaction, getAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS } from './db.js';
+import { initDB, saveTransaction, getAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME } from './db.js';
 import { initSync, markDirty, signIn, signOut, syncNow, ensureToken } from './sync.js';
 
 // DOM Elements
@@ -9,14 +9,17 @@ const txTypeInputs = document.getElementsByName('type');
 const txDateInput = document.getElementById('tx-date');
 const txTimeInput = document.getElementById('tx-time');
 const txAmountInput = document.getElementById('tx-amount');
+const txWalletInput = document.getElementById('tx-wallet');
 const txCategoryInput = document.getElementById('tx-category');
 const txNoteInput = document.getElementById('tx-note');
 const btnCancel = document.getElementById('btn-cancel');
 
 const txListContainer = document.getElementById('tx-list');
+const filterWalletSelect = document.getElementById('filter-wallet');
 const totalBalanceEl = document.getElementById('total-balance');
 const totalIncomeEl = document.getElementById('total-income');
 const totalExpenseEl = document.getElementById('total-expense');
+const walletBalancesContainer = document.getElementById('wallet-balances');
 
 const confirmDialog = document.getElementById('confirm-dialog');
 const confirmDialogTitle = document.getElementById('confirm-dialog-title');
@@ -41,17 +44,27 @@ const inputAddExpenseCat = document.getElementById('input-add-expense-cat');
 const formAddIncomeCat = document.getElementById('form-add-income-cat');
 const inputAddIncomeCat = document.getElementById('input-add-income-cat');
 
+const walletSettingsList = document.getElementById('wallet-settings-list');
+const formAddWallet = document.getElementById('form-add-wallet');
+const inputAddWallet = document.getElementById('input-add-wallet');
+
 const budgetSettingsList = document.getElementById('budget-settings-list');
 const formSetBudget = document.getElementById('form-set-budget');
 const selectBudgetCat = document.getElementById('select-budget-cat');
 const inputBudgetAmount = document.getElementById('input-budget-amount');
 
 let currentTransactions = [];
+let currentWallets = [];
 let pendingDeleteId = null;
 let pendingCategoryDelete = null;
 let pendingBudgetDelete = null;
+let pendingWalletDelete = null;
 let editingCategory = null;
 let editingBudgetCategory = null;
+let editingWalletId = null;
+let currentWalletFilter = 'all';
+const LAST_WALLET_KEY = 'mizan-okane:last-wallet-id';
+
 let selectedBudgetMonth = '';
 let currentBudgets = {
     items: {},
@@ -106,6 +119,77 @@ function populateCategoryOptions(selectedVal = null, oldCustomCategory = null) {
     }
 }
 
+function getActiveWallets() {
+    return (currentWallets || []).filter(w => !w.deleted);
+}
+
+function getWalletName(walletId) {
+    const id = walletId || DEFAULT_WALLET_ID;
+    const found = (currentWallets || []).find(w => w.id === id);
+    if (found && found.name) return found.name;
+    if (id === DEFAULT_WALLET_ID) return DEFAULT_WALLET_NAME;
+    return DEFAULT_WALLET_NAME;
+}
+
+function populateWalletOptions(selectedVal = null) {
+    if (!txWalletInput) return;
+    const active = getActiveWallets();
+    let targetId = selectedVal;
+    if (!targetId || !active.some(w => w.id === targetId)) {
+        const lastUsed = localStorage.getItem(LAST_WALLET_KEY);
+        if (lastUsed && active.some(w => w.id === lastUsed)) {
+            targetId = lastUsed;
+        } else if (active.some(w => w.id === DEFAULT_WALLET_ID)) {
+            targetId = DEFAULT_WALLET_ID;
+        } else if (active.length > 0) {
+            targetId = active[0].id;
+        } else {
+            targetId = DEFAULT_WALLET_ID;
+        }
+    }
+
+    let html = '';
+    // Jika dompet yang dipilih sebelumnya sudah di-soft-delete (misal saat edit transaksi lama)
+    if (selectedVal && !active.some(w => w.id === selectedVal)) {
+        const oldWalletName = getWalletName(selectedVal);
+        html += `<option value="${escapeHTML(selectedVal)}" selected>${escapeHTML(oldWalletName)} (Dihapus)</option>`;
+    }
+
+    for (const w of active) {
+        const isSelected = targetId === w.id;
+        html += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)}</option>`;
+    }
+
+    txWalletInput.innerHTML = html;
+    if (targetId) {
+        txWalletInput.value = targetId;
+    }
+}
+
+function populateWalletFilterOptions() {
+    if (!filterWalletSelect) return;
+    const active = getActiveWallets();
+    const currentVal = filterWalletSelect.value || currentWalletFilter || 'all';
+
+    let html = `<option value="all" ${currentVal === 'all' ? 'selected' : ''}>Semua Dompet</option>`;
+    let hasCurrent = currentVal === 'all';
+
+    for (const w of active) {
+        const isSelected = currentVal === w.id;
+        if (isSelected) hasCurrent = true;
+        html += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)}</option>`;
+    }
+
+    filterWalletSelect.innerHTML = html;
+    if (hasCurrent) {
+        filterWalletSelect.value = currentVal;
+        currentWalletFilter = currentVal;
+    } else {
+        filterWalletSelect.value = 'all';
+        currentWalletFilter = 'all';
+    }
+}
+
 // Formatter
 const currencyFormatter = new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -135,9 +219,13 @@ async function loadData() {
     try {
         currentCategories = await getCategories();
         currentBudgets = await getBudgets();
+        currentWallets = await getWallets();
         renderCategorySettings();
         renderBudgetSettings();
+        renderWalletSettings();
         populateCategoryOptions(txCategoryInput.value);
+        populateWalletOptions(txWalletInput ? txWalletInput.value : null);
+        populateWalletFilterOptions();
 
         const allTx = await getAllTransactions();
         currentTransactions = allTx.filter(tx => !tx.deleted);
@@ -415,41 +503,76 @@ function render() {
     let totalIncome = 0;
     let totalExpense = 0;
 
+    const walletBalances = new Map();
+    const activeWallets = getActiveWallets();
+    for (const w of activeWallets) {
+        walletBalances.set(w.id, 0);
+    }
+
     currentTransactions.forEach(tx => {
+        const wId = tx.walletId || DEFAULT_WALLET_ID;
         if (tx.type === 'income') {
             totalIncome += tx.amount;
+            walletBalances.set(wId, (walletBalances.get(wId) || 0) + tx.amount);
         } else {
             totalExpense += tx.amount;
+            walletBalances.set(wId, (walletBalances.get(wId) || 0) - tx.amount);
         }
-
-        const txEl = document.createElement('div');
-        txEl.className = 'tx-item';
-        
-        const sign = tx.type === 'income' ? '+' : '-';
-        const amountClass = tx.type === 'income' ? 'income' : 'expense';
-
-        txEl.innerHTML = `
-            <div class="tx-info">
-                <div class="tx-header">
-                    <span class="tx-category">${tx.category}</span>
-                    <span class="tx-date">${formatDateTime(tx)}</span>
-                </div>
-                ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
-                <div class="tx-amount ${amountClass}">${sign} ${currencyFormatter.format(tx.amount)}</div>
-            </div>
-            <div class="tx-actions">
-                <button class="btn-icon btn-edit" data-id="${tx.id}">Edit</button>
-                <button class="btn-icon btn-delete" data-id="${tx.id}">Hapus</button>
-            </div>
-        `;
-        
-        txListContainer.appendChild(txEl);
     });
 
     const totalBalance = totalIncome - totalExpense;
     totalBalanceEl.textContent = currencyFormatter.format(totalBalance);
     totalIncomeEl.textContent = currencyFormatter.format(totalIncome);
     totalExpenseEl.textContent = currencyFormatter.format(totalExpense);
+
+    if (walletBalancesContainer) {
+        let balancesHtml = '';
+        for (const w of activeWallets) {
+            const bal = walletBalances.get(w.id) || 0;
+            balancesHtml += `
+                <div class="wallet-balance-item">
+                    <span class="wallet-balance-name">${escapeHTML(w.name)}</span>
+                    <strong class="wallet-balance-amount">${currencyFormatter.format(bal)}</strong>
+                </div>
+            `;
+        }
+        walletBalancesContainer.innerHTML = balancesHtml;
+    }
+
+    const filteredTx = currentTransactions.filter(tx => {
+        if (currentWalletFilter === 'all') return true;
+        return (tx.walletId || DEFAULT_WALLET_ID) === currentWalletFilter;
+    });
+
+    if (filteredTx.length === 0) {
+        txListContainer.innerHTML = '<p class="tx-empty">Belum ada transaksi.</p>';
+    } else {
+        filteredTx.forEach(tx => {
+            const txEl = document.createElement('div');
+            txEl.className = 'tx-item';
+            
+            const sign = tx.type === 'income' ? '+' : '-';
+            const amountClass = tx.type === 'income' ? 'income' : 'expense';
+            const walletName = getWalletName(tx.walletId);
+
+            txEl.innerHTML = `
+                <div class="tx-info">
+                    <div class="tx-header">
+                        <span class="tx-category">${escapeHTML(tx.category)} <span class="tx-wallet-badge">${escapeHTML(walletName)}</span></span>
+                        <span class="tx-date">${formatDateTime(tx)}</span>
+                    </div>
+                    ${tx.note ? `<div class="tx-note">${escapeHTML(tx.note)}</div>` : ''}
+                    <div class="tx-amount ${amountClass}">${sign} ${currencyFormatter.format(tx.amount)}</div>
+                </div>
+                <div class="tx-actions">
+                    <button class="btn-icon btn-edit" data-id="${tx.id}">Edit</button>
+                    <button class="btn-icon btn-delete" data-id="${tx.id}">Hapus</button>
+                </div>
+            `;
+            
+            txListContainer.appendChild(txEl);
+        });
+    }
 
     renderExpenseChart(currentTransactions);
     renderBudgetSection();
@@ -657,6 +780,223 @@ async function performDeleteCategory(type, name) {
     } catch (error) {
         console.error("Gagal menghapus kategori", error);
         alert("Terjadi kesalahan saat menghapus kategori.");
+    }
+}
+
+function renderWalletSettings() {
+    if (!walletSettingsList) return;
+    walletSettingsList.innerHTML = '';
+    const active = getActiveWallets();
+
+    if (active.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'category-empty-item';
+        emptyLi.textContent = 'Belum ada dompet.';
+        walletSettingsList.appendChild(emptyLi);
+        return;
+    }
+
+    active.forEach(w => {
+        const li = document.createElement('li');
+        li.className = 'category-item';
+
+        const isEditing = editingWalletId === w.id;
+
+        if (isEditing) {
+            li.classList.add('editing');
+            li.innerHTML = `
+                <form class="category-inline-edit-form">
+                    <input type="text" class="category-edit-input" value="${escapeHTML(w.name)}" required autocomplete="off" aria-label="Ubah nama dompet ${escapeHTML(w.name)}">
+                    <div class="category-item-actions">
+                        <button type="submit" class="btn-icon btn-save-cat">Simpan</button>
+                        <button type="button" class="btn-icon btn-cancel-cat">Batal</button>
+                    </div>
+                </form>
+            `;
+
+            const editForm = li.querySelector('.category-inline-edit-form');
+            const editInput = li.querySelector('.category-edit-input');
+            const btnCancelEdit = li.querySelector('.btn-cancel-cat');
+
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleSaveWalletName(w.id, editInput.value.trim());
+            });
+
+            btnCancelEdit.addEventListener('click', () => {
+                editingWalletId = null;
+                renderWalletSettings();
+            });
+
+            editInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    editingWalletId = null;
+                    renderWalletSettings();
+                }
+            });
+
+            walletSettingsList.appendChild(li);
+            requestAnimationFrame(() => {
+                editInput.focus();
+                editInput.select();
+            });
+        } else {
+            li.innerHTML = `
+                <span class="category-name">${escapeHTML(w.name)}</span>
+                <div class="category-item-actions">
+                    <button type="button" class="btn-icon btn-edit-wallet" data-id="${escapeHTML(w.id)}" aria-label="Ubah nama dompet ${escapeHTML(w.name)}">Ubah</button>
+                    <button type="button" class="btn-icon btn-delete-wallet" data-id="${escapeHTML(w.id)}" aria-label="Hapus dompet ${escapeHTML(w.name)}">Hapus</button>
+                </div>
+            `;
+
+            li.querySelector('.btn-edit-wallet').addEventListener('click', () => {
+                editingWalletId = w.id;
+                renderWalletSettings();
+            });
+
+            li.querySelector('.btn-delete-wallet').addEventListener('click', () => {
+                handleDeleteWalletPrompt(w.id);
+            });
+
+            walletSettingsList.appendChild(li);
+        }
+    });
+}
+
+async function handleSaveWalletName(walletId, newName) {
+    if (!newName) {
+        alert('Nama dompet tidak boleh kosong.');
+        return;
+    }
+    const wallet = currentWallets.find(w => w.id === walletId);
+    if (!wallet) return;
+
+    if (newName === wallet.name) {
+        editingWalletId = null;
+        renderWalletSettings();
+        return;
+    }
+
+    const exists = getActiveWallets().some(w => w.id !== walletId && w.name.toLowerCase() === newName.toLowerCase());
+    if (exists) {
+        alert(`Dompet "${newName}" sudah ada.`);
+        return;
+    }
+
+    ensureToken();
+
+    wallet.name = newName;
+    wallet.updatedAt = Date.now();
+
+    try {
+        await saveWallets(currentWallets);
+        editingWalletId = null;
+        render();
+        renderWalletSettings();
+        populateWalletOptions(txWalletInput.value);
+        populateWalletFilterOptions();
+        markDirty().catch(err => console.error("Gagal menandai perubahan dompet untuk sinkron", err));
+    } catch (error) {
+        console.error("Gagal mengubah nama dompet", error);
+        alert("Terjadi kesalahan saat menyimpan dompet.");
+    }
+}
+
+async function handleAddWallet(inputEl) {
+    const name = inputEl.value.trim();
+    if (!name) {
+        alert('Nama dompet tidak boleh kosong.');
+        return;
+    }
+
+    const exists = getActiveWallets().some(w => w.name.toLowerCase() === name.toLowerCase());
+    if (exists) {
+        alert(`Dompet "${name}" sudah ada.`);
+        return;
+    }
+
+    ensureToken();
+
+    const now = Date.now();
+    const newWallet = {
+        id: crypto.randomUUID(),
+        name,
+        createdAt: now,
+        updatedAt: now,
+        deleted: false
+    };
+
+    currentWallets.push(newWallet);
+
+    try {
+        await saveWallets(currentWallets);
+        inputEl.value = '';
+        render();
+        renderWalletSettings();
+        populateWalletOptions(txWalletInput.value);
+        populateWalletFilterOptions();
+        markDirty().catch(err => console.error("Gagal menambah dompet untuk sinkron", err));
+    } catch (error) {
+        console.error("Gagal menambah dompet", error);
+        alert("Terjadi kesalahan saat menyimpan dompet.");
+    }
+}
+
+function handleDeleteWalletPrompt(walletId) {
+    const wallet = currentWallets.find(w => w.id === walletId);
+    if (!wallet) return;
+
+    // Dompet yang masih punya transaksi aktif tidak bisa dihapus.
+    const hasActiveTransactions = currentTransactions.some(tx => !tx.deleted && (tx.walletId || DEFAULT_WALLET_ID) === walletId);
+    if (hasActiveTransactions) {
+        alert(`Dompet "${wallet.name}" tidak bisa dihapus karena masih memiliki transaksi aktif.`);
+        return;
+    }
+
+    const active = getActiveWallets();
+    if (active.length <= 1) {
+        alert('Dompet tidak bisa dihapus karena minimal harus ada satu dompet.');
+        return;
+    }
+
+    pendingDeleteId = null;
+    pendingCategoryDelete = null;
+    pendingBudgetDelete = null;
+    pendingWalletDelete = walletId;
+
+    if (confirmDialogTitle) {
+        confirmDialogTitle.textContent = `Hapus dompet "${wallet.name}"?`;
+    }
+    if (confirmDialog && typeof confirmDialog.showModal === 'function') {
+        confirmDialog.showModal();
+    }
+}
+
+async function performDeleteWallet(walletId) {
+    ensureToken();
+
+    const wallet = currentWallets.find(w => w.id === walletId);
+    if (wallet) {
+        wallet.deleted = true;
+        wallet.updatedAt = Date.now();
+
+        try {
+            await saveWallets(currentWallets);
+            if (localStorage.getItem(LAST_WALLET_KEY) === walletId) {
+                localStorage.removeItem(LAST_WALLET_KEY);
+            }
+            if (currentWalletFilter === walletId) {
+                currentWalletFilter = 'all';
+            }
+            render();
+            renderWalletSettings();
+            populateWalletOptions();
+            populateWalletFilterOptions();
+            markDirty().catch(err => console.error("Gagal menandai penghapusan dompet untuk sinkron", err));
+        } catch (error) {
+            console.error("Gagal menghapus dompet", error);
+            alert("Terjadi kesalahan saat menghapus dompet.");
+        }
     }
 }
 
@@ -1051,6 +1391,7 @@ function resetForm() {
     // Default to expense
     txTypeInputs[0].checked = true;
     populateCategoryOptions();
+    populateWalletOptions();
 }
 
 async function handleSubmit(e) {
@@ -1073,6 +1414,9 @@ async function handleSubmit(e) {
         }
     }
 
+    const selectedWalletId = (txWalletInput && txWalletInput.value) ? txWalletInput.value : DEFAULT_WALLET_ID;
+    localStorage.setItem(LAST_WALLET_KEY, selectedWalletId);
+
     const now = Date.now();
     const id = txIdInput.value || crypto.randomUUID();
     
@@ -1089,6 +1433,7 @@ async function handleSubmit(e) {
         id,
         type: selectedType,
         amount,
+        walletId: selectedWalletId,
         category: txCategoryInput.value.trim(),
         date: txDateInput.value,
         note: txNoteInput.value.trim(),
@@ -1126,6 +1471,9 @@ function handleEdit(id) {
     txAmountInput.value = tx.amount;
     txNoteInput.value = tx.note || '';
 
+    // Pilihan dompet: gunakan walletId transaksi atau fallback DEFAULT_WALLET_ID
+    populateWalletOptions(tx.walletId || DEFAULT_WALLET_ID);
+
     // Pilihan kategori mengikuti tipe yang dipilih
     const list = (currentCategories && currentCategories[tx.type]) ? currentCategories[tx.type] : [];
     if (list.includes(tx.category)) {
@@ -1145,6 +1493,8 @@ function handleDelete(id) {
     if (!id) return;
     pendingDeleteId = id;
     pendingCategoryDelete = null;
+    pendingBudgetDelete = null;
+    pendingWalletDelete = null;
     if (confirmDialogTitle) {
         confirmDialogTitle.textContent = 'Hapus transaksi ini?';
     }
@@ -1198,8 +1548,9 @@ if (confirmDialog) {
         const txId = pendingDeleteId;
         const catDelete = pendingCategoryDelete;
         const bgtDelete = pendingBudgetDelete;
+        const wltDelete = pendingWalletDelete;
 
-        if (!txId && !catDelete && !bgtDelete) {
+        if (!txId && !catDelete && !bgtDelete && !wltDelete) {
             confirmDialog.close();
             return;
         }
@@ -1212,6 +1563,8 @@ if (confirmDialog) {
                 await performDeleteCategory(catDelete.type, catDelete.name);
             } else if (bgtDelete) {
                 await performDeleteBudget(bgtDelete);
+            } else if (wltDelete) {
+                await performDeleteWallet(wltDelete);
             }
         } finally {
             btnConfirmDelete.disabled = false;
@@ -1223,6 +1576,7 @@ if (confirmDialog) {
         pendingDeleteId = null;
         pendingCategoryDelete = null;
         pendingBudgetDelete = null;
+        pendingWalletDelete = null;
         if (confirmDialogTitle) {
             confirmDialogTitle.textContent = 'Hapus transaksi ini?';
         }
@@ -1308,13 +1662,15 @@ btnExport.addEventListener('click', async () => {
         const allTx = await getAllTransactions();
         const cats = await getCategories();
         const bgs = await getBudgets();
+        const wts = await getWallets();
         const data = {
             app: 'mizan-okane',
             schemaVersion: 1,
             exportedAt: new Date().toISOString(),
             transactions: allTx,
             categories: cats,
-            budgets: bgs
+            budgets: bgs,
+            wallets: wts
         };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -1373,13 +1729,15 @@ btnExportCsv.addEventListener('click', async () => {
             return (b.createdAt || 0) - (a.createdAt || 0);
         });
 
-        const headers = ['tanggal', 'jam', 'tipe', 'kategori', 'jumlah', 'catatan'];
+        const headers = ['tanggal', 'jam', 'dompet', 'tipe', 'kategori', 'jumlah', 'catatan'];
         const rows = [headers.join(',')];
 
         for (const tx of activeTx) {
+            const walletName = getWalletName(tx.walletId);
             const row = [
                 escapeCSVField(tx.date),
                 escapeCSVField(tx.time || ''),
+                escapeCSVField(walletName),
                 escapeCSVField(tx.type),
                 escapeCSVField(tx.category),
                 escapeCSVField(tx.amount),
@@ -1411,13 +1769,28 @@ async function init() {
         await initDB();
         currentCategories = await getCategories();
         currentBudgets = await getBudgets();
+        currentWallets = await getWallets();
         selectedBudgetMonth = getLocalYearMonthString();
-        resetForm(); // Set default date dan kategori
+        resetForm(); // Set default date, kategori, dan dompet
         await loadData();
     } catch (error) {
         console.error("Gagal inisialisasi database", error);
         alert("Browser Anda tidak mendukung penyimpanan lokal atau terjadi kesalahan.");
         return;
+    }
+
+    if (formAddWallet && inputAddWallet) {
+        formAddWallet.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleAddWallet(inputAddWallet);
+        });
+    }
+
+    if (filterWalletSelect) {
+        filterWalletSelect.addEventListener('change', () => {
+            currentWalletFilter = filterWalletSelect.value;
+            render();
+        });
     }
 
     if (formAddExpenseCat && inputAddExpenseCat) {
