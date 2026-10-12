@@ -183,16 +183,37 @@ let currentCategories = {
 };
 
 const VALID_TABS = ['beranda', 'riwayat', 'statistik', 'pengaturan'];
+let currentActiveTab = 'beranda';
+let tabHistory = ['beranda'];
+let isNavigatingBack = false;
 
 function getTabFromHash() {
     const raw = window.location.hash.replace('#', '').trim();
     return VALID_TABS.includes(raw) ? raw : 'beranda';
 }
 
+function recordTabNavigation(tabId) {
+    if (!VALID_TABS.includes(tabId)) {
+        tabId = 'beranda';
+    }
+    if (tabId === 'beranda') {
+        tabHistory = ['beranda'];
+    } else {
+        tabHistory = tabHistory.filter(t => t !== tabId);
+        if (tabHistory.length === 0 || tabHistory[0] !== 'beranda') {
+            tabHistory.unshift('beranda');
+        }
+        tabHistory.push(tabId);
+    }
+    currentActiveTab = tabId;
+}
+
 function switchTab(tabId) {
     if (!VALID_TABS.includes(tabId)) {
         tabId = 'beranda';
     }
+
+    currentActiveTab = tabId;
 
     // Tampilkan panel halaman yang sesuai, sembunyikan yang lain
     document.querySelectorAll('.page-view').forEach(view => {
@@ -209,6 +230,51 @@ function switchTab(tabId) {
 
     window.scrollTo({ top: 0, behavior: 'instant' });
 }
+
+window.handleAndroidBack = function() {
+    // 1. Jika dialog konfirmasi sedang terbuka, tutup dialog
+    if (confirmDialog && confirmDialog.open) {
+        confirmDialog.close();
+        pendingDeleteId = null;
+        pendingCategoryDelete = null;
+        pendingBudgetDelete = null;
+        pendingWalletDelete = null;
+        return true;
+    }
+
+    // 2. Jika layar formulir (tambah/edit transaksi) sedang terbuka, tutup formulir
+    if (formScreen && !formScreen.classList.contains('hidden')) {
+        resetForm();
+        closeFormScreen();
+        return true;
+    }
+
+    // 3. Jika sedang berada di tab dalam (selain beranda), kembali ke tab sebelumnya
+    if (currentActiveTab !== 'beranda') {
+        if (tabHistory.length > 1) {
+            tabHistory.pop(); // buang tab aktif saat ini
+            const prevTab = tabHistory[tabHistory.length - 1] || 'beranda';
+            currentActiveTab = prevTab;
+            isNavigatingBack = true;
+            window.location.hash = prevTab;
+            switchTab(prevTab);
+            isNavigatingBack = false;
+            return true;
+        } else {
+            // Fallback jika riwayat kosong tetapi masih di tab dalam
+            currentActiveTab = 'beranda';
+            tabHistory = ['beranda'];
+            isNavigatingBack = true;
+            window.location.hash = 'beranda';
+            switchTab('beranda');
+            isNavigatingBack = false;
+            return true;
+        }
+    }
+
+    // 4. Berada di halaman utama (Beranda) tanpa modal/form terbuka -> biarkan aplikasi keluar
+    return false;
+};
 
 function openFormScreen() {
     if (!formScreen) return;
@@ -3002,7 +3068,9 @@ async function init() {
         selectedDonutMonth = getLocalYearMonthString();
         resetForm(); // Set default date, kategori, dan dompet
         await loadData();
-        switchTab(getTabFromHash());
+        const initialTab = getTabFromHash();
+        recordTabNavigation(initialTab);
+        switchTab(initialTab);
     } catch (error) {
         console.error("Gagal inisialisasi database", error);
         alert("Browser Anda tidak mendukung penyimpanan lokal atau terjadi kesalahan.");
@@ -3025,6 +3093,7 @@ async function init() {
 
     if (btnSeeAllTx) {
         btnSeeAllTx.addEventListener('click', () => {
+            recordTabNavigation('riwayat');
             window.location.hash = 'riwayat';
             switchTab('riwayat');
         });
@@ -3034,6 +3103,7 @@ async function init() {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
             if (tab) {
+                recordTabNavigation(tab);
                 window.location.hash = tab;
                 switchTab(tab);
             }
@@ -3041,7 +3111,12 @@ async function init() {
     });
 
     window.addEventListener('hashchange', () => {
-        switchTab(getTabFromHash());
+        if (isNavigatingBack) return;
+        const tab = getTabFromHash();
+        if (tab !== currentActiveTab) {
+            recordTabNavigation(tab);
+            switchTab(tab);
+        }
     });
 
     window.addEventListener('keydown', (e) => {

@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-12: Tahap 5: Perbaikan APK: tombol back Android
+- Ditambah: Penanganan tombol back Android native via AndroidX `OnBackPressedCallback` pada `MainActivity.java` yang mengarahkan navigasi mundur WebView dan menutup aplikasi secara aman (`finish()`) hanya saat berada di halaman utama (`android/app/src/main/java/com/mizoar/mizanokane/MainActivity.java`).
+- Ditambah: Pelacakan riwayat navigasi tab (`tabHistory`) dan fungsi handler global `window.handleAndroidBack` di `js/app.js` untuk menutup dialog konfirmasi hapus atau form transaksi layar sendiri saat tombol back ditekan, serta kembali ke tab sebelumnya hingga ke Beranda (`js/app.js`).
+- Diperbaiki: Tautan kembali pada halaman Kebijakan Privasi dan Syarat & Ketentuan yang sebelumnya mengarah ke `index.html` (halaman depan) diperbaiki menjadi `index.html#pengaturan` agar kembali ke tab Pengaturan (`privasi.html`, `syarat.html`).
+- Diubah: `sw.js` naik ke versi `mizan-v25` untuk memperbarui cache aset PWA secara offline (`sw.js`).
+- Diubah: `PLAN.md` mencentang item "Perbaikan APK: tombol back Android" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-12: Tahap 5: APK Item B: bungkus jadi APK dengan Capacitor
 - Ditambah: Konfigurasi Capacitor untuk membungkus web app menjadi aplikasi Android native (`capacitor.config.json`, `package.json`, `package-lock.json`).
 - Ditambah: Proyek Android native Capacitor lengkap dengan package ID `com.mizoar.mizanokane`, nama aplikasi "Mizan Okane", manifest, Gradle wrapper, serta resource ikon dan splash screen (`android/`).
