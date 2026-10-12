@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-12: Tahap 5: APK Item B: bungkus jadi APK dengan Capacitor
+- Ditambah: Konfigurasi Capacitor untuk membungkus web app menjadi aplikasi Android native (`capacitor.config.json`, `package.json`, `package-lock.json`).
+- Ditambah: Proyek Android native Capacitor lengkap dengan package ID `com.mizoar.mizanokane`, nama aplikasi "Mizan Okane", manifest, Gradle wrapper, serta resource ikon dan splash screen (`android/`).
+- Ditambah: Skrip `scripts/copy-www.js` dan npm script `build:www` untuk menyalin aset web (`index.html`, `privasi.html`, `syarat.html`, `manifest.webmanifest`, `sw.js`, folder `css`, `icons`, `js`) ke dalam folder `www` sebelum sinkronisasi Capacitor (`scripts/copy-www.js`, `package.json`).
+- Diubah: Menambahkan `www/` ke daftar abaikan Git agar folder artefak build web tidak masuk ke repository (`.gitignore`).
+- Diubah: `PLAN.md` mencentang item "APK Item B: bungkus jadi APK dengan Capacitor" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-11: Tahap 5: Mode gelap
 - Ditambah: Bagian pengaturan "Tampilan" pada halaman Pengaturan dengan tiga pilihan tema (Ikuti sistem, Terang, Gelap) yang disimpan lokal di perangkat tanpa sinkron ke Drive (`index.html`, `js/app.js`, `css/style.css`).
 - Ditambah: Dukungan mode gelap menyeluruh berbasis variabel CSS untuk semua komponen aplikasi: bilah navigasi desktop & mobile, kartu ringkasan saldo, formulir tambah/edit, daftar riwayat transaksi, dialog konfirmasi hapus, pengaturan dompet/kategori/budget, serta warna garis, label, sumbu pada grafik bulanan dan diagram donut per kategori (`css/style.css`, `js/app.js`).

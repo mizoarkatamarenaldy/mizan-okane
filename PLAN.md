@@ -19,7 +19,7 @@ Sebelum mulai kerja, jalankan `git branch --show-current`. Hasilnya harus `main`
 Setelah tahap selesai:
 1. Jalankan `git status --short`. Kalau ada file yang muncul tapi bukan bagian dari tahap ini (selain PLAN.md dan CHANGELOG.md), berhenti: jangan commit, jangan push, laporkan ke pemilik.
 2. Tambahkan entri di CHANGELOG.md. Cantumkan file yang diubah berdasarkan hasil `git status --short`.
-3. Stage file dengan menyebut namanya satu per satu. Dilarang `git add -A` dan `git add .`
+3. Stage file dengan menyebut namanya satu per satu. Khusus folder android/, boleh disebut sebagai folder (git add android/) asalkan isinya sudah dicek lewat git status --short dan semuanya bagian dari tahap ini. Dilarang `git add -A` dan `git add .`
 4. Commit dengan pesan lengkap: judul singkat dengan format "tahap N: nama singkat", isi penjelasan, lalu dua baris trailer di bawah, dipisah satu baris kosong dari isi pesan.
 
    Co-authored-by: Claude <noreply@anthropic.com>
@@ -37,6 +37,7 @@ Setelah tahap selesai:
 - Transaksi dihapus dengan penanda "terhapus" (soft delete), bukan dibuang langsung.
 - Hosting: GitHub Pages.
 - Harus ada tombol ekspor JSON manual sebagai cadangan.
+- APK: dibungkus dengan Capacitor, file web dimasukkan ke dalam APK (tidak membuka situs). Versi PWA di GitHub Pages tetap ada dan tetap jadi sumber kode. Login Google di APK memakai jalur native Android, sedangkan data tetap di Drive `appDataFolder`. Dirilis lewat GitHub Releases, bukan Play Store.
 
 ## Versi 1: fitur minimal
 Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
@@ -86,5 +87,9 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Halaman kebijakan privasi (satu halaman statis di GitHub Pages, ditautkan dari aplikasi)
   - [x] Halaman syarat dan ketentuan (satu halaman statis di GitHub Pages, ditautkan dari aplikasi di samping tautan kebijakan privasi)
   - [x] Perbaikan UI/UX multi halaman (dikerjakan paling akhir, butuh peta halaman dulu)
-  - [ ] Persiapan rilis publik (README berisi cara pakai, cara install, catatan peringatan "belum diverifikasi Google", dan cara hapus data; pastikan tidak ada keystore, token, atau data asli di repo)
-  - [ ] Bungkus jadi APK dan rilis lewat GitHub Releases (dikerjakan setelah UI/UX selesai, tes login Google di HP asli, keystore disimpan di luar repo)
+  - [x] APK Item B: bungkus jadi APK dengan Capacitor (package ID com.mizoar.mizanokane, nama app "Mizan Okane", webDir www; file web masuk ke APK, offline tanpa bergantung GitHub Pages). Folder www adalah salinan hasil skrip build:www dan masuk .gitignore, root repo tetap jadi sumber kode. Build APK release, keystore, dan password dikerjakan pemilik di Android Studio; agent tidak menyentuh keystore atau password. File yang termasuk tahap ini: folder android/, package.json, package-lock.json, scripts/copy-www.js, capacitor.config.json, .gitignore. Tidak ada keystore, token, atau data asli di repo.
+  - [ ] Perbaikan APK: tombol back Android (di halaman dalam, back kembali ke halaman sebelumnya, bukan keluar app; dari halaman Kebijakan Privasi dan Syarat dan Ketentuan, back kembali ke Pengaturan; di halaman utama, back keluar app; perilaku versi web/PWA tidak berubah; cara teknisnya ditentukan di Implementation Plan)
+  - [ ] Perbaikan APK: ekspor CSV dan ekspor JSON berfungsi di APK (file tersimpan atau bisa dibagikan lewat share sheet Android, dan ada notifikasi sukses atau gagal di UI; pakai plugin Capacitor Filesystem dan Share; versi web tetap memakai cara unduh yang sekarang; nama kolom CSV dan format JSON tidak berubah; ekspor tetap jalan tanpa login Google)
+  - [ ] APK rilis: unggah APK ke GitHub Releases (dikerjakan pemilik setelah dua perbaikan APK di atas selesai dan APK dibuild ulang; APK tidak dimasukkan ke repo lewat git add)
+  - [ ] APK Item A: login Google native untuk APK (plugin Google Sign-In untuk Capacitor, OAuth Client ID tipe Android, token Drive `appDataFolder` didapat lewat jalur native; logika sinkron dan aturan konflik tidak berubah; versi web tetap memakai login yang sekarang; dikerjakan setelah APK rilis, dites di HP asli)
+  - [ ] Persiapan rilis publik (dikerjakan paling akhir, karena butuh link unduh, screenshot, dan fitur final; README berisi cara pakai, cara install, catatan peringatan "belum diverifikasi Google", dan cara hapus data; pastikan tidak ada keystore, token, atau data asli di repo)

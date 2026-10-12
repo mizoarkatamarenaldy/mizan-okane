@@ -14,6 +14,7 @@ client_secret*.json
 # Hasil build
 dist/
 build/
+www/
 
 # Log
 *.log
