@@ -2683,6 +2683,112 @@ btnLogout.addEventListener('click', async () => {
 
 btnSyncNow.addEventListener('click', () => syncNow({ interactive: true }));
 
+let toastNotificationTimeout = null;
+
+export function showNotification(message, type = 'info') {
+    const toastEl = document.getElementById('toast-notification');
+    if (!toastEl) {
+        if (type === 'error') {
+            alert(message);
+        } else {
+            console.log(`[Notification ${type}]:`, message);
+        }
+        return;
+    }
+
+    toastEl.textContent = message;
+    toastEl.className = 'toast-notification';
+    if (type === 'success') {
+        toastEl.classList.add('toast-success');
+    } else if (type === 'error') {
+        toastEl.classList.add('toast-error');
+    } else if (type === 'warn') {
+        toastEl.classList.add('toast-warn');
+    }
+
+    if (toastNotificationTimeout) {
+        clearTimeout(toastNotificationTimeout);
+    }
+
+    requestAnimationFrame(() => {
+        toastEl.classList.add('show');
+    });
+
+    toastNotificationTimeout = setTimeout(() => {
+        toastEl.classList.remove('show');
+    }, 3500);
+}
+
+export function isCapacitorApp() {
+    return typeof window !== 'undefined' &&
+           typeof window.Capacitor !== 'undefined' &&
+           typeof window.Capacitor.isNativePlatform === 'function' &&
+           window.Capacitor.isNativePlatform();
+}
+
+export function getCapacitorPlugin(name) {
+    if (typeof window === 'undefined' || !window.Capacitor) return null;
+    if (window.Capacitor.Plugins && window.Capacitor.Plugins[name]) {
+        return window.Capacitor.Plugins[name];
+    }
+    if (typeof window.Capacitor.registerPlugin === 'function') {
+        try {
+            return window.Capacitor.registerPlugin(name);
+        } catch (e) {
+            console.warn(`Gagal meregistrasi plugin ${name}:`, e);
+        }
+    }
+    return null;
+}
+
+export async function exportViaCapacitor(fileName, dataContent, dialogTitle) {
+    const filesystem = getCapacitorPlugin('Filesystem');
+    const share = getCapacitorPlugin('Share');
+
+    if (!filesystem) {
+        throw new Error('Plugin Capacitor Filesystem tidak tersedia di aplikasi ini.');
+    }
+
+    // Tulis ke direktori CACHE agar FileProvider dapat membagikannya tanpa izin penyimpanan sensitif
+    const writeResult = await filesystem.writeFile({
+        path: fileName,
+        data: dataContent,
+        directory: 'CACHE',
+        encoding: 'utf8'
+    });
+
+    let targetUri = writeResult && writeResult.uri;
+    if (!targetUri && typeof filesystem.getUri === 'function') {
+        const uriResult = await filesystem.getUri({
+            path: fileName,
+            directory: 'CACHE'
+        });
+        targetUri = uriResult && uriResult.uri;
+    }
+
+    if (share && targetUri) {
+        try {
+            await share.share({
+                title: fileName,
+                url: targetUri,
+                dialogTitle: dialogTitle || 'Simpan atau Bagikan File'
+            });
+            showNotification(`Ekspor ${fileName} berhasil.`, 'success');
+        } catch (shareErr) {
+            const errStr = String((shareErr && shareErr.message) || shareErr || '').toLowerCase();
+            if (errStr.includes('cancel')) {
+                // Pengguna menutup share sheet, namun file tetap sudah tersimpan
+                showNotification(`File ${fileName} berhasil disimpan.`, 'success');
+            } else {
+                console.warn('Gagal membagikan lewat Share plugin:', shareErr);
+                showNotification(`File ${fileName} berhasil disimpan.`, 'success');
+            }
+        }
+    } else {
+        showNotification(`File ${fileName} berhasil disimpan.`, 'success');
+    }
+}
+
 btnExport.addEventListener('click', async () => {
     try {
         const allTx = await getAllTransactions();
@@ -2698,18 +2804,29 @@ btnExport.addEventListener('click', async () => {
             budgets: bgs,
             wallets: wts
         };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `mizan-okane-backup-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const fileName = `mizan-okane-backup-${new Date().toISOString().split('T')[0]}.json`;
+        const jsonContent = JSON.stringify(data, null, 2);
+
+        if (isCapacitorApp()) {
+            await exportViaCapacitor(fileName, jsonContent, 'Simpan atau Bagikan Cadangan JSON');
+        } else {
+            const blob = new Blob([jsonContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification(`Ekspor cadangan JSON berhasil diunduh.`, 'success');
+        }
     } catch (error) {
         console.error("Gagal mengekspor data", error);
-        alert("Terjadi kesalahan saat mengekspor data.");
+        showNotification("Terjadi kesalahan saat mengekspor data.", "error");
+        if (!isCapacitorApp()) {
+            alert("Terjadi kesalahan saat mengekspor data.");
+        }
     }
 });
 
@@ -3001,7 +3118,10 @@ btnExportCsv.addEventListener('click', async () => {
         const activeTx = allTx.filter(tx => !tx.deleted);
 
         if (activeTx.length === 0) {
-            alert('Belum ada transaksi untuk diekspor.');
+            showNotification('Belum ada transaksi untuk diekspor.', 'warn');
+            if (!isCapacitorApp()) {
+                alert('Belum ada transaksi untuk diekspor.');
+            }
             return;
         }
 
@@ -3042,18 +3162,29 @@ btnExportCsv.addEventListener('click', async () => {
 
         const csvContent = rows.join('\r\n');
         const BOM = '\uFEFF';
-        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `mizan-okane-transaksi-${getLocalDateString()}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const fullCsvContent = BOM + csvContent;
+        const fileName = `mizan-okane-transaksi-${getLocalDateString()}.csv`;
+
+        if (isCapacitorApp()) {
+            await exportViaCapacitor(fileName, fullCsvContent, 'Simpan atau Bagikan Transaksi CSV');
+        } else {
+            const blob = new Blob([fullCsvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification(`Ekspor CSV berhasil diunduh.`, 'success');
+        }
     } catch (error) {
         console.error("Gagal mengekspor CSV", error);
-        alert("Terjadi kesalahan saat mengekspor CSV.");
+        showNotification("Terjadi kesalahan saat mengekspor CSV.", "error");
+        if (!isCapacitorApp()) {
+            alert("Terjadi kesalahan saat mengekspor CSV.");
+        }
     }
 });
 

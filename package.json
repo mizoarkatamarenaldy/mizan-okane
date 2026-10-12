@@ -4,9 +4,9 @@
   "description": "Money manager pribadi berbasis PWA. Jalan di HP dan PC, bisa offline, data sinkron otomatis lewat Google Drive.",
   "main": "sw.js",
   "scripts": {
-  "build:www": "node scripts/copy-www.js",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+    "build:www": "node scripts/copy-www.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mizoarkatamarenaldy/mizan-okane.git"
@@ -22,6 +22,8 @@
   "dependencies": {
     "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.3",
-    "@capacitor/core": "^8.5.3"
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/filesystem": "^8.1.4",
+    "@capacitor/share": "^8.0.3"
   }
 }

@@ -1907,4 +1907,55 @@ body.modal-open {
     opacity: 0.8;
 }
 
+/* Notifikasi UI (Toast) */
+.toast-notification {
+    position: fixed;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background-color: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
+    padding: 10px 20px;
+    border-radius: 9999px;
+    font-size: 13.5px;
+    font-weight: 500;
+    z-index: 9999;
+    max-width: calc(100vw - 32px);
+    width: max-content;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+@media (min-width: 768px) {
+    .toast-notification {
+        bottom: 28px;
+    }
+}
+
+.toast-notification.toast-success {
+    border-color: var(--tone-ok);
+    color: var(--tone-ok);
+}
+
+.toast-notification.toast-error {
+    border-color: var(--tone-error);
+    color: var(--tone-error);
+}
+
+.toast-notification.toast-warn {
+    border-color: var(--tone-warn);
+    color: var(--tone-warn);
+}
+
+
 

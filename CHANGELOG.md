@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-12: Tahap 5: Perbaikan APK: ekspor CSV dan ekspor JSON berfungsi di APK
+- Ditambah: Instalasi dan konfigurasi plugin Capacitor Filesystem (`@capacitor/filesystem`) dan Share (`@capacitor/share`) untuk menangani penyimpanan berkas dan berbagi berkas native di Android APK (`package.json`, `package-lock.json`, `android/capacitor.settings.gradle`, `android/app/capacitor.build.gradle`).
+- Ditambah: Konfigurasi jalur penyimpanan berkas FileProvider di Android untuk mendukung pembagian berkas dari cache dan files internal (`android/app/src/main/res/xml/file_paths.xml`).
+- Ditambah: Komponen notifikasi toast UI (`#toast-notification`) yang responsif untuk HP dan PC dengan dukungan tema terang/gelap serta varian status (sukses, error, peringatan) untuk memberi umpan balik visual langsung kepada pengguna (`index.html`, `css/style.css`, `js/app.js`).
+- Diperbaiki: Ekspor JSON dan CSV di APK kini menyimpan berkas ke cache perangkat via `@capacitor/filesystem` lalu membuka share sheet Android via `@capacitor/share` sehingga berkas dapat langsung disimpan ke perangkat atau dibagikan ke aplikasi lain, mengatasi masalah tombol ekspor tidak bereaksi sama sekali di Android WebView (`js/app.js`).
+- Diubah: Versi web/PWA tetap mempertahankan alur unduh berkas Blob yang ada, format struktur JSON dan nama kolom header CSV tetap konsisten tanpa perubahan, serta ekspor tetap berfungsi penuh tanpa memerlukan login Google (`js/app.js`).
+- Diubah: `sw.js` naik ke versi `mizan-v26` untuk memperbarui cache aset PWA secara offline (`sw.js`).
+- Diubah: `PLAN.md` mencentang item "Perbaikan APK: ekspor CSV dan ekspor JSON berfungsi di APK" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-12: Tahap 5: Perbaikan APK: tombol back Android
 - Ditambah: Penanganan tombol back Android native via AndroidX `OnBackPressedCallback` pada `MainActivity.java` yang mengarahkan navigasi mundur WebView dan menutup aplikasi secara aman (`finish()`) hanya saat berada di halaman utama (`android/app/src/main/java/com/mizoar/mizanokane/MainActivity.java`).
 - Ditambah: Pelacakan riwayat navigasi tab (`tabHistory`) dan fungsi handler global `window.handleAndroidBack` di `js/app.js` untuk menutup dialog konfirmasi hapus atau form transaksi layar sendiri saat tombol back ditekan, serta kembali ke tab sebelumnya hingga ke Beranda (`js/app.js`).
