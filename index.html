@@ -64,34 +64,42 @@
         <!-- 1. Halaman Beranda -->
         <main id="page-beranda" class="page-view" role="tabpanel" aria-label="Beranda">
 
+            <!-- Hero: Total Saldo dan Ringkasan Bulan Ini -->
             <section class="summary" aria-label="Ringkasan Saldo">
-                <div class="summary-item balance">
-                    <span>Total Saldo</span>
-                    <strong id="total-balance">Rp 0</strong>
+                <div class="summary-balance summary-item balance">
+                    <span class="summary-balance-label">Total Saldo</span>
+                    <strong id="total-balance" class="summary-balance-amount tabular-nums">Rp 0</strong>
                 </div>
                 <div class="summary-row">
-                    <div class="summary-item income">
-                        <span>Pemasukan</span>
-                        <strong id="total-income">Rp 0</strong>
+                    <div class="summary-item summary-item-income income">
+                        <span class="summary-item-label">Pemasukan</span>
+                        <strong id="total-income" class="summary-item-amount tabular-nums">+Rp 0</strong>
                     </div>
-                    <div class="summary-item expense">
-                        <span>Pengeluaran</span>
-                        <strong id="total-expense">Rp 0</strong>
+                    <div class="summary-divider" aria-hidden="true"></div>
+                    <div class="summary-item summary-item-expense expense">
+                        <span class="summary-item-label">Pengeluaran</span>
+                        <strong id="total-expense" class="summary-item-amount tabular-nums">−Rp 0</strong>
                     </div>
                 </div>
-                <div id="wallet-balances" class="wallet-balances" aria-label="Saldo per dompet"></div>
             </section>
 
+            <!-- Dompet: Baris yang bisa digeser ke samping -->
+            <section class="wallets-section" aria-label="Saldo per Dompet">
+                <div id="wallet-balances" class="wallet-balances" role="region" aria-label="Daftar saldo dompet"></div>
+            </section>
+
+            <!-- Budget Ringkas per Kategori -->
             <section class="budget-section" aria-labelledby="budget-section-title">
                 <div class="budget-header">
-                    <div class="budget-header-title">
-                        <h2 id="budget-section-title">Budget per Kategori</h2>
-                        <span id="budget-month-label" class="budget-month-label"></span>
-                    </div>
-                    <div class="budget-month-controls">
-                        <button type="button" id="btn-budget-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">&larr;</button>
-                        <input type="month" id="budget-month-input" class="budget-month-input" aria-label="Pilih bulan budget">
-                        <button type="button" id="btn-budget-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">&rarr;</button>
+                    <h2 id="budget-section-title" class="card-title">Budget</h2>
+                    <div class="budget-month-controls" role="group" aria-label="Pilih bulan budget">
+                        <button type="button" id="btn-budget-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <span id="budget-month-label" class="budget-month-label" aria-live="polite">Okt 2026</span>
+                        <button type="button" id="btn-budget-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
                     </div>
                 </div>
                 <div id="budget-summary-banner" class="budget-summary-banner hidden" aria-live="polite"></div>
@@ -100,12 +108,13 @@
                 </div>
             </section>
 
+            <!-- Transaksi Terakhir -->
             <section class="recent-tx-section" aria-labelledby="recent-tx-title">
                 <div class="recent-tx-header">
-                    <h2 id="recent-tx-title">5 Transaksi Terakhir</h2>
-                    <button type="button" id="btn-see-all-tx" class="btn-link-action">Lihat Semua &rarr;</button>
+                    <h2 id="recent-tx-title" class="card-title">Transaksi Terakhir</h2>
+                    <button type="button" id="btn-see-all-tx" class="btn-link-action">Lihat Semua</button>
                 </div>
-                <div id="recent-tx-list" class="tx-list">
+                <div id="recent-tx-list" class="recent-tx-list tx-list">
                     <!-- 5 transaksi terakhir diisi lewat JS -->
                 </div>
             </section>

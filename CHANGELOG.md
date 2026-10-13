@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-14: Tahap 5: Desain ulang v2.2
+- Diubah: Halaman Beranda didesain ulang dengan urutan Total Saldo hero di tengah (32px, bold, tabular-nums) diikuti ringkasan pemasukan (+, hijau accent) dan pengeluaran (−, merah) dua kolom kecil (18px, semibold, tabular-nums) tanpa kartu bersarang (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Saldo per dompet dipisahkan menjadi baris kartu geser horizontal ke samping dengan nama dompet (12px abu-abu), saldo tabular-nums, dan dompet bersaldo 0 ditampilkan redup (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Pemilih bulan budget menggunakan navigasi panah kiri/kanan kustom dan label teks Indonesia (contoh "Okt 2026"), sepenuhnya menghapus input bulan native browser (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Budget ringkas per kategori menampilkan nama kategori di kiri, "Rp terpakai dari Rp budget" di kanan, bar progres tipis 6px, serta persentase dan status dinamis (hijau aman, amber >= 80% dengan teks sisa, merah >= 100% dengan teks "Lewat Rp ...") tanpa kartu di dalam kartu (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Daftar transaksi terakhir pada Beranda ditata sebagai baris daftar bergaris pemisah tipis tanpa kartu di dalam kartu (`index.html`, `css/style.css`).
+- Diubah: Tanda minus transaksi dan pengeluaran diseragamkan memakai unicode minus ("−") U+2212 (`js/app.js`).
+- Diubah: Keadaan kosong (empty state) pada dompet, budget, dan transaksi terakhir diseragamkan menjadi satu kalimat singkat dan satu tombol aksi (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v30` (`sw.js`).
+- Diubah: `PLAN.md` mencentang sub-item "v2.2" di bawah "Desain ulang v2 mengikuti DESIGN.md" (`PLAN.md`).
+
 ## 2026-10-13: Tahap 5: Desain ulang v2.1
 - Ditambah: Ikon status sinkron kecil di header dengan popover penjelasan teks yang hanya muncul saat disentuh atau diklik (`index.html`, `css/style.css`, `js/app.js`).
 - Diubah: Header aplikasi didesain ulang menjadi tipis (56px) dengan nama app "Mizan Okane" (18px) satu baris di kiri dan ikon status sinkron di kanan (`index.html`, `css/style.css`).

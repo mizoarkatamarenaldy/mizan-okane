@@ -1427,12 +1427,12 @@ function createTxItemElement(tx, filterWallet) {
         if (filterWallet === 'all') {
             sign = '';
         } else if (filterWallet === (tx.walletId || DEFAULT_WALLET_ID)) {
-            sign = '- ';
+            sign = '−';
         } else if (filterWallet === tx.toWalletId) {
-            sign = '+ ';
+            sign = '+';
         }
     } else {
-        sign = tx.type === 'income' ? '+ ' : '- ';
+        sign = tx.type === 'income' ? '+' : '−';
         amountClass = tx.type === 'income' ? 'income' : 'expense';
         walletBadgeText = escapeHTML(getWalletName(tx.walletId));
     }
@@ -1484,21 +1484,35 @@ function render() {
 
     const totalBalance = totalIncome - totalExpense;
     totalBalanceEl.textContent = currencyFormatter.format(totalBalance);
-    totalIncomeEl.textContent = currencyFormatter.format(totalIncome);
-    totalExpenseEl.textContent = currencyFormatter.format(totalExpense);
+    totalIncomeEl.textContent = '+' + currencyFormatter.format(totalIncome);
+    totalExpenseEl.textContent = '−' + currencyFormatter.format(totalExpense);
 
     if (walletBalancesContainer) {
-        let balancesHtml = '';
-        for (const w of activeWallets) {
-            const bal = walletBalances.get(w.id) || 0;
-            balancesHtml += `
-                <div class="wallet-balance-item">
-                    <span class="wallet-balance-name">${escapeHTML(w.name)}</span>
-                    <strong class="wallet-balance-amount">${currencyFormatter.format(bal)}</strong>
+        if (activeWallets.length === 0) {
+            walletBalancesContainer.innerHTML = `
+                <div class="empty-state wallet-empty">
+                    <p class="empty-state-text">Belum ada dompet.</p>
+                    <button type="button" class="btn-action-outline" id="btn-empty-wallet">Tambah Dompet</button>
                 </div>
             `;
+            const btnEmptyWallet = document.getElementById('btn-empty-wallet');
+            if (btnEmptyWallet) {
+                btnEmptyWallet.addEventListener('click', () => switchTab('pengaturan'));
+            }
+        } else {
+            let balancesHtml = '';
+            for (const w of activeWallets) {
+                const bal = walletBalances.get(w.id) || 0;
+                const isZero = bal === 0;
+                balancesHtml += `
+                    <div class="wallet-balance-item${isZero ? ' is-zero' : ''}">
+                        <span class="wallet-balance-name">${escapeHTML(w.name)}</span>
+                        <strong class="wallet-balance-amount tabular-nums">${currencyFormatter.format(bal)}</strong>
+                    </div>
+                `;
+            }
+            walletBalancesContainer.innerHTML = balancesHtml;
         }
-        walletBalancesContainer.innerHTML = balancesHtml;
     }
 
     const filteredTx = currentTransactions.filter(tx => {
@@ -1524,7 +1538,16 @@ function render() {
         recentTxListContainer.innerHTML = '';
         const recentTx = currentTransactions.slice(0, 5);
         if (recentTx.length === 0) {
-            recentTxListContainer.innerHTML = '<p class="tx-empty">Belum ada transaksi.</p>';
+            recentTxListContainer.innerHTML = `
+                <div class="empty-state">
+                    <p class="empty-state-text">Belum ada transaksi.</p>
+                    <button type="button" class="btn-action-outline" id="btn-empty-add-tx">Tambah Transaksi</button>
+                </div>
+            `;
+            const btnEmptyAddTx = document.getElementById('btn-empty-add-tx');
+            if (btnEmptyAddTx) {
+                btnEmptyAddTx.addEventListener('click', () => openFormScreen());
+            }
         } else {
             recentTx.forEach(tx => {
                 recentTxListContainer.appendChild(createTxItemElement(tx, 'all'));
@@ -2007,7 +2030,7 @@ function renderBudgetSection() {
     if (budgetMonthLabel) {
         const [yStr, mStr] = selectedBudgetMonth.split('-');
         const mNum = parseInt(mStr, 10);
-        const monthName = INDO_MONTHS_FULL[mNum - 1] || '';
+        const monthName = INDO_MONTHS_SHORT[mNum - 1] || '';
         budgetMonthLabel.textContent = `${monthName} ${yStr}`;
     }
 
@@ -2015,7 +2038,16 @@ function renderBudgetSection() {
     const budgetedCats = Object.keys(budgetMap).filter(cat => typeof budgetMap[cat] === 'number' && budgetMap[cat] > 0);
 
     if (budgetedCats.length === 0) {
-        budgetListContainer.innerHTML = '<p class="budget-empty">Belum ada budget yang diatur. Atur budget di bagian Pengaturan Kategori &amp; Budget di bawah.</p>';
+        budgetListContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada budget yang diatur.</p>
+                <button type="button" class="btn-action-outline" id="btn-empty-budget">Atur Budget</button>
+            </div>
+        `;
+        const btnEmptyBudget = document.getElementById('btn-empty-budget');
+        if (btnEmptyBudget) {
+            btnEmptyBudget.addEventListener('click', () => switchTab('pengaturan'));
+        }
         if (budgetSummaryBanner) {
             budgetSummaryBanner.innerHTML = '';
             budgetSummaryBanner.classList.add('hidden');
@@ -2061,31 +2093,21 @@ function renderBudgetSection() {
         const formattedBudget = currencyFormatter.format(budgetAmount);
         const formattedTerpakai = currencyFormatter.format(terpakai);
         const statusText = isOver
-            ? `Lebih ${currencyFormatter.format(lebih)}`
+            ? `Lewat ${currencyFormatter.format(lebih)}`
             : `Sisa ${currencyFormatter.format(sisa)}`;
 
         listHtml += `
-            <div class="budget-card">
-                <div class="budget-card-header">
+            <div class="budget-item">
+                <div class="budget-item-header">
                     <span class="budget-category-name">${escapeHTML(cat)}</span>
-                    <span class="budget-percent-badge ${toneClass}">${Math.round(percent)}%</span>
+                    <span class="budget-spending tabular-nums">${formattedTerpakai} <span class="budget-spending-divider">dari</span> ${formattedBudget}</span>
                 </div>
                 <div class="budget-progress-track" role="progressbar" aria-valuenow="${Math.round(percent)}" aria-valuemin="0" aria-valuemax="100" aria-label="Progres budget ${escapeHTML(cat)}: ${Math.round(percent)}%">
                     <div class="budget-progress-fill ${toneClass}" style="width: ${percentClamped}%;"></div>
                 </div>
-                <div class="budget-card-details">
-                    <div class="budget-detail-col">
-                        <span class="budget-detail-label">Budget</span>
-                        <span class="budget-detail-value">${formattedBudget}</span>
-                    </div>
-                    <div class="budget-detail-col">
-                        <span class="budget-detail-label">Terpakai</span>
-                        <span class="budget-detail-value">${formattedTerpakai}</span>
-                    </div>
-                    <div class="budget-detail-col">
-                        <span class="budget-detail-label">${isOver ? 'Kelebihan' : 'Sisa'}</span>
-                        <span class="budget-detail-value ${toneClass}">${statusText}</span>
-                    </div>
+                <div class="budget-item-footer">
+                    <span class="budget-status-text ${toneClass}">${statusText}</span>
+                    <span class="budget-percent tabular-nums ${toneClass}">${Math.round(percent)}%</span>
                 </div>
             </div>
         `;
@@ -2097,22 +2119,22 @@ function renderBudgetSection() {
         const totalSisa = totalBudget - totalTerpakai;
         const totalOver = totalTerpakai > totalBudget;
         const summaryStatus = totalOver
-            ? `Lebih ${currencyFormatter.format(totalTerpakai - totalBudget)}`
+            ? `Lewat ${currencyFormatter.format(totalTerpakai - totalBudget)}`
             : `Sisa ${currencyFormatter.format(Math.max(0, totalSisa))}`;
         const summaryTone = totalOver ? 'tone-danger' : (totalBudget > 0 && totalTerpakai / totalBudget >= 0.8 ? 'tone-warn' : 'tone-normal');
 
         budgetSummaryBanner.innerHTML = `
             <div class="budget-summary-banner-item">
                 <span>Total Budget:</span>
-                <strong>${currencyFormatter.format(totalBudget)}</strong>
+                <strong class="tabular-nums">${currencyFormatter.format(totalBudget)}</strong>
             </div>
             <div class="budget-summary-banner-item">
                 <span>Terpakai:</span>
-                <strong>${currencyFormatter.format(totalTerpakai)}</strong>
+                <strong class="tabular-nums">${currencyFormatter.format(totalTerpakai)}</strong>
             </div>
             <div class="budget-summary-banner-item">
                 <span>${totalOver ? 'Kelebihan:' : 'Sisa:'}</span>
-                <strong class="budget-detail-value ${summaryTone}">${summaryStatus}</strong>
+                <strong class="budget-detail-value tabular-nums ${summaryTone}">${summaryStatus}</strong>
             </div>
         `;
         budgetSummaryBanner.classList.remove('hidden');
