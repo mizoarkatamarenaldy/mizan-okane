@@ -143,10 +143,10 @@
             <section class="chart-section" aria-labelledby="chart-section-title">
                 <div class="chart-header">
                     <div class="chart-header-title">
-                        <h2 id="chart-section-title">Grafik Pengeluaran Bulanan</h2>
+                        <h2 id="chart-section-title" class="card-title">Grafik Pengeluaran Bulanan</h2>
                         <span id="chart-summary-text" class="chart-summary-text"></span>
                     </div>
-                    <div class="chart-toggle-group" role="group" aria-label="Pilihan jenis grafik bulanan">
+                    <div class="type-segmented-control chart-toggle-group" role="radiogroup" aria-label="Pilihan jenis grafik bulanan">
                         <button type="button" id="btn-chart-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
                         <button type="button" id="btn-chart-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
                     </div>
@@ -160,16 +160,20 @@
             <section class="donut-section" aria-labelledby="donut-section-title">
                 <div class="donut-header">
                     <div class="donut-header-title">
-                        <h2 id="donut-section-title">Diagram Pengeluaran per Kategori</h2>
-                        <span id="donut-month-label" class="donut-month-label"></span>
+                        <h2 id="donut-section-title" class="card-title">Diagram Pengeluaran per Kategori</h2>
                     </div>
                     <div class="donut-controls">
-                        <div class="donut-month-controls">
-                            <button type="button" id="btn-donut-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">&larr;</button>
-                            <input type="month" id="donut-month-input" class="donut-month-input" aria-label="Pilih bulan diagram kategori">
-                            <button type="button" id="btn-donut-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">&rarr;</button>
+                        <div class="budget-month-controls donut-month-controls" role="group" aria-label="Pilih bulan diagram kategori">
+                            <button type="button" id="btn-donut-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </button>
+                            <span id="donut-month-label" class="budget-month-label donut-month-label" aria-live="polite">Okt 2026</span>
+                            <button type="button" id="btn-donut-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
                         </div>
-                        <div class="chart-toggle-group" role="group" aria-label="Pilihan jenis transaksi diagram kategori">
+                        <input type="hidden" id="donut-month-input">
+                        <div class="type-segmented-control chart-toggle-group" role="radiogroup" aria-label="Pilihan jenis transaksi diagram kategori">
                             <button type="button" id="btn-donut-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
                             <button type="button" id="btn-donut-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
                         </div>
@@ -184,96 +188,112 @@
 
         <!-- 4. Halaman Pengaturan -->
         <main id="page-pengaturan" class="page-view hidden" role="tabpanel" aria-label="Pengaturan">
-            <section class="wallet-settings-section" aria-labelledby="wallet-section-title">
-                <h2 id="wallet-section-title">Pengaturan Dompet</h2>
-                <div class="wallet-settings-card">
-                    <ul id="wallet-settings-list" class="category-items" aria-label="Daftar dompet"></ul>
-                    <form id="form-add-wallet" class="category-add-form">
-                        <input type="text" id="input-add-wallet" placeholder="Tambah dompet baru..." required autocomplete="off">
+            <!-- 1. Tampilan -->
+            <section class="settings-card" aria-labelledby="theme-section-title">
+                <div class="settings-card-header">
+                    <h2 id="theme-section-title" class="card-title">Tampilan</h2>
+                    <p class="settings-card-desc">Pilihan tema untuk tampilan di perangkat ini (disimpan lokal).</p>
+                </div>
+                <div class="radio-group" id="theme-options">
+                    <label>
+                        <input type="radio" name="theme-setting" value="system" checked>
+                        <span>Ikuti sistem</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="theme-setting" value="light">
+                        <span>Terang</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="theme-setting" value="dark">
+                        <span>Gelap</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- 2. Format Jam -->
+            <section class="settings-card" aria-labelledby="time-format-section-title">
+                <div class="settings-card-header">
+                    <h2 id="time-format-section-title" class="card-title">Format Jam</h2>
+                    <p class="settings-card-desc">Pilihan format waktu untuk formulir dan tampilan transaksi di perangkat ini.</p>
+                </div>
+                <div class="radio-group" id="time-format-options">
+                    <label>
+                        <input type="radio" name="time-format-setting" value="24" checked>
+                        <span>24 jam (contoh: 14:30)</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="time-format-setting" value="12">
+                        <span>12 jam (contoh: 02:30 PM)</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- 3. Dompet -->
+            <section class="settings-card" aria-labelledby="wallet-section-title">
+                <div class="settings-card-header">
+                    <h2 id="wallet-section-title" class="card-title">Dompet</h2>
+                    <p class="settings-card-desc">Kelola dompet atau rekening sumber dana (misal: Tunai, Rekening Bank, E-Wallet).</p>
+                </div>
+                <ul id="wallet-settings-list" class="category-items" aria-label="Daftar dompet"></ul>
+                <form id="form-add-wallet" class="category-add-form">
+                    <input type="text" id="input-add-wallet" placeholder="Nama dompet baru..." required autocomplete="off" aria-label="Nama dompet baru">
+                    <button type="submit" class="btn-primary btn-small">Tambah Dompet</button>
+                </form>
+            </section>
+
+            <!-- 4. Kategori Transaksi -->
+            <section class="settings-card" aria-labelledby="category-section-title">
+                <div class="settings-card-header">
+                    <h2 id="category-section-title" class="card-title">Kategori Transaksi</h2>
+                    <p class="settings-card-desc">Atur kategori untuk memilah pengeluaran dan pemasukan transaksi Anda.</p>
+                </div>
+
+                <div class="settings-group">
+                    <h3 class="category-group-title expense">Pengeluaran</h3>
+                    <ul id="expense-category-list" class="category-items" aria-label="Daftar kategori pengeluaran"></ul>
+                    <form id="form-add-expense-cat" class="category-add-form">
+                        <input type="text" id="input-add-expense-cat" placeholder="Tambah kategori pengeluaran..." required autocomplete="off" aria-label="Tambah kategori pengeluaran">
+                        <button type="submit" class="btn-primary btn-small">Tambah</button>
+                    </form>
+                </div>
+
+                <div class="settings-divider" aria-hidden="true"></div>
+
+                <div class="settings-group">
+                    <h3 class="category-group-title income">Pemasukan</h3>
+                    <ul id="income-category-list" class="category-items" aria-label="Daftar kategori pemasukan"></ul>
+                    <form id="form-add-income-cat" class="category-add-form">
+                        <input type="text" id="input-add-income-cat" placeholder="Tambah kategori pemasukan..." required autocomplete="off" aria-label="Tambah kategori pemasukan">
                         <button type="submit" class="btn-primary btn-small">Tambah</button>
                     </form>
                 </div>
             </section>
 
-            <section class="category-section" aria-labelledby="category-section-title">
-                <h2 id="category-section-title">Pengaturan Kategori &amp; Budget</h2>
-                <div class="category-grid">
-                    <div class="category-card">
-                        <h3 class="category-group-title expense">Pengeluaran</h3>
-                        <ul id="expense-category-list" class="category-items" aria-label="Daftar kategori pengeluaran"></ul>
-                        <form id="form-add-expense-cat" class="category-add-form">
-                            <input type="text" id="input-add-expense-cat" placeholder="Tambah kategori pengeluaran..." required autocomplete="off">
-                            <button type="submit" class="btn-primary btn-small">Tambah</button>
-                        </form>
-                    </div>
-                    <div class="category-card">
-                        <h3 class="category-group-title income">Pemasukan</h3>
-                        <ul id="income-category-list" class="category-items" aria-label="Daftar kategori pemasukan"></ul>
-                        <form id="form-add-income-cat" class="category-add-form">
-                            <input type="text" id="input-add-income-cat" placeholder="Tambah kategori pemasukan..." required autocomplete="off">
-                            <button type="submit" class="btn-primary btn-small">Tambah</button>
-                        </form>
-                    </div>
+            <!-- 5. Budget Pengeluaran Bulanan -->
+            <section class="settings-card" aria-labelledby="budget-section-title">
+                <div class="settings-card-header">
+                    <h2 id="budget-section-title" class="card-title">Budget Pengeluaran Bulanan</h2>
+                    <p class="settings-card-desc">Batas pengeluaran per bulan untuk tiap kategori (berlaku terus setiap bulan).</p>
                 </div>
-
-                <div class="budget-settings-card">
-                    <h3 class="category-group-title expense">Budget Pengeluaran Bulanan</h3>
-                    <p class="budget-settings-desc">Batas pengeluaran per bulan untuk tiap kategori pengeluaran (berlaku terus setiap bulan).</p>
-                    <ul id="budget-settings-list" class="category-items" aria-label="Daftar budget per kategori"></ul>
-                    <form id="form-set-budget" class="budget-add-form">
-                        <div class="budget-form-row">
-                            <select id="select-budget-cat" required aria-label="Pilih kategori pengeluaran untuk budget">
-                                <option value="" disabled selected>Pilih kategori pengeluaran</option>
-                            </select>
-                            <input type="text" inputmode="numeric" id="input-budget-amount" placeholder="Batas bulanan (Rp)..." required aria-label="Batas bulanan dalam rupiah" autocomplete="off">
-                            <button type="submit" class="btn-primary btn-small">Simpan</button>
-                        </div>
-                    </form>
-                </div>
+                <ul id="budget-settings-list" class="category-items" aria-label="Daftar budget per kategori"></ul>
+                <form id="form-set-budget" class="budget-add-form">
+                    <div class="budget-form-row">
+                        <select id="select-budget-cat" required aria-label="Pilih kategori pengeluaran untuk budget">
+                            <option value="" disabled selected>Pilih kategori pengeluaran</option>
+                        </select>
+                        <input type="text" inputmode="numeric" id="input-budget-amount" placeholder="Batas bulanan (Rp)..." required aria-label="Batas bulanan dalam rupiah" autocomplete="off">
+                        <button type="submit" class="btn-primary btn-small">Simpan Budget</button>
+                    </div>
+                </form>
             </section>
 
-            <section class="time-format-settings-section" aria-labelledby="time-format-section-title">
-                <h2 id="time-format-section-title">Pengaturan Format Jam</h2>
-                <div class="time-format-card">
-                    <p class="time-format-desc">Pilihan format jam untuk formulir dan tampilan riwayat di perangkat ini (disimpan lokal, tidak ikut sinkron).</p>
-                    <div class="radio-group" id="time-format-options">
-                        <label>
-                            <input type="radio" name="time-format-setting" value="24" checked>
-                            24 jam (contoh: 14:30)
-                        </label>
-                        <label>
-                            <input type="radio" name="time-format-setting" value="12">
-                            12 jam (AM/PM) (contoh: 02:30 PM)
-                        </label>
-                    </div>
+            <!-- 6. Data dan Akun -->
+            <section class="settings-card" aria-labelledby="data-account-title">
+                <div class="settings-card-header">
+                    <h2 id="data-account-title" class="card-title">Data dan Akun</h2>
+                    <p class="settings-card-desc">Cadangan data lokal dan sinkronisasi otomatis dengan Google Drive.</p>
                 </div>
-            </section>
-
-            <section class="theme-settings-section" aria-labelledby="theme-section-title">
-                <h2 id="theme-section-title">Tampilan</h2>
-                <div class="theme-card">
-                    <p class="theme-desc">Pilihan tema untuk tampilan di perangkat ini (disimpan lokal, tidak ikut sinkron).</p>
-                    <div class="radio-group" id="theme-options">
-                        <label>
-                            <input type="radio" name="theme-setting" value="system" checked>
-                            Ikuti sistem
-                        </label>
-                        <label>
-                            <input type="radio" name="theme-setting" value="light">
-                            Terang
-                        </label>
-                        <label>
-                            <input type="radio" name="theme-setting" value="dark">
-                            Gelap
-                        </label>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Bagian Data dan Akun -->
-            <section class="data-account-section" aria-labelledby="data-account-title">
-                <h2 id="data-account-title">Data dan Akun</h2>
-                <div class="data-account-card">
+                <div class="data-account-content">
                     <p id="settings-sync-status" class="sync-status" role="status">Belum login. Data hanya tersimpan di perangkat ini.</p>
                     <div class="data-account-actions">
                         <button type="button" id="btn-login" class="btn-primary btn-small">Login Google</button>
@@ -285,6 +305,7 @@
                         <button type="button" id="btn-export-csv" class="btn-secondary btn-small">Ekspor CSV</button>
                         <button type="button" id="btn-install" class="btn-primary btn-small hidden">Install Aplikasi</button>
                     </div>
+                    <div class="settings-divider" aria-hidden="true"></div>
                     <div class="data-account-links">
                         <a href="privasi.html" class="footer-link">Kebijakan Privasi</a>
                         <span class="footer-separator" aria-hidden="true">&bull;</span>

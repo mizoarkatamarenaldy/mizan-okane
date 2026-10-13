@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-14: Tahap 5: Desain ulang v2.4
+- Diubah: Halaman Statistik didesain ulang dengan pemilih bulan kustom berlabel teks Indonesia ("Okt 2026") dan tombol navigasi panah kiri/kanan outline konsisten menggantikan input bulan bawaan browser (`index.html`, `js/app.js`, `css/style.css`).
+- Diubah: Grafik bulanan dan diagram donut per kategori menggunakan tombol geser segmen (Pengeluaran / Pemasukan) dengan visual yang selaras dengan formulir transaksi tanpa bayangan dekoratif (`index.html`, `css/style.css`).
+- Diubah: Diagram donut dan grafik bulanan hanya menggunakan palet token DESIGN.md (pemasukan hijau accent, pengeluaran merah #FF453A, transfer biru #4A9EFF, warning amber #F5A623, border, surface-raised, text-secondary) disertai rincian label teks, persentase, dan angka uang tabular-nums agar informasi tidak mengandalkan warna semata (`js/app.js`, `css/style.css`).
+- Diubah: Keadaan kosong pada grafik bulanan dan diagram donut diseragamkan menjadi satu kalimat singkat dan satu tombol aksi ("Tambah Transaksi") (`js/app.js`, `css/style.css`).
+- Diubah: Halaman Pengaturan ditata ulang menjadi kartu per kelompok (Tampilan, Format Jam, Dompet, Kategori Transaksi, Budget Pengeluaran Bulanan, Data dan Akun) tanpa kartu di dalam kartu, dipisahkan garis tipis atau spasi bersih di dalam kartu, serta tombol aksi konsisten (tombol utama/simpan berlatar accent, tombol hapus berbahaya memakai warna pengeluaran berlabel teks jelas) (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Halaman Kebijakan Privasi (`privasi.html`) dan Syarat dan Ketentuan (`syarat.html`) diselaraskan tampilannya dengan token warna DESIGN.md, tipografi, lebar maksimal 640px di tengah, tombol kembali outline SVG, dan dukungan tema terang/gelap tanpa mengubah isi teks aslinya (`privasi.html`, `syarat.html`, `css/style.css`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v32` (`sw.js`).
+- Diubah: `PLAN.md` mencentang sub-item "v2.4" di bawah "Desain ulang v2 mengikuti DESIGN.md" (`PLAN.md`).
+
 ## 2026-10-14: Tahap 5: Desain ulang v2.3
 - Diubah: Halaman Riwayat didesain ulang dengan pengelompokan transaksi per tanggal ("Hari ini", "Kemarin", "12 Okt", dst.) disertai total saldo harian (dengan tanda +, −, atau Rp 0) pada header grup (`index.html`, `css/style.css`, `js/app.js`).
 - Diubah: Tiap baris transaksi menampilkan ikon kategori garis (outline) konsisten tanpa emoji, nama kategori dan catatan, jumlah rata kanan dengan tanda (+ untuk pemasukan hijau accent, − untuk pengeluaran merah, dan transfer biru tanpa tanda dengan label "Transfer"), serta dompet dan waktu pada baris kecil 12px text-secondary, dengan angka uang tabular-nums (`index.html`, `css/style.css`, `js/app.js`).

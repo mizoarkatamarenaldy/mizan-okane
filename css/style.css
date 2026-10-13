@@ -1551,28 +1551,29 @@ p {
 /* Segmented Toggle Control (Pilihan Pengeluaran / Pemasukan) */
 .chart-toggle-group {
     display: inline-flex;
-    background-color: var(--bg);
+    background-color: var(--surface-raised);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: var(--radius-input, 6px);
     padding: 3px;
     gap: 3px;
 }
 
 .chart-toggle-btn {
-    border: none;
+    border: 1px solid transparent;
     background: transparent;
-    color: var(--text-muted);
-    font-size: 13px;
+    color: var(--text-secondary);
+    font-size: 13.5px;
     font-weight: 500;
-    padding: 8px 14px;
-    border-radius: 6px;
+    padding: 8px 16px;
+    border-radius: 4px;
     cursor: pointer;
     min-height: 44px;
     line-height: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    user-select: none;
     flex: none;
 }
 
@@ -1581,18 +1582,19 @@ p {
 }
 
 .chart-toggle-btn.is-active {
-    background-color: var(--card-bg);
+    background-color: var(--surface);
+    border-color: var(--border);
     color: var(--text);
-    font-weight: 700;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+    box-shadow: none;
 }
 
 .chart-toggle-btn.is-active[data-type="expense"] {
-    color: var(--tone-error);
+    color: var(--expense);
 }
 
 .chart-toggle-btn.is-active[data-type="income"] {
-    color: var(--tone-ok);
+    color: var(--income);
 }
 
 .chart-detail {
@@ -1723,25 +1725,16 @@ p {
 .donut-controls {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .donut-month-controls {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-}
-
-.donut-month-input {
-    padding: 6px 10px;
-    font-size: 13.5px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background-color: var(--card-bg);
-    color: var(--text);
-    min-height: 44px;
-    width: auto;
+    gap: 4px;
 }
 
 .donut-container {
@@ -1789,19 +1782,17 @@ p {
 
 .donut-segment {
     cursor: pointer;
-    transition: stroke-width 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+    transition: stroke-width 0.18s ease, opacity 0.18s ease;
 }
 
 .donut-segment:hover,
 .donut-segment.is-active {
     stroke-width: 40;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .donut-segment:focus-visible {
     outline: none;
     stroke-width: 40;
-    filter: drop-shadow(0 0 0 2px var(--text));
 }
 
 .donut-chart-svg.has-active .donut-segment:not(.is-active) {
@@ -1914,64 +1905,62 @@ p {
    Halaman Pengaturan (Dompet, Kategori, Budget, Format Jam, Tampilan, Data & Akun)
    ========================================================================== */
 
-.wallet-settings-section,
-.category-section,
-.time-format-settings-section,
-.theme-settings-section,
-.data-account-section {
-    background: var(--card-bg);
+.settings-card {
+    background: var(--surface);
     padding: 18px 16px;
     border-radius: var(--radius-card, 8px);
     border: 1px solid var(--border);
-    box-shadow: var(--card-shadow);
+    box-shadow: none;
     margin-bottom: 20px;
 }
 
-.wallet-settings-card,
-.category-card,
-.budget-settings-card,
-.time-format-card,
-.theme-card,
-.data-account-card {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    background: var(--card-bg);
+.settings-card-header {
+    margin-bottom: 14px;
+}
+
+.settings-card-header .card-title {
+    margin: 0 0 4px 0;
+    font-size: var(--font-size-card-title, 16px);
+    font-weight: var(--font-weight-card-title, 600);
+    color: var(--text);
+}
+
+.settings-card-desc {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+.settings-group {
     display: flex;
     flex-direction: column;
 }
 
-.category-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-@media (min-width: 600px) {
-    .category-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-    }
+.settings-divider {
+    height: 1px;
+    background-color: var(--border);
+    margin: 16px 0;
+    border: none;
 }
 
 .category-group-title {
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border-subtle);
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-bottom: 0;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .category-group-title.income {
-    color: var(--tone-ok);
+    color: var(--income);
 }
 
 .category-group-title.expense {
-    color: var(--tone-error);
+    color: var(--expense);
 }
 
 .category-items {
@@ -1979,8 +1968,8 @@ p {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 14px;
-    flex: 1;
+    margin: 0 0 14px 0;
+    padding: 0;
 }
 
 .category-item {
@@ -1989,14 +1978,14 @@ p {
     align-items: center;
     padding: 8px 12px;
     border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--card-bg-subtle);
+    border-radius: var(--radius-input, 6px);
+    background: var(--surface-raised);
     min-height: 44px;
     gap: 8px;
 }
 
 .category-item.editing {
-    background: var(--card-bg);
+    background: var(--surface);
     padding: 6px 8px;
 }
 
@@ -2004,11 +1993,12 @@ p {
     font-weight: 500;
     font-size: 14px;
     word-break: break-word;
+    color: var(--text);
 }
 
 .category-empty-item {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     padding: 12px 0;
     text-align: center;
     font-style: italic;
@@ -2020,10 +2010,92 @@ p {
     flex-shrink: 0;
 }
 
+.btn-edit-cat,
+.btn-edit-wallet,
+.btn-edit-budget {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    min-height: 44px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-edit-cat:hover,
+.btn-edit-wallet:hover,
+.btn-edit-budget:hover {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border-strong);
+}
+
+.btn-delete-cat,
+.btn-delete-wallet,
+.btn-delete-budget,
+.btn-item-danger {
+    background: transparent;
+    color: var(--expense);
+    border: 1px solid rgba(255, 69, 58, 0.32);
+    border-radius: var(--radius-input, 6px);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    min-height: 44px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-delete-cat:hover,
+.btn-delete-wallet:hover,
+.btn-delete-budget:hover,
+.btn-item-danger:hover {
+    background: rgba(255, 69, 58, 0.12);
+    border-color: var(--expense);
+    color: var(--expense);
+}
+
+.btn-save-cat {
+    background-color: var(--accent);
+    color: var(--btn-primary-text, #0F1117);
+    border: none;
+    border-radius: var(--radius-input, 6px);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    min-height: 44px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-save-cat:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-cancel-cat {
+    background-color: var(--surface-raised);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    min-height: 44px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-cancel-cat:hover {
+    background-color: var(--surface);
+}
+
 .category-add-form {
     display: flex;
     gap: 8px;
-    margin-top: auto;
+    margin-top: 4px;
 }
 
 .category-add-form input {
@@ -2046,22 +2118,13 @@ p {
     padding: 8px 12px;
     font-size: 14px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius-input, 6px);
     background-color: var(--card-bg);
     color: var(--text);
 }
 
-.budget-settings-desc,
-.time-format-desc,
-.theme-desc {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-    line-height: 1.45;
-}
-
 .budget-add-form {
-    margin-top: auto;
+    margin-top: 4px;
 }
 
 .budget-form-row {
@@ -2087,19 +2150,19 @@ p {
 
 .budget-item-amount {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     margin-left: 4px;
     white-space: nowrap;
 }
 
 .budget-orphan-badge {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-style: italic;
     margin-left: 4px;
 }
 
-/* Radio Option Groups */
+/* Radio Option Groups (Tampilan & Format Jam) */
 .radio-group {
     display: flex;
     flex-direction: column;
@@ -2114,28 +2177,35 @@ p {
 }
 
 .radio-group label {
+    flex: 1 1 auto;
     font-weight: 500;
-    font-size: 14px;
+    font-size: 13.5px;
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
     padding: 10px 14px;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card-bg-subtle);
+    border-radius: var(--radius-input, 6px);
+    background: var(--surface-raised);
+    color: var(--text);
     min-height: 44px;
     transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
+.radio-group label:hover {
+    border-color: var(--border-strong);
+}
+
 .radio-group label:has(input:checked) {
-    border-color: var(--primary);
+    border-color: var(--accent);
     background: var(--primary-subtle);
-    color: var(--primary);
+    color: var(--text);
     font-weight: 600;
 }
 
 .radio-group input[type="radio"] {
+    accent-color: var(--accent);
     width: 18px;
     height: 18px;
     margin: 0;
@@ -2143,35 +2213,34 @@ p {
 }
 
 /* Data dan Akun */
-.data-account-card .sync-status {
+.data-account-content .sync-status {
     font-size: 13px;
     margin-bottom: 14px;
-    padding: 10px 12px;
-    background: var(--card-bg-subtle);
-    border-radius: 6px;
+    padding: 10px 14px;
+    background: var(--surface-raised);
+    border-radius: var(--radius-input, 6px);
     border: 1px solid var(--border);
+    color: var(--text);
 }
 
 .data-account-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 16px;
 }
 
 .data-account-links {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border-subtle);
-    font-size: 13.5px;
+    gap: 12px;
+    font-size: 13px;
 }
 
 .footer-link {
-    color: var(--text-muted);
+    color: var(--accent);
     text-decoration: underline;
+    text-underline-offset: 2px;
     transition: color 0.15s ease;
     min-height: 44px;
     display: inline-flex;
@@ -2181,11 +2250,11 @@ p {
 
 .footer-link:hover,
 .footer-link:focus-visible {
-    color: var(--primary);
+    color: var(--primary-hover);
 }
 
 .footer-separator {
-    color: var(--text-subtle);
+    color: var(--text-secondary);
 }
 
 /* ==========================================================================

@@ -148,37 +148,12 @@ function applyThemeUI(themeSetting) {
     applyTheme(themeSetting);
 }
 
-const DONUT_COLORS_LIGHT = [
-    '#2563eb', // Biru
-    '#e11d48', // Merah / Rose
-    '#059669', // Hijau Zamrud
-    '#d97706', // Jingga / Amber
-    '#7c3aed', // Ungu / Violet
-    '#0891b2', // Sian / Cyan
-    '#db2777', // Merah Muda / Pink
-    '#4f46e5', // Nila / Indigo
-    '#65a30d', // Limau / Lime
-    '#c026d3', // Fuchsia
-    '#0d9488', // Teal
-    '#ea580c'  // Oranye Tua
-];
-
-const DONUT_COLORS_DARK = [
-    '#3b82f6', // Biru
-    '#f43f5e', // Merah / Rose
-    '#10b981', // Hijau Zamrud
-    '#f59e0b', // Jingga / Amber
-    '#8b5cf6', // Ungu / Violet
-    '#06b6d4', // Sian / Cyan
-    '#ec4899', // Merah Muda / Pink
-    '#6366f1', // Nila / Indigo
-    '#84cc16', // Limau / Lime
-    '#d946ef', // Fuchsia
-    '#14b8a6', // Teal
-    '#f97316'  // Oranye Tua
-];
-
-const DONUT_COLORS = DONUT_COLORS_LIGHT;
+// Token Palet DESIGN.md untuk Diagram Donut
+// Makna: Pengeluaran #FF453A, Pemasukan accent, Transfer #4A9EFF, Warn #F5A623, dll.
+const DONUT_EXPENSE_DARK = ['#FF453A', '#F5A623', '#4A9EFF', '#2ECC8F', '#9194A1', '#2A2D3A', '#1F2232'];
+const DONUT_EXPENSE_LIGHT = ['#FF453A', '#F5A623', '#4A9EFF', '#24A574', '#6B6D78', '#D8D8DC', '#F0F0F2'];
+const DONUT_INCOME_DARK = ['#2ECC8F', '#4A9EFF', '#F5A623', '#FF453A', '#9194A1', '#2A2D3A', '#1F2232'];
+const DONUT_INCOME_LIGHT = ['#24A574', '#4A9EFF', '#F5A623', '#FF453A', '#6B6D78', '#D8D8DC', '#F0F0F2'];
 
 let selectedBudgetMonth = '';
 let currentBudgets = {
@@ -1107,11 +1082,23 @@ function renderMonthlyChart(transactions) {
     );
 
     if (chartTx.length === 0) {
-        chartContainer.innerHTML = `<p class="chart-empty">Belum ada transaksi ${typeLabel} untuk ditampilkan.</p>`;
+        chartContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada transaksi ${typeLabel}.</p>
+                <button type="button" class="btn-action-outline" id="btn-empty-chart-tx">Tambah Transaksi</button>
+            </div>
+        `;
         if (chartSummaryText) chartSummaryText.textContent = '';
         if (chartDetail) {
             chartDetail.textContent = '';
             chartDetail.classList.add('hidden');
+        }
+        const btnEmptyChart = document.getElementById('btn-empty-chart-tx');
+        if (btnEmptyChart) {
+            btnEmptyChart.addEventListener('click', () => {
+                resetForm();
+                openFormScreen();
+            });
         }
         return;
     }
@@ -1136,11 +1123,23 @@ function renderMonthlyChart(transactions) {
     }
 
     if (monthData.size === 0) {
-        chartContainer.innerHTML = `<p class="chart-empty">Belum ada transaksi ${typeLabel} untuk ditampilkan.</p>`;
+        chartContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada transaksi ${typeLabel}.</p>
+                <button type="button" class="btn-action-outline" id="btn-empty-chart-tx">Tambah Transaksi</button>
+            </div>
+        `;
         if (chartSummaryText) chartSummaryText.textContent = '';
         if (chartDetail) {
             chartDetail.textContent = '';
             chartDetail.classList.add('hidden');
+        }
+        const btnEmptyChart = document.getElementById('btn-empty-chart-tx');
+        if (btnEmptyChart) {
+            btnEmptyChart.addEventListener('click', () => {
+                resetForm();
+                openFormScreen();
+            });
         }
         return;
     }
@@ -1220,7 +1219,7 @@ function renderMonthlyChart(transactions) {
 
         chartDetail.innerHTML = `
             <span class="chart-detail-month">${fullLabel}:</span>
-            <strong class="${amountClass}">${currencyFormatter.format(total)}</strong>
+            <strong class="${amountClass} tabular-nums">${currencyFormatter.format(total)}</strong>
             <span class="chart-detail-count">${count > 0 ? `(${count} transaksi)` : emptyLabel}</span>
         `;
     }
@@ -1367,7 +1366,7 @@ function renderDonutChart(transactions) {
     if (donutMonthLabel) {
         const [yStr, mStr] = selectedDonutMonth.split('-');
         const mNum = parseInt(mStr, 10);
-        const monthName = INDO_MONTHS_FULL[mNum - 1] || '';
+        const monthName = INDO_MONTHS_SHORT[mNum - 1] || '';
         donutMonthLabel.textContent = `${monthName} ${yStr}`;
     }
 
@@ -1392,12 +1391,24 @@ function renderDonutChart(transactions) {
     });
 
     if (monthTx.length === 0) {
-        donutContainer.innerHTML = `<p class="chart-empty">Belum ada transaksi ${typeLabel} pada bulan ini.</p>`;
+        donutContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada transaksi ${typeLabel} pada bulan ini.</p>
+                <button type="button" class="btn-action-outline" id="btn-empty-donut-tx">Tambah Transaksi</button>
+            </div>
+        `;
         if (donutDetail) {
             donutDetail.textContent = '';
             donutDetail.classList.add('hidden');
         }
         activeDonutCategory = null;
+        const btnEmptyDonut = document.getElementById('btn-empty-donut-tx');
+        if (btnEmptyDonut) {
+            btnEmptyDonut.addEventListener('click', () => {
+                resetForm();
+                openFormScreen();
+            });
+        }
         return;
     }
 
@@ -1414,16 +1425,32 @@ function renderDonutChart(transactions) {
     }
 
     if (totalAmount <= 0) {
-        donutContainer.innerHTML = `<p class="chart-empty">Belum ada transaksi ${typeLabel} pada bulan ini.</p>`;
+        donutContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada transaksi ${typeLabel} pada bulan ini.</p>
+                <button type="button" class="btn-action-outline" id="btn-empty-donut-tx">Tambah Transaksi</button>
+            </div>
+        `;
         if (donutDetail) {
             donutDetail.textContent = '';
             donutDetail.classList.add('hidden');
         }
         activeDonutCategory = null;
+        const btnEmptyDonut = document.getElementById('btn-empty-donut-tx');
+        if (btnEmptyDonut) {
+            btnEmptyDonut.addEventListener('click', () => {
+                resetForm();
+                openFormScreen();
+            });
+        }
         return;
     }
 
-    const activeDonutPalette = resolveIsDark(getStoredTheme()) ? DONUT_COLORS_DARK : DONUT_COLORS_LIGHT;
+    const isDark = resolveIsDark(getStoredTheme());
+    const activeDonutPalette = isIncome
+        ? (isDark ? DONUT_INCOME_DARK : DONUT_INCOME_LIGHT)
+        : (isDark ? DONUT_EXPENSE_DARK : DONUT_EXPENSE_LIGHT);
+
     const sortedCategories = Array.from(categoryMap.entries())
         .sort((a, b) => b[1].amount - a[1].amount)
         .map(([category, data], index) => {
@@ -1453,13 +1480,13 @@ function renderDonutChart(transactions) {
         if (!catItem) {
             donutDetail.innerHTML = `
                 <span class="chart-detail-month">Total ${typeLabel}:</span>
-                <strong class="${amountClass}">${currencyFormatter.format(totalAmount)}</strong>
+                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(totalAmount)}</strong>
                 <span class="chart-detail-count">(${sortedCategories.length} kategori, ${monthTx.length} transaksi)</span>
             `;
         } else {
             donutDetail.innerHTML = `
                 <span class="chart-detail-month">${escapeHTML(catItem.category)}:</span>
-                <strong class="${amountClass}">${currencyFormatter.format(catItem.amount)}</strong>
+                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(catItem.amount)}</strong>
                 <span class="chart-detail-count">(${formatPercent(catItem.percentage)} - ${catItem.count} transaksi)</span>
             `;
         }
@@ -1531,8 +1558,8 @@ function renderDonutChart(transactions) {
                     <span class="donut-legend-name" title="${escapeHTML(cat.category)}">${escapeHTML(cat.category)}</span>
                 </div>
                 <div class="donut-legend-side">
-                    <span class="donut-legend-percent">${percentStr}</span>
-                    <strong class="donut-legend-amount">${currencyFormatter.format(cat.amount)}</strong>
+                    <span class="donut-legend-percent tabular-nums">${percentStr}</span>
+                    <strong class="donut-legend-amount tabular-nums">${currencyFormatter.format(cat.amount)}</strong>
                 </div>
             </li>
         `;
@@ -1550,8 +1577,8 @@ function renderDonutChart(transactions) {
                     ${segmentsHtml}
                     <g class="donut-center-group" aria-hidden="true">
                         <text x="110" y="98" text-anchor="middle" class="donut-center-title" id="donut-center-title">${centerTitleText}</text>
-                        <text x="110" y="118" text-anchor="middle" class="donut-center-value" id="donut-center-value">${centerValueText}</text>
-                        <text x="110" y="134" text-anchor="middle" class="donut-center-sub" id="donut-center-sub">${centerSubText}</text>
+                        <text x="110" y="118" text-anchor="middle" class="donut-center-value tabular-nums" id="donut-center-value">${centerValueText}</text>
+                        <text x="110" y="134" text-anchor="middle" class="donut-center-sub tabular-nums" id="donut-center-sub">${centerSubText}</text>
                     </g>
                 </svg>
             </div>
