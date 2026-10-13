@@ -10,6 +10,23 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-13: Tahap 5: Desain ulang v2.0
+- Ditambah: Menaruh `DESIGN.md` sebagai panduan arah desain aplikasi di root repository (`DESIGN.md`).
+- Diubah: Menerapkan token warna palet gelap utama (`#0F1117`, `#181A24`, `#1F2232`, `#2A2D3A`, `#E4E4E8`, `#9194A1`, `#2ECC8F`) dan palet terang opsi (`#F5F5F7`, `#FFFFFF`, `#F0F0F2`, `#D8D8DC`, `#1A1A1E`, `#6B6D78`, `#24A574`) serta warna semantik uang (pemasukan hijau accent, pengeluaran merah `#FF453A`, transfer biru `#4A9EFF`, budget bar) melalui variabel CSS (`css/style.css`).
+- Diubah: Menerapkan tipografi `DESIGN.md` (Total Saldo 32px bold, ringkasan 18px semibold, judul kartu 16px semibold, isi 14px, label kecil 12px, judul app di header 18px satu baris, dan angka uang tabular-nums) serta radius 8px untuk kartu/dialog dan tanpa bayangan (`css/style.css`).
+- Diubah: Warna tema `theme-color` diselaraskan ke `#0F1117` pada mode gelap dan `#F5F5F7` pada mode terang di seluruh dokumen web dan handler tema (`index.html`, `privasi.html`, `syarat.html`, `js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v28` untuk memastikan pembaruan cache aset di PWA dan APK, serta menyinkronkan aset web ke Capacitor Android (`sw.js`).
+- Diubah: `PLAN.md` mencentang sub-item "v2.0" di bawah "Desain ulang v2 mengikuti DESIGN.md" (`PLAN.md`).
+
+## 2026-10-13: Tahap 5: Desain ulang tampilan dengan skill anti-slop
+- Diubah: Desain ulang menyeluruh antarmuka web sesuai prinsip anti-slop (dials ENERGY 1 / RHYTHM 2 / MOTION 1) dengan palet finansial tenang (hijau zamrud/pinus `#1b6348` di mode terang dan `#34d399` di mode gelap, latar batu pasir hangat `#f7f6f2` dan slate obsidian `#111417`, tanpa gradien ungu-biru generik atau glow neon) (`css/style.css`, `index.html`, `privasi.html`, `syarat.html`).
+- Diubah: Tipografi diperjelas dengan angka tabular (`tabular-nums`) pada saldo, riwayat transaksi, budget, dan statistik agar angka keuangan tersusun rapi secara vertikal (`css/style.css`).
+- Diubah: Spasi, ritme layout, dan target sentuh interaktif ditingkatkan ke standar ergonomis minimum 44x44px pada seluruh tombol, tab navigasi, kontrol filter, dan formulir di HP maupun PC (`css/style.css`).
+- Diubah: Indikator fokus keyboard (`:focus-visible`) diseragamkan dengan kontras tinggi untuk seluruh kontrol interaktif tanpa menghilangkan outline aksesibilitas (`css/style.css`).
+- Diubah: Warna meta `theme-color` diselaraskan ke palet baru di mode terang (`#1b6348`) dan mode gelap (`#111417`) pada seluruh halaman (`index.html`, `privasi.html`, `syarat.html`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v27` untuk memperbarui cache aset PWA secara offline (`sw.js`).
+- Diubah: `PLAN.md` menambahkan dan mencentang item "Desain ulang tampilan dengan skill anti-slop (hanya tampilan: warna, tipografi, spasi, layout, komponen; tidak mengubah logika, data, atau fitur)" pada Tahap 5 (`PLAN.md`).
+
 ## 2026-10-12: Tahap 5: Perbaikan APK: ekspor CSV dan ekspor JSON berfungsi di APK
 - Ditambah: Instalasi dan konfigurasi plugin Capacitor Filesystem (`@capacitor/filesystem`) dan Share (`@capacitor/share`) untuk menangani penyimpanan berkas dan berbagi berkas native di Android APK (`package.json`, `package-lock.json`, `android/capacitor.settings.gradle`, `android/app/capacitor.build.gradle`).
 - Ditambah: Konfigurasi jalur penyimpanan berkas FileProvider di Android untuk mendukung pembagian berkas dari cache dan files internal (`android/app/src/main/res/xml/file_paths.xml`).

@@ -12,6 +12,7 @@ Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Dr
 - Jangan pernah menaruh data transaksi asli, token, kunci, atau file `.env` di repo. Repo ini publik, isinya hanya kode dan dokumen.
 - Di akhir tahap atau fitur, centang tahap atau fitur itu di PLAN.md dan tambahkan satu entri di paling atas `CHANGELOG.md` sesuai format di file itu. Tahap 5 baru dicentang setelah semua fiturnya tercentang. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
 - Di awal sesi, baca hanya 5 entri paling atas CHANGELOG.md, jangan seluruh file.
+- Untuk tugas tampilan, baca DESIGN.md dulu dan ikuti. Jangan menambah warna, font, bayangan, atau animasi di luar DESIGN.md.
 
 ### Alur commit dan push
 Sebelum mulai kerja, jalankan `git branch --show-current`. Hasilnya harus `main`. Kalau bukan, berhenti: jangan pindah branch, jangan buat branch, jangan commit, jangan push. Laporkan nama branch yang aktif ke pemilik. Kalau selama sesi muncul branch atau worktree baru yang dibuat otomatis oleh tool, berhenti dan laporkan juga, jangan push.
@@ -90,6 +91,14 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] APK Item B: bungkus jadi APK dengan Capacitor (package ID com.mizoar.mizanokane, nama app "Mizan Okane", webDir www; file web masuk ke APK, offline tanpa bergantung GitHub Pages). Folder www adalah salinan hasil skrip build:www dan masuk .gitignore, root repo tetap jadi sumber kode. Build APK release, keystore, dan password dikerjakan pemilik di Android Studio; agent tidak menyentuh keystore atau password. File yang termasuk tahap ini: folder android/, package.json, package-lock.json, scripts/copy-www.js, capacitor.config.json, .gitignore. Tidak ada keystore, token, atau data asli di repo.
   - [x] Perbaikan APK: tombol back Android (di halaman dalam, back kembali ke halaman sebelumnya, bukan keluar app; dari halaman Kebijakan Privasi dan Syarat dan Ketentuan, back kembali ke Pengaturan; di halaman utama, back keluar app; perilaku versi web/PWA tidak berubah; cara teknisnya ditentukan di Implementation Plan)
   - [x] Perbaikan APK: ekspor CSV dan ekspor JSON berfungsi di APK (file tersimpan atau bisa dibagikan lewat share sheet Android, dan ada notifikasi sukses atau gagal di UI; pakai plugin Capacitor Filesystem dan Share; versi web tetap memakai cara unduh yang sekarang; nama kolom CSV dan format JSON tidak berubah; ekspor tetap jalan tanpa login Google)
+  - [x] Desain ulang tampilan dengan skill anti-slop (hanya tampilan: warna, tipografi, spasi, layout, komponen; tidak mengubah logika, data, atau fitur)
+  - [ ] Desain ulang v2 mengikuti DESIGN.md (hanya tampilan; tidak mengubah logika, data, sinkron, atau fitur; perubahan markup dan JS untuk keperluan tampilan boleh; file yang boleh disentuh: css/style.css, index.html, privasi.html, syarat.html, js/app.js hanya bagian tampilan, sw.js hanya naik versi, dan DESIGN.md; dikerjakan satu sub-item per sesi; dicentang setelah semua sub-itemnya tercentang)
+    - [x] v2.0: Taruh DESIGN.md di root repo, terapkan token warna dan tipografi lewat variabel CSS, lalu pastikan tampilan benar-benar berubah di web dan APK (cek cache service worker)
+    - [ ] v2.1: Header tipis, navigasi (bar bawah di HP, tab atas di PC), tombol tambah mengambang, status sinkron jadi ikon
+    - [ ] v2.2: Beranda (Total Saldo hero, ringkasan bulan, dompet geser, pemilih bulan custom berbahasa Indonesia, budget ringkas)
+    - [ ] v2.3: Riwayat dikelompokkan per tanggal dan form tambah/edit transaksi (bottom sheet di HP)
+    - [ ] v2.4: Statistik, Pengaturan, Kebijakan Privasi, Syarat dan Ketentuan
+    - [ ] v2.5: Cek akhir (semua teks Indonesia, mode terang dan gelap, tes di HP)
   - [ ] APK rilis: unggah APK ke GitHub Releases (dikerjakan pemilik setelah dua perbaikan APK di atas selesai dan APK dibuild ulang; APK tidak dimasukkan ke repo lewat git add)
   - [ ] APK Item A: login Google native untuk APK (plugin Google Sign-In untuk Capacitor, OAuth Client ID tipe Android, token Drive `appDataFolder` didapat lewat jalur native; logika sinkron dan aturan konflik tidak berubah; versi web tetap memakai login yang sekarang; dikerjakan setelah APK rilis, dites di HP asli)
   - [ ] Persiapan rilis publik (dikerjakan paling akhir, karena butuh link unduh, screenshot, dan fitur final; README berisi cara pakai, cara install, catatan peringatan "belum diverifikasi Google", dan cara hapus data; pastikan tidak ada keystore, token, atau data asli di repo)

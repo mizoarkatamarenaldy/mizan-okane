@@ -126,7 +126,7 @@ function applyTheme(themeSetting) {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', isDark ? '#121212' : '#4CAF50');
+        metaThemeColor.setAttribute('content', isDark ? '#0F1117' : '#F5F5F7');
     }
 }
 
