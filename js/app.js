@@ -26,11 +26,20 @@ const formGroupCategory = document.getElementById('form-group-category');
 const txCategoryInput = document.getElementById('tx-category');
 const txNoteInput = document.getElementById('tx-note');
 const btnCancel = document.getElementById('btn-cancel');
+const btnDeleteFromForm = document.getElementById('btn-delete-from-form');
+
+const formScreen = document.getElementById('form-screen');
+const formScreenBackdrop = document.getElementById('form-screen-backdrop');
+const categoryChipsContainer = document.getElementById('category-chips');
+const txDateDaySelect = document.getElementById('tx-date-day');
+const txDateMonthSelect = document.getElementById('tx-date-month');
+const txDateYearSelect = document.getElementById('tx-date-year');
+const txTimeHour24Select = document.getElementById('tx-time-hour-24');
+const txTimeMinute24Select = document.getElementById('tx-time-minute-24');
 
 const txListContainer = document.getElementById('tx-list');
 const recentTxListContainer = document.getElementById('recent-tx-list');
 const btnSeeAllTx = document.getElementById('btn-see-all-tx');
-const formScreen = document.getElementById('form-screen');
 const btnFabAdd = document.getElementById('btn-fab-add');
 const btnFormBack = document.getElementById('btn-form-back');
 const settingsSyncStatusEl = document.getElementById('settings-sync-status');
@@ -338,10 +347,40 @@ function populateCategoryOptions(selectedVal = null, oldCustomCategory = null) {
 
     txCategoryInput.innerHTML = html;
 
+    let targetVal = '';
     if (selectedVal && list.includes(selectedVal)) {
+        targetVal = selectedVal;
         txCategoryInput.value = selectedVal;
+    } else if (oldCustomCategory && !list.includes(oldCustomCategory) && selectedVal === oldCustomCategory) {
+        targetVal = oldCustomCategory;
     } else {
         txCategoryInput.value = '';
+    }
+
+    // Render Chip Kategori
+    if (categoryChipsContainer) {
+        let chipsHtml = '';
+        if (oldCustomCategory && !list.includes(oldCustomCategory)) {
+            const isSel = targetVal === oldCustomCategory;
+            chipsHtml += `<button type="button" class="category-chip ${isSel ? 'is-selected' : ''}" data-value="${escapeHTML(oldCustomCategory)}" role="radio" aria-checked="${String(isSel)}">${escapeHTML(oldCustomCategory)}</button>`;
+        }
+        for (const cat of list) {
+            const isSel = targetVal === cat;
+            chipsHtml += `<button type="button" class="category-chip ${isSel ? 'is-selected' : ''}" data-value="${escapeHTML(cat)}" role="radio" aria-checked="${String(isSel)}">${escapeHTML(cat)}</button>`;
+        }
+        categoryChipsContainer.innerHTML = chipsHtml;
+
+        categoryChipsContainer.querySelectorAll('.category-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const val = chip.dataset.value;
+                txCategoryInput.value = val;
+                categoryChipsContainer.querySelectorAll('.category-chip').forEach(c => {
+                    const active = c.dataset.value === val;
+                    c.classList.toggle('is-selected', active);
+                    c.setAttribute('aria-checked', String(active));
+                });
+            });
+        });
     }
 }
 
@@ -598,6 +637,208 @@ export function attachAmountInputFormatting(input) {
     });
 }
 
+const INDO_MONTHS_NAMES = [
+    { val: '01', name: 'Januari' },
+    { val: '02', name: 'Februari' },
+    { val: '03', name: 'Maret' },
+    { val: '04', name: 'April' },
+    { val: '05', name: 'Mei' },
+    { val: '06', name: 'Juni' },
+    { val: '07', name: 'Juli' },
+    { val: '08', name: 'Agustus' },
+    { val: '09', name: 'September' },
+    { val: '10', name: 'Oktober' },
+    { val: '11', name: 'November' },
+    { val: '12', name: 'Desember' }
+];
+
+function initDateSelectOptions() {
+    if (!txDateDaySelect || !txDateMonthSelect || !txDateYearSelect) return;
+
+    let dayHtml = '';
+    for (let d = 1; d <= 31; d++) {
+        const val = String(d).padStart(2, '0');
+        dayHtml += `<option value="${val}">${d}</option>`;
+    }
+    txDateDaySelect.innerHTML = dayHtml;
+
+    let monthHtml = '';
+    for (const m of INDO_MONTHS_NAMES) {
+        monthHtml += `<option value="${m.val}">${m.name}</option>`;
+    }
+    txDateMonthSelect.innerHTML = monthHtml;
+
+    const currentYear = new Date().getFullYear();
+    let yearHtml = '';
+    for (let y = currentYear - 10; y <= currentYear + 2; y++) {
+        yearHtml += `<option value="${y}">${y}</option>`;
+    }
+    txDateYearSelect.innerHTML = yearHtml;
+
+    const onDateSelectChange = () => {
+        syncSelectsToDateInput();
+    };
+
+    txDateDaySelect.addEventListener('change', onDateSelectChange);
+    txDateMonthSelect.addEventListener('change', onDateSelectChange);
+    txDateYearSelect.addEventListener('change', onDateSelectChange);
+}
+
+function getDaysInMonth(year, month) {
+    return new Date(year, month, 0).getDate();
+}
+
+function syncSelectsToDateInput() {
+    if (!txDateDaySelect || !txDateMonthSelect || !txDateYearSelect || !txDateInput) return;
+    const y = parseInt(txDateYearSelect.value, 10) || new Date().getFullYear();
+    const m = parseInt(txDateMonthSelect.value, 10) || (new Date().getMonth() + 1);
+    const maxDays = getDaysInMonth(y, m);
+
+    let d = parseInt(txDateDaySelect.value, 10) || 1;
+    if (d > maxDays) {
+        d = maxDays;
+        txDateDaySelect.value = String(d).padStart(2, '0');
+    }
+
+    const yStr = String(y);
+    const mStr = String(m).padStart(2, '0');
+    const dStr = String(d).padStart(2, '0');
+    txDateInput.value = `${yStr}-${mStr}-${dStr}`;
+}
+
+function syncDateInputToSelects(dateStr) {
+    if (!txDateDaySelect || !txDateMonthSelect || !txDateYearSelect) return;
+    if (!dateStr) return;
+    const match = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return;
+    const yStr = match[1];
+    const mStr = match[2];
+    const dStr = match[3];
+
+    if (!txDateYearSelect.querySelector(`option[value="${yStr}"]`)) {
+        const opt = document.createElement('option');
+        opt.value = yStr;
+        opt.textContent = yStr;
+        txDateYearSelect.appendChild(opt);
+    }
+
+    txDateYearSelect.value = yStr;
+    txDateMonthSelect.value = mStr;
+    txDateDaySelect.value = dStr;
+}
+
+function init24TimeSelectOptions() {
+    if (!txTimeHour24Select || !txTimeMinute24Select) return;
+
+    let hourHtml = '<option value="">Jam</option>';
+    for (let h = 0; h < 24; h++) {
+        const val = String(h).padStart(2, '0');
+        hourHtml += `<option value="${val}">${val}</option>`;
+    }
+    txTimeHour24Select.innerHTML = hourHtml;
+
+    let minuteHtml = '<option value="">Menit</option>';
+    for (let m = 0; m < 60; m++) {
+        const val = String(m).padStart(2, '0');
+        minuteHtml += `<option value="${val}">${val}</option>`;
+    }
+    txTimeMinute24Select.innerHTML = minuteHtml;
+
+    const on24SelectChange = () => {
+        const h = txTimeHour24Select.value;
+        const m = txTimeMinute24Select.value;
+        if (h && m) {
+            if (txTimeInput) txTimeInput.value = `${h}:${m}`;
+            hideTimeError();
+        } else {
+            if (txTimeInput) txTimeInput.value = '';
+        }
+    };
+
+    txTimeHour24Select.addEventListener('change', on24SelectChange);
+    txTimeMinute24Select.addEventListener('change', on24SelectChange);
+}
+
+export function getCategoryIconSvg(categoryName, type) {
+    if (type === 'transfer') {
+        return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`;
+    }
+
+    const norm = String(categoryName || '').trim().toLowerCase();
+    switch (norm) {
+        case 'makanan':
+        case 'makanan & minuman':
+        case 'kuliner':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>`;
+        case 'transportasi':
+        case 'transport':
+        case 'bensin':
+        case 'kendaraan':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="9" rx="2"></rect><circle cx="7.5" cy="16.5" r="1.5"></circle><circle cx="16.5" cy="16.5" r="1.5"></circle><path d="M5 11l2-5h10l2 5"></path></svg>`;
+        case 'belanja':
+        case 'belanjaan':
+        case 'shopping':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`;
+        case 'tagihan':
+        case 'listrik':
+        case 'air':
+        case 'pulsa':
+        case 'internet':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>`;
+        case 'hiburan':
+        case 'hobi':
+        case 'rekreasi':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>`;
+        case 'gaji':
+        case 'upah':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`;
+        case 'bonus':
+        case 'hadiah':
+        case 'thr':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>`;
+        case 'investasi':
+        case 'dividen':
+        case 'saham':
+        case 'reksadana':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`;
+        default:
+            if (type === 'income') {
+                return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg>`;
+            }
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
+    }
+}
+
+function formatGroupDate(dateString) {
+    if (!dateString) return 'Lainnya';
+    const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return dateString;
+    const y = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const d = parseInt(match[3], 10);
+
+    const now = new Date();
+    const todayY = now.getFullYear();
+    const todayM = now.getMonth() + 1;
+    const todayD = now.getDate();
+
+    if (y === todayY && m === todayM && d === todayD) {
+        return 'Hari ini';
+    }
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (y === yesterday.getFullYear() && m === (yesterday.getMonth() + 1) && d === yesterday.getDate()) {
+        return 'Kemarin';
+    }
+
+    const mShort = INDO_MONTHS_SHORT[m - 1] || '';
+    if (y === todayY) {
+        return `${d} ${mShort}`;
+    }
+    return `${d} ${mShort} ${y}`;
+}
+
 function formatDate(dateString) {
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('id-ID', options);
@@ -642,6 +883,11 @@ function getTimeValueFromForm() {
         }
         return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     }
+    const hVal = txTimeHour24Select ? txTimeHour24Select.value : '';
+    const mVal = txTimeMinute24Select ? txTimeMinute24Select.value : '';
+    if (hVal && mVal) {
+        return `${hVal}:${mVal}`;
+    }
     const raw = txTimeInput ? txTimeInput.value.trim() : '';
     const match = raw.match(/^(\d{1,2}):(\d{2})$/);
     if (!match) return '';
@@ -656,8 +902,15 @@ function setTimeValueToForm(timeStr) {
         if (match) {
             const h24 = parseInt(match[1], 10);
             const m = match[2];
+            const h24Str = String(h24).padStart(2, '0');
             if (txTimeInput) {
-                txTimeInput.value = `${String(h24).padStart(2, '0')}:${m}`;
+                txTimeInput.value = `${h24Str}:${m}`;
+            }
+            if (txTimeHour24Select) {
+                txTimeHour24Select.value = h24Str;
+            }
+            if (txTimeMinute24Select) {
+                txTimeMinute24Select.value = m;
             }
             const ampm = h24 >= 12 ? 'PM' : 'AM';
             let h12 = h24 % 12;
@@ -679,6 +932,8 @@ function setTimeValueToForm(timeStr) {
         }
     }
     if (txTimeInput) txTimeInput.value = '';
+    if (txTimeHour24Select) txTimeHour24Select.value = '';
+    if (txTimeMinute24Select) txTimeMinute24Select.value = '';
     if (txTimeHourSelect) txTimeHourSelect.value = '';
     if (txTimeMinuteSelect) txTimeMinuteSelect.value = '';
     if (txTimeAmpmSelect) txTimeAmpmSelect.value = 'AM';
@@ -696,8 +951,14 @@ function showTimeError() {
         } else if (txTimeHourSelect) {
             txTimeHourSelect.focus();
         }
-    } else if (txTimeInput) {
-        txTimeInput.focus();
+    } else {
+        if (txTimeHour24Select && !txTimeHour24Select.value) {
+            txTimeHour24Select.focus();
+        } else if (txTimeMinute24Select && !txTimeMinute24Select.value) {
+            txTimeMinute24Select.focus();
+        } else if (txTimeHour24Select) {
+            txTimeHour24Select.focus();
+        }
     }
 }
 
@@ -721,7 +982,7 @@ function applyTimeFormatUI(format) {
     } else {
         if (timeInput24Container) timeInput24Container.classList.remove('hidden');
         if (timeInput12Container) timeInput12Container.classList.add('hidden');
-        if (txTimeLabel) txTimeLabel.setAttribute('for', 'tx-time');
+        if (txTimeLabel) txTimeLabel.setAttribute('for', 'tx-time-hour-24');
     }
 }
 
@@ -1412,45 +1673,76 @@ function renderDonutChart(transactions) {
 function createTxItemElement(tx, filterWallet) {
     const txEl = document.createElement('div');
     txEl.className = 'tx-item';
-    
+    txEl.dataset.id = tx.id;
+    txEl.tabIndex = 0;
+    txEl.setAttribute('role', 'button');
+    txEl.setAttribute('aria-label', `Transaksi ${escapeHTML(tx.category || tx.type)}, ketuk untuk edit`);
+
     let sign = '';
     let amountClass = '';
     let categoryText = escapeHTML(tx.category || '');
-    let walletBadgeText = '';
+    let walletText = '';
+    const isTransfer = tx.type === 'transfer';
 
-    if (tx.type === 'transfer') {
+    if (isTransfer) {
         const fromName = getWalletName(tx.walletId);
         const toName = getWalletName(tx.toWalletId);
         categoryText = 'Transfer';
-        walletBadgeText = `${escapeHTML(fromName)} &rarr; ${escapeHTML(toName)}`;
+        walletText = `${escapeHTML(fromName)} &rarr; ${escapeHTML(toName)}`;
         amountClass = 'transfer';
-        if (filterWallet === 'all') {
-            sign = '';
-        } else if (filterWallet === (tx.walletId || DEFAULT_WALLET_ID)) {
-            sign = '−';
-        } else if (filterWallet === tx.toWalletId) {
-            sign = '+';
-        }
+        sign = ''; // Transfer: teks biru, tanpa tanda +/−, ada label "Transfer"
     } else {
         sign = tx.type === 'income' ? '+' : '−';
         amountClass = tx.type === 'income' ? 'income' : 'expense';
-        walletBadgeText = escapeHTML(getWalletName(tx.walletId));
+        walletText = escapeHTML(getWalletName(tx.walletId));
     }
 
+    const timeFormatted = tx.time ? formatTimeDisplay(tx.time, currentTimeFormat) : '';
+    const iconSvg = getCategoryIconSvg(tx.category, tx.type);
+
     txEl.innerHTML = `
-        <div class="tx-info">
-            <div class="tx-header">
-                <span class="tx-category">${categoryText} <span class="tx-wallet-badge">${walletBadgeText}</span></span>
-                <span class="tx-date">${formatDateTime(tx)}</span>
+        <div class="tx-item-icon ${tx.type}" aria-hidden="true">
+            ${iconSvg}
+        </div>
+        <div class="tx-item-content">
+            <div class="tx-item-main">
+                <span class="tx-item-category">${categoryText}${isTransfer ? ' <span class="tx-transfer-badge">Transfer</span>' : ''}</span>
+                ${tx.note ? `<span class="tx-item-note">&bull; ${escapeHTML(tx.note)}</span>` : ''}
             </div>
-            ${tx.note ? `<div class="tx-note">${escapeHTML(tx.note)}</div>` : ''}
-            <div class="tx-amount ${amountClass}">${sign}${currencyFormatter.format(tx.amount)}</div>
+            <div class="tx-item-sub">
+                <span class="tx-item-wallet">${walletText}</span>
+                ${timeFormatted ? `<span class="tx-item-time">&bull; ${escapeHTML(timeFormatted)}</span>` : ''}
+            </div>
+        </div>
+        <div class="tx-item-amount-col">
+            <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(tx.amount)}</span>
         </div>
         <div class="tx-actions">
-            <button type="button" class="btn-icon btn-edit" data-id="${tx.id}">Edit</button>
-            <button type="button" class="btn-icon btn-delete" data-id="${tx.id}">Hapus</button>
+            <button type="button" class="btn-icon btn-edit" data-id="${tx.id}" aria-label="Edit transaksi" title="Edit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </button>
+            <button type="button" class="btn-icon btn-delete" data-id="${tx.id}" aria-label="Hapus transaksi" title="Hapus">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
         </div>
     `;
+
+    // Klik baris atau tekan Enter/Spasi membuka formulir edit
+    txEl.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-delete')) return;
+        handleEdit(tx.id);
+        openFormScreen();
+    });
+
+    txEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            if (e.target.closest('.btn-delete') || e.target.closest('.btn-edit')) return;
+            e.preventDefault();
+            handleEdit(tx.id);
+            openFormScreen();
+        }
+    });
+
     return txEl;
 }
 
@@ -1526,11 +1818,81 @@ function render() {
     if (txListContainer) {
         txListContainer.innerHTML = '';
         if (filteredTx.length === 0) {
-            txListContainer.innerHTML = '<p class="tx-empty">Belum ada transaksi.</p>';
+            txListContainer.innerHTML = `
+                <div class="empty-state">
+                    <p class="empty-state-text">Belum ada transaksi.</p>
+                    <button type="button" class="btn-action-outline" id="btn-empty-riwayat-add">Tambah Transaksi</button>
+                </div>
+            `;
+            const btnEmptyRiwayat = document.getElementById('btn-empty-riwayat-add');
+            if (btnEmptyRiwayat) {
+                btnEmptyRiwayat.addEventListener('click', () => {
+                    resetForm();
+                    openFormScreen();
+                });
+            }
         } else {
-            filteredTx.forEach(tx => {
-                txListContainer.appendChild(createTxItemElement(tx, currentWalletFilter));
-            });
+            // Kelompokkan transaksi berdasarkan tanggal (YYYY-MM-DD)
+            const dateGroups = new Map();
+            for (const tx of filteredTx) {
+                const dateKey = tx.date || '';
+                if (!dateGroups.has(dateKey)) {
+                    dateGroups.set(dateKey, []);
+                }
+                dateGroups.get(dateKey).push(tx);
+            }
+
+            for (const [dateKey, groupTxList] of dateGroups.entries()) {
+                const groupEl = document.createElement('div');
+                groupEl.className = 'tx-date-group';
+
+                let dailyNet = 0;
+                for (const tx of groupTxList) {
+                    if (tx.type === 'income') {
+                        dailyNet += tx.amount;
+                    } else if (tx.type === 'expense') {
+                        dailyNet -= tx.amount;
+                    } else if (tx.type === 'transfer') {
+                        if (currentWalletFilter === 'all') {
+                            // Transfer antar dompet tidak mempengaruhi total netto keseluruhan
+                        } else if (currentWalletFilter === (tx.walletId || DEFAULT_WALLET_ID)) {
+                            dailyNet -= tx.amount;
+                        } else if (currentWalletFilter === tx.toWalletId) {
+                            dailyNet += tx.amount;
+                        }
+                    }
+                }
+
+                let totalClass = 'neutral';
+                let totalText = '';
+                if (dailyNet > 0) {
+                    totalClass = 'income';
+                    totalText = '+' + currencyFormatter.format(dailyNet);
+                } else if (dailyNet < 0) {
+                    totalClass = 'expense';
+                    totalText = '−' + currencyFormatter.format(Math.abs(dailyNet));
+                } else {
+                    totalClass = 'neutral';
+                    totalText = currencyFormatter.format(0);
+                }
+
+                const groupTitle = formatGroupDate(dateKey);
+
+                groupEl.innerHTML = `
+                    <div class="tx-date-group-header">
+                        <span class="tx-date-group-title">${escapeHTML(groupTitle)}</span>
+                        <span class="tx-date-group-total tabular-nums ${totalClass}">${totalText}</span>
+                    </div>
+                    <div class="tx-date-group-items"></div>
+                `;
+
+                const itemsContainer = groupEl.querySelector('.tx-date-group-items');
+                for (const tx of groupTxList) {
+                    itemsContainer.appendChild(createTxItemElement(tx, currentWalletFilter));
+                }
+
+                txListContainer.appendChild(groupEl);
+            }
         }
     }
 
@@ -1546,7 +1908,10 @@ function render() {
             `;
             const btnEmptyAddTx = document.getElementById('btn-empty-add-tx');
             if (btnEmptyAddTx) {
-                btnEmptyAddTx.addEventListener('click', () => openFormScreen());
+                btnEmptyAddTx.addEventListener('click', () => {
+                    resetForm();
+                    openFormScreen();
+                });
             }
         } else {
             recentTx.forEach(tx => {
@@ -1562,12 +1927,16 @@ function render() {
     // Pasang event listener tombol edit dan hapus pada kedua daftar transaksi
     document.querySelectorAll('.btn-edit').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            handleEdit(e.target.dataset.id);
+            e.stopPropagation();
+            handleEdit(btn.dataset.id);
             openFormScreen();
         });
     });
     document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', (e) => handleDelete(e.target.dataset.id));
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleDelete(btn.dataset.id);
+        });
     });
 }
 
@@ -2377,11 +2746,15 @@ function resetForm() {
     // Offset for local timezone
     const localToday = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
     txDateInput.value = localToday;
+    syncDateInputToSelects(localToday);
     setTimeValueToForm(getCurrentTimeString());
     hideTimeError();
     
     formTitle.textContent = 'Tambah Transaksi';
     btnCancel.classList.remove('hidden');
+    if (btnDeleteFromForm) {
+        btnDeleteFromForm.classList.add('hidden');
+    }
     // Default to expense
     txTypeInputs[0].checked = true;
     updateTypeUI('expense');
@@ -2495,6 +2868,7 @@ function handleEdit(id) {
         radio.checked = (radio.value === tx.type);
     }
     txDateInput.value = tx.date;
+    syncDateInputToSelects(tx.date);
     setTimeValueToForm(tx.time || '');
     hideTimeError();
     txAmountInput.value = formatNumber(tx.amount);
@@ -2522,6 +2896,9 @@ function handleEdit(id) {
     }
 
     btnCancel.classList.remove('hidden');
+    if (btnDeleteFromForm) {
+        btnDeleteFromForm.classList.remove('hidden');
+    }
     openFormScreen();
 }
 
@@ -3267,6 +3644,8 @@ async function init() {
         currentWallets = await getWallets();
         selectedBudgetMonth = getLocalYearMonthString();
         selectedDonutMonth = getLocalYearMonthString();
+        initDateSelectOptions();
+        init24TimeSelectOptions();
         resetForm(); // Set default date, kategori, dan dompet
         await loadData();
         const initialTab = getTabFromHash();
@@ -3289,6 +3668,23 @@ async function init() {
         btnFormBack.addEventListener('click', () => {
             resetForm();
             closeFormScreen();
+        });
+    }
+
+    if (formScreenBackdrop) {
+        formScreenBackdrop.addEventListener('click', () => {
+            resetForm();
+            closeFormScreen();
+        });
+    }
+
+    if (btnDeleteFromForm) {
+        btnDeleteFromForm.addEventListener('click', () => {
+            const id = txIdInput.value;
+            if (id) {
+                closeFormScreen();
+                handleDelete(id);
+            }
         });
     }
 
@@ -3502,29 +3898,20 @@ async function init() {
         });
     }
 
-    if (txTimeInput) {
-        const sync24to12 = () => {
-            setTimeValueToForm(txTimeInput.value);
-            if (txTimeInput.value) {
-                hideTimeError();
-            }
-        };
-        txTimeInput.addEventListener('change', sync24to12);
-        txTimeInput.addEventListener('input', sync24to12);
-    }
-
-    const sync12to24 = () => {
+    const syncTimeInputs = () => {
         const timeVal = getTimeValueFromForm();
-        if (txTimeInput) {
-            txTimeInput.value = timeVal;
-        }
         if (timeVal) {
+            setTimeValueToForm(timeVal);
             hideTimeError();
+        } else {
+            if (txTimeInput) txTimeInput.value = '';
         }
     };
-    if (txTimeHourSelect) txTimeHourSelect.addEventListener('change', sync12to24);
-    if (txTimeMinuteSelect) txTimeMinuteSelect.addEventListener('change', sync12to24);
-    if (txTimeAmpmSelect) txTimeAmpmSelect.addEventListener('change', sync12to24);
+    if (txTimeHour24Select) txTimeHour24Select.addEventListener('change', syncTimeInputs);
+    if (txTimeMinute24Select) txTimeMinute24Select.addEventListener('change', syncTimeInputs);
+    if (txTimeHourSelect) txTimeHourSelect.addEventListener('change', syncTimeInputs);
+    if (txTimeMinuteSelect) txTimeMinuteSelect.addEventListener('change', syncTimeInputs);
+    if (txTimeAmpmSelect) txTimeAmpmSelect.addEventListener('change', syncTimeInputs);
 
     if (timeFormatRadios) {
         for (const radio of timeFormatRadios) {

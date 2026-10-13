@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-14: Tahap 5: Desain ulang v2.3
+- Diubah: Halaman Riwayat didesain ulang dengan pengelompokan transaksi per tanggal ("Hari ini", "Kemarin", "12 Okt", dst.) disertai total saldo harian (dengan tanda +, −, atau Rp 0) pada header grup (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Tiap baris transaksi menampilkan ikon kategori garis (outline) konsisten tanpa emoji, nama kategori dan catatan, jumlah rata kanan dengan tanda (+ untuk pemasukan hijau accent, − untuk pengeluaran merah, dan transfer biru tanpa tanda dengan label "Transfer"), serta dompet dan waktu pada baris kecil 12px text-secondary, dengan angka uang tabular-nums (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Keadaan kosong (empty state) pada halaman Riwayat diseragamkan menjadi satu kalimat singkat dan satu tombol aksi ("Tambah Transaksi") (`js/app.js`, `css/style.css`).
+- Diubah: Formulir tambah/edit transaksi didesain ulang menjadi bottom sheet di HP dan dialog tengah di PC dengan radius 8px, tanpa bayangan, dan tanpa kartu bersarang (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Urutan komponen formulir disusun ulang sesuai DESIGN.md: jumlah (besar, keypad angka inputmode="numeric") → tipe (tombol geser segmen: Pengeluaran / Pemasukan / Transfer) → kategori (chip) → dompet → tanggal dan waktu → catatan → tombol Simpan selebar form dengan warna accent (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Pemilih tanggal dan waktu menggunakan antarmuka kustom berbahasa Indonesia (dropdown hari, nama bulan Indonesia, tahun, serta pemilih jam dan menit 24/12 jam) menggantikan widget native browser yang berbahasa Inggris, dengan format penyimpanan data (YYYY-MM-DD, HH:mm 24 jam, angka numerik) dan aturan validasi waktu wajib diisi tetap dipertahankan (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v31` (`sw.js`).
+- Diubah: `PLAN.md` mencentang sub-item "v2.3" di bawah "Desain ulang v2 mengikuti DESIGN.md" (`PLAN.md`).
+
 ## 2026-10-14: Tahap 5: Desain ulang v2.2
 - Diubah: Halaman Beranda didesain ulang dengan urutan Total Saldo hero di tengah (32px, bold, tabular-nums) diikuti ringkasan pemasukan (+, hijau accent) dan pengeluaran (−, merah) dua kolom kecil (18px, semibold, tabular-nums) tanpa kartu bersarang (`index.html`, `css/style.css`, `js/app.js`).
 - Diubah: Saldo per dompet dipisahkan menjadi baris kartu geser horizontal ke samping dengan nama dompet (12px abu-abu), saldo tabular-nums, dan dompet bersaldo 0 ditampilkan redup (`index.html`, `css/style.css`, `js/app.js`).

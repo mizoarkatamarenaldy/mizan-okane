@@ -96,7 +96,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
     - [x] v2.0: Taruh DESIGN.md di root repo, terapkan token warna dan tipografi lewat variabel CSS, lalu pastikan tampilan benar-benar berubah di web dan APK (cek cache service worker)
     - [x] v2.1: Header tipis, navigasi (bar bawah di HP, tab atas di PC), tombol tambah mengambang, status sinkron jadi ikon
     - [x] v2.2: Beranda (Total Saldo hero, ringkasan bulan, dompet geser, pemilih bulan custom berbahasa Indonesia, budget ringkas)
-    - [ ] v2.3: Riwayat dikelompokkan per tanggal dan form tambah/edit transaksi (bottom sheet di HP)
+    - [x] v2.3: Riwayat dikelompokkan per tanggal dan form tambah/edit transaksi (bottom sheet di HP)
     - [ ] v2.4: Statistik, Pengaturan, Kebijakan Privasi, Syarat dan Ketentuan
     - [ ] v2.5: Cek akhir (semua teks Indonesia, mode terang dan gelap, tes di HP)
   - [ ] APK rilis: unggah APK ke GitHub Releases (dikerjakan pemilik setelah dua perbaikan APK di atas selesai dan APK dibuild ulang; APK tidak dimasukkan ke repo lewat git add)
