@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-13: Tahap 5: Desain ulang v2.1
+- Ditambah: Ikon status sinkron kecil di header dengan popover penjelasan teks yang hanya muncul saat disentuh atau diklik (`index.html`, `css/style.css`, `js/app.js`).
+- Diubah: Header aplikasi didesain ulang menjadi tipis (56px) dengan nama app "Mizan Okane" (18px) satu baris di kiri dan ikon status sinkron di kanan (`index.html`, `css/style.css`).
+- Diubah: Navigasi utama tetap 4 item (Beranda, Riwayat, Statistik, Pengaturan) menggunakan bar bawah di HP (ikon outline + label) dan tab di atas di PC dengan target sentuh ergonomis minimal 44x44px dan indikator fokus `:focus-visible` jelas (`index.html`, `css/style.css`).
+- Diubah: Status sinkronisasi di header memakai variasi warna dan ikon garis: abu-abu saat belum terhubung, centang accent saat tersinkron, dan peringatan amber saat gagal atau butuh perhatian (`js/app.js`, `css/style.css`).
+- Diubah: Menghapus banner sinkronisasi menetap pada halaman Beranda (`index.html`, `css/style.css`).
+- Diubah: Tombol tambah transaksi melayang (FAB) diposisikan di kanan bawah di atas bar bawah tanpa bayangan dekoratif sesuai panduan `DESIGN.md` (`css/style.css`).
+- Diubah: Tata letak menghormati area aman (safe area) Android pada status bar dan gesture bar (`css/style.css`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v29` (`sw.js`).
+- Diubah: `PLAN.md` mencentang sub-item "v2.1" di bawah "Desain ulang v2 mengikuti DESIGN.md" (`PLAN.md`).
+
 ## 2026-10-13: Tahap 5: Desain ulang v2.0
 - Ditambah: Menaruh `DESIGN.md` sebagai panduan arah desain aplikasi di root repository (`DESIGN.md`).
 - Diubah: Menerapkan token warna palet gelap utama (`#0F1117`, `#181A24`, `#1F2232`, `#2A2D3A`, `#E4E4E8`, `#9194A1`, `#2ECC8F`) dan palet terang opsi (`#F5F5F7`, `#FFFFFF`, `#F0F0F2`, `#D8D8DC`, `#1A1A1E`, `#6B6D78`, `#24A574`) serta warna semantik uang (pemasukan hijau accent, pengeluaran merah `#FF453A`, transfer biru `#4A9EFF`, budget bar) melalui variabel CSS (`css/style.css`).

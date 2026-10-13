@@ -232,6 +232,15 @@ function switchTab(tabId) {
 }
 
 window.handleAndroidBack = function() {
+    // 0. Jika popover status sinkron di header sedang terbuka, tutup popover
+    const headerSyncPopover = document.getElementById('header-sync-popover');
+    if (headerSyncPopover && !headerSyncPopover.classList.contains('hidden')) {
+        headerSyncPopover.classList.add('hidden');
+        const headerSyncBtn = document.getElementById('header-sync-btn');
+        if (headerSyncBtn) headerSyncBtn.setAttribute('aria-expanded', 'false');
+        return true;
+    }
+
     // 1. Jika dialog konfirmasi sedang terbuka, tutup dialog
     if (confirmDialog && confirmDialog.open) {
         confirmDialog.close();
@@ -2660,11 +2669,50 @@ function renderSyncState(s) {
         settingsSyncStatusEl.dataset.tone = finalSyncTone;
     }
 
+    updateHeaderSyncUI(s.status, finalSyncTone, finalSyncText);
+
     btnLogin.classList.toggle('hidden', linked);
     btnLogin.disabled = busy;
     btnLogout.classList.toggle('hidden', !linked);
     btnSyncNow.classList.toggle('hidden', !linked);
     btnSyncNow.disabled = busy;
+}
+
+function updateHeaderSyncUI(status, tone, text) {
+    const headerSyncBtn = document.getElementById('header-sync-btn');
+    const headerSyncIcon = document.getElementById('header-sync-icon');
+    if (!headerSyncBtn || !headerSyncIcon) return;
+
+    let state = 'unlinked';
+    let label = 'Status sinkron: Belum terhubung';
+    let iconSvg = '';
+
+    if (tone === 'ok' || status === 'synced') {
+        state = 'synced';
+        label = `Status sinkron: Tersinkron (${text})`;
+        // Centang accent outline
+        iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    } else if (tone === 'error' || tone === 'warn' || status === 'error' || status === 'needs-login' || status === 'offline') {
+        state = 'warning';
+        label = `Status sinkron: Perhatian (${text})`;
+        // Peringatan amber outline
+        iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+    } else if (status === 'syncing' || status === 'connecting') {
+        state = 'syncing';
+        label = `Status sinkron: Menyinkronkan (${text})`;
+        // Sync arrows outline
+        iconSvg = `<svg class="icon-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`;
+    } else {
+        state = 'unlinked';
+        label = `Status sinkron: Belum terhubung (${text})`;
+        // Abu-abu cloud outline
+        iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>`;
+    }
+
+    headerSyncBtn.dataset.state = state;
+    headerSyncBtn.setAttribute('aria-label', label);
+    headerSyncBtn.setAttribute('title', label);
+    headerSyncIcon.innerHTML = iconSvg;
 }
 
 btnLogin.addEventListener('click', () => {
@@ -3258,6 +3306,34 @@ async function init() {
             }
         }
     });
+
+    const headerSyncBtn = document.getElementById('header-sync-btn');
+    const headerSyncPopover = document.getElementById('header-sync-popover');
+    if (headerSyncBtn && headerSyncPopover) {
+        headerSyncBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = headerSyncPopover.classList.contains('hidden');
+            headerSyncPopover.classList.toggle('hidden', !isHidden);
+            headerSyncBtn.setAttribute('aria-expanded', String(isHidden));
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!headerSyncPopover.classList.contains('hidden')) {
+                if (!headerSyncPopover.contains(e.target) && !headerSyncBtn.contains(e.target)) {
+                    headerSyncPopover.classList.add('hidden');
+                    headerSyncBtn.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !headerSyncPopover.classList.contains('hidden')) {
+                headerSyncPopover.classList.add('hidden');
+                headerSyncBtn.setAttribute('aria-expanded', 'false');
+                headerSyncBtn.focus();
+            }
+        });
+    }
 
     if (formAddWallet && inputAddWallet) {
         formAddWallet.addEventListener('submit', (e) => {

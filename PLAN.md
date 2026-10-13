@@ -94,7 +94,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Desain ulang tampilan dengan skill anti-slop (hanya tampilan: warna, tipografi, spasi, layout, komponen; tidak mengubah logika, data, atau fitur)
   - [ ] Desain ulang v2 mengikuti DESIGN.md (hanya tampilan; tidak mengubah logika, data, sinkron, atau fitur; perubahan markup dan JS untuk keperluan tampilan boleh; file yang boleh disentuh: css/style.css, index.html, privasi.html, syarat.html, js/app.js hanya bagian tampilan, sw.js hanya naik versi, dan DESIGN.md; dikerjakan satu sub-item per sesi; dicentang setelah semua sub-itemnya tercentang)
     - [x] v2.0: Taruh DESIGN.md di root repo, terapkan token warna dan tipografi lewat variabel CSS, lalu pastikan tampilan benar-benar berubah di web dan APK (cek cache service worker)
-    - [ ] v2.1: Header tipis, navigasi (bar bawah di HP, tab atas di PC), tombol tambah mengambang, status sinkron jadi ikon
+    - [x] v2.1: Header tipis, navigasi (bar bawah di HP, tab atas di PC), tombol tambah mengambang, status sinkron jadi ikon
     - [ ] v2.2: Beranda (Total Saldo hero, ringkasan bulan, dompet geser, pemilih bulan custom berbahasa Indonesia, budget ringkas)
     - [ ] v2.3: Riwayat dikelompokkan per tanggal dan form tambah/edit transaksi (bottom sheet di HP)
     - [ ] v2.4: Statistik, Pengaturan, Kebijakan Privasi, Syarat dan Ketentuan
