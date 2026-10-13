@@ -75,6 +75,7 @@
     --btn-secondary-text: var(--text);
     --btn-danger-bg: var(--expense);
     --btn-danger-hover-bg: #e0382f;
+    --btn-danger-text: #FFFFFF;
     --btn-icon-bg: var(--surface-raised);
     --btn-icon-hover-bg: #282c40;
 
@@ -157,6 +158,7 @@
     --btn-secondary-text: var(--text);
     --btn-danger-bg: var(--expense);
     --btn-danger-hover-bg: #e0382f;
+    --btn-danger-text: #FFFFFF;
     --btn-icon-bg: var(--surface-raised);
     --btn-icon-hover-bg: #e4e4e8;
 
@@ -239,6 +241,7 @@
     --btn-secondary-text: var(--text);
     --btn-danger-bg: var(--expense);
     --btn-danger-hover-bg: #e0382f;
+    --btn-danger-text: #FFFFFF;
     --btn-icon-bg: var(--surface-raised);
     --btn-icon-hover-bg: #282c40;
 
@@ -321,6 +324,7 @@
         --btn-secondary-text: var(--text);
         --btn-danger-bg: var(--expense);
         --btn-danger-hover-bg: #e0382f;
+        --btn-danger-text: #FFFFFF;
         --btn-icon-bg: var(--surface-raised);
         --btn-icon-hover-bg: #e4e4e8;
 
@@ -531,7 +535,7 @@ p {
 
 .desktop-nav .nav-tab-btn.is-active {
     background-color: var(--accent);
-    color: var(--btn-primary-text, #0F1117);
+    color: var(--btn-primary-text);
     font-weight: 600;
     border-color: var(--accent);
     box-shadow: none;
@@ -581,7 +585,7 @@ p {
 
 .header-sync-btn[data-state="warning"],
 .header-sync-btn[data-state="error"] {
-    color: #F5A623;
+    color: var(--budget-warn);
 }
 
 .header-sync-btn[data-state="syncing"] {
@@ -2060,7 +2064,7 @@ p {
 
 .btn-save-cat {
     background-color: var(--accent);
-    color: var(--btn-primary-text, #0F1117);
+    color: var(--btn-primary-text);
     border: none;
     border-radius: var(--radius-input, 6px);
     font-size: 13px;
@@ -2348,7 +2352,7 @@ button:active {
 
 .btn-primary {
     background-color: var(--primary);
-    color: var(--btn-primary-text, #0F1117);
+    color: var(--btn-primary-text);
 }
 
 .btn-primary:hover {
@@ -2368,7 +2372,7 @@ button:active {
 
 .btn-danger {
     background-color: var(--btn-danger-bg);
-    color: #ffffff;
+    color: var(--btn-danger-text);
 }
 
 .btn-danger:hover {
@@ -2642,7 +2646,7 @@ button:disabled {
 
 .category-chip.is-selected {
     background-color: var(--accent);
-    color: var(--btn-primary-text, #0F1117);
+    color: var(--btn-primary-text);
     font-weight: 600;
     border-color: var(--accent);
 }
@@ -2726,7 +2730,7 @@ button:disabled {
     font-size: 15px;
     font-weight: 600;
     background-color: var(--accent);
-    color: var(--btn-primary-text, #0F1117);
+    color: var(--btn-primary-text);
     border-radius: var(--radius-input, 6px);
     cursor: pointer;
     border: none;
@@ -2776,7 +2780,7 @@ button:disabled {
     min-height: 56px;
     border-radius: 50%;
     background-color: var(--accent);
-    color: var(--btn-primary-text, #0F1117);
+    color: var(--btn-primary-text);
     border: none;
     cursor: pointer;
     display: flex;

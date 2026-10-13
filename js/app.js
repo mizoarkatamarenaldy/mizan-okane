@@ -101,6 +101,7 @@ let pendingDeleteId = null;
 let pendingCategoryDelete = null;
 let pendingBudgetDelete = null;
 let pendingWalletDelete = null;
+let pendingLogout = false;
 let editingCategory = null;
 let editingBudgetCategory = null;
 let editingWalletId = null;
@@ -232,6 +233,13 @@ window.handleAndroidBack = function() {
         pendingCategoryDelete = null;
         pendingBudgetDelete = null;
         pendingWalletDelete = null;
+        pendingLogout = false;
+        if (btnConfirmDelete) {
+            btnConfirmDelete.textContent = 'Hapus';
+        }
+        if (confirmDialogTitle) {
+            confirmDialogTitle.textContent = 'Hapus transaksi ini?';
+        }
         return true;
     }
 
@@ -1004,7 +1012,7 @@ async function loadData() {
         renderBudgetSection();
     } catch (error) {
         console.error("Gagal memuat data", error);
-        alert("Terjadi kesalahan saat memuat data.");
+        showNotification("Terjadi kesalahan saat memuat data.", "error");
     }
 }
 
@@ -1745,7 +1753,7 @@ function createTxItemElement(tx, filterWallet) {
             <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(tx.amount)}</span>
         </div>
         <div class="tx-actions">
-            <button type="button" class="btn-icon btn-edit" data-id="${tx.id}" aria-label="Edit transaksi" title="Edit">
+            <button type="button" class="btn-icon btn-edit" data-id="${tx.id}" aria-label="Ubah transaksi" title="Ubah">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
             </button>
             <button type="button" class="btn-icon btn-delete" data-id="${tx.id}" aria-label="Hapus transaksi" title="Hapus">
@@ -2054,7 +2062,7 @@ function renderCategoryGroup(type, container) {
 
 async function handleSaveCategoryName(type, oldName, newName) {
     if (!newName) {
-        alert('Nama kategori tidak boleh kosong.');
+        showNotification('Nama kategori tidak boleh kosong.', 'warn');
         return;
     }
     if (newName === oldName) {
@@ -2066,7 +2074,7 @@ async function handleSaveCategoryName(type, oldName, newName) {
     const list = currentCategories[type] || [];
     const exists = list.some(c => c !== oldName && c.toLowerCase() === newName.toLowerCase());
     if (exists) {
-        alert(`Kategori "${newName}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`);
+        showNotification(`Kategori "${newName}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`, 'warn');
         return;
     }
 
@@ -2091,7 +2099,7 @@ async function handleSaveCategoryName(type, oldName, newName) {
             markDirty().catch(err => console.error("Gagal menandai perubahan kategori untuk sinkron", err));
         } catch (error) {
             console.error("Gagal mengubah nama kategori", error);
-            alert("Terjadi kesalahan saat menyimpan kategori.");
+            showNotification("Terjadi kesalahan saat menyimpan kategori.", "error");
         }
     }
 }
@@ -2099,14 +2107,14 @@ async function handleSaveCategoryName(type, oldName, newName) {
 async function handleAddCategory(type, inputEl) {
     const name = inputEl.value.trim();
     if (!name) {
-        alert('Nama kategori tidak boleh kosong.');
+        showNotification('Nama kategori tidak boleh kosong.', 'warn');
         return;
     }
 
     const list = currentCategories[type] || [];
     const exists = list.some(c => c.toLowerCase() === name.toLowerCase());
     if (exists) {
-        alert(`Kategori "${name}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`);
+        showNotification(`Kategori "${name}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`, 'warn');
         return;
     }
 
@@ -2125,15 +2133,21 @@ async function handleAddCategory(type, inputEl) {
         markDirty().catch(err => console.error("Gagal menambah kategori untuk sinkron", err));
     } catch (error) {
         console.error("Gagal menambah kategori", error);
-        alert("Terjadi kesalahan saat menyimpan kategori.");
+        showNotification("Terjadi kesalahan saat menyimpan kategori.", "error");
     }
 }
 
 function handleDeleteCategoryPrompt(type, name) {
     pendingDeleteId = null;
     pendingCategoryDelete = { type, name };
+    pendingBudgetDelete = null;
+    pendingWalletDelete = null;
+    pendingLogout = false;
     if (confirmDialogTitle) {
         confirmDialogTitle.textContent = `Hapus kategori "${name}"?`;
+    }
+    if (btnConfirmDelete) {
+        btnConfirmDelete.textContent = 'Hapus';
     }
     if (confirmDialog && typeof confirmDialog.showModal === 'function') {
         confirmDialog.showModal();
@@ -2160,7 +2174,7 @@ async function performDeleteCategory(type, name) {
         markDirty().catch(err => console.error("Gagal menandai penghapusan kategori untuk sinkron", err));
     } catch (error) {
         console.error("Gagal menghapus kategori", error);
-        alert("Terjadi kesalahan saat menghapus kategori.");
+        showNotification("Terjadi kesalahan saat menghapus kategori.", "error");
     }
 }
 
@@ -2246,7 +2260,7 @@ function renderWalletSettings() {
 
 async function handleSaveWalletName(walletId, newName) {
     if (!newName) {
-        alert('Nama dompet tidak boleh kosong.');
+        showNotification('Nama dompet tidak boleh kosong.', 'warn');
         return;
     }
     const wallet = currentWallets.find(w => w.id === walletId);
@@ -2260,7 +2274,7 @@ async function handleSaveWalletName(walletId, newName) {
 
     const exists = getActiveWallets().some(w => w.id !== walletId && w.name.toLowerCase() === newName.toLowerCase());
     if (exists) {
-        alert(`Dompet "${newName}" sudah ada.`);
+        showNotification(`Dompet "${newName}" sudah ada.`, 'warn');
         return;
     }
 
@@ -2279,20 +2293,20 @@ async function handleSaveWalletName(walletId, newName) {
         markDirty().catch(err => console.error("Gagal menandai perubahan dompet untuk sinkron", err));
     } catch (error) {
         console.error("Gagal mengubah nama dompet", error);
-        alert("Terjadi kesalahan saat menyimpan dompet.");
+        showNotification("Terjadi kesalahan saat menyimpan dompet.", "error");
     }
 }
 
 async function handleAddWallet(inputEl) {
     const name = inputEl.value.trim();
     if (!name) {
-        alert('Nama dompet tidak boleh kosong.');
+        showNotification('Nama dompet tidak boleh kosong.', 'warn');
         return;
     }
 
     const exists = getActiveWallets().some(w => w.name.toLowerCase() === name.toLowerCase());
     if (exists) {
-        alert(`Dompet "${name}" sudah ada.`);
+        showNotification(`Dompet "${name}" sudah ada.`, 'warn');
         return;
     }
 
@@ -2319,7 +2333,7 @@ async function handleAddWallet(inputEl) {
         markDirty().catch(err => console.error("Gagal menambah dompet untuk sinkron", err));
     } catch (error) {
         console.error("Gagal menambah dompet", error);
-        alert("Terjadi kesalahan saat menyimpan dompet.");
+        showNotification("Terjadi kesalahan saat menyimpan dompet.", "error");
     }
 }
 
@@ -2333,13 +2347,13 @@ function handleDeleteWalletPrompt(walletId) {
         (tx.type === 'transfer' && tx.toWalletId === walletId)
     ));
     if (hasActiveTransactions) {
-        alert(`Dompet "${wallet.name}" tidak bisa dihapus karena masih memiliki transaksi aktif.`);
+        showNotification(`Dompet "${wallet.name}" tidak bisa dihapus karena masih memiliki transaksi aktif.`, 'warn');
         return;
     }
 
     const active = getActiveWallets();
     if (active.length <= 1) {
-        alert('Dompet tidak bisa dihapus karena minimal harus ada satu dompet.');
+        showNotification('Dompet tidak bisa dihapus karena minimal harus ada satu dompet.', 'warn');
         return;
     }
 
@@ -2347,9 +2361,13 @@ function handleDeleteWalletPrompt(walletId) {
     pendingCategoryDelete = null;
     pendingBudgetDelete = null;
     pendingWalletDelete = walletId;
+    pendingLogout = false;
 
     if (confirmDialogTitle) {
         confirmDialogTitle.textContent = `Hapus dompet "${wallet.name}"?`;
+    }
+    if (btnConfirmDelete) {
+        btnConfirmDelete.textContent = 'Hapus';
     }
     if (confirmDialog && typeof confirmDialog.showModal === 'function') {
         confirmDialog.showModal();
@@ -2384,7 +2402,7 @@ async function performDeleteWallet(walletId) {
             markDirty().catch(err => console.error("Gagal menandai penghapusan dompet untuk sinkron", err));
         } catch (error) {
             console.error("Gagal menghapus dompet", error);
-            alert("Terjadi kesalahan saat menghapus dompet.");
+            showNotification("Terjadi kesalahan saat menghapus dompet.", "error");
         }
     }
 }
@@ -2674,7 +2692,7 @@ function renderBudgetSettings() {
 
 async function handleSaveBudgetAmount(cat, newAmount) {
     if (isNaN(newAmount) || newAmount <= 0) {
-        alert('Jumlah budget harus berupa angka lebih dari 0.');
+        showNotification('Jumlah budget harus berupa angka lebih dari 0.', 'warn');
         return;
     }
 
@@ -2694,7 +2712,7 @@ async function handleSaveBudgetAmount(cat, newAmount) {
         markDirty().catch(err => console.error("Gagal menandai perubahan budget untuk sinkron", err));
     } catch (error) {
         console.error("Gagal mengubah budget", error);
-        alert("Terjadi kesalahan saat menyimpan budget.");
+        showNotification("Terjadi kesalahan saat menyimpan budget.", "error");
     }
 }
 
@@ -2704,11 +2722,11 @@ async function handleSetBudgetSubmit(e) {
     const amount = inputBudgetAmount ? parseAmount(inputBudgetAmount.value) : 0;
 
     if (!cat) {
-        alert('Pilih kategori pengeluaran.');
+        showNotification('Pilih kategori pengeluaran.', 'warn');
         return;
     }
     if (isNaN(amount) || amount <= 0) {
-        alert('Jumlah budget harus berupa angka lebih dari 0.');
+        showNotification('Jumlah budget harus berupa angka lebih dari 0.', 'warn');
         return;
     }
 
@@ -2729,7 +2747,7 @@ async function handleSetBudgetSubmit(e) {
         markDirty().catch(err => console.error("Gagal menyimpan budget untuk sinkron", err));
     } catch (error) {
         console.error("Gagal menyimpan budget", error);
-        alert("Terjadi kesalahan saat menyimpan budget.");
+        showNotification("Terjadi kesalahan saat menyimpan budget.", "error");
     }
 }
 
@@ -2737,8 +2755,13 @@ function handleDeleteBudgetPrompt(cat) {
     pendingDeleteId = null;
     pendingCategoryDelete = null;
     pendingBudgetDelete = cat;
+    pendingWalletDelete = null;
+    pendingLogout = false;
     if (confirmDialogTitle) {
         confirmDialogTitle.textContent = `Hapus budget untuk kategori "${cat}"?`;
+    }
+    if (btnConfirmDelete) {
+        btnConfirmDelete.textContent = 'Hapus';
     }
     if (confirmDialog && typeof confirmDialog.showModal === 'function') {
         confirmDialog.showModal();
@@ -2759,7 +2782,7 @@ async function performDeleteBudget(cat) {
             markDirty().catch(err => console.error("Gagal menandai penghapusan budget untuk sinkron", err));
         } catch (error) {
             console.error("Gagal menghapus budget", error);
-            alert("Terjadi kesalahan saat menghapus budget.");
+            showNotification("Terjadi kesalahan saat menghapus budget.", "error");
         }
     }
 }
@@ -2800,7 +2823,7 @@ async function handleSubmit(e) {
 
     const amount = parseAmount(txAmountInput.value);
     if (isNaN(amount) || amount <= 0) {
-        alert("Jumlah harus berupa angka lebih dari 0.");
+        showNotification("Jumlah harus berupa angka lebih dari 0.", "warn");
         return;
     }
 
@@ -2824,22 +2847,22 @@ async function handleSubmit(e) {
     if (selectedType === 'transfer') {
         selectedToWalletId = txToWalletInput ? txToWalletInput.value : '';
         if (!selectedWalletId) {
-            alert('Pilih dompet asal.');
+            showNotification('Pilih dompet asal.', 'warn');
             return;
         }
         if (!selectedToWalletId) {
-            alert('Pilih dompet tujuan.');
+            showNotification('Pilih dompet tujuan.', 'warn');
             return;
         }
         if (selectedWalletId === selectedToWalletId) {
-            alert('Dompet tujuan harus berbeda dari dompet asal.');
+            showNotification('Dompet tujuan harus berbeda dari dompet asal.', 'warn');
             return;
         }
         selectedCategory = 'Transfer';
     } else {
         selectedCategory = txCategoryInput ? txCategoryInput.value.trim() : '';
         if (!selectedCategory) {
-            alert('Pilih kategori.');
+            showNotification('Pilih kategori.', 'warn');
             return;
         }
     }
@@ -2882,7 +2905,7 @@ async function handleSubmit(e) {
         markDirty().catch(err => console.error("Gagal menandai perubahan untuk sinkron", err));
     } catch (error) {
         console.error("Gagal menyimpan transaksi", error);
-        alert("Terjadi kesalahan saat menyimpan data.");
+        showNotification("Terjadi kesalahan saat menyimpan data.", "error");
     }
 }
 
@@ -2905,7 +2928,7 @@ function handleEdit(id) {
 
     if (tx.type === 'transfer') {
         populateWalletOptions(tx.walletId || DEFAULT_WALLET_ID, tx.toWalletId || null);
-        formTitle.textContent = 'Edit Transfer';
+        formTitle.textContent = 'Ubah Transfer';
     } else {
         // Pilihan dompet: gunakan walletId transaksi atau fallback DEFAULT_WALLET_ID
         populateWalletOptions(tx.walletId || DEFAULT_WALLET_ID);
@@ -2919,7 +2942,7 @@ function handleEdit(id) {
             // Minta pengguna memilih kategori dari daftar yang sesuai
             populateCategoryOptions(null, tx.category);
         }
-        formTitle.textContent = 'Edit Transaksi';
+        formTitle.textContent = 'Ubah Transaksi';
     }
 
     btnCancel.classList.remove('hidden');
@@ -2936,8 +2959,12 @@ function handleDelete(id) {
     pendingCategoryDelete = null;
     pendingBudgetDelete = null;
     pendingWalletDelete = null;
+    pendingLogout = false;
     if (confirmDialogTitle) {
         confirmDialogTitle.textContent = (tx && tx.type === 'transfer') ? 'Hapus transfer ini?' : 'Hapus transaksi ini?';
+    }
+    if (btnConfirmDelete) {
+        btnConfirmDelete.textContent = 'Hapus';
     }
     if (confirmDialog && typeof confirmDialog.showModal === 'function') {
         confirmDialog.showModal();
@@ -2961,7 +2988,7 @@ async function performDelete(id) {
         }
     } catch (error) {
         console.error("Gagal menghapus transaksi", error);
-        alert("Terjadi kesalahan saat menghapus data.");
+        showNotification("Terjadi kesalahan saat menghapus data.", "error");
     }
 }
 
@@ -2978,7 +3005,7 @@ txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {
         if (radio.value === 'transfer') {
             if (getActiveWallets().length < 2) {
-                alert('Transfer membutuhkan minimal 2 dompet. Silakan tambah dompet baru terlebih dahulu di Pengaturan Dompet.');
+                showNotification('Transfer membutuhkan minimal 2 dompet. Silakan tambah dompet baru terlebih dahulu di Pengaturan Dompet.', 'warn');
                 txTypeInputs[0].checked = true;
                 updateTypeUI('expense');
                 return;
@@ -2998,15 +3025,18 @@ if (confirmDialog) {
         const catDelete = pendingCategoryDelete;
         const bgtDelete = pendingBudgetDelete;
         const wltDelete = pendingWalletDelete;
+        const isLogout = pendingLogout;
 
-        if (!txId && !catDelete && !bgtDelete && !wltDelete) {
+        if (!txId && !catDelete && !bgtDelete && !wltDelete && !isLogout) {
             confirmDialog.close();
             return;
         }
 
         btnConfirmDelete.disabled = true;
         try {
-            if (txId) {
+            if (isLogout) {
+                await signOut();
+            } else if (txId) {
                 await performDelete(txId);
             } else if (catDelete) {
                 await performDeleteCategory(catDelete.type, catDelete.name);
@@ -3026,6 +3056,10 @@ if (confirmDialog) {
         pendingCategoryDelete = null;
         pendingBudgetDelete = null;
         pendingWalletDelete = null;
+        pendingLogout = false;
+        if (btnConfirmDelete) {
+            btnConfirmDelete.textContent = 'Hapus';
+        }
         if (confirmDialogTitle) {
             confirmDialogTitle.textContent = 'Hapus transaksi ini?';
         }
@@ -3149,9 +3183,20 @@ btnLogin.addEventListener('click', () => {
     signIn();
 });
 
-btnLogout.addEventListener('click', async () => {
-    if (confirm('Logout dari Google? Data di perangkat ini tetap ada, tapi tidak disinkronkan lagi sampai login ulang.')) {
-        await signOut();
+btnLogout.addEventListener('click', () => {
+    pendingDeleteId = null;
+    pendingCategoryDelete = null;
+    pendingBudgetDelete = null;
+    pendingWalletDelete = null;
+    pendingLogout = true;
+    if (confirmDialogTitle) {
+        confirmDialogTitle.textContent = 'Logout dari Google? Data di perangkat ini tetap ada, tapi tidak disinkronkan lagi sampai login ulang.';
+    }
+    if (btnConfirmDelete) {
+        btnConfirmDelete.textContent = 'Logout';
+    }
+    if (confirmDialog && typeof confirmDialog.showModal === 'function') {
+        confirmDialog.showModal();
     }
 });
 
@@ -3163,7 +3208,7 @@ export function showNotification(message, type = 'info') {
     const toastEl = document.getElementById('toast-notification');
     if (!toastEl) {
         if (type === 'error') {
-            alert(message);
+            console.error(`[Notification error]:`, message);
         } else {
             console.log(`[Notification ${type}]:`, message);
         }
@@ -3298,9 +3343,6 @@ btnExport.addEventListener('click', async () => {
     } catch (error) {
         console.error("Gagal mengekspor data", error);
         showNotification("Terjadi kesalahan saat mengekspor data.", "error");
-        if (!isCapacitorApp()) {
-            alert("Terjadi kesalahan saat mengekspor data.");
-        }
     }
 });
 
@@ -3408,7 +3450,7 @@ async function handleImportJson(file) {
         text = await file.text();
     } catch (readErr) {
         console.error("Gagal membaca file", readErr);
-        alert("Gagal membaca file yang dipilih.");
+        showNotification("Gagal membaca file yang dipilih.", "error");
         return;
     }
 
@@ -3417,7 +3459,7 @@ async function handleImportJson(file) {
         parsed = JSON.parse(text);
     } catch (jsonErr) {
         console.error("JSON tidak valid", jsonErr);
-        alert("File tidak valid atau bukan format JSON.");
+        showNotification("File tidak valid atau bukan format JSON.", "error");
         return;
     }
 
@@ -3444,7 +3486,7 @@ async function handleImportJson(file) {
     }
 
     if (!rawTransactions && !rawCategories && !rawBudgets && !rawWallets) {
-        alert("Format file cadangan tidak dikenali. Pastikan file berisi data cadangan mizan-okane.");
+        showNotification("Format file cadangan tidak dikenali. Pastikan file berisi data cadangan mizan-okane.", "error");
         return;
     }
 
@@ -3458,7 +3500,7 @@ async function handleImportJson(file) {
     }
 
     if (rawTransactions && rawTransactions.length > 0 && validImportedTx.length === 0) {
-        alert("Tidak ada transaksi valid yang ditemukan di dalam file cadangan.");
+        showNotification("Tidak ada transaksi valid yang ditemukan di dalam file cadangan.", "warn");
         return;
     }
 
@@ -3540,13 +3582,13 @@ async function handleImportJson(file) {
             if (budgetsChanged) details.push('budget diperbarui');
 
             const detailStr = details.length > 0 ? details.join(', ') : 'data diperbarui';
-            alert(`Impor data berhasil (${detailStr}).`);
+            showNotification(`Impor data berhasil (${detailStr}).`, 'success');
         } else {
-            alert("Semua data pada file cadangan sudah sesuai dengan data saat ini (tidak ada perubahan).");
+            showNotification("Semua data pada file cadangan sudah sesuai dengan data saat ini (tidak ada perubahan).", 'info');
         }
     } catch (err) {
         console.error("Gagal mengimpor data", err);
-        alert("Terjadi kesalahan saat memproses data cadangan.");
+        showNotification("Terjadi kesalahan saat memproses data cadangan.", "error");
     }
 }
 
@@ -3593,9 +3635,6 @@ btnExportCsv.addEventListener('click', async () => {
 
         if (activeTx.length === 0) {
             showNotification('Belum ada transaksi untuk diekspor.', 'warn');
-            if (!isCapacitorApp()) {
-                alert('Belum ada transaksi untuk diekspor.');
-            }
             return;
         }
 
@@ -3656,9 +3695,6 @@ btnExportCsv.addEventListener('click', async () => {
     } catch (error) {
         console.error("Gagal mengekspor CSV", error);
         showNotification("Terjadi kesalahan saat mengekspor CSV.", "error");
-        if (!isCapacitorApp()) {
-            alert("Terjadi kesalahan saat mengekspor CSV.");
-        }
     }
 });
 
@@ -3680,7 +3716,7 @@ async function init() {
         switchTab(initialTab);
     } catch (error) {
         console.error("Gagal inisialisasi database", error);
-        alert("Browser Anda tidak mendukung penyimpanan lokal atau terjadi kesalahan.");
+        showNotification("Browser Anda tidak mendukung penyimpanan lokal atau terjadi kesalahan.", "error");
         return;
     }
 

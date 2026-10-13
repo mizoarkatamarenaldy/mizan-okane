@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-14: Tahap 5: Desain ulang v2.5
+- Diperbaiki: Seluruh dialog bawaan browser (`alert` dan `confirm`) yang memicu teks/tombol bahasa Inggris diganti dengan sistem notifikasi toast (`showNotification`) dan dialog konfirmasi kustom terintegrasi (`confirm-dialog`) berbahasa Indonesia (`js/app.js`).
+- Diperbaiki: Tombol aksi transaksi dan judul modal diseragamkan ke bahasa Indonesia ("Ubah transaksi", "Ubah Transaksi", "Ubah Transfer") (`js/app.js`).
+- Diperbaiki: Menghapus seluruh warna hardcoded di luar variabel CSS tema pada navigasi desktop, tombol sinkron header, dan tombol utama/bahaya, serta menambahkan token `--btn-danger-text` (`css/style.css`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v33` (`sw.js`).
+- Diubah: `PLAN.md` mencentang sub-item "v2.5" dan item induk "Desain ulang v2 mengikuti DESIGN.md" (`PLAN.md`).
+
 ## 2026-10-14: Tahap 5: Desain ulang v2.4
 - Diubah: Halaman Statistik didesain ulang dengan pemilih bulan kustom berlabel teks Indonesia ("Okt 2026") dan tombol navigasi panah kiri/kanan outline konsisten menggantikan input bulan bawaan browser (`index.html`, `js/app.js`, `css/style.css`).
 - Diubah: Grafik bulanan dan diagram donut per kategori menggunakan tombol geser segmen (Pengeluaran / Pemasukan) dengan visual yang selaras dengan formulir transaksi tanpa bayangan dekoratif (`index.html`, `css/style.css`).
