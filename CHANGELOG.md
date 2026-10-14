@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-14: Tahap 5: Mata uang per dompet, tahap 2: tambah USD dengan desimal
+- Ditambah: Dukungan mata uang "USD" (Dolar) pada dompet di samping IDR dan JPY, serta opsi Dolar pada form tambah dompet di Pengaturan (`index.html`, `js/db.js`, `js/sync.js`, `js/app.js`).
+- Ditambah: Format angka mata uang USD (`$ `) dengan pemisah ribuan titik (`.`) dan desimal koma (`,`) 2 digit (contoh `$ 1.234,56`), dengan data disimpan sebagai angka dibulatkan 2 desimal (`js/app.js`).
+- Ditambah: Input jumlah mendukung koma desimal hanya untuk USD (maksimal 2 digit desimal di belakang koma, inputmode decimal di HP) dan konversi koma/titik otomatis saat mengetik atau menempel (`js/app.js`).
+- Ditambah: Pilihan mata uang Dolar (USD) pada halaman Statistik dan Budget; budget tetap dibatasi hanya untuk Rupiah dengan pesan informatif saat memilih USD (`index.html`, `js/app.js`).
+- Ditambah: Generator data contoh (dummy) mendukung nominal acak USD dengan 2 desimal (`js/app.js`).
+- Diubah: Logika impor JSON menjaga nilai desimal transaksi USD tanpa membulatkan ke bilangan bulat (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v37` (`sw.js`).
+- Diubah: `PLAN.md` mencentang item "Mata uang per dompet, tahap 2: tambah USD dengan desimal" (`PLAN.md`).
+
 ## 2026-10-14: Tahap 5: Mata uang per dompet, tahap 1: Rupiah dan Yen
 - Ditambah: Field `currency` pada setiap dompet dengan pilihan "IDR" (Rupiah) atau "JPY" (Yen), dengan nilai bawaan dompet lama otomatis IDR (`js/db.js`, `js/sync.js`, `js/app.js`).
 - Ditambah: Pilihan mata uang saat menambah dompet baru di Pengaturan serta badge mata uang (IDR / JPY) pada daftar dompet (`index.html`, `css/style.css`, `js/app.js`).

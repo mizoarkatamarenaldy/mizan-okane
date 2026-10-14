@@ -97,8 +97,10 @@ const inputAddIncomeCat = document.getElementById('input-add-income-cat');
 
 const btnStatsCurrencyIdr = document.getElementById('btn-stats-currency-idr');
 const btnStatsCurrencyJpy = document.getElementById('btn-stats-currency-jpy');
+const btnStatsCurrencyUsd = document.getElementById('btn-stats-currency-usd');
 const btnBudgetCurrencyIdr = document.getElementById('btn-budget-currency-idr');
 const btnBudgetCurrencyJpy = document.getElementById('btn-budget-currency-jpy');
+const btnBudgetCurrencyUsd = document.getElementById('btn-budget-currency-usd');
 
 const walletSettingsList = document.getElementById('wallet-settings-list');
 const formAddWallet = document.getElementById('form-add-wallet');
@@ -456,7 +458,7 @@ export function getWalletCurrency(walletId) {
     const id = walletId || DEFAULT_WALLET_ID;
     const found = (currentWallets || []).find(w => w.id === id);
     if (found && found.currency) {
-        return found.currency === 'JPY' ? 'JPY' : 'IDR';
+        return (found.currency === 'JPY' || found.currency === 'USD') ? found.currency : 'IDR';
     }
     return 'IDR';
 }
@@ -470,10 +472,31 @@ function updateFormCurrencyUI() {
     const selectedWalletId = txWalletInput ? txWalletInput.value : DEFAULT_WALLET_ID;
     const curr = getWalletCurrency(selectedWalletId);
     if (txAmountPrefix) {
-        txAmountPrefix.textContent = curr === 'JPY' ? '¥' : 'Rp';
+        if (curr === 'USD') {
+            txAmountPrefix.textContent = '$';
+        } else if (curr === 'JPY') {
+            txAmountPrefix.textContent = '¥';
+        } else {
+            txAmountPrefix.textContent = 'Rp';
+        }
     }
     if (txAmountLabel) {
-        txAmountLabel.textContent = curr === 'JPY' ? 'Jumlah (¥)' : 'Jumlah (Rp)';
+        if (curr === 'USD') {
+            txAmountLabel.textContent = 'Jumlah ($)';
+        } else if (curr === 'JPY') {
+            txAmountLabel.textContent = 'Jumlah (¥)';
+        } else {
+            txAmountLabel.textContent = 'Jumlah (Rp)';
+        }
+    }
+    if (txAmountInput) {
+        txAmountInput.setAttribute('inputmode', curr === 'USD' ? 'decimal' : 'numeric');
+        if (txAmountInput.value) {
+            if (curr !== 'USD' && txAmountInput.value.includes(',')) {
+                txAmountInput.value = txAmountInput.value.split(',')[0];
+            }
+            formatInputWithCursor(txAmountInput, curr);
+        }
     }
 }
 
@@ -504,7 +527,7 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
 
     for (const w of active) {
         const isSelected = targetId === w.id;
-        const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
+        const curr = getWalletCurrency(w.id);
         html += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)} (${curr})</option>`;
     }
 
@@ -516,7 +539,7 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
     if (txToWalletInput) {
         // Transfer hanya antar dompet semata uang!
         const fromCurr = getWalletCurrency(targetId);
-        const eligibleWallets = active.filter(w => w.id !== targetId && (w.currency === 'JPY' ? 'JPY' : 'IDR') === fromCurr);
+        const eligibleWallets = active.filter(w => w.id !== targetId && getWalletCurrency(w.id) === fromCurr);
 
         let targetToId = selectedToVal;
         if (!targetToId || !eligibleWallets.some(w => w.id === targetToId)) {
@@ -536,7 +559,7 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
 
             for (const w of eligibleWallets) {
                 const isSelected = targetToId === w.id;
-                const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
+                const curr = getWalletCurrency(w.id);
                 toHtml += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)} (${curr})</option>`;
             }
         }
@@ -561,7 +584,7 @@ function populateWalletFilterOptions() {
     for (const w of active) {
         const isSelected = currentVal === w.id;
         if (isSelected) hasCurrent = true;
-        const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
+        const curr = getWalletCurrency(w.id);
         html += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)} (${curr})</option>`;
     }
 
@@ -587,23 +610,78 @@ export function formatNumber(val) {
     return isNegative ? `-${formatted}` : formatted;
 }
 
-export function parseAmount(str) {
+export function formatAmountForInput(amount, currency = 'IDR') {
+    if (amount === null || amount === undefined || amount === '' || isNaN(amount)) return '';
+    const num = Number(amount);
+    if (currency === 'USD') {
+        const rounded = Math.round(num * 100) / 100;
+        const str = String(rounded);
+        const parts = str.split('.');
+        const intFormatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        if (parts.length > 1) {
+            return `${intFormatted},${parts[1]}`;
+        }
+        return intFormatted;
+    }
+    return formatNumber(Math.round(num));
+}
+
+export function parseAmount(str, currency = 'IDR') {
     if (str === null || str === undefined) return 0;
-    const digits = String(str).replace(/\D/g, '');
+    const s = String(str).trim();
+    if (!s) return 0;
+
+    if (currency === 'USD') {
+        let normalized = s;
+        if (normalized.includes('.') && normalized.includes(',')) {
+            if (normalized.lastIndexOf(',') > normalized.lastIndexOf('.')) {
+                normalized = normalized.replace(/\./g, '').replace(',', '.');
+            } else {
+                normalized = normalized.replace(/,/g, '');
+            }
+        } else if (normalized.includes(',')) {
+            normalized = normalized.replace(',', '.');
+        }
+        normalized = normalized.replace(/[^0-9.-]/g, '');
+        const parsed = parseFloat(normalized);
+        if (isNaN(parsed)) return 0;
+        return Math.round(parsed * 100) / 100;
+    }
+
+    const digits = s.replace(/\D/g, '');
     return digits ? parseInt(digits, 10) : 0;
 }
 
 export function formatCurrency(val, currency = 'IDR') {
+    const isUsd = currency === 'USD';
     const isJpy = currency === 'JPY';
-    const num = typeof val === 'number' ? Math.round(val) : parseAmount(val);
+    const num = typeof val === 'number'
+        ? (isUsd ? Math.round(val * 100) / 100 : Math.round(val))
+        : parseAmount(val, currency);
+
     if (val === null || val === undefined || val === '' || isNaN(num)) {
-        return isJpy ? '¥ 0' : 'Rp 0';
+        if (isUsd) return '$ 0,00';
+        if (isJpy) return '¥ 0';
+        return 'Rp 0';
     }
-    const prefix = isJpy ? '¥ ' : 'Rp ';
+
+    const prefix = isUsd ? '$ ' : (isJpy ? '¥ ' : 'Rp ');
+    const absNum = Math.abs(num);
+
+    let formattedNumberStr;
+    if (isUsd) {
+        const fixed = absNum.toFixed(2);
+        const [intPart, decPart] = fixed.split('.');
+        const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        formattedNumberStr = `${intFormatted},${decPart}`;
+    } else {
+        formattedNumberStr = formatNumber(absNum);
+    }
+
     if (num < 0) {
-        return `-${prefix}${formatNumber(Math.abs(num))}`;
+        return `-${prefix}${formattedNumberStr}`;
     }
-    return `${prefix}${formatNumber(num)}`;
+    return `${prefix}${formattedNumberStr}`;
 }
 
 export const currencyFormatter = {
@@ -612,50 +690,138 @@ export const currencyFormatter = {
     }
 };
 
-export function formatInputWithCursor(input) {
+export function formatInputWithCursor(input, currency = 'IDR') {
     if (!input) return;
+    const isUsd = currency === 'USD';
     const originalValue = input.value;
     const originalCursor = input.selectionStart !== null ? input.selectionStart : originalValue.length;
 
-    const textBeforeCursor = originalValue.slice(0, originalCursor);
-    const digitsBeforeCursor = textBeforeCursor.replace(/\D/g, '').length;
+    if (!isUsd) {
+        const textBeforeCursor = originalValue.slice(0, originalCursor);
+        const digitsBeforeCursor = textBeforeCursor.replace(/\D/g, '').length;
 
-    const rawDigits = originalValue.replace(/\D/g, '');
-    if (!rawDigits) {
+        const rawDigits = originalValue.replace(/\D/g, '');
+        if (!rawDigits) {
+            input.value = '';
+            return;
+        }
+
+        const cleanDigits = rawDigits.replace(/^0+(?=\d)/, '');
+        const formatted = formatNumber(cleanDigits);
+        input.value = formatted;
+
+        if (digitsBeforeCursor === 0) {
+            input.setSelectionRange(0, 0);
+            return;
+        }
+
+        const targetDigits = Math.min(digitsBeforeCursor, cleanDigits.length);
+        let digitCount = 0;
+        let newCursor = formatted.length;
+
+        for (let i = 0; i < formatted.length; i++) {
+            if (/\d/.test(formatted[i])) {
+                digitCount++;
+                if (digitCount === targetDigits) {
+                    newCursor = i + 1;
+                    break;
+                }
+            }
+        }
+
+        input.setSelectionRange(newCursor, newCursor);
+        return;
+    }
+
+    // --- Format Input USD (Mendukung Koma Desimal, maks 2 angka) ---
+    if (!originalValue) {
         input.value = '';
         return;
     }
 
-    const cleanDigits = rawDigits.replace(/^0+(?=\d)/, '');
-    const formatted = formatNumber(cleanDigits);
-    input.value = formatted;
+    const hasComma = originalValue.includes(',');
+    const hasDot = originalValue.includes('.');
 
-    if (digitsBeforeCursor === 0) {
-        input.setSelectionRange(0, 0);
+    let intPartRaw = '';
+    let decPartRaw = '';
+    let isDecimalMode = false;
+    let sepIndex = -1;
+
+    if (hasComma) {
+        const parts = originalValue.split(',');
+        intPartRaw = parts[0];
+        decPartRaw = parts.slice(1).join('');
+        isDecimalMode = true;
+        sepIndex = originalValue.indexOf(',');
+    } else if (hasDot && /^\d*\.\d*$/.test(originalValue)) {
+        const parts = originalValue.split('.');
+        intPartRaw = parts[0];
+        decPartRaw = parts.slice(1).join('');
+        isDecimalMode = true;
+        sepIndex = originalValue.indexOf('.');
+    } else {
+        intPartRaw = originalValue;
+        decPartRaw = '';
+    }
+
+    let intDigits = intPartRaw.replace(/\D/g, '');
+    if (intDigits.length > 1) {
+        intDigits = intDigits.replace(/^0+(?=\d)/, '');
+    }
+
+    const decDigits = decPartRaw.replace(/\D/g, '').slice(0, 2);
+
+    if (!intDigits && !isDecimalMode) {
+        input.value = '';
         return;
     }
 
-    const targetDigits = Math.min(digitsBeforeCursor, cleanDigits.length);
-    let digitCount = 0;
-    let newCursor = formatted.length;
-
-    for (let i = 0; i < formatted.length; i++) {
-        if (/\d/.test(formatted[i])) {
-            digitCount++;
-            if (digitCount === targetDigits) {
-                newCursor = i + 1;
-                break;
-            }
-        }
+    if (!intDigits && isDecimalMode) {
+        intDigits = '0';
     }
 
-    input.setSelectionRange(newCursor, newCursor);
+    const formattedInt = intDigits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formatted = isDecimalMode ? `${formattedInt},${decDigits}` : formattedInt;
+    input.value = formatted;
+
+    const textBefore = originalValue.slice(0, originalCursor);
+    const commaBefore = isDecimalMode && (sepIndex < originalCursor);
+
+    if (!commaBefore) {
+        const digitsBefore = textBefore.replace(/\D/g, '').length;
+        if (digitsBefore === 0) {
+            input.setSelectionRange(0, 0);
+            return;
+        }
+        const targetDigits = Math.min(digitsBefore, intDigits.length);
+        let digitCount = 0;
+        let newCursor = formattedInt.length;
+        for (let i = 0; i < formattedInt.length; i++) {
+            if (/\d/.test(formattedInt[i])) {
+                digitCount++;
+                if (digitCount === targetDigits) {
+                    newCursor = i + 1;
+                    break;
+                }
+            }
+        }
+        input.setSelectionRange(newCursor, newCursor);
+    } else {
+        const commaPosInFormatted = formatted.indexOf(',');
+        const decTextBefore = textBefore.slice(sepIndex + 1);
+        const decDigitsBefore = decTextBefore.replace(/\D/g, '').length;
+        const newCursor = Math.min(commaPosInFormatted + 1 + decDigitsBefore, formatted.length);
+        input.setSelectionRange(newCursor, newCursor);
+    }
 }
 
-export function attachAmountInputFormatting(input) {
+export function attachAmountInputFormatting(input, getCurrencyFn = () => 'IDR') {
     if (!input) return;
 
     input.addEventListener('keydown', (e) => {
+        const curr = typeof getCurrencyFn === 'function' ? getCurrencyFn() : 'IDR';
+        const isUsd = curr === 'USD';
+
         if (
             e.key === 'Backspace' ||
             e.key === 'Delete' ||
@@ -679,7 +845,7 @@ export function attachAmountInputFormatting(input) {
                     const val = input.value;
                     input.value = val.slice(0, pos - 2) + val.slice(pos - 1);
                     input.setSelectionRange(pos - 2, pos - 2);
-                    formatInputWithCursor(input);
+                    formatInputWithCursor(input, curr);
                 }
             } else if (e.key === 'Delete' && input.selectionStart === input.selectionEnd && input.selectionStart < input.value.length) {
                 if (input.value[input.selectionStart] === '.') {
@@ -688,19 +854,56 @@ export function attachAmountInputFormatting(input) {
                     const val = input.value;
                     input.value = val.slice(0, pos) + val.slice(pos + 2);
                     input.setSelectionRange(pos, pos);
-                    formatInputWithCursor(input);
+                    formatInputWithCursor(input, curr);
                 }
+            }
+            return;
+        }
+
+        // Koma atau titik desimal hanya untuk USD
+        if (isUsd && (e.key === ',' || e.key === '.')) {
+            e.preventDefault();
+            const val = input.value;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const remaining = val.slice(0, start) + val.slice(end);
+
+            if (!remaining.includes(',')) {
+                const prefix = (start === 0 && (!val || end === val.length)) ? '0' : '';
+                input.value = val.slice(0, start) + prefix + ',' + val.slice(end);
+                const newPos = start + prefix.length + 1;
+                input.setSelectionRange(newPos, newPos);
+                formatInputWithCursor(input, curr);
             }
             return;
         }
 
         if (e.key.length === 1 && !/^\d$/.test(e.key)) {
             e.preventDefault();
+            return;
+        }
+
+        // Untuk USD: batasi maksimal 2 desimal di belakang koma
+        if (isUsd && /^\d$/.test(e.key)) {
+            const val = input.value;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            if (val.includes(',') && start === end) {
+                const commaIdx = val.indexOf(',');
+                if (start > commaIdx) {
+                    const decPart = val.slice(commaIdx + 1);
+                    if (decPart.length >= 2) {
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
         }
     });
 
     input.addEventListener('input', () => {
-        formatInputWithCursor(input);
+        const curr = typeof getCurrencyFn === 'function' ? getCurrencyFn() : 'IDR';
+        formatInputWithCursor(input, curr);
     });
 }
 
@@ -1123,11 +1326,18 @@ function formatCompactCurrency(value) {
         const val = value / 1_000;
         return (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' rb';
     }
+    if (typeof value === 'number' && value % 1 !== 0) {
+        return (Math.round(value * 100) / 100).toFixed(2).replace('.', ',');
+    }
     return formatNumber(value);
 }
 
 function getNiceCeiling(maxVal) {
-    if (maxVal <= 0) return 100000;
+    if (maxVal <= 0) {
+        if (currentStatsCurrency === 'USD') return 100;
+        if (currentStatsCurrency === 'JPY') return 10000;
+        return 100000;
+    }
     const target = maxVal * 1.15;
     const exp = Math.floor(Math.log10(target));
     const factor = Math.pow(10, exp);
@@ -1142,22 +1352,38 @@ function getNiceCeiling(maxVal) {
 }
 
 function updateStatsCurrencyUI() {
-    if (btnStatsCurrencyIdr && btnStatsCurrencyJpy) {
-        const isIdr = currentStatsCurrency === 'IDR';
+    const isIdr = currentStatsCurrency === 'IDR';
+    const isJpy = currentStatsCurrency === 'JPY';
+    const isUsd = currentStatsCurrency === 'USD';
+    if (btnStatsCurrencyIdr) {
         btnStatsCurrencyIdr.classList.toggle('is-active', isIdr);
         btnStatsCurrencyIdr.setAttribute('aria-pressed', String(isIdr));
-        btnStatsCurrencyJpy.classList.toggle('is-active', !isIdr);
-        btnStatsCurrencyJpy.setAttribute('aria-pressed', String(!isIdr));
+    }
+    if (btnStatsCurrencyJpy) {
+        btnStatsCurrencyJpy.classList.toggle('is-active', isJpy);
+        btnStatsCurrencyJpy.setAttribute('aria-pressed', String(isJpy));
+    }
+    if (btnStatsCurrencyUsd) {
+        btnStatsCurrencyUsd.classList.toggle('is-active', isUsd);
+        btnStatsCurrencyUsd.setAttribute('aria-pressed', String(isUsd));
     }
 }
 
 function updateBudgetCurrencyUI() {
-    if (btnBudgetCurrencyIdr && btnBudgetCurrencyJpy) {
-        const isIdr = currentBudgetCurrency === 'IDR';
+    const isIdr = currentBudgetCurrency === 'IDR';
+    const isJpy = currentBudgetCurrency === 'JPY';
+    const isUsd = currentBudgetCurrency === 'USD';
+    if (btnBudgetCurrencyIdr) {
         btnBudgetCurrencyIdr.classList.toggle('is-active', isIdr);
         btnBudgetCurrencyIdr.setAttribute('aria-pressed', String(isIdr));
-        btnBudgetCurrencyJpy.classList.toggle('is-active', !isIdr);
-        btnBudgetCurrencyJpy.setAttribute('aria-pressed', String(!isIdr));
+    }
+    if (btnBudgetCurrencyJpy) {
+        btnBudgetCurrencyJpy.classList.toggle('is-active', isJpy);
+        btnBudgetCurrencyJpy.setAttribute('aria-pressed', String(isJpy));
+    }
+    if (btnBudgetCurrencyUsd) {
+        btnBudgetCurrencyUsd.classList.toggle('is-active', isUsd);
+        btnBudgetCurrencyUsd.setAttribute('aria-pressed', String(isUsd));
     }
 }
 
@@ -1893,6 +2119,7 @@ function render() {
     const activeCurrencies = [];
     if (activeWallets.some(w => (w.currency || 'IDR') === 'IDR')) activeCurrencies.push('IDR');
     if (activeWallets.some(w => w.currency === 'JPY')) activeCurrencies.push('JPY');
+    if (activeWallets.some(w => w.currency === 'USD')) activeCurrencies.push('USD');
     if (activeCurrencies.length === 0) activeCurrencies.push('IDR');
 
     const walletBalances = new Map();
@@ -1970,7 +2197,7 @@ function render() {
             for (const w of activeWallets) {
                 const bal = walletBalances.get(w.id) || 0;
                 const isZero = bal === 0;
-                const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
+                const curr = getWalletCurrency(w.id);
                 balancesHtml += `
                     <div class="wallet-balance-item${isZero ? ' is-zero' : ''}">
                         <span class="wallet-balance-name">${escapeHTML(w.name)}</span>
@@ -2391,7 +2618,7 @@ function renderWalletSettings() {
                 editInput.select();
             });
         } else {
-            const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
+            const curr = getWalletCurrency(w.id);
             li.innerHTML = `
                 <div class="category-name-group">
                     <span class="category-name">${escapeHTML(w.name)}</span>
@@ -2471,7 +2698,7 @@ async function handleAddWallet(inputEl) {
 
     ensureToken();
 
-    const selectedCurrency = selectAddWalletCurrency && selectAddWalletCurrency.value === 'JPY' ? 'JPY' : 'IDR';
+    const selectedCurrency = selectAddWalletCurrency && ['JPY', 'USD'].includes(selectAddWalletCurrency.value) ? selectAddWalletCurrency.value : 'IDR';
     const now = Date.now();
     const newWallet = {
         id: crypto.randomUUID(),
@@ -2615,7 +2842,7 @@ function renderBudgetSection() {
         budgetMonthLabel.textContent = `${monthName} ${yStr}`;
     }
 
-    if (currentBudgetCurrency === 'JPY') {
+    if (currentBudgetCurrency !== 'IDR') {
         budgetListContainer.innerHTML = `
             <div class="empty-state">
                 <p class="empty-state-text">Budget hanya tersedia untuk mata uang Rupiah.</p>
@@ -3001,7 +3228,9 @@ async function handleSubmit(e) {
     }
     hideTimeError();
 
-    const amount = parseAmount(txAmountInput.value);
+    const selectedWalletId = (txWalletInput && txWalletInput.value) ? txWalletInput.value : DEFAULT_WALLET_ID;
+    const curr = getWalletCurrency(selectedWalletId);
+    const amount = parseAmount(txAmountInput.value, curr);
     if (isNaN(amount) || amount <= 0) {
         showNotification("Jumlah harus berupa angka lebih dari 0.", "warn");
         return;
@@ -3018,7 +3247,6 @@ async function handleSubmit(e) {
         }
     }
 
-    const selectedWalletId = (txWalletInput && txWalletInput.value) ? txWalletInput.value : DEFAULT_WALLET_ID;
     localStorage.setItem(LAST_WALLET_KEY, selectedWalletId);
 
     let selectedToWalletId = null;
@@ -3115,7 +3343,8 @@ function handleEdit(id) {
     syncDateInputToSelects(tx.date);
     setTimeValueToForm(tx.time || '');
     hideTimeError();
-    txAmountInput.value = formatNumber(tx.amount);
+    const txCurr = getWalletCurrency(tx.walletId || DEFAULT_WALLET_ID);
+    txAmountInput.value = formatAmountForInput(tx.amount, txCurr);
     txNoteInput.value = tx.note || '';
 
     updateTypeUI(tx.type);
@@ -3198,8 +3427,8 @@ btnCancel.addEventListener('click', () => {
     resetForm();
     closeFormScreen();
 });
-attachAmountInputFormatting(txAmountInput);
-attachAmountInputFormatting(inputBudgetAmount);
+attachAmountInputFormatting(txAmountInput, () => getWalletCurrency(txWalletInput ? txWalletInput.value : DEFAULT_WALLET_ID));
+attachAmountInputFormatting(inputBudgetAmount, () => 'IDR');
 
 txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -3581,7 +3810,7 @@ function sanitizeImportedTx(item) {
     const tx = {
         id: String(item.id).trim(),
         type: item.type,
-        amount: Math.round(amt),
+        amount: Math.round(amt * 100) / 100,
         date: String(item.date).trim(),
         createdAt,
         updatedAt,
@@ -3614,7 +3843,7 @@ function mergeWalletsList(localWallets, importedWallets) {
                 map.set(w.id, {
                     id: String(w.id),
                     name: String(w.name || '').trim(),
-                    currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
+                    currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
                     createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                     updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
                     deleted: !!w.deleted
@@ -3630,7 +3859,7 @@ function mergeWalletsList(localWallets, importedWallets) {
                     map.set(w.id, {
                         id: String(w.id),
                         name: String(w.name || '').trim(),
-                        currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
+                        currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
                         createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                         updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
                         deleted: !!w.deleted
@@ -3991,7 +4220,7 @@ export function generateDummyTransactions(categories, wallets) {
         // Dompet asal
         const wallet = activeWallets[Math.floor(Math.random() * activeWallets.length)];
         const walletId = wallet.id;
-        const walletCurr = (wallet.currency === 'JPY' ? 'JPY' : 'IDR');
+        const walletCurr = getWalletCurrency(walletId);
 
         let category = '';
         let note = '';
@@ -4003,26 +4232,32 @@ export function generateDummyTransactions(categories, wallets) {
             category = expenseCats[Math.floor(Math.random() * expenseCats.length)];
             const pool = expenseNotes[category] || expenseNotes['Lainnya'];
             note = pool[Math.floor(Math.random() * pool.length)];
-            const steps = walletCurr === 'JPY'
-                ? [300, 500, 800, 1200, 1800, 2500, 3000, 4500, 6000, 8000]
-                : [15000, 20000, 25000, 35000, 45000, 50000, 75000, 90000, 120000, 150000, 200000, 250000, 350000];
+            const steps = walletCurr === 'USD'
+                ? [2.5, 4.75, 8.5, 12, 15.99, 25.5, 34, 50, 75.25, 110]
+                : (walletCurr === 'JPY'
+                    ? [300, 500, 800, 1200, 1800, 2500, 3000, 4500, 6000, 8000]
+                    : [15000, 20000, 25000, 35000, 45000, 50000, 75000, 90000, 120000, 150000, 200000, 250000, 350000]);
             amount = steps[Math.floor(Math.random() * steps.length)];
         } else if (actualType === 'income') {
             category = incomeCats[Math.floor(Math.random() * incomeCats.length)];
             const pool = incomeNotes[category] || incomeNotes['Lainnya'];
             note = pool[Math.floor(Math.random() * pool.length)];
-            const steps = walletCurr === 'JPY'
-                ? [25000, 50000, 80000, 120000, 200000, 300000, 400000]
-                : [300000, 500000, 750000, 1200000, 2000000, 3500000, 4500000, 5500000];
+            const steps = walletCurr === 'USD'
+                ? [25, 50, 100, 250, 500, 1200, 2500]
+                : (walletCurr === 'JPY'
+                    ? [25000, 50000, 80000, 120000, 200000, 300000, 400000]
+                    : [300000, 500000, 750000, 1200000, 2000000, 3500000, 4500000, 5500000]);
             amount = steps[Math.floor(Math.random() * steps.length)];
         } else if (actualType === 'transfer') {
             category = 'Transfer';
             note = transferNotes[Math.floor(Math.random() * transferNotes.length)];
-            const steps = walletCurr === 'JPY'
-                ? [1000, 2000, 5000, 10000, 20000, 30000]
-                : [50000, 100000, 200000, 250000, 500000, 750000, 1000000];
+            const steps = walletCurr === 'USD'
+                ? [10, 20, 50, 100, 200]
+                : (walletCurr === 'JPY'
+                    ? [1000, 2000, 5000, 10000, 20000, 30000]
+                    : [50000, 100000, 200000, 250000, 500000, 750000, 1000000]);
             amount = steps[Math.floor(Math.random() * steps.length)];
-            const sameCurrWallets = activeWallets.filter(w => (w.currency === 'JPY' ? 'JPY' : 'IDR') === walletCurr && w.id !== walletId);
+            const sameCurrWallets = activeWallets.filter(w => getWalletCurrency(w.id) === walletCurr && w.id !== walletId);
             if (sameCurrWallets.length > 0) {
                 const toWallet = sameCurrWallets[Math.floor(Math.random() * sameCurrWallets.length)];
                 toWalletId = toWallet.id;
@@ -4432,7 +4667,7 @@ async function init() {
                 if (txWalletInput.value === txToWalletInput.value) {
                     const active = getActiveWallets();
                     const fromCurr = getWalletCurrency(txToWalletInput.value);
-                    const other = active.find(w => w.id !== txToWalletInput.value && (w.currency === 'JPY' ? 'JPY' : 'IDR') === fromCurr);
+                    const other = active.find(w => w.id !== txToWalletInput.value && getWalletCurrency(w.id) === fromCurr);
                     if (other) {
                         txWalletInput.value = other.id;
                         updateFormCurrencyUI();
@@ -4460,6 +4695,15 @@ async function init() {
         });
     }
 
+    if (btnBudgetCurrencyUsd) {
+        btnBudgetCurrencyUsd.addEventListener('click', () => {
+            if (currentBudgetCurrency !== 'USD') {
+                currentBudgetCurrency = 'USD';
+                renderBudgetSection();
+            }
+        });
+    }
+
     if (btnStatsCurrencyIdr) {
         btnStatsCurrencyIdr.addEventListener('click', () => {
             if (currentStatsCurrency !== 'IDR') {
@@ -4475,6 +4719,17 @@ async function init() {
         btnStatsCurrencyJpy.addEventListener('click', () => {
             if (currentStatsCurrency !== 'JPY') {
                 currentStatsCurrency = 'JPY';
+                updateStatsCurrencyUI();
+                renderMonthlyChart(currentTransactions);
+                renderDonutChart(currentTransactions);
+            }
+        });
+    }
+
+    if (btnStatsCurrencyUsd) {
+        btnStatsCurrencyUsd.addEventListener('click', () => {
+            if (currentStatsCurrency !== 'USD') {
+                currentStatsCurrency = 'USD';
                 updateStatsCurrencyUI();
                 renderMonthlyChart(currentTransactions);
                 renderDonutChart(currentTransactions);

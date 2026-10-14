@@ -217,7 +217,7 @@ export function getWallets() {
           .map(w => ({
             id: String(w.id),
             name: String(w.name).trim(),
-            currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
+            currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
             createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
             updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
             deleted: !!w.deleted
@@ -252,7 +252,7 @@ export function saveWallets(wallets) {
     const clean = list.map(w => ({
       id: String(w.id),
       name: String(w.name).trim(),
-      currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
+      currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
       createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
       updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : Date.now(),
       deleted: !!w.deleted

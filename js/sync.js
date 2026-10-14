@@ -235,7 +235,7 @@ function mergeWallets(localWallets, remoteWallets) {
                 merged.set(w.id, {
                     id: String(w.id),
                     name: String(w.name || ''),
-                    currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
+                    currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
                     createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                     updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
                     deleted: !!w.deleted
@@ -251,7 +251,7 @@ function mergeWallets(localWallets, remoteWallets) {
                     merged.set(w.id, {
                         id: String(w.id),
                         name: String(w.name || ''),
-                        currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
+                        currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
                         createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                         updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
                         deleted: !!w.deleted
