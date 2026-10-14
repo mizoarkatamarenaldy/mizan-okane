@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-14: Tahap 5: Data contoh (dummy)
+- Ditambah: Tombol "Isi Data Contoh" di Pengaturan untuk menghasilkan 40 transaksi acak (pemasukan, pengeluaran, dan transfer) dalam rentang 2 bulan terakhir yang tersebar di dompet dan kategori yang ada, masing-masing dengan penanda `dummy: true` (`index.html`, `js/app.js`).
+- Ditambah: Tombol "Hapus Data Contoh" di Pengaturan yang membuang seluruh transaksi bertanda dummy secara langsung dari penyimpanan lokal tanpa soft delete, menjaga data asli tetap utuh (`index.html`, `js/app.js`).
+- Ditambah: Dialog konfirmasi web UI (`confirm-dialog`) berbahasa Indonesia untuk konfirmasi pengisian dan penghapusan data contoh (`js/app.js`).
+- Diubah: Ekspor CSV dan ekspor JSON mengecualikan transaksi bertanda dummy sehingga data cadangan hanya memuat data asli (`js/app.js`).
+- Diubah: Logika sinkronisasi Drive mengabaikan transaksi dummy agar tidak terunggah ke Drive, dan proses penarikan atau penggabungan dari Drive mempertahankan data dummy lokal tanpa menimpanya (`js/sync.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v34` (`sw.js`).
+- Diubah: `PLAN.md` menambahkan dua entri baru di Tahap 5 dan mencentang entri "Data contoh (dummy)" (`PLAN.md`).
+
 ## 2026-10-14: Tahap 5: Desain ulang v2.5
 - Diperbaiki: Seluruh dialog bawaan browser (`alert` dan `confirm`) yang memicu teks/tombol bahasa Inggris diganti dengan sistem notifikasi toast (`showNotification`) dan dialog konfirmasi kustom terintegrasi (`confirm-dialog`) berbahasa Indonesia (`js/app.js`).
 - Diperbaiki: Tombol aksi transaksi dan judul modal diseragamkan ke bahasa Indonesia ("Ubah transaksi", "Ubah Transaksi", "Ubah Transfer") (`js/app.js`).

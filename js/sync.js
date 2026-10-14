@@ -262,11 +262,12 @@ function mergeWallets(localWallets, remoteWallets) {
 }
 
 function buildPayload(transactions, categories, budgets, wallets) {
+    const cleanTransactions = (transactions || []).filter(tx => !tx.dummy);
     const payload = {
         app: 'mizan-okane',
         schemaVersion: SCHEMA_VERSION,
         exportedAt: new Date().toISOString(),
-        transactions
+        transactions: cleanTransactions
     };
     if (categories) {
         payload.categories = categories;
@@ -336,22 +337,25 @@ async function runSync(force = null) {
 
     const revAtStart = await getLocalRev();
     const local = await getAllTransactions();
+    const localReal = local.filter(tx => !tx.dummy);
     const localCategories = await getCategories();
     const localBudgets = await getBudgets();
     const localWallets = await getWallets();
     const dirty = meta.syncedRev === null
-        ? (local.length > 0 || (localCategories.updatedAt || 0) > 0 || (localBudgets.updatedAt || 0) > 0 || localWallets.some(w => (w.updatedAt || 0) > 0))
+        ? (localReal.length > 0 || (localCategories.updatedAt || 0) > 0 || (localBudgets.updatedAt || 0) > 0 || localWallets.some(w => (w.updatedAt || 0) > 0))
         : meta.syncedRev !== revAtStart;
 
     const remoteFile = await findRemoteFile();
 
     const push = async (categoriesToPush = localCategories, budgetsToPush = localBudgets, walletsToPush = localWallets) => {
-        const saved = await uploadRemote(remoteFile?.id || null, local, categoriesToPush, budgetsToPush, walletsToPush);
+        const saved = await uploadRemote(remoteFile?.id || null, localReal, categoriesToPush, budgetsToPush, walletsToPush);
         return { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };
     };
 
     const pull = async (remoteData, version) => {
-        await replaceAllTransactions(remoteData.transactions);
+        const currentLocal = await getAllTransactions();
+        const localDummies = currentLocal.filter(tx => tx.dummy);
+        await replaceAllTransactions([...(remoteData.transactions || []), ...localDummies]);
         if (remoteData.categories && Array.isArray(remoteData.categories.income) && Array.isArray(remoteData.categories.expense)) {
             if ((remoteData.categories.updatedAt || 0) > (localCategories.updatedAt || 0)) {
                 await saveCategories(remoteData.categories);
@@ -425,15 +429,17 @@ async function runSync(force = null) {
                 await saveWallets(finalWallets);
             }
             meta = await pull(remoteData, remoteFile.version);
-        } else if (local.length === 0 && !remoteCatWins && !remoteBudgetWins && !remoteWalletsNewer) {
+        } else if (localReal.length === 0 && !remoteCatWins && !remoteBudgetWins && !remoteWalletsNewer) {
             const saved = await uploadRemote(remoteFile.id, remoteData.transactions, finalCategories, finalBudgets, finalWallets);
-            await replaceAllTransactions(remoteData.transactions);
+            const currentLocal = await getAllTransactions();
+            const localDummies = currentLocal.filter(tx => tx.dummy);
+            await replaceAllTransactions([...(remoteData.transactions || []), ...localDummies]);
             await saveCategories(finalCategories);
             await saveBudgets(finalBudgets);
             await saveWallets(finalWallets);
             await listeners.onRemoteApplied();
             meta = { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };
-        } else if (local.length === 0) {
+        } else if (localReal.length === 0) {
             if (remoteCatWins) {
                 await saveCategories(remoteData.categories);
             }
@@ -450,9 +456,11 @@ async function runSync(force = null) {
             // Gabung data
             const merged = new Map();
             for (const tx of remoteData.transactions) {
-                merged.set(tx.id, tx);
+                if (!tx.dummy) {
+                    merged.set(tx.id, tx);
+                }
             }
-            for (const tx of local) {
+            for (const tx of localReal) {
                 const existing = merged.get(tx.id);
                 if (!existing || (tx.updatedAt || 0) > (existing.updatedAt || 0)) {
                     merged.set(tx.id, tx);
@@ -460,10 +468,12 @@ async function runSync(force = null) {
             }
             const mergedList = Array.from(merged.values());
             
-            // Simpan hasil gabungan ke Drive
+            // Simpan hasil gabungan ke Drive (hanya transaksi asli)
             const saved = await uploadRemote(remoteFile.id, mergedList, finalCategories, finalBudgets, finalWallets);
-            // Simpan ke lokal
-            await replaceAllTransactions(mergedList);
+            // Simpan ke lokal bersama transaksi dummy lokal
+            const currentLocal = await getAllTransactions();
+            const localDummies = currentLocal.filter(tx => tx.dummy);
+            await replaceAllTransactions([...mergedList, ...localDummies]);
             await saveCategories(finalCategories);
             await saveBudgets(finalBudgets);
             await saveWallets(finalWallets);

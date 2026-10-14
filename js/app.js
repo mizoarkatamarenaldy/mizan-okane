@@ -102,6 +102,8 @@ let pendingCategoryDelete = null;
 let pendingBudgetDelete = null;
 let pendingWalletDelete = null;
 let pendingLogout = false;
+let pendingFillDummy = false;
+let pendingClearDummy = false;
 let editingCategory = null;
 let editingBudgetCategory = null;
 let editingWalletId = null;
@@ -2870,12 +2872,14 @@ async function handleSubmit(e) {
     const now = Date.now();
     const id = txIdInput.value || crypto.randomUUID();
     
-    // Check if it's an update to preserve createdAt
+    // Check if it's an update to preserve createdAt and dummy flag
     let createdAt = now;
+    let isDummy = false;
     if (txIdInput.value) {
         const existingTx = currentTransactions.find(t => t.id === txIdInput.value);
         if (existingTx) {
             createdAt = existingTx.createdAt;
+            isDummy = !!existingTx.dummy;
         }
     }
 
@@ -2893,6 +2897,10 @@ async function handleSubmit(e) {
         deleted: false
     };
 
+    if (isDummy) {
+        tx.dummy = true;
+    }
+
     if (selectedType === 'transfer') {
         tx.toWalletId = selectedToWalletId;
     }
@@ -2902,7 +2910,9 @@ async function handleSubmit(e) {
         resetForm();
         closeFormScreen();
         await loadData();
-        markDirty().catch(err => console.error("Gagal menandai perubahan untuk sinkron", err));
+        if (!isDummy) {
+            markDirty().catch(err => console.error("Gagal menandai perubahan untuk sinkron", err));
+        }
     } catch (error) {
         console.error("Gagal menyimpan transaksi", error);
         showNotification("Terjadi kesalahan saat menyimpan data.", "error");
@@ -2972,14 +2982,20 @@ function handleDelete(id) {
 }
 
 async function performDelete(id) {
-    // Minta token dalam handler interaksi pengguna bila token sudah habis
-    ensureToken();
-
     try {
         const allTx = await getAllTransactions();
         const tx = allTx.find(t => t.id === id);
         
         if (tx) {
+            if (tx.dummy) {
+                const remaining = allTx.filter(t => t.id !== id);
+                await replaceAllTransactions(remaining);
+                await loadData();
+                showNotification("Data contoh berhasil dihapus.", "success");
+                return;
+            }
+            // Minta token dalam handler interaksi pengguna bila token sudah habis
+            ensureToken();
             tx.deleted = true;
             tx.updatedAt = Date.now();
             await saveTransaction(tx);
@@ -3026,8 +3042,10 @@ if (confirmDialog) {
         const bgtDelete = pendingBudgetDelete;
         const wltDelete = pendingWalletDelete;
         const isLogout = pendingLogout;
+        const isFillDummy = pendingFillDummy;
+        const isClearDummy = pendingClearDummy;
 
-        if (!txId && !catDelete && !bgtDelete && !wltDelete && !isLogout) {
+        if (!txId && !catDelete && !bgtDelete && !wltDelete && !isLogout && !isFillDummy && !isClearDummy) {
             confirmDialog.close();
             return;
         }
@@ -3036,6 +3054,10 @@ if (confirmDialog) {
         try {
             if (isLogout) {
                 await signOut();
+            } else if (isFillDummy) {
+                await performFillDummy();
+            } else if (isClearDummy) {
+                await performClearDummy();
             } else if (txId) {
                 await performDelete(txId);
             } else if (catDelete) {
@@ -3057,8 +3079,11 @@ if (confirmDialog) {
         pendingBudgetDelete = null;
         pendingWalletDelete = null;
         pendingLogout = false;
+        pendingFillDummy = false;
+        pendingClearDummy = false;
         if (btnConfirmDelete) {
             btnConfirmDelete.textContent = 'Hapus';
+            btnConfirmDelete.className = 'btn-danger';
         }
         if (confirmDialogTitle) {
             confirmDialogTitle.textContent = 'Hapus transaksi ini?';
@@ -3092,6 +3117,8 @@ const btnExport = document.getElementById('btn-export');
 const btnImportJson = document.getElementById('btn-import-json');
 const inputImportJson = document.getElementById('input-import-json');
 const btnExportCsv = document.getElementById('btn-export-csv');
+const btnFillDummy = document.getElementById('btn-fill-dummy');
+const btnClearDummy = document.getElementById('btn-clear-dummy');
 
 function formatTime(ts) {
     return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -3311,6 +3338,7 @@ export async function exportViaCapacitor(fileName, dataContent, dialogTitle) {
 btnExport.addEventListener('click', async () => {
     try {
         const allTx = await getAllTransactions();
+        const realTx = allTx.filter(tx => !tx.dummy);
         const cats = await getCategories();
         const bgs = await getBudgets();
         const wts = await getWallets();
@@ -3318,7 +3346,7 @@ btnExport.addEventListener('click', async () => {
             app: 'mizan-okane',
             schemaVersion: 1,
             exportedAt: new Date().toISOString(),
-            transactions: allTx,
+            transactions: realTx,
             categories: cats,
             budgets: bgs,
             wallets: wts
@@ -3631,7 +3659,7 @@ function getLocalDateString() {
 btnExportCsv.addEventListener('click', async () => {
     try {
         const allTx = await getAllTransactions();
-        const activeTx = allTx.filter(tx => !tx.deleted);
+        const activeTx = allTx.filter(tx => !tx.deleted && !tx.dummy);
 
         if (activeTx.length === 0) {
             showNotification('Belum ada transaksi untuk diekspor.', 'warn');
@@ -3697,6 +3725,225 @@ btnExportCsv.addEventListener('click', async () => {
         showNotification("Terjadi kesalahan saat mengekspor CSV.", "error");
     }
 });
+
+// --- Data Contoh (Dummy) ---
+
+export function generateDummyTransactions(categories, wallets) {
+    const list = [];
+    const expenseCats = (categories && Array.isArray(categories.expense) && categories.expense.length > 0)
+        ? categories.expense
+        : ['Makan', 'Transport', 'Hiburan', 'Belanja', 'Tagihan', 'Lainnya'];
+    const incomeCats = (categories && Array.isArray(categories.income) && categories.income.length > 0)
+        ? categories.income
+        : ['Gaji', 'Bonus', 'Hadiah', 'Lainnya'];
+    const activeWallets = (wallets && Array.isArray(wallets) && wallets.filter(w => !w.deleted).length > 0)
+        ? wallets.filter(w => !w.deleted)
+        : [{ id: DEFAULT_WALLET_ID, name: DEFAULT_WALLET_NAME }];
+
+    const now = new Date();
+
+    // Sekitar 40 transaksi: 25 pengeluaran, 10 pemasukan, 5 transfer
+    const types = [
+        ...Array(25).fill('expense'),
+        ...Array(10).fill('income'),
+        ...Array(5).fill('transfer')
+    ];
+    // Acak urutan tipe (Fisher-Yates)
+    for (let i = types.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [types[i], types[j]] = [types[j], types[i]];
+    }
+
+    const expenseNotes = {
+        'Makan': ['Makan siang nasi padang', 'Kopi & roti bakar', 'Sarapan bubur ayam', 'Makan malam seafood', 'Beli snack martabak', 'Pesan makan online', 'Kopi susu gula aren'],
+        'Transport': ['Bensin motor', 'Isi bensin mobil', 'Tiket KRL', 'Ojek online ke kantor', 'Parkir seharian', 'Tol dalam kota'],
+        'Hiburan': ['Nonton bioskop', 'Langganan streaming film', 'Beli game online', 'Tiket konser mini', 'Karaoke keluarga'],
+        'Belanja': ['Belanja mingguan supermarket', 'Beli kaos polos', 'Keperluan rumah tangga', 'Beli perlengkapan mandi', 'Belanja kebutuhan dapur'],
+        'Tagihan': ['Bayar listrik PLN', 'Tagihan air PDAM', 'Paket data internet', 'Iuran keamanan & sampah', 'Langganan wifi'],
+        'Lainnya': ['Potong rambut', 'Fotokopi dokumen', 'Obat di apotek', 'Beli baterai remote', 'Sedekah subuh']
+    };
+
+    const incomeNotes = {
+        'Gaji': ['Gaji bulanan', 'Uang lembur akhir pekan', 'Insentif kinerja bulanan'],
+        'Bonus': ['Bonus pencapaian target', 'Bonus tahunan', 'Reward proyek'],
+        'Hadiah': ['Kado ulang tahun', 'THR dari keluarga', 'Hadiah lomba'],
+        'Lainnya': ['Penjualan barang bekas', 'Freelance jasa penulisan', 'Cashback belanja', 'Pengembalian pinjaman']
+    };
+
+    const transferNotes = [
+        'Pindah saldo ke tabungan',
+        'Tarik tunai untuk belanja',
+        'Top up dana darurat',
+        'Alokasi anggaran bulanan',
+        'Kirim dana operasional'
+    ];
+
+    for (let i = 0; i < 40; i++) {
+        const type = types[i];
+        // Tersebar merata dalam 60 hari terakhir (~2 bulan)
+        const baseOffset = Math.floor((i * 59) / 39);
+        const jitter = Math.floor(Math.random() * 3) - 1;
+        const dayOffset = Math.min(59, Math.max(0, baseOffset + jitter));
+        const txDateObj = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOffset);
+        const year = txDateObj.getFullYear();
+        const month = String(txDateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(txDateObj.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
+        // Jam acak antara 07:00 sampai 22:00
+        const hour = Math.floor(Math.random() * 16) + 7;
+        const minute = Math.floor(Math.random() * 12) * 5;
+        const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+        // Dompet asal
+        const wallet = activeWallets[Math.floor(Math.random() * activeWallets.length)];
+        const walletId = wallet.id;
+
+        let category = '';
+        let note = '';
+        let amount = 0;
+        let toWalletId = undefined;
+
+        if (type === 'expense') {
+            category = expenseCats[Math.floor(Math.random() * expenseCats.length)];
+            const pool = expenseNotes[category] || expenseNotes['Lainnya'];
+            note = pool[Math.floor(Math.random() * pool.length)];
+            const steps = [15000, 20000, 25000, 35000, 45000, 50000, 75000, 90000, 120000, 150000, 200000, 250000, 350000];
+            amount = steps[Math.floor(Math.random() * steps.length)];
+        } else if (type === 'income') {
+            category = incomeCats[Math.floor(Math.random() * incomeCats.length)];
+            const pool = incomeNotes[category] || incomeNotes['Lainnya'];
+            note = pool[Math.floor(Math.random() * pool.length)];
+            const steps = [300000, 500000, 750000, 1200000, 2000000, 3500000, 4500000, 5500000];
+            amount = steps[Math.floor(Math.random() * steps.length)];
+        } else if (type === 'transfer') {
+            category = 'Transfer';
+            note = transferNotes[Math.floor(Math.random() * transferNotes.length)];
+            const steps = [50000, 100000, 200000, 250000, 500000, 750000, 1000000];
+            amount = steps[Math.floor(Math.random() * steps.length)];
+            if (activeWallets.length > 1) {
+                const otherWallets = activeWallets.filter(w => w.id !== walletId);
+                const toWallet = otherWallets[Math.floor(Math.random() * otherWallets.length)];
+                toWalletId = toWallet.id;
+            } else {
+                toWalletId = walletId;
+            }
+        }
+
+        const createdAt = txDateObj.getTime() + (hour * 3600 + minute * 60) * 1000;
+        const tx = {
+            id: `dummy_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}`,
+            type,
+            amount,
+            date: dateStr,
+            time: timeStr,
+            category,
+            walletId,
+            note,
+            createdAt,
+            updatedAt: createdAt,
+            deleted: false,
+            dummy: true
+        };
+        if (toWalletId !== undefined) {
+            tx.toWalletId = toWalletId;
+        }
+
+        list.push(tx);
+    }
+
+    return list;
+}
+
+export async function performFillDummy() {
+    try {
+        const allTx = await getAllTransactions();
+        const realTx = allTx.filter(tx => !tx.dummy);
+        const categories = await getCategories();
+        const wallets = await getWallets();
+        const newDummies = generateDummyTransactions(categories, wallets);
+        await replaceAllTransactions([...realTx, ...newDummies]);
+        resetForm();
+        await loadData();
+        showNotification('Data contoh berhasil diisi (40 transaksi).', 'success');
+    } catch (err) {
+        console.error('Gagal mengisi data contoh', err);
+        showNotification('Gagal mengisi data contoh.', 'error');
+    }
+}
+
+export async function performClearDummy() {
+    try {
+        const allTx = await getAllTransactions();
+        const realTx = allTx.filter(tx => !tx.dummy);
+        const dummyCount = allTx.length - realTx.length;
+        if (dummyCount === 0) {
+            showNotification('Tidak ada data contoh yang tersimpan.', 'info');
+            return;
+        }
+        await replaceAllTransactions(realTx);
+        resetForm();
+        await loadData();
+        showNotification('Data contoh berhasil dihapus.', 'success');
+    } catch (err) {
+        console.error('Gagal menghapus data contoh', err);
+        showNotification('Gagal menghapus data contoh.', 'error');
+    }
+}
+
+if (btnFillDummy) {
+    btnFillDummy.addEventListener('click', () => {
+        pendingDeleteId = null;
+        pendingCategoryDelete = null;
+        pendingBudgetDelete = null;
+        pendingWalletDelete = null;
+        pendingLogout = false;
+        pendingClearDummy = false;
+        pendingFillDummy = true;
+        if (confirmDialogTitle) {
+            confirmDialogTitle.textContent = 'Isi data contoh? Sekitar 40 transaksi acak dalam 2 bulan terakhir akan ditambahkan ke perangkat ini.';
+        }
+        if (btnConfirmDelete) {
+            btnConfirmDelete.textContent = 'Isi Data';
+            btnConfirmDelete.className = 'btn-primary';
+        }
+        if (confirmDialog && typeof confirmDialog.showModal === 'function') {
+            confirmDialog.showModal();
+        }
+    });
+}
+
+if (btnClearDummy) {
+    btnClearDummy.addEventListener('click', async () => {
+        try {
+            const allTx = await getAllTransactions();
+            const dummyCount = allTx.filter(tx => tx.dummy).length;
+            if (dummyCount === 0) {
+                showNotification('Tidak ada data contoh yang tersimpan.', 'info');
+                return;
+            }
+            pendingDeleteId = null;
+            pendingCategoryDelete = null;
+            pendingBudgetDelete = null;
+            pendingWalletDelete = null;
+            pendingLogout = false;
+            pendingFillDummy = false;
+            pendingClearDummy = true;
+            if (confirmDialogTitle) {
+                confirmDialogTitle.textContent = `Hapus semua data contoh (${dummyCount} transaksi)? Data asli Anda tidak akan terpengaruh.`;
+            }
+            if (btnConfirmDelete) {
+                btnConfirmDelete.textContent = 'Hapus';
+                btnConfirmDelete.className = 'btn-danger';
+            }
+            if (confirmDialog && typeof confirmDialog.showModal === 'function') {
+                confirmDialog.showModal();
+            }
+        } catch (err) {
+            console.error('Gagal memeriksa data contoh', err);
+        }
+    });
+}
 
 // Init
 async function init() {
