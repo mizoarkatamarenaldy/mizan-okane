@@ -18,6 +18,8 @@ const txTimeError = document.getElementById('tx-time-error');
 const timeFormatRadios = document.getElementsByName('time-format-setting');
 const themeRadios = document.getElementsByName('theme-setting');
 const txAmountInput = document.getElementById('tx-amount');
+const txAmountLabel = document.getElementById('tx-amount-label');
+const txAmountPrefix = document.getElementById('tx-amount-prefix');
 const txWalletLabel = document.getElementById('tx-wallet-label');
 const txWalletInput = document.getElementById('tx-wallet');
 const formGroupToWallet = document.getElementById('form-group-to-wallet');
@@ -93,9 +95,15 @@ const inputAddExpenseCat = document.getElementById('input-add-expense-cat');
 const formAddIncomeCat = document.getElementById('form-add-income-cat');
 const inputAddIncomeCat = document.getElementById('input-add-income-cat');
 
+const btnStatsCurrencyIdr = document.getElementById('btn-stats-currency-idr');
+const btnStatsCurrencyJpy = document.getElementById('btn-stats-currency-jpy');
+const btnBudgetCurrencyIdr = document.getElementById('btn-budget-currency-idr');
+const btnBudgetCurrencyJpy = document.getElementById('btn-budget-currency-jpy');
+
 const walletSettingsList = document.getElementById('wallet-settings-list');
 const formAddWallet = document.getElementById('form-add-wallet');
 const inputAddWallet = document.getElementById('input-add-wallet');
+const selectAddWalletCurrency = document.getElementById('select-add-wallet-currency');
 
 const budgetSettingsList = document.getElementById('budget-settings-list');
 const formSetBudget = document.getElementById('form-set-budget');
@@ -121,6 +129,8 @@ let currentChartType = 'expense';
 let currentDonutType = 'expense';
 let selectedDonutMonth = '';
 let activeDonutCategory = null;
+let currentStatsCurrency = 'IDR';
+let currentBudgetCurrency = 'IDR';
 
 const THEME_STORAGE_KEY = 'mizan-theme';
 const VALID_THEMES = ['system', 'light', 'dark'];
@@ -400,7 +410,28 @@ function updateTypeUI(type) {
     }
 
     if (isTransfer) {
-        populateWalletOptions(txWalletInput ? txWalletInput.value : null, txToWalletInput ? txToWalletInput.value : null);
+        const fromCurr = getWalletCurrency(txWalletInput ? txWalletInput.value : null);
+        const active = getActiveWallets();
+        const sameCurrWallets = active.filter(w => (w.currency === 'JPY' ? 'JPY' : 'IDR') === fromCurr);
+        if (sameCurrWallets.length < 2) {
+            const idrCount = active.filter(w => (w.currency || 'IDR') === 'IDR').length;
+            const jpyCount = active.filter(w => w.currency === 'JPY').length;
+            if (idrCount < 2 && jpyCount < 2) {
+                showNotification('Transfer butuh minimal 2 dompet dengan mata uang yang sama.', 'warn');
+                txTypeInputs[0].checked = true;
+                updateTypeUI('expense');
+                return;
+            } else {
+                const candidate = active.find(w => (idrCount >= 2 ? (w.currency || 'IDR') === 'IDR' : w.currency === 'JPY'));
+                if (candidate) {
+                    populateWalletOptions(candidate.id);
+                } else {
+                    populateWalletOptions();
+                }
+            }
+        } else {
+            populateWalletOptions(txWalletInput ? txWalletInput.value : null, txToWalletInput ? txToWalletInput.value : null);
+        }
     } else {
         const currentVal = txCategoryInput ? txCategoryInput.value : '';
         const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
@@ -419,6 +450,31 @@ function getWalletName(walletId) {
     if (found && found.name) return found.name;
     if (id === DEFAULT_WALLET_ID) return DEFAULT_WALLET_NAME;
     return DEFAULT_WALLET_NAME;
+}
+
+export function getWalletCurrency(walletId) {
+    const id = walletId || DEFAULT_WALLET_ID;
+    const found = (currentWallets || []).find(w => w.id === id);
+    if (found && found.currency) {
+        return found.currency === 'JPY' ? 'JPY' : 'IDR';
+    }
+    return 'IDR';
+}
+
+export function getTransactionCurrency(tx) {
+    if (!tx) return 'IDR';
+    return getWalletCurrency(tx.walletId || DEFAULT_WALLET_ID);
+}
+
+function updateFormCurrencyUI() {
+    const selectedWalletId = txWalletInput ? txWalletInput.value : DEFAULT_WALLET_ID;
+    const curr = getWalletCurrency(selectedWalletId);
+    if (txAmountPrefix) {
+        txAmountPrefix.textContent = curr === 'JPY' ? '¥' : 'Rp';
+    }
+    if (txAmountLabel) {
+        txAmountLabel.textContent = curr === 'JPY' ? 'Jumlah (¥)' : 'Jumlah (Rp)';
+    }
 }
 
 function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
@@ -442,12 +498,14 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
     // Jika dompet yang dipilih sebelumnya sudah di-soft-delete (misal saat edit transaksi lama)
     if (selectedFromVal && !active.some(w => w.id === selectedFromVal)) {
         const oldWalletName = getWalletName(selectedFromVal);
-        html += `<option value="${escapeHTML(selectedFromVal)}" selected>${escapeHTML(oldWalletName)} (Dihapus)</option>`;
+        const oldCurr = getWalletCurrency(selectedFromVal);
+        html += `<option value="${escapeHTML(selectedFromVal)}" selected>${escapeHTML(oldWalletName)} (${oldCurr}) (Dihapus)</option>`;
     }
 
     for (const w of active) {
         const isSelected = targetId === w.id;
-        html += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)}</option>`;
+        const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
+        html += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)} (${curr})</option>`;
     }
 
     txWalletInput.innerHTML = html;
@@ -456,25 +514,31 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
     }
 
     if (txToWalletInput) {
+        // Transfer hanya antar dompet semata uang!
+        const fromCurr = getWalletCurrency(targetId);
+        const eligibleWallets = active.filter(w => w.id !== targetId && (w.currency === 'JPY' ? 'JPY' : 'IDR') === fromCurr);
+
         let targetToId = selectedToVal;
-        if (!targetToId || !active.some(w => w.id === targetToId) || targetToId === targetId) {
-            const other = active.find(w => w.id !== targetId);
-            if (other) {
-                targetToId = other.id;
-            } else {
-                targetToId = '';
+        if (!targetToId || !eligibleWallets.some(w => w.id === targetToId)) {
+            targetToId = eligibleWallets.length > 0 ? eligibleWallets[0].id : '';
+        }
+
+        let toHtml = '';
+        if (eligibleWallets.length === 0) {
+            toHtml = `<option value="" disabled selected>Tidak ada dompet lain (${fromCurr})</option>`;
+        } else {
+            toHtml = `<option value="" disabled ${!targetToId ? 'selected' : ''}>Pilih dompet tujuan</option>`;
+            if (selectedToVal && !eligibleWallets.some(w => w.id === selectedToVal) && selectedToVal !== targetId) {
+                const oldWalletName = getWalletName(selectedToVal);
+                const oldCurr = getWalletCurrency(selectedToVal);
+                toHtml += `<option value="${escapeHTML(selectedToVal)}" selected>${escapeHTML(oldWalletName)} (${oldCurr}) (Dihapus)</option>`;
             }
-        }
 
-        let toHtml = `<option value="" disabled ${!targetToId ? 'selected' : ''}>Pilih dompet tujuan</option>`;
-        if (selectedToVal && !active.some(w => w.id === selectedToVal)) {
-            const oldWalletName = getWalletName(selectedToVal);
-            toHtml += `<option value="${escapeHTML(selectedToVal)}" selected>${escapeHTML(oldWalletName)} (Dihapus)</option>`;
-        }
-
-        for (const w of active) {
-            const isSelected = targetToId === w.id;
-            toHtml += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)}</option>`;
+            for (const w of eligibleWallets) {
+                const isSelected = targetToId === w.id;
+                const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
+                toHtml += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)} (${curr})</option>`;
+            }
         }
 
         txToWalletInput.innerHTML = toHtml;
@@ -482,6 +546,8 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
             txToWalletInput.value = targetToId;
         }
     }
+
+    updateFormCurrencyUI();
 }
 
 function populateWalletFilterOptions() {
@@ -495,7 +561,8 @@ function populateWalletFilterOptions() {
     for (const w of active) {
         const isSelected = currentVal === w.id;
         if (isSelected) hasCurrent = true;
-        html += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)}</option>`;
+        const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
+        html += `<option value="${escapeHTML(w.id)}" ${isSelected ? 'selected' : ''}>${escapeHTML(w.name)} (${curr})</option>`;
     }
 
     filterWalletSelect.innerHTML = html;
@@ -526,19 +593,22 @@ export function parseAmount(str) {
     return digits ? parseInt(digits, 10) : 0;
 }
 
-export function formatCurrency(val) {
-    if (val === null || val === undefined || val === '') return 'Rp 0';
+export function formatCurrency(val, currency = 'IDR') {
+    const isJpy = currency === 'JPY';
     const num = typeof val === 'number' ? Math.round(val) : parseAmount(val);
-    if (isNaN(num)) return 'Rp 0';
-    if (num < 0) {
-        return `-Rp ${formatNumber(Math.abs(num))}`;
+    if (val === null || val === undefined || val === '' || isNaN(num)) {
+        return isJpy ? '¥ 0' : 'Rp 0';
     }
-    return `Rp ${formatNumber(num)}`;
+    const prefix = isJpy ? '¥ ' : 'Rp ';
+    if (num < 0) {
+        return `-${prefix}${formatNumber(Math.abs(num))}`;
+    }
+    return `${prefix}${formatNumber(num)}`;
 }
 
 export const currencyFormatter = {
-    format(val) {
-        return formatCurrency(val);
+    format(val, currency = 'IDR') {
+        return formatCurrency(val, currency);
     }
 };
 
@@ -1071,6 +1141,26 @@ function getNiceCeiling(maxVal) {
     return niceFraction * factor;
 }
 
+function updateStatsCurrencyUI() {
+    if (btnStatsCurrencyIdr && btnStatsCurrencyJpy) {
+        const isIdr = currentStatsCurrency === 'IDR';
+        btnStatsCurrencyIdr.classList.toggle('is-active', isIdr);
+        btnStatsCurrencyIdr.setAttribute('aria-pressed', String(isIdr));
+        btnStatsCurrencyJpy.classList.toggle('is-active', !isIdr);
+        btnStatsCurrencyJpy.setAttribute('aria-pressed', String(!isIdr));
+    }
+}
+
+function updateBudgetCurrencyUI() {
+    if (btnBudgetCurrencyIdr && btnBudgetCurrencyJpy) {
+        const isIdr = currentBudgetCurrency === 'IDR';
+        btnBudgetCurrencyIdr.classList.toggle('is-active', isIdr);
+        btnBudgetCurrencyIdr.setAttribute('aria-pressed', String(isIdr));
+        btnBudgetCurrencyJpy.classList.toggle('is-active', !isIdr);
+        btnBudgetCurrencyJpy.setAttribute('aria-pressed', String(!isIdr));
+    }
+}
+
 function updateChartTypeUI() {
     const isIncome = currentChartType === 'income';
     if (btnChartExpense) {
@@ -1090,17 +1180,19 @@ function renderMonthlyChart(transactions) {
     if (!chartContainer) return;
 
     updateChartTypeUI();
+    updateStatsCurrencyUI();
 
     const isIncome = currentChartType === 'income';
     const typeLabel = isIncome ? 'pemasukan' : 'pengeluaran';
 
     // Filter transaksi aktif (tidak terhapus) sesuai tipe (pengeluaran atau pemasukan),
-    // transfer antar dompet tidak dihitung, dan jumlah > 0
+    // transfer antar dompet tidak dihitung, jumlah > 0, dan mata uang sesuai pilihan statistik
     const chartTx = (transactions || []).filter(tx => 
         tx.type === currentChartType && 
         tx.type !== 'transfer' && 
         !tx.deleted && 
-        tx.amount > 0
+        tx.amount > 0 &&
+        getTransactionCurrency(tx) === currentStatsCurrency
     );
 
     if (chartTx.length === 0) {
@@ -1208,7 +1300,7 @@ function renderMonthlyChart(transactions) {
 
     const avgAmount = monthsWithAmount > 0 ? Math.round(totalAmountAll / monthsWithAmount) : 0;
     if (chartSummaryText) {
-        chartSummaryText.textContent = `Rata-rata: ${currencyFormatter.format(avgAmount)} / bulan`;
+        chartSummaryText.textContent = `Rata-rata: ${currencyFormatter.format(avgAmount, currentStatsCurrency)} / bulan`;
     }
 
     const ceiling = getNiceCeiling(maxMonthAmount);
@@ -1241,7 +1333,7 @@ function renderMonthlyChart(transactions) {
 
         chartDetail.innerHTML = `
             <span class="chart-detail-month">${fullLabel}:</span>
-            <strong class="${amountClass} tabular-nums">${currencyFormatter.format(total)}</strong>
+            <strong class="${amountClass} tabular-nums">${currencyFormatter.format(total, currentStatsCurrency)}</strong>
             <span class="chart-detail-count">${count > 0 ? `(${count} transaksi)` : emptyLabel}</span>
         `;
     }
@@ -1295,7 +1387,7 @@ function renderMonthlyChart(transactions) {
                data-key="${key}"
                tabindex="0"
                role="button"
-               aria-label="${fullLabel}: ${currencyFormatter.format(amount)}">
+               aria-label="${fullLabel}: ${currencyFormatter.format(amount, currentStatsCurrency)}">
                 <rect class="chart-hit-area" x="${paddingLeft + index * slotWidth}" y="0" width="${slotWidth}" height="${svgHeight}" fill="transparent" />
                 <rect class="chart-bar" x="${barX}" y="${barY}" width="${barWidth}" height="${barHeight}" rx="3" ry="3" />
                 ${topLabel ? `<text class="chart-bar-value" x="${cx}" y="${labelY}" text-anchor="middle">${topLabel}</text>` : ''}
@@ -1398,13 +1490,14 @@ function renderDonutChart(transactions) {
     const typeLabel = isIncome ? 'pemasukan' : 'pengeluaran';
 
     // Filter transaksi untuk bulan yang dipilih sesuai tipe (pengeluaran atau pemasukan),
-    // transfer antar dompet tidak dihitung, tidak terhapus, dan jumlah > 0
+    // transfer antar dompet tidak dihitung, tidak terhapus, jumlah > 0, dan mata uang sesuai pilihan statistik
     const monthTx = (transactions || []).filter(tx => {
         if (tx.type !== currentDonutType) return false;
         if (tx.type === 'transfer') return false;
         if (tx.deleted) return false;
         if (!(tx.amount > 0)) return false;
         if (!tx.date) return false;
+        if (getTransactionCurrency(tx) !== currentStatsCurrency) return false;
         const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
         if (!match) return false;
         const year = match[1];
@@ -1502,13 +1595,13 @@ function renderDonutChart(transactions) {
         if (!catItem) {
             donutDetail.innerHTML = `
                 <span class="chart-detail-month">Total ${typeLabel}:</span>
-                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(totalAmount)}</strong>
+                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(totalAmount, currentStatsCurrency)}</strong>
                 <span class="chart-detail-count">(${sortedCategories.length} kategori, ${monthTx.length} transaksi)</span>
             `;
         } else {
             donutDetail.innerHTML = `
                 <span class="chart-detail-month">${escapeHTML(catItem.category)}:</span>
-                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(catItem.amount)}</strong>
+                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(catItem.amount, currentStatsCurrency)}</strong>
                 <span class="chart-detail-count">(${formatPercent(catItem.percentage)} - ${catItem.count} transaksi)</span>
             `;
         }
@@ -1546,7 +1639,7 @@ function renderDonutChart(transactions) {
                 data-category="${escapeHTML(cat.category)}"
                 tabindex="0"
                 role="button"
-                aria-label="${escapeHTML(cat.category)}: ${currencyFormatter.format(cat.amount)} (${percentStr})">
+                aria-label="${escapeHTML(cat.category)}: ${currencyFormatter.format(cat.amount, currentStatsCurrency)} (${percentStr})">
             </circle>
         `;
     }
@@ -1574,14 +1667,14 @@ function renderDonutChart(transactions) {
                 data-category="${escapeHTML(cat.category)}"
                 tabindex="0"
                 role="button"
-                aria-label="${escapeHTML(cat.category)}: ${currencyFormatter.format(cat.amount)} (${percentStr})">
+                aria-label="${escapeHTML(cat.category)}: ${currencyFormatter.format(cat.amount, currentStatsCurrency)} (${percentStr})">
                 <div class="donut-legend-main">
                     <span class="donut-legend-color" style="background-color: ${cat.color}"></span>
                     <span class="donut-legend-name" title="${escapeHTML(cat.category)}">${escapeHTML(cat.category)}</span>
                 </div>
                 <div class="donut-legend-side">
                     <span class="donut-legend-percent tabular-nums">${percentStr}</span>
-                    <strong class="donut-legend-amount tabular-nums">${currencyFormatter.format(cat.amount)}</strong>
+                    <strong class="donut-legend-amount tabular-nums">${currencyFormatter.format(cat.amount, currentStatsCurrency)}</strong>
                 </div>
             </li>
         `;
@@ -1764,7 +1857,7 @@ function createTxItemElement(tx, filterWallet) {
             </div>
         </div>
         <div class="tx-item-amount-col">
-            <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(tx.amount)}</span>
+            <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(tx.amount, getTransactionCurrency(tx))}</span>
         </div>
         <div class="tx-actions">
             <button type="button" class="btn-icon btn-edit" data-id="${tx.id}" aria-label="Ubah transaksi" title="Ubah">
@@ -1796,22 +1889,32 @@ function createTxItemElement(tx, filterWallet) {
 }
 
 function render() {
-    let totalIncome = 0;
-    let totalExpense = 0;
+    const activeWallets = getActiveWallets();
+    const activeCurrencies = [];
+    if (activeWallets.some(w => (w.currency || 'IDR') === 'IDR')) activeCurrencies.push('IDR');
+    if (activeWallets.some(w => w.currency === 'JPY')) activeCurrencies.push('JPY');
+    if (activeCurrencies.length === 0) activeCurrencies.push('IDR');
 
     const walletBalances = new Map();
-    const activeWallets = getActiveWallets();
     for (const w of activeWallets) {
         walletBalances.set(w.id, 0);
     }
 
+    const incomeByCurrency = new Map();
+    const expenseByCurrency = new Map();
+    for (const c of activeCurrencies) {
+        incomeByCurrency.set(c, 0);
+        expenseByCurrency.set(c, 0);
+    }
+
     currentTransactions.forEach(tx => {
+        const curr = getTransactionCurrency(tx);
         const wId = tx.walletId || DEFAULT_WALLET_ID;
         if (tx.type === 'income') {
-            totalIncome += tx.amount;
+            incomeByCurrency.set(curr, (incomeByCurrency.get(curr) || 0) + tx.amount);
             walletBalances.set(wId, (walletBalances.get(wId) || 0) + tx.amount);
         } else if (tx.type === 'expense') {
-            totalExpense += tx.amount;
+            expenseByCurrency.set(curr, (expenseByCurrency.get(curr) || 0) + tx.amount);
             walletBalances.set(wId, (walletBalances.get(wId) || 0) - tx.amount);
         } else if (tx.type === 'transfer') {
             const fromId = tx.walletId || DEFAULT_WALLET_ID;
@@ -1823,10 +1926,32 @@ function render() {
         }
     });
 
-    const totalBalance = totalIncome - totalExpense;
-    totalBalanceEl.textContent = currencyFormatter.format(totalBalance);
-    totalIncomeEl.textContent = '+' + currencyFormatter.format(totalIncome);
-    totalExpenseEl.textContent = '−' + currencyFormatter.format(totalExpense);
+    if (activeCurrencies.length === 1) {
+        const c = activeCurrencies[0];
+        const inc = incomeByCurrency.get(c) || 0;
+        const exp = expenseByCurrency.get(c) || 0;
+        const bal = inc - exp;
+        totalBalanceEl.textContent = currencyFormatter.format(bal, c);
+        totalIncomeEl.textContent = '+' + currencyFormatter.format(inc, c);
+        totalExpenseEl.textContent = '−' + currencyFormatter.format(exp, c);
+    } else {
+        totalBalanceEl.innerHTML = activeCurrencies.map(c => {
+            const inc = incomeByCurrency.get(c) || 0;
+            const exp = expenseByCurrency.get(c) || 0;
+            const bal = inc - exp;
+            return `<span class="summary-balance-line">${escapeHTML(currencyFormatter.format(bal, c))}</span>`;
+        }).join('');
+
+        totalIncomeEl.innerHTML = activeCurrencies.map(c => {
+            const inc = incomeByCurrency.get(c) || 0;
+            return `<span class="summary-item-line">+${escapeHTML(currencyFormatter.format(inc, c))}</span>`;
+        }).join('');
+
+        totalExpenseEl.innerHTML = activeCurrencies.map(c => {
+            const exp = expenseByCurrency.get(c) || 0;
+            return `<span class="summary-item-line">−${escapeHTML(currencyFormatter.format(exp, c))}</span>`;
+        }).join('');
+    }
 
     if (walletBalancesContainer) {
         if (activeWallets.length === 0) {
@@ -1845,10 +1970,11 @@ function render() {
             for (const w of activeWallets) {
                 const bal = walletBalances.get(w.id) || 0;
                 const isZero = bal === 0;
+                const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
                 balancesHtml += `
                     <div class="wallet-balance-item${isZero ? ' is-zero' : ''}">
                         <span class="wallet-balance-name">${escapeHTML(w.name)}</span>
-                        <strong class="wallet-balance-amount tabular-nums">${currencyFormatter.format(bal)}</strong>
+                        <strong class="wallet-balance-amount tabular-nums">${currencyFormatter.format(bal, curr)}</strong>
                     </div>
                 `;
             }
@@ -1895,34 +2021,49 @@ function render() {
                 const groupEl = document.createElement('div');
                 groupEl.className = 'tx-date-group';
 
-                let dailyNet = 0;
+                const netByCurrency = new Map();
                 for (const tx of groupTxList) {
+                    const c = getTransactionCurrency(tx);
+                    const net = netByCurrency.get(c) || 0;
                     if (tx.type === 'income') {
-                        dailyNet += tx.amount;
+                        netByCurrency.set(c, net + tx.amount);
                     } else if (tx.type === 'expense') {
-                        dailyNet -= tx.amount;
+                        netByCurrency.set(c, net - tx.amount);
                     } else if (tx.type === 'transfer') {
                         if (currentWalletFilter === 'all') {
-                            // Transfer antar dompet tidak mempengaruhi total netto keseluruhan
+                            // Transfer antar dompet semata uang tidak mempengaruhi total netto keseluruhan
                         } else if (currentWalletFilter === (tx.walletId || DEFAULT_WALLET_ID)) {
-                            dailyNet -= tx.amount;
+                            netByCurrency.set(c, net - tx.amount);
                         } else if (currentWalletFilter === tx.toWalletId) {
-                            dailyNet += tx.amount;
+                            netByCurrency.set(c, net + tx.amount);
                         }
                     }
                 }
 
+                const netEntries = Array.from(netByCurrency.entries());
                 let totalClass = 'neutral';
                 let totalText = '';
-                if (dailyNet > 0) {
-                    totalClass = 'income';
-                    totalText = '+' + currencyFormatter.format(dailyNet);
-                } else if (dailyNet < 0) {
-                    totalClass = 'expense';
-                    totalText = '−' + currencyFormatter.format(Math.abs(dailyNet));
+                if (netEntries.length === 0) {
+                    totalText = currencyFormatter.format(0, 'IDR');
+                } else if (netEntries.length === 1) {
+                    const [c, val] = netEntries[0];
+                    if (val > 0) {
+                        totalClass = 'income';
+                        totalText = '+' + currencyFormatter.format(val, c);
+                    } else if (val < 0) {
+                        totalClass = 'expense';
+                        totalText = '−' + currencyFormatter.format(Math.abs(val), c);
+                    } else {
+                        totalClass = 'neutral';
+                        totalText = currencyFormatter.format(0, c);
+                    }
                 } else {
+                    totalText = netEntries.map(([c, val]) => {
+                        if (val > 0) return `+${currencyFormatter.format(val, c)}`;
+                        if (val < 0) return `−${currencyFormatter.format(Math.abs(val), c)}`;
+                        return currencyFormatter.format(0, c);
+                    }).join(' &bull; ');
                     totalClass = 'neutral';
-                    totalText = currencyFormatter.format(0);
                 }
 
                 const groupTitle = formatGroupDate(dateKey);
@@ -2250,8 +2391,12 @@ function renderWalletSettings() {
                 editInput.select();
             });
         } else {
+            const curr = w.currency === 'JPY' ? 'JPY' : 'IDR';
             li.innerHTML = `
-                <span class="category-name">${escapeHTML(w.name)}</span>
+                <div class="category-name-group">
+                    <span class="category-name">${escapeHTML(w.name)}</span>
+                    <span class="wallet-currency-badge">${curr}</span>
+                </div>
                 <div class="category-item-actions">
                     <button type="button" class="btn-icon btn-edit-wallet" data-id="${escapeHTML(w.id)}" aria-label="Ubah nama dompet ${escapeHTML(w.name)}">Ubah</button>
                     <button type="button" class="btn-icon btn-delete-wallet" data-id="${escapeHTML(w.id)}" aria-label="Hapus dompet ${escapeHTML(w.name)}">Hapus</button>
@@ -2326,10 +2471,12 @@ async function handleAddWallet(inputEl) {
 
     ensureToken();
 
+    const selectedCurrency = selectAddWalletCurrency && selectAddWalletCurrency.value === 'JPY' ? 'JPY' : 'IDR';
     const now = Date.now();
     const newWallet = {
         id: crypto.randomUUID(),
         name,
+        currency: selectedCurrency,
         createdAt: now,
         updatedAt: now,
         deleted: false
@@ -2340,6 +2487,9 @@ async function handleAddWallet(inputEl) {
     try {
         await saveWallets(currentWallets);
         inputEl.value = '';
+        if (selectAddWalletCurrency) {
+            selectAddWalletCurrency.value = 'IDR';
+        }
         render();
         renderWalletSettings();
         populateWalletOptions(txWalletInput.value);
@@ -2427,11 +2577,12 @@ function getLocalYearMonthString(d = new Date()) {
     return `${y}-${m}`;
 }
 
-function getActiveMonthlyExpenses(transactions, targetMonthKey) {
+export function getActiveMonthlyExpenses(transactions, targetMonthKey, currency = 'IDR') {
     const categoryTotals = new Map();
     let totalExpense = 0;
     for (const tx of transactions || []) {
         if (tx.type !== 'expense' || tx.deleted || !(tx.amount > 0) || !tx.date) continue;
+        if (getTransactionCurrency(tx) !== currency) continue;
         const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
         if (!match) continue;
         const year = match[1];
@@ -2449,6 +2600,8 @@ function getActiveMonthlyExpenses(transactions, targetMonthKey) {
 function renderBudgetSection() {
     if (!budgetListContainer) return;
 
+    updateBudgetCurrencyUI();
+
     if (!selectedBudgetMonth) {
         selectedBudgetMonth = getLocalYearMonthString();
     }
@@ -2460,6 +2613,19 @@ function renderBudgetSection() {
         const mNum = parseInt(mStr, 10);
         const monthName = INDO_MONTHS_SHORT[mNum - 1] || '';
         budgetMonthLabel.textContent = `${monthName} ${yStr}`;
+    }
+
+    if (currentBudgetCurrency === 'JPY') {
+        budgetListContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Budget hanya tersedia untuk mata uang Rupiah.</p>
+            </div>
+        `;
+        if (budgetSummaryBanner) {
+            budgetSummaryBanner.innerHTML = '';
+            budgetSummaryBanner.classList.add('hidden');
+        }
+        return;
     }
 
     const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
@@ -2493,7 +2659,7 @@ function renderBudgetSection() {
     const orphanCats = budgetedCats.filter(cat => !activeExpenseList.includes(cat)).sort();
     orderedCats.push(...orphanCats);
 
-    const { categoryTotals } = getActiveMonthlyExpenses(currentTransactions, selectedBudgetMonth);
+    const { categoryTotals } = getActiveMonthlyExpenses(currentTransactions, selectedBudgetMonth, 'IDR');
 
     let totalBudget = 0;
     let totalTerpakai = 0;
@@ -2870,6 +3036,12 @@ async function handleSubmit(e) {
         }
         if (selectedWalletId === selectedToWalletId) {
             showNotification('Dompet tujuan harus berbeda dari dompet asal.', 'warn');
+            return;
+        }
+        const fromCurr = getWalletCurrency(selectedWalletId);
+        const toCurr = getWalletCurrency(selectedToWalletId);
+        if (fromCurr !== toCurr) {
+            showNotification('Transfer hanya bisa dilakukan antar dompet dengan mata uang yang sama.', 'warn');
             return;
         }
         selectedCategory = 'Transfer';
@@ -3442,6 +3614,7 @@ function mergeWalletsList(localWallets, importedWallets) {
                 map.set(w.id, {
                     id: String(w.id),
                     name: String(w.name || '').trim(),
+                    currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
                     createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                     updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
                     deleted: !!w.deleted
@@ -3457,6 +3630,7 @@ function mergeWalletsList(localWallets, importedWallets) {
                     map.set(w.id, {
                         id: String(w.id),
                         name: String(w.name || '').trim(),
+                        currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
                         createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                         updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
                         deleted: !!w.deleted
@@ -3469,6 +3643,7 @@ function mergeWalletsList(localWallets, importedWallets) {
         map.set(DEFAULT_WALLET_ID, {
             id: DEFAULT_WALLET_ID,
             name: DEFAULT_WALLET_NAME,
+            currency: 'IDR',
             createdAt: 0,
             updatedAt: 0,
             deleted: false
@@ -3483,7 +3658,7 @@ function walletsDiffer(w1, w2) {
     for (const item of w2) {
         const exist = m1.get(item.id);
         if (!exist) return true;
-        if (exist.name !== item.name || exist.deleted !== item.deleted || exist.updatedAt !== item.updatedAt) {
+        if (exist.name !== item.name || exist.currency !== item.currency || exist.deleted !== item.deleted || exist.updatedAt !== item.updatedAt) {
             return true;
         }
     }
@@ -3816,42 +3991,53 @@ export function generateDummyTransactions(categories, wallets) {
         // Dompet asal
         const wallet = activeWallets[Math.floor(Math.random() * activeWallets.length)];
         const walletId = wallet.id;
+        const walletCurr = (wallet.currency === 'JPY' ? 'JPY' : 'IDR');
 
         let category = '';
         let note = '';
         let amount = 0;
         let toWalletId = undefined;
+        let actualType = type;
 
-        if (type === 'expense') {
+        if (actualType === 'expense') {
             category = expenseCats[Math.floor(Math.random() * expenseCats.length)];
             const pool = expenseNotes[category] || expenseNotes['Lainnya'];
             note = pool[Math.floor(Math.random() * pool.length)];
-            const steps = [15000, 20000, 25000, 35000, 45000, 50000, 75000, 90000, 120000, 150000, 200000, 250000, 350000];
+            const steps = walletCurr === 'JPY'
+                ? [300, 500, 800, 1200, 1800, 2500, 3000, 4500, 6000, 8000]
+                : [15000, 20000, 25000, 35000, 45000, 50000, 75000, 90000, 120000, 150000, 200000, 250000, 350000];
             amount = steps[Math.floor(Math.random() * steps.length)];
-        } else if (type === 'income') {
+        } else if (actualType === 'income') {
             category = incomeCats[Math.floor(Math.random() * incomeCats.length)];
             const pool = incomeNotes[category] || incomeNotes['Lainnya'];
             note = pool[Math.floor(Math.random() * pool.length)];
-            const steps = [300000, 500000, 750000, 1200000, 2000000, 3500000, 4500000, 5500000];
+            const steps = walletCurr === 'JPY'
+                ? [25000, 50000, 80000, 120000, 200000, 300000, 400000]
+                : [300000, 500000, 750000, 1200000, 2000000, 3500000, 4500000, 5500000];
             amount = steps[Math.floor(Math.random() * steps.length)];
-        } else if (type === 'transfer') {
+        } else if (actualType === 'transfer') {
             category = 'Transfer';
             note = transferNotes[Math.floor(Math.random() * transferNotes.length)];
-            const steps = [50000, 100000, 200000, 250000, 500000, 750000, 1000000];
+            const steps = walletCurr === 'JPY'
+                ? [1000, 2000, 5000, 10000, 20000, 30000]
+                : [50000, 100000, 200000, 250000, 500000, 750000, 1000000];
             amount = steps[Math.floor(Math.random() * steps.length)];
-            if (activeWallets.length > 1) {
-                const otherWallets = activeWallets.filter(w => w.id !== walletId);
-                const toWallet = otherWallets[Math.floor(Math.random() * otherWallets.length)];
+            const sameCurrWallets = activeWallets.filter(w => (w.currency === 'JPY' ? 'JPY' : 'IDR') === walletCurr && w.id !== walletId);
+            if (sameCurrWallets.length > 0) {
+                const toWallet = sameCurrWallets[Math.floor(Math.random() * sameCurrWallets.length)];
                 toWalletId = toWallet.id;
             } else {
-                toWalletId = walletId;
+                actualType = 'expense';
+                category = expenseCats[Math.floor(Math.random() * expenseCats.length)];
+                const pool = expenseNotes[category] || expenseNotes['Lainnya'];
+                note = pool[Math.floor(Math.random() * pool.length)];
             }
         }
 
         const createdAt = txDateObj.getTime() + (hour * 3600 + minute * 60) * 1000;
         const tx = {
             id: `dummy_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}`,
-            type,
+            type: actualType,
             amount,
             date: dateStr,
             time: timeStr,
@@ -4233,14 +4419,9 @@ async function init() {
 
     if (txWalletInput) {
         txWalletInput.addEventListener('change', () => {
+            updateFormCurrencyUI();
             if (getSelectedType() === 'transfer' && txToWalletInput) {
-                if (txToWalletInput.value === txWalletInput.value) {
-                    const active = getActiveWallets();
-                    const other = active.find(w => w.id !== txWalletInput.value);
-                    if (other) {
-                        txToWalletInput.value = other.id;
-                    }
-                }
+                populateWalletOptions(txWalletInput.value, txToWalletInput.value);
             }
         });
     }
@@ -4250,11 +4431,53 @@ async function init() {
             if (getSelectedType() === 'transfer' && txWalletInput) {
                 if (txWalletInput.value === txToWalletInput.value) {
                     const active = getActiveWallets();
-                    const other = active.find(w => w.id !== txToWalletInput.value);
+                    const fromCurr = getWalletCurrency(txToWalletInput.value);
+                    const other = active.find(w => w.id !== txToWalletInput.value && (w.currency === 'JPY' ? 'JPY' : 'IDR') === fromCurr);
                     if (other) {
                         txWalletInput.value = other.id;
+                        updateFormCurrencyUI();
                     }
                 }
+            }
+        });
+    }
+
+    if (btnBudgetCurrencyIdr) {
+        btnBudgetCurrencyIdr.addEventListener('click', () => {
+            if (currentBudgetCurrency !== 'IDR') {
+                currentBudgetCurrency = 'IDR';
+                renderBudgetSection();
+            }
+        });
+    }
+
+    if (btnBudgetCurrencyJpy) {
+        btnBudgetCurrencyJpy.addEventListener('click', () => {
+            if (currentBudgetCurrency !== 'JPY') {
+                currentBudgetCurrency = 'JPY';
+                renderBudgetSection();
+            }
+        });
+    }
+
+    if (btnStatsCurrencyIdr) {
+        btnStatsCurrencyIdr.addEventListener('click', () => {
+            if (currentStatsCurrency !== 'IDR') {
+                currentStatsCurrency = 'IDR';
+                updateStatsCurrencyUI();
+                renderMonthlyChart(currentTransactions);
+                renderDonutChart(currentTransactions);
+            }
+        });
+    }
+
+    if (btnStatsCurrencyJpy) {
+        btnStatsCurrencyJpy.addEventListener('click', () => {
+            if (currentStatsCurrency !== 'JPY') {
+                currentStatsCurrency = 'JPY';
+                updateStatsCurrencyUI();
+                renderMonthlyChart(currentTransactions);
+                renderDonutChart(currentTransactions);
             }
         });
     }

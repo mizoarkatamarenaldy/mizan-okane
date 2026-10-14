@@ -749,6 +749,16 @@ p {
     }
 }
 
+.summary-balance-line {
+    display: block;
+    line-height: 1.2;
+}
+
+.summary-item-line {
+    display: block;
+    line-height: 1.25;
+}
+
 .summary-row {
     display: grid;
     grid-template-columns: 1fr 1px 1fr;
@@ -891,6 +901,29 @@ p {
     font-size: var(--font-size-card-title, 16px);
     font-weight: var(--font-weight-card-title, 600);
     color: var(--text);
+}
+
+.budget-controls-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.budget-currency-control {
+    display: inline-flex;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    padding: 3px;
+    gap: 3px;
+}
+
+.budget-currency-control .chart-toggle-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    min-height: 38px;
 }
 
 .budget-month-controls {
@@ -1513,6 +1546,33 @@ p {
    Grafik Bulanan & Diagram Donut (Statistik)
    ========================================================================== */
 
+.stats-currency-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card, 8px);
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.stats-currency-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.stats-currency-control {
+    display: inline-flex;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    padding: 3px;
+    gap: 3px;
+}
+
 .chart-section,
 .donut-section {
     background: var(--card-bg);
@@ -2107,6 +2167,40 @@ p {
     min-width: 0;
     padding: 8px 12px;
     font-size: 14px;
+}
+
+.wallet-add-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.wallet-add-form input {
+    flex: 1 1 180px;
+}
+
+.wallet-currency-select {
+    padding: 8px 12px;
+    border-radius: var(--radius-input, 6px);
+    border: 1px solid var(--border);
+    background-color: var(--surface-raised);
+    color: var(--text);
+    font-size: 13.5px;
+    font-family: inherit;
+    min-height: 44px;
+}
+
+.wallet-currency-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--surface-raised);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    margin-left: 6px;
+    vertical-align: middle;
 }
 
 .category-inline-edit-form {

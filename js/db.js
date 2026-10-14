@@ -198,6 +198,7 @@ export const DEFAULT_WALLETS = [
   {
     id: DEFAULT_WALLET_ID,
     name: DEFAULT_WALLET_NAME,
+    currency: 'IDR',
     createdAt: 0,
     updatedAt: 0,
     deleted: false
@@ -211,7 +212,16 @@ export function getWallets() {
     request.onsuccess = (event) => {
       const stored = event.target.result;
       if (Array.isArray(stored) && stored.length > 0) {
-        const clean = stored.filter(w => w && typeof w.id === 'string' && typeof w.name === 'string');
+        const clean = stored
+          .filter(w => w && typeof w.id === 'string' && typeof w.name === 'string')
+          .map(w => ({
+            id: String(w.id),
+            name: String(w.name).trim(),
+            currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
+            createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
+            updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
+            deleted: !!w.deleted
+          }));
         if (clean.length > 0) {
           resolve(clean);
           return;
@@ -221,6 +231,7 @@ export function getWallets() {
         {
           id: DEFAULT_WALLET_ID,
           name: DEFAULT_WALLET_NAME,
+          currency: 'IDR',
           createdAt: Date.now(),
           updatedAt: 0,
           deleted: false
@@ -241,6 +252,7 @@ export function saveWallets(wallets) {
     const clean = list.map(w => ({
       id: String(w.id),
       name: String(w.name).trim(),
+      currency: w.currency === 'JPY' ? 'JPY' : 'IDR',
       createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
       updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : Date.now(),
       deleted: !!w.deleted

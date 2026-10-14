@@ -10,6 +10,18 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-14: Tahap 5: Mata uang per dompet, tahap 1: Rupiah dan Yen
+- Ditambah: Field `currency` pada setiap dompet dengan pilihan "IDR" (Rupiah) atau "JPY" (Yen), dengan nilai bawaan dompet lama otomatis IDR (`js/db.js`, `js/sync.js`, `js/app.js`).
+- Ditambah: Pilihan mata uang saat menambah dompet baru di Pengaturan serta badge mata uang (IDR / JPY) pada daftar dompet (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Prefix mata uang dinamis pada formulir transaksi (Rp atau ¥) yang menyesuaikan secara otomatis dengan mata uang dompet yang dipilih (`index.html`, `js/app.js`).
+- Ditambah: Format angka khusus mata uang Yen (`¥ `) tanpa desimal berdampingan dengan Rupiah (`Rp `) (`js/app.js`).
+- Ditambah: Tampilan Total Saldo dan ringkasan bulan (pemasukan/pengeluaran) menampilkan satu angka per mata uang saat terdapat beberapa mata uang aktif (`css/style.css`, `js/app.js`).
+- Ditambah: Pilihan mata uang (IDR / JPY) pada halaman Statistik dan Budget dengan nilai bawaan Rupiah; budget pengeluaran dibatasi hanya untuk mata uang Rupiah dan menampilkan pesan informatif saat beralih ke Yen (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Pembatasan ketat transfer hanya antar dompet dengan mata uang yang sama, baik pada dropdown pemilihan dompet tujuan maupun pada validasi simpan transaksi (`js/app.js`).
+- Diubah: Generator data contoh (dummy) menyesuaikan besaran nominal dan membatasi transfer antar dompet semata uang (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v36` (`sw.js`).
+- Diubah: `PLAN.md` menambahkan item tahap 1 dan 2, lalu mencentang item tahap 1 ("Mata uang per dompet, tahap 1: Rupiah dan Yen") (`PLAN.md`).
+
 ## 2026-10-14: Tahap 5: Hapus semua data
 - Ditambah: Bagian "Zona Bahaya" di halaman Pengaturan dengan tombol "Hapus Semua Data" yang menggunakan warna merah (#FF453A) dari tabel Warna makna (`index.html`, `css/style.css`).
 - Ditambah: Dialog konfirmasi dua langkah (`delete-all-dialog`) berbahasa Indonesia yang memuat peringatan detail, penawaran tombol "Ekspor JSON (Cadangan)", input ketik "HAPUS", dan tombol konfirmasi yang baru aktif setelah pengguna mengetik "HAPUS" (`index.html`, `css/style.css`, `js/app.js`).
