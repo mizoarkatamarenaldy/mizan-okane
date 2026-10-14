@@ -315,6 +315,17 @@
                     </div>
                 </div>
             </section>
+
+            <!-- 7. Zona Bahaya -->
+            <section id="danger-zone" class="settings-card" aria-labelledby="danger-zone-title">
+                <div class="settings-card-header">
+                    <h2 id="danger-zone-title" class="card-title">Zona Bahaya</h2>
+                    <p class="settings-card-desc">Hapus seluruh data transaksi dari perangkat ini dan sinkronisasi.</p>
+                </div>
+                <div class="danger-zone-actions">
+                    <button type="button" id="btn-delete-all-data" class="btn-danger btn-small">Hapus Semua Data</button>
+                </div>
+            </section>
         </main>
 
         <!-- 5. Tombol Melayang Tambah Transaksi -->
@@ -534,6 +545,28 @@
                 <div class="confirm-dialog-actions">
                     <button type="button" id="btn-confirm-cancel" class="btn-secondary" autofocus>Batal</button>
                     <button type="button" id="btn-confirm-delete" class="btn-danger">Hapus</button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Dialog Konfirmasi Hapus Semua Data (Dua Langkah) -->
+        <dialog id="delete-all-dialog" class="confirm-dialog delete-all-dialog" closedby="any" aria-labelledby="delete-all-dialog-title" aria-describedby="delete-all-dialog-desc">
+            <div class="confirm-dialog-content">
+                <h3 id="delete-all-dialog-title" class="confirm-dialog-title">Hapus Semua Data?</h3>
+                <p id="delete-all-dialog-desc" class="delete-all-dialog-desc">
+                    Semua transaksi asli akan ditandai terhapus dan ikut terhapus di Google Drive serta perangkat lain saat sinkron. Transaksi contoh akan dibuang langsung. Kategori, dompet, budget, dan pengaturan tema tidak akan berubah.
+                </p>
+                <div class="delete-all-backup-box">
+                    <p class="delete-all-backup-text">Cadangkan data Anda terlebih dahulu:</p>
+                    <button type="button" id="btn-dialog-export-json" class="btn-secondary btn-small">Ekspor JSON (Cadangan)</button>
+                </div>
+                <div class="delete-all-confirm-step">
+                    <label for="input-confirm-delete-all" class="delete-all-input-label">Ketik <strong>HAPUS</strong> untuk mengonfirmasi:</label>
+                    <input type="text" id="input-confirm-delete-all" class="delete-all-input" placeholder="HAPUS" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="confirm-dialog-actions">
+                    <button type="button" id="btn-delete-all-cancel" class="btn-secondary">Batal</button>
+                    <button type="button" id="btn-delete-all-confirm" class="btn-danger" disabled>Hapus Semua Data</button>
                 </div>
             </div>
         </dialog>

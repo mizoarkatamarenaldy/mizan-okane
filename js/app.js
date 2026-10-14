@@ -55,6 +55,13 @@ const confirmDialogTitle = document.getElementById('confirm-dialog-title');
 const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
 const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
+const btnDeleteAllData = document.getElementById('btn-delete-all-data');
+const deleteAllDialog = document.getElementById('delete-all-dialog');
+const btnDialogExportJson = document.getElementById('btn-dialog-export-json');
+const inputConfirmDeleteAll = document.getElementById('input-confirm-delete-all');
+const btnDeleteAllCancel = document.getElementById('btn-delete-all-cancel');
+const btnDeleteAllConfirm = document.getElementById('btn-delete-all-confirm');
+
 const chartSectionTitle = document.getElementById('chart-section-title');
 const btnChartExpense = document.getElementById('btn-chart-expense');
 const btnChartIncome = document.getElementById('btn-chart-income');
@@ -242,6 +249,11 @@ window.handleAndroidBack = function() {
         if (confirmDialogTitle) {
             confirmDialogTitle.textContent = 'Hapus transaksi ini?';
         }
+        return true;
+    }
+
+    if (deleteAllDialog && deleteAllDialog.open) {
+        deleteAllDialog.close();
         return true;
     }
 
@@ -3335,7 +3347,7 @@ export async function exportViaCapacitor(fileName, dataContent, dialogTitle) {
     }
 }
 
-btnExport.addEventListener('click', async () => {
+export async function exportBackupJson() {
     try {
         const allTx = await getAllTransactions();
         const realTx = allTx.filter(tx => !tx.dummy);
@@ -3368,11 +3380,17 @@ btnExport.addEventListener('click', async () => {
             URL.revokeObjectURL(url);
             showNotification(`Ekspor cadangan JSON berhasil diunduh.`, 'success');
         }
+        return true;
     } catch (error) {
         console.error("Gagal mengekspor data", error);
         showNotification("Terjadi kesalahan saat mengekspor data.", "error");
+        return false;
     }
-});
+}
+
+if (btnExport) {
+    btnExport.addEventListener('click', exportBackupJson);
+}
 
 function isValidTransaction(item) {
     if (!item || typeof item !== 'object') return false;
@@ -3945,6 +3963,142 @@ if (btnClearDummy) {
     });
 }
 
+// --- Hapus Semua Data (Zona Bahaya) ---
+
+export async function performDeleteAllData() {
+    try {
+        const allTx = await getAllTransactions();
+        const now = Date.now();
+        const updatedRealTx = [];
+        let hasChanges = false;
+
+        for (const tx of allTx) {
+            if (tx.dummy) {
+                // Transaksi contoh (dummy) dibuang langsung dari IndexedDB
+                hasChanges = true;
+            } else {
+                if (!tx.deleted) {
+                    tx.deleted = true;
+                    tx.updatedAt = now;
+                    hasChanges = true;
+                }
+                updatedRealTx.push(tx);
+            }
+        }
+
+        if (hasChanges) {
+            await replaceAllTransactions(updatedRealTx);
+            resetForm();
+            await loadData();
+            ensureToken();
+            markDirty().catch(err => console.error("Gagal menandai penghapusan semua data untuk sinkron", err));
+        }
+
+        showNotification('Semua data transaksi berhasil dihapus.', 'success');
+    } catch (error) {
+        console.error('Gagal menghapus semua data transaksi', error);
+        showNotification('Terjadi kesalahan saat menghapus data.', 'error');
+    }
+}
+
+if (btnDeleteAllData) {
+    btnDeleteAllData.addEventListener('click', async () => {
+        try {
+            const allTx = await getAllTransactions();
+            const hasDeletableTx = allTx.some(tx => !tx.deleted || tx.dummy);
+            if (!hasDeletableTx) {
+                showNotification('Tidak ada data transaksi untuk dihapus.', 'info');
+                return;
+            }
+            if (inputConfirmDeleteAll) {
+                inputConfirmDeleteAll.value = '';
+            }
+            if (btnDeleteAllConfirm) {
+                btnDeleteAllConfirm.disabled = true;
+            }
+            if (deleteAllDialog && typeof deleteAllDialog.showModal === 'function') {
+                deleteAllDialog.showModal();
+            }
+        } catch (err) {
+            console.error('Gagal memeriksa data transaksi', err);
+            showNotification('Terjadi kesalahan saat memeriksa data.', 'error');
+        }
+    });
+}
+
+if (btnDialogExportJson) {
+    btnDialogExportJson.addEventListener('click', async () => {
+        await exportBackupJson();
+    });
+}
+
+if (inputConfirmDeleteAll) {
+    inputConfirmDeleteAll.addEventListener('input', () => {
+        const isMatch = inputConfirmDeleteAll.value.trim() === 'HAPUS';
+        if (btnDeleteAllConfirm) {
+            btnDeleteAllConfirm.disabled = !isMatch;
+        }
+    });
+
+    inputConfirmDeleteAll.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (inputConfirmDeleteAll.value.trim() === 'HAPUS' && btnDeleteAllConfirm && !btnDeleteAllConfirm.disabled) {
+                btnDeleteAllConfirm.click();
+            }
+        }
+    });
+}
+
+if (btnDeleteAllCancel && deleteAllDialog) {
+    btnDeleteAllCancel.addEventListener('click', () => {
+        deleteAllDialog.close();
+    });
+}
+
+if (btnDeleteAllConfirm) {
+    btnDeleteAllConfirm.addEventListener('click', async () => {
+        if (inputConfirmDeleteAll && inputConfirmDeleteAll.value.trim() !== 'HAPUS') {
+            return;
+        }
+        btnDeleteAllConfirm.disabled = true;
+        try {
+            await performDeleteAllData();
+        } finally {
+            if (deleteAllDialog && deleteAllDialog.open) {
+                deleteAllDialog.close();
+            }
+        }
+    });
+}
+
+if (deleteAllDialog) {
+    deleteAllDialog.addEventListener('close', () => {
+        if (inputConfirmDeleteAll) {
+            inputConfirmDeleteAll.value = '';
+        }
+        if (btnDeleteAllConfirm) {
+            btnDeleteAllConfirm.disabled = true;
+        }
+    });
+
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+        deleteAllDialog.addEventListener('click', (event) => {
+            if (event.target !== deleteAllDialog) return;
+            const rect = deleteAllDialog.getBoundingClientRect();
+            const isInside = (
+                rect.top <= event.clientY &&
+                event.clientY <= rect.top + rect.height &&
+                rect.left <= event.clientX &&
+                event.clientX <= rect.left + rect.width
+            );
+            if (!isInside) {
+                deleteAllDialog.close();
+            }
+        });
+    }
+}
+
 // Init
 async function init() {
     try {
@@ -4028,7 +4182,7 @@ async function init() {
 
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && formScreen && !formScreen.classList.contains('hidden')) {
-            if (!confirmDialog || !confirmDialog.open) {
+            if ((!confirmDialog || !confirmDialog.open) && (!deleteAllDialog || !deleteAllDialog.open)) {
                 resetForm();
                 closeFormScreen();
             }

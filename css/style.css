@@ -2227,7 +2227,8 @@ p {
     color: var(--text);
 }
 
-.data-account-actions {
+.data-account-actions,
+.danger-zone-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -2882,6 +2883,8 @@ button:disabled {
     color: var(--text);
     padding: 24px 20px;
     max-width: 360px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
     width: calc(100% - 32px);
     margin: auto;
     box-shadow: var(--elevated-shadow);
@@ -2907,6 +2910,59 @@ button:disabled {
 .confirm-dialog-actions button {
     flex: 1;
     min-height: 44px;
+}
+
+.delete-all-dialog {
+    max-width: 440px;
+    text-align: left;
+}
+
+.confirm-dialog-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    color: var(--text);
+}
+
+.delete-all-dialog-desc {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin: 0 0 16px 0;
+}
+
+.delete-all-backup-box {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.delete-all-backup-text {
+    font-size: 13px;
+    color: var(--text);
+    margin: 0;
+    font-weight: 500;
+}
+
+.delete-all-confirm-step {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.delete-all-input-label {
+    font-size: 13px;
+    color: var(--text);
+}
+
+.delete-all-input {
+    width: 100%;
 }
 
 /* ==========================================================================

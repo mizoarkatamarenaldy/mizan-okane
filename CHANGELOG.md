@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-14: Tahap 5: Hapus semua data
+- Ditambah: Bagian "Zona Bahaya" di halaman Pengaturan dengan tombol "Hapus Semua Data" yang menggunakan warna merah (#FF453A) dari tabel Warna makna (`index.html`, `css/style.css`).
+- Ditambah: Dialog konfirmasi dua langkah (`delete-all-dialog`) berbahasa Indonesia yang memuat peringatan detail, penawaran tombol "Ekspor JSON (Cadangan)", input ketik "HAPUS", dan tombol konfirmasi yang baru aktif setelah pengguna mengetik "HAPUS" (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Logika penghapusan `performDeleteAllData` yang melakukan soft delete pada semua transaksi asli yang belum terhapus dengan `updatedAt` waktu sekarang agar ikut tersinkron ke perangkat lain dan Google Drive, membuang transaksi contoh (dummy) langsung dari IndexedDB tanpa soft delete, serta mempertahankan kategori, dompet, budget, dan tema (`js/app.js`).
+- Ditambah: Fungsi `exportBackupJson` untuk mengekspor cadangan JSON yang dapat dijalankan langsung dari dalam dialog konfirmasi sebelum penghapusan maupun melalui tombol di Pengaturan (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v35` (`sw.js`).
+- Diubah: `PLAN.md` mencentang entri "Hapus semua data" di Tahap 5 (`PLAN.md`).
+
+
 ## 2026-10-14: Tahap 5: Data contoh (dummy)
 - Ditambah: Tombol "Isi Data Contoh" di Pengaturan untuk menghasilkan 40 transaksi acak (pemasukan, pengeluaran, dan transfer) dalam rentang 2 bulan terakhir yang tersebar di dompet dan kategori yang ada, masing-masing dengan penanda `dummy: true` (`index.html`, `js/app.js`).
 - Ditambah: Tombol "Hapus Data Contoh" di Pengaturan yang membuang seluruh transaksi bertanda dummy secara langsung dari penyimpanan lokal tanpa soft delete, menjaga data asli tetap utuh (`index.html`, `js/app.js`).
