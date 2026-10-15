@@ -10,6 +10,18 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Tahap 5: Sub kategori
+- Ditambah: Struktur data `subcategories` pada model kategori di IndexedDB, mendukung sub kategori satu tingkat opsional yang terpisah untuk pemasukan dan pengeluaran (`js/db.js`).
+- Ditambah: Antarmuka pengelolaan sub kategori di bawah tiap kategori (tambah, ubah nama, hapus) pada Pengaturan beserta dialog konfirmasi web UI berbahasa Indonesia (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Pemilihan chip sub kategori opsional pada formulir tambah/ubah transaksi yang muncul dinamis setelah kategori dipilih dan dapat dikosongkan (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Tampilan "Kategori > Sub" pada baris transaksi di Riwayat dan Beranda (`js/app.js`).
+- Ditambah: Rincian sub kategori pada diagram donut di halaman Statistik saat kategori disentuh atau dipilih (`css/style.css`, `js/app.js`).
+- Ditambah: Kolom baru `subkategori` di paling kanan pada ekspor CSV dengan kolom lama tetap tidak berubah (`js/app.js`).
+- Ditambah: Dukungan field opsional `subcategory` pada ekspor dan impor cadangan JSON, serta keamanan membaca data cadangan lama tanpa subcategory (`js/app.js`).
+- Diubah: Penghapusan sub kategori mempertahankan data transaksi lama dan menampilkannya sebagai kategori utama saja, serta penghapusan kategori ikut menghapus daftar sub kategorinya (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v38` (`sw.js`).
+- Diubah: `PLAN.md` menambahkan dan mencentang item "Sub kategori" di Tahap 5 (`PLAN.md`).
+
 ## 2026-10-14: Tahap 5: Mata uang per dompet, tahap 2: tambah USD dengan desimal
 - Ditambah: Dukungan mata uang "USD" (Dolar) pada dompet di samping IDR dan JPY, serta opsi Dolar pada form tambah dompet di Pengaturan (`index.html`, `js/db.js`, `js/sync.js`, `js/app.js`).
 - Ditambah: Format angka mata uang USD (`$ `) dengan pemisah ribuan titik (`.`) dan desimal koma (`,`) 2 digit (contoh `$ 1.234,56`), dengan data disimpan sebagai angka dibulatkan 2 desimal (`js/app.js`).

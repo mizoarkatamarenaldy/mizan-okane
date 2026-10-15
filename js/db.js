@@ -100,6 +100,10 @@ export function deleteMeta(key) {
 export const DEFAULT_CATEGORIES = {
   income: ['Gaji', 'Bonus', 'Hadiah', 'Lainnya'],
   expense: ['Makan', 'Transport', 'Hiburan', 'Belanja', 'Tagihan', 'Lainnya'],
+  subcategories: {
+    income: {},
+    expense: {}
+  },
   updatedAt: 0
 };
 
@@ -110,11 +114,22 @@ export function getCategories() {
     request.onsuccess = (event) => {
       const stored = event.target.result;
       if (stored && Array.isArray(stored.income) && Array.isArray(stored.expense)) {
+        if (!stored.subcategories || typeof stored.subcategories !== 'object') {
+          stored.subcategories = { income: {}, expense: {} };
+        } else {
+          if (!stored.subcategories.income || typeof stored.subcategories.income !== 'object') {
+            stored.subcategories.income = {};
+          }
+          if (!stored.subcategories.expense || typeof stored.subcategories.expense !== 'object') {
+            stored.subcategories.expense = {};
+          }
+        }
         resolve(stored);
       } else {
         const initial = {
           income: [...DEFAULT_CATEGORIES.income],
           expense: [...DEFAULT_CATEGORIES.expense],
+          subcategories: { income: {}, expense: {} },
           updatedAt: 0
         };
         const writeTx = db.transaction([META_STORE], 'readwrite');
@@ -129,9 +144,30 @@ export function getCategories() {
 
 export function saveCategories(categories) {
   return new Promise((resolve, reject) => {
+    const cleanSubcategories = {
+      income: {},
+      expense: {}
+    };
+    if (categories && typeof categories.subcategories === 'object' && categories.subcategories !== null) {
+      if (typeof categories.subcategories.income === 'object' && categories.subcategories.income !== null) {
+        for (const [cat, subs] of Object.entries(categories.subcategories.income)) {
+          if (Array.isArray(subs)) {
+            cleanSubcategories.income[cat] = subs.map(s => String(s).trim()).filter(Boolean);
+          }
+        }
+      }
+      if (typeof categories.subcategories.expense === 'object' && categories.subcategories.expense !== null) {
+        for (const [cat, subs] of Object.entries(categories.subcategories.expense)) {
+          if (Array.isArray(subs)) {
+            cleanSubcategories.expense[cat] = subs.map(s => String(s).trim()).filter(Boolean);
+          }
+        }
+      }
+    }
     const toSave = {
       income: Array.isArray(categories.income) ? categories.income : [...DEFAULT_CATEGORIES.income],
       expense: Array.isArray(categories.expense) ? categories.expense : [...DEFAULT_CATEGORIES.expense],
+      subcategories: cleanSubcategories,
       updatedAt: typeof categories.updatedAt === 'number' ? categories.updatedAt : Date.now()
     };
     const transaction = db.transaction([META_STORE], 'readwrite');
