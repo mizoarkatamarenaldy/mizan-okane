@@ -10,6 +10,10 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Perketat petunjuk baca RULES dan PLANSPEC
+- Diubah: Memperbarui baris petunjuk di `dev/PLAN.md` tepat di bawah judul agar mewajibkan membaca `dev/RULES.md` sebelum mengerjakan apa pun serta merujuk spesifikasi ke `dev/PLANSPEC.md` dan desain ke `dev/DESIGN.md`.
+- Diubah: Memperbarui aturan kerja di `dev/RULES.md` mengenai kewajiban membaca `dev/RULES.md` dan `dev/PLAN.md` di awal sesi, membaca `dev/PLANSPEC.md` hanya pada item yang dikerjakan, ketentuan satu baris checkbox di `dev/PLAN.md` dengan spek di `dev/PLANSPEC.md`, serta prioritas spek jika berbeda dengan `dev/PLAN.md`.
+
 ## 2026-10-15: Rapikan dokumen ke folder dev
 - Ditambah: Folder `dev/` sebagai tempat terpusat untuk dokumen rencana, aturan, dan spesifikasi.
 - Ditambah: Berkas `dev/RULES.md` memuat aturan kerja dan alur commit/push untuk agent yang dipindahkan dari `PLAN.md` dengan penyesuaian jalur file dan aturan dua tempat untuk penulisan fitur baru.

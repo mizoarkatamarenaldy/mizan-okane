@@ -1,8 +1,8 @@
 # PLAN.md: mizan-okane
 
-Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Drive.
+WAJIB baca dev/RULES.md dulu sebelum mengerjakan apa pun. Spek lengkap tiap item ada di dev/PLANSPEC.md, desain ada di dev/DESIGN.md.
 
-Aturan ada di RULES.md, spek ada di PLANSPEC.md, desain ada di DESIGN.md
+Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Drive.
 
 ## Keputusan terkunci
 - Bentuk: PWA (web app), bisa di-install di HP dan PC.

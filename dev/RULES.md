@@ -1,8 +1,9 @@
 # Aturan untuk agent (baca ini dulu)
 
 ## Aturan kerja
-- Baca dev/RULES.md dan dev/PLAN.md dulu, lalu dev/PLANSPEC.md hanya bagian item yang dikerjakan.
-- Fitur baru ditulis dua tempat, satu baris checkbox di dev/PLAN.md dan spek lengkapnya di dev/PLANSPEC.md dengan judul sama.
+- Di awal sesi, baca dev/RULES.md dan dev/PLAN.md. Lalu baca dev/PLANSPEC.md hanya di bagian item yang dikerjakan, jangan seluruh file.
+- Spek fitur baru WAJIB ditulis di dev/PLANSPEC.md dengan judul sama seperti item di dev/PLAN.md. Di dev/PLAN.md hanya boleh ada satu baris checkbox plus judul singkat, tanpa kurung penjelasan dan tanpa sub-poin.
+- Saat mengerjakan item, ikuti spek di dev/PLANSPEC.md. Kalau spek dan PLAN.md berbeda, spek yang berlaku.
 - Kerjakan SATU tahap per sesi. Khusus Tahap 5, kerjakan SATU fitur per sesi. Jangan lompat ke tahap atau fitur lain.
 - Jangan ubah file di luar tahap yang sedang dikerjakan.
 - Bagian "Keputusan terkunci" tidak boleh diubah tanpa izin pemilik.
