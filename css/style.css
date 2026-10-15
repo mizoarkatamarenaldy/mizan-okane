@@ -813,6 +813,45 @@ p {
     color: var(--expense);
 }
 
+.summary-timbangan-action {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+}
+
+.btn-timbangan-entry {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: var(--radius-input, 6px);
+    min-height: 44px;
+    transition: background-color 0.15s ease;
+}
+
+.btn-timbangan-entry:hover {
+    background-color: var(--surface-raised);
+    color: var(--accent);
+}
+
+.btn-timbangan-entry:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.timbangan-entry-icon {
+    flex-shrink: 0;
+}
+
 /* ==========================================================================
    Dompet (Baris Geser ke Samping)
    ========================================================================== */
@@ -2018,6 +2057,304 @@ p {
     font-weight: 700;
     color: var(--text);
     text-align: right;
+}
+
+/* ==========================================================================
+   Halaman Timbangan (Mizan) & Kalkulator "Timbang Sebelum Beli"
+   ========================================================================== */
+
+.timbangan-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.btn-timbangan-back {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--btn-icon-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    color: var(--text);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.btn-timbangan-back:hover {
+    background-color: var(--btn-secondary-hover-bg);
+}
+
+.btn-timbangan-back:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.timbangan-title-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.timbangan-main-title {
+    margin: 0;
+    font-size: var(--font-size-header-title, 18px);
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.25;
+}
+
+.timbangan-sub-title {
+    font-size: var(--font-size-small, 12px);
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.timbangan-section,
+.timbangan-calc-section {
+    background: var(--surface);
+    padding: 18px 16px;
+    border-radius: var(--radius-card, 8px);
+    border: 1px solid var(--border);
+    box-shadow: none;
+    margin-bottom: 20px;
+}
+
+.timbangan-scale-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.timbangan-svg-wrap {
+    width: 100%;
+    max-width: 320px;
+    margin: 6px auto 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.timbangan-svg {
+    width: 100%;
+    height: auto;
+    max-height: 180px;
+    display: block;
+    color: var(--text);
+}
+
+.timbangan-pan-amounts {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 320px;
+    margin: 4px 0 12px;
+}
+
+.timbangan-pan-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.timbangan-pan-box.pan-left {
+    align-items: flex-start;
+    text-align: left;
+}
+
+.timbangan-pan-box.pan-right {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.timbangan-pan-box .pan-title {
+    font-size: var(--font-size-small, 12px);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.timbangan-pan-box .pan-amount {
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.timbangan-pan-box.pan-left .pan-amount {
+    color: var(--income);
+}
+
+.timbangan-pan-box.pan-right .pan-amount {
+    color: var(--expense);
+}
+
+.timbangan-verdict-box {
+    width: 100%;
+    max-width: 320px;
+    padding: 12px 14px;
+    border-radius: var(--radius-input, 6px);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.timbangan-verdict-box.is-surplus {
+    border-color: rgba(46, 204, 143, 0.35);
+    background: rgba(46, 204, 143, 0.08);
+}
+
+.timbangan-verdict-box.is-defisit {
+    border-color: rgba(255, 69, 58, 0.35);
+    background: rgba(255, 69, 58, 0.08);
+}
+
+.timbangan-verdict-text {
+    font-size: var(--font-size-summary, 18px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+}
+
+.timbangan-verdict-box.is-surplus .timbangan-verdict-text {
+    color: var(--income);
+}
+
+.timbangan-verdict-box.is-defisit .timbangan-verdict-text {
+    color: var(--expense);
+}
+
+.timbangan-calc-form {
+    margin-top: 14px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.calc-select {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    color: var(--text);
+    font-size: 14px;
+    font-family: var(--font-sans);
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.calc-select:focus {
+    border-color: var(--accent);
+}
+
+.timbangan-calc-results {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.calc-status-banner {
+    border-radius: var(--radius-input, 6px);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    border: 1px solid transparent;
+}
+
+.calc-status-banner.status-aman {
+    background: rgba(46, 204, 143, 0.12);
+    border-color: rgba(46, 204, 143, 0.32);
+}
+
+.calc-status-banner.status-aman .calc-status-badge {
+    color: var(--accent);
+    background: rgba(46, 204, 143, 0.2);
+}
+
+.calc-status-banner.status-pas {
+    background: rgba(245, 166, 35, 0.12);
+    border-color: rgba(245, 166, 35, 0.32);
+}
+
+.calc-status-banner.status-pas .calc-status-badge {
+    color: var(--budget-warn);
+    background: rgba(245, 166, 35, 0.2);
+}
+
+.calc-status-banner.status-berat {
+    background: rgba(255, 69, 58, 0.12);
+    border-color: rgba(255, 69, 58, 0.32);
+}
+
+.calc-status-banner.status-berat .calc-status-badge {
+    color: var(--expense);
+    background: rgba(255, 69, 58, 0.2);
+}
+
+.calc-status-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.calc-status-label-prefix {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.calc-status-badge {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.calc-status-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.calc-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.calc-result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+}
+
+.calc-result-row:last-child {
+    border-bottom: none;
+}
+
+.calc-result-label {
+    color: var(--text-secondary);
+}
+
+.calc-result-val {
+    color: var(--text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.calc-result-val.is-negative {
+    color: var(--expense);
 }
 
 /* ==========================================================================

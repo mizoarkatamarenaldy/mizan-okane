@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Tahap 5: Timbangan
+- Ditambah: Halaman baru "Timbangan" sesuai nama Mizan yang menampilkan keseimbangan keuangan dan simulasi belanja tanpa mengubah skema data (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Fitur "Timbangan bulan ini" dengan visualisasi timbangan garis outline SVG (non-emoji, miring statis tanpa animasi sesuai selisih pemasukan dan pengeluaran), pemilih bulan, rincian per sisi, dan label status "Surplus Rp ..." atau "Defisit Rp ..." (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Fitur kalkulator "Timbang sebelum beli" untuk menguji dampak belanja terhadap saldo dompet yang dipilih, sisa budget kategori (hanya untuk kategori ber-budget pada mata uang Rupiah), dan estimasi timbangan bulan ini setelah beli (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Label hasil kalkulator "Aman" (>20%), "Pas" (0-20%), atau "Berat" (lewat budget atau saldo minus/defisit) yang selalu disertai teks penjelas status, bukan hanya warna (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Dukungan multi mata uang (Rupiah, Yen, Dolar) pada halaman Timbangan dengan bawaan Rupiah dan pembatasan budget hanya untuk Rupiah (`index.html`, `js/app.js`).
+- Ditambah: Akses navigasi tab desktop dan tautan langsung dari Beranda dengan navigasi bawah HP tetap 4 item (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Tampilan keadaan kosong (empty state) berbahasa Indonesia saat belum ada transaksi pada bulan yang dipilih (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v39` (`sw.js`).
+- Diubah: `PLAN.md` menambahkan dan mencentang item "Timbangan" di Tahap 5 (`PLAN.md`).
+
 ## 2026-10-15: Tahap 5: Sub kategori
 - Ditambah: Struktur data `subcategories` pada model kategori di IndexedDB, mendukung sub kategori satu tingkat opsional yang terpisah untuk pemasukan dan pengeluaran (`js/db.js`).
 - Ditambah: Antarmuka pengelolaan sub kategori di bawah tiap kategori (tambah, ubah nama, hapus) pada Pengaturan beserta dialog konfirmasi web UI berbahasa Indonesia (`index.html`, `css/style.css`, `js/app.js`).

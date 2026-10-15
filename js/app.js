@@ -105,6 +105,29 @@ const btnBudgetCurrencyIdr = document.getElementById('btn-budget-currency-idr');
 const btnBudgetCurrencyJpy = document.getElementById('btn-budget-currency-jpy');
 const btnBudgetCurrencyUsd = document.getElementById('btn-budget-currency-usd');
 
+const btnBerandaTimbangan = document.getElementById('btn-beranda-timbangan');
+const btnTimbanganBack = document.getElementById('btn-timbangan-back');
+const btnTimbanganCurrencyIdr = document.getElementById('btn-timbangan-currency-idr');
+const btnTimbanganCurrencyJpy = document.getElementById('btn-timbangan-currency-jpy');
+const btnTimbanganCurrencyUsd = document.getElementById('btn-timbangan-currency-usd');
+const btnTimbanganPrevMonth = document.getElementById('btn-timbangan-prev-month');
+const btnTimbanganNextMonth = document.getElementById('btn-timbangan-next-month');
+const timbanganMonthLabel = document.getElementById('timbangan-month-label');
+const timbanganScaleContainer = document.getElementById('timbangan-scale-container');
+
+const calcPriceInput = document.getElementById('calc-price-input');
+const calcPriceLabel = document.getElementById('calc-price-label');
+const calcPricePrefix = document.getElementById('calc-price-prefix');
+const calcCategorySelect = document.getElementById('calc-category-select');
+const calcWalletSelect = document.getElementById('calc-wallet-select');
+const calcStatusBanner = document.getElementById('calc-status-banner');
+const calcStatusBadge = document.getElementById('calc-status-badge');
+const calcStatusDesc = document.getElementById('calc-status-desc');
+const calcResultWallet = document.getElementById('calc-result-wallet');
+const calcResultBudgetRow = document.getElementById('calc-result-budget-row');
+const calcResultBudget = document.getElementById('calc-result-budget');
+const calcResultMonthlyScale = document.getElementById('calc-result-monthly-scale');
+
 const walletSettingsList = document.getElementById('wallet-settings-list');
 const formAddWallet = document.getElementById('form-add-wallet');
 const inputAddWallet = document.getElementById('input-add-wallet');
@@ -139,6 +162,8 @@ let selectedDonutMonth = '';
 let activeDonutCategory = null;
 let currentStatsCurrency = 'IDR';
 let currentBudgetCurrency = 'IDR';
+let currentTimbanganCurrency = 'IDR';
+let selectedTimbanganMonth = '';
 
 const THEME_STORAGE_KEY = 'mizan-theme';
 const VALID_THEMES = ['system', 'light', 'dark'];
@@ -194,7 +219,7 @@ let currentCategories = {
     updatedAt: 0
 };
 
-const VALID_TABS = ['beranda', 'riwayat', 'statistik', 'pengaturan'];
+const VALID_TABS = ['beranda', 'riwayat', 'statistik', 'timbangan', 'pengaturan'];
 let currentActiveTab = 'beranda';
 let tabHistory = ['beranda'];
 let isNavigatingBack = false;
@@ -239,6 +264,10 @@ function switchTab(tabId) {
         btn.classList.toggle('is-active', isTarget);
         btn.setAttribute('aria-selected', String(isTarget));
     });
+
+    if (tabId === 'timbangan') {
+        renderTimbangan();
+    }
 
     window.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -2181,6 +2210,415 @@ function renderDonutChart(transactions) {
     });
 }
 
+/* ==========================================================================
+   Timbangan (Mizan) & Kalkulator "Timbang Sebelum Beli"
+   ========================================================================== */
+
+function getWalletCurrentBalance(walletId) {
+    if (!walletId) return 0;
+    let bal = 0;
+    for (const tx of currentTransactions) {
+        if (tx.deleted) continue;
+        const fromId = tx.walletId || DEFAULT_WALLET_ID;
+        if (tx.type === 'income' && fromId === walletId) {
+            bal += tx.amount;
+        } else if (tx.type === 'expense' && fromId === walletId) {
+            bal -= tx.amount;
+        } else if (tx.type === 'transfer') {
+            if (fromId === walletId) bal -= tx.amount;
+            if (tx.toWalletId === walletId) bal += tx.amount;
+        }
+    }
+    const curr = getWalletCurrency(walletId);
+    if (curr === 'USD') {
+        bal = Math.round(bal * 100) / 100;
+    }
+    return bal;
+}
+
+function updateTimbanganCurrencyUI() {
+    const isIdr = currentTimbanganCurrency === 'IDR';
+    const isJpy = currentTimbanganCurrency === 'JPY';
+    const isUsd = currentTimbanganCurrency === 'USD';
+
+    if (btnTimbanganCurrencyIdr) {
+        btnTimbanganCurrencyIdr.classList.toggle('is-active', isIdr);
+        btnTimbanganCurrencyIdr.setAttribute('aria-pressed', String(isIdr));
+    }
+    if (btnTimbanganCurrencyJpy) {
+        btnTimbanganCurrencyJpy.classList.toggle('is-active', isJpy);
+        btnTimbanganCurrencyJpy.setAttribute('aria-pressed', String(isJpy));
+    }
+    if (btnTimbanganCurrencyUsd) {
+        btnTimbanganCurrencyUsd.classList.toggle('is-active', isUsd);
+        btnTimbanganCurrencyUsd.setAttribute('aria-pressed', String(isUsd));
+    }
+
+    if (calcPricePrefix) {
+        calcPricePrefix.textContent = isUsd ? '$' : (isJpy ? '¥' : 'Rp');
+    }
+    if (calcPriceLabel) {
+        calcPriceLabel.textContent = isUsd ? 'Harga Barang ($)' : (isJpy ? 'Harga Barang (¥)' : 'Harga Barang (Rp)');
+    }
+    if (calcPriceInput) {
+        calcPriceInput.setAttribute('inputmode', isUsd ? 'decimal' : 'numeric');
+        if (calcPriceInput.value) {
+            if (!isUsd && calcPriceInput.value.includes(',')) {
+                calcPriceInput.value = calcPriceInput.value.split(',')[0];
+            }
+            formatInputWithCursor(calcPriceInput, currentTimbanganCurrency);
+        }
+    }
+}
+
+function shiftTimbanganMonth(delta) {
+    if (!selectedTimbanganMonth) {
+        selectedTimbanganMonth = getLocalYearMonthString();
+    }
+    const [yStr, mStr] = selectedTimbanganMonth.split('-');
+    let y = parseInt(yStr, 10);
+    let m = parseInt(mStr, 10) + delta;
+    if (m < 1) {
+        m = 12;
+        y--;
+    } else if (m > 12) {
+        m = 1;
+        y++;
+    }
+    selectedTimbanganMonth = `${y}-${String(m).padStart(2, '0')}`;
+    renderTimbangan();
+}
+
+function getTimbanganMonthlyData(monthKey, currency) {
+    let income = 0;
+    let expense = 0;
+    let txCount = 0;
+
+    for (const tx of currentTransactions) {
+        if (tx.deleted || !(tx.amount > 0) || !tx.date) continue;
+        if (tx.type === 'transfer') continue; // Transfer antar dompet tidak dihitung
+        if (getTransactionCurrency(tx) !== currency) continue;
+
+        const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
+        if (!match) continue;
+        const key = `${match[1]}-${String(parseInt(match[2], 10)).padStart(2, '0')}`;
+        if (key === monthKey) {
+            if (tx.type === 'income') {
+                income += tx.amount;
+                txCount++;
+            } else if (tx.type === 'expense') {
+                expense += tx.amount;
+                txCount++;
+            }
+        }
+    }
+
+    if (currency === 'USD') {
+        income = Math.round(income * 100) / 100;
+        expense = Math.round(expense * 100) / 100;
+    }
+
+    const diff = currency === 'USD' ? Math.round((income - expense) * 100) / 100 : (income - expense);
+    return { income, expense, diff, txCount };
+}
+
+function generateTimbanganScaleSvg(income, expense, diff, currency) {
+    const total = income + expense;
+    const maxTilt = 16;
+    let dy = 0;
+    if (total > 0) {
+        const ratio = diff / total; // antara -1 dan +1
+        // diff > 0 (surplus, income > expense) -> lengan kiri lebih berat -> miring turun: dy > 0
+        // diff < 0 (defisit, expense > income) -> lengan kanan lebih berat -> miring turun: dy < 0
+        if (diff > 0) {
+            dy = Math.max(3, Math.min(maxTilt, Math.round(ratio * maxTilt)));
+        } else if (diff < 0) {
+            dy = Math.min(-3, Math.max(-maxTilt, Math.round(ratio * maxTilt)));
+        }
+    }
+
+    const pivotX = 160;
+    const pivotY = 42;
+    const leftX = 65;
+    const leftY = pivotY + dy;
+    const rightX = 255;
+    const rightY = pivotY - dy;
+
+    const stringLen = 48;
+    const leftSaucerY = leftY + stringLen;
+    const rightSaucerY = rightY + stringLen;
+
+    return `
+        <svg viewBox="0 0 320 180" class="timbangan-svg" role="img" aria-label="Gambar timbangan garis">
+            <!-- Stand dan Tiang Utama -->
+            <line x1="110" y1="160" x2="210" y2="160" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="${pivotX}" y1="160" x2="${pivotX}" y2="${pivotY}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            
+            <!-- Lengan Timbangan (Beam) miring statis tanpa animasi -->
+            <line x1="${leftX}" y1="${leftY}" x2="${rightX}" y2="${rightY}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            <circle cx="${pivotX}" cy="${pivotY}" r="4.5" fill="var(--surface)" stroke="currentColor" stroke-width="2" />
+            <circle cx="${leftX}" cy="${leftY}" r="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.8" />
+            <circle cx="${rightX}" cy="${rightY}" r="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.8" />
+
+            <!-- Piring Kiri (Pemasukan) -->
+            <line x1="${leftX}" y1="${leftY}" x2="${leftX - 25}" y2="${leftSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="${leftX}" y1="${leftY}" x2="${leftX + 25}" y2="${leftSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M ${leftX - 28} ${leftSaucerY} Q ${leftX} ${leftSaucerY + 12} ${leftX + 28} ${leftSaucerY}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+
+            <!-- Piring Kanan (Pengeluaran) -->
+            <line x1="${rightX}" y1="${rightY}" x2="${rightX - 25}" y2="${rightSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
+            <line x1="${rightX}" y1="${rightY}" x2="${rightX + 25}" y2="${rightSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M ${rightX - 28} ${rightSaucerY} Q ${rightX} ${rightSaucerY + 12} ${rightX + 28} ${rightSaucerY}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
+    `;
+}
+
+function renderTimbanganScale() {
+    if (!timbanganScaleContainer) return;
+
+    if (!selectedTimbanganMonth) {
+        selectedTimbanganMonth = getLocalYearMonthString();
+    }
+
+    if (timbanganMonthLabel) {
+        const [yStr, mStr] = selectedTimbanganMonth.split('-');
+        const mNum = parseInt(mStr, 10);
+        const monthName = INDO_MONTHS_SHORT[mNum - 1] || '';
+        timbanganMonthLabel.textContent = `${monthName} ${yStr}`;
+    }
+
+    const { income, expense, diff, txCount } = getTimbanganMonthlyData(selectedTimbanganMonth, currentTimbanganCurrency);
+
+    if (txCount === 0) {
+        timbanganScaleContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada transaksi pada bulan ini.</p>
+                <button type="button" class="btn-action-outline" id="btn-empty-timbangan-tx">Tambah Transaksi</button>
+            </div>
+        `;
+        const btnEmptyTimbangan = document.getElementById('btn-empty-timbangan-tx');
+        if (btnEmptyTimbangan) {
+            btnEmptyTimbangan.addEventListener('click', () => {
+                resetForm();
+                openFormScreen();
+            });
+        }
+        return;
+    }
+
+    const svgHtml = generateTimbanganScaleSvg(income, expense, diff, currentTimbanganCurrency);
+
+    let verdictClass = 'is-surplus';
+    let verdictText = '';
+    if (diff > 0) {
+        verdictClass = 'is-surplus';
+        verdictText = `Surplus ${currencyFormatter.format(diff, currentTimbanganCurrency)}`;
+    } else if (diff < 0) {
+        verdictClass = 'is-defisit';
+        verdictText = `Defisit ${currencyFormatter.format(Math.abs(diff), currentTimbanganCurrency)}`;
+    } else {
+        verdictClass = 'is-surplus';
+        verdictText = `Surplus ${currencyFormatter.format(0, currentTimbanganCurrency)}`;
+    }
+
+    timbanganScaleContainer.innerHTML = `
+        <div class="timbangan-svg-wrap">
+            ${svgHtml}
+        </div>
+        <div class="timbangan-pan-amounts">
+            <div class="timbangan-pan-box pan-left">
+                <span class="pan-title">Pemasukan</span>
+                <strong class="pan-amount tabular-nums">+${currencyFormatter.format(income, currentTimbanganCurrency)}</strong>
+            </div>
+            <div class="timbangan-pan-box pan-right">
+                <span class="pan-title">Pengeluaran</span>
+                <strong class="pan-amount tabular-nums">−${currencyFormatter.format(expense, currentTimbanganCurrency)}</strong>
+            </div>
+        </div>
+        <div class="timbangan-verdict-box ${verdictClass}">
+            <p class="timbangan-verdict-text tabular-nums">${verdictText}</p>
+        </div>
+    `;
+}
+
+function populateTimbanganCalcOptions() {
+    if (calcWalletSelect) {
+        const active = getActiveWallets().filter(w => (w.currency || 'IDR') === currentTimbanganCurrency);
+        const prevWalletVal = calcWalletSelect.value;
+        if (active.length === 0) {
+            calcWalletSelect.innerHTML = '<option value="" disabled selected>Belum ada dompet</option>';
+        } else {
+            let html = '';
+            for (const w of active) {
+                const bal = getWalletCurrentBalance(w.id);
+                html += `<option value="${w.id}">${escapeHTML(w.name)} (${currencyFormatter.format(bal, currentTimbanganCurrency)})</option>`;
+            }
+            calcWalletSelect.innerHTML = html;
+            if (prevWalletVal && active.some(w => w.id === prevWalletVal)) {
+                calcWalletSelect.value = prevWalletVal;
+            } else if (active.some(w => w.id === DEFAULT_WALLET_ID)) {
+                calcWalletSelect.value = DEFAULT_WALLET_ID;
+            } else {
+                calcWalletSelect.value = active[0].id;
+            }
+        }
+    }
+
+    if (calcCategorySelect) {
+        const expenseCats = (currentCategories && currentCategories.expense) ? currentCategories.expense : [];
+        const prevCatVal = calcCategorySelect.value;
+        if (expenseCats.length === 0) {
+            calcCategorySelect.innerHTML = '<option value="" disabled selected>Belum ada kategori</option>';
+        } else {
+            let html = '';
+            const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
+            for (const cat of expenseCats) {
+                const hasBudget = (currentTimbanganCurrency === 'IDR') && typeof budgetMap[cat] === 'number' && budgetMap[cat] > 0;
+                const budgetLabel = hasBudget ? ` (Budget: ${currencyFormatter.format(budgetMap[cat], 'IDR')})` : '';
+                html += `<option value="${escapeHTML(cat)}">${escapeHTML(cat)}${escapeHTML(budgetLabel)}</option>`;
+            }
+            calcCategorySelect.innerHTML = html;
+            if (prevCatVal && expenseCats.includes(prevCatVal)) {
+                calcCategorySelect.value = prevCatVal;
+            } else {
+                calcCategorySelect.value = expenseCats[0];
+            }
+        }
+    }
+}
+
+function renderTimbanganCalculator() {
+    if (!calcPriceInput || !calcCategorySelect || !calcWalletSelect) return;
+
+    const rawPrice = parseAmount(calcPriceInput.value || 0, currentTimbanganCurrency);
+    const price = isNaN(rawPrice) || rawPrice < 0 ? 0 : rawPrice;
+
+    const selectedWalletId = calcWalletSelect.value;
+    const walletBal = getWalletCurrentBalance(selectedWalletId);
+    let newWalletBal = walletBal - price;
+    if (currentTimbanganCurrency === 'USD') {
+        newWalletBal = Math.round(newWalletBal * 100) / 100;
+    }
+
+    if (calcResultWallet) {
+        calcResultWallet.className = newWalletBal < 0 ? 'calc-result-val tabular-nums is-negative' : 'calc-result-val tabular-nums';
+        calcResultWallet.textContent = currencyFormatter.format(newWalletBal, currentTimbanganCurrency);
+    }
+
+    const selectedCat = calcCategorySelect.value;
+    const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
+    const hasBudget = (currentTimbanganCurrency === 'IDR') && selectedCat && (typeof budgetMap[selectedCat] === 'number') && (budgetMap[selectedCat] > 0);
+
+    let remainingBudget = 0;
+    let remainingPercent = 0;
+
+    if (hasBudget) {
+        if (calcResultBudgetRow) calcResultBudgetRow.classList.remove('hidden');
+        const budgetAmount = budgetMap[selectedCat];
+        const { categoryTotals } = getActiveMonthlyExpenses(currentTransactions, selectedTimbanganMonth, 'IDR');
+        const currentSpent = categoryTotals.get(selectedCat) || 0;
+        const newSpent = currentSpent + price;
+        remainingBudget = budgetAmount - newSpent;
+        remainingPercent = budgetAmount > 0 ? (remainingBudget / budgetAmount) * 100 : 0;
+
+        if (calcResultBudget) {
+            if (remainingBudget >= 0) {
+                calcResultBudget.className = 'calc-result-val tabular-nums';
+                calcResultBudget.textContent = `${currencyFormatter.format(remainingBudget, 'IDR')} (${Math.round(remainingPercent)}% tersisa)`;
+            } else {
+                calcResultBudget.className = 'calc-result-val tabular-nums is-negative';
+                calcResultBudget.textContent = `Lewat Rp ${formatNumber(Math.abs(remainingBudget))}`;
+            }
+        }
+    } else {
+        if (calcResultBudgetRow) calcResultBudgetRow.classList.add('hidden');
+    }
+
+    const { income: monthIncome, expense: currentMonthExpense } = getTimbanganMonthlyData(selectedTimbanganMonth, currentTimbanganCurrency);
+    let newMonthExpense = currentMonthExpense + price;
+    if (currentTimbanganCurrency === 'USD') {
+        newMonthExpense = Math.round(newMonthExpense * 100) / 100;
+    }
+    let newMonthDiff = monthIncome - newMonthExpense;
+    if (currentTimbanganCurrency === 'USD') {
+        newMonthDiff = Math.round(newMonthDiff * 100) / 100;
+    }
+
+    if (calcResultMonthlyScale) {
+        if (newMonthDiff > 0) {
+            calcResultMonthlyScale.className = 'calc-result-val tabular-nums';
+            calcResultMonthlyScale.textContent = `Surplus ${currencyFormatter.format(newMonthDiff, currentTimbanganCurrency)}`;
+        } else if (newMonthDiff < 0) {
+            calcResultMonthlyScale.className = 'calc-result-val tabular-nums is-negative';
+            calcResultMonthlyScale.textContent = `Defisit ${currencyFormatter.format(Math.abs(newMonthDiff), currentTimbanganCurrency)}`;
+        } else {
+            calcResultMonthlyScale.className = 'calc-result-val tabular-nums';
+            calcResultMonthlyScale.textContent = `Surplus ${currencyFormatter.format(0, currentTimbanganCurrency)}`;
+        }
+    }
+
+    let statusBadge = 'Aman';
+    let statusDesc = '';
+
+    if (hasBudget) {
+        if (remainingBudget < 0 || newWalletBal < 0) {
+            statusBadge = 'Berat';
+            if (remainingBudget < 0 && newWalletBal < 0) {
+                statusDesc = `Lewat budget Rp ${formatNumber(Math.abs(remainingBudget))} dan saldo dompet jadi minus.`;
+            } else if (remainingBudget < 0) {
+                statusDesc = `Melebihi budget bulanan Rp ${formatNumber(Math.abs(remainingBudget))}.`;
+            } else {
+                statusDesc = 'Saldo dompet tidak mencukupi (jadi minus).';
+            }
+        } else if (remainingPercent <= 20) {
+            statusBadge = 'Pas';
+            statusDesc = `Sisa budget kategori tinggal ${Math.round(remainingPercent)}% (${currencyFormatter.format(remainingBudget, 'IDR')}).`;
+        } else {
+            statusBadge = 'Aman';
+            statusDesc = `Sisa budget masih aman di atas 20% (${Math.round(remainingPercent)}% tersisa).`;
+        }
+    } else {
+        if (newWalletBal < 0 || newMonthDiff < 0) {
+            statusBadge = 'Berat';
+            if (newWalletBal < 0 && newMonthDiff < 0) {
+                statusDesc = `Saldo dompet jadi minus dan timbangan bulan ini defisit ${currencyFormatter.format(Math.abs(newMonthDiff), currentTimbanganCurrency)}.`;
+            } else if (newWalletBal < 0) {
+                statusDesc = 'Saldo dompet tidak mencukupi (jadi minus).';
+            } else {
+                statusDesc = `Timbangan bulan ini menjadi defisit ${currencyFormatter.format(Math.abs(newMonthDiff), currentTimbanganCurrency)}.`;
+            }
+        } else if (
+            newMonthDiff === 0 ||
+            newWalletBal === 0 ||
+            (monthIncome > 0 && (newMonthDiff / monthIncome) <= 0.20) ||
+            (walletBal > 0 && (newWalletBal / walletBal) <= 0.20)
+        ) {
+            statusBadge = 'Pas';
+            statusDesc = 'Saldo dompet atau surplus bulan ini pas-pasan (0–20%).';
+        } else {
+            statusBadge = 'Aman';
+            statusDesc = 'Saldo dompet dan surplus timbangan bulan ini aman.';
+        }
+    }
+
+    if (calcStatusBanner) {
+        calcStatusBanner.className = `calc-status-banner status-${statusBadge.toLowerCase()}`;
+    }
+    if (calcStatusBadge) {
+        calcStatusBadge.textContent = statusBadge;
+    }
+    if (calcStatusDesc) {
+        calcStatusDesc.textContent = statusDesc;
+    }
+}
+
+function renderTimbangan() {
+    updateTimbanganCurrencyUI();
+    renderTimbanganScale();
+    populateTimbanganCalcOptions();
+    renderTimbanganCalculator();
+}
+
 function createTxItemElement(tx, filterWallet) {
     const txEl = document.createElement('div');
     txEl.className = 'tx-item';
@@ -2484,6 +2922,7 @@ function render() {
     renderMonthlyChart(currentTransactions);
     renderBudgetSection();
     renderDonutChart(currentTransactions);
+    renderTimbangan();
 
     // Pasang event listener tombol edit dan hapus pada kedua daftar transaksi
     document.querySelectorAll('.btn-edit').forEach(btn => {
@@ -4991,6 +5430,7 @@ async function init() {
         currentWallets = await getWallets();
         selectedBudgetMonth = getLocalYearMonthString();
         selectedDonutMonth = getLocalYearMonthString();
+        selectedTimbanganMonth = getLocalYearMonthString();
         initDateSelectOptions();
         init24TimeSelectOptions();
         resetForm(); // Set default date, kategori, dan dompet
@@ -5302,6 +5742,74 @@ async function init() {
         });
     }
 
+    if (btnBerandaTimbangan) {
+        btnBerandaTimbangan.addEventListener('click', () => {
+            recordTabNavigation('timbangan');
+            window.location.hash = 'timbangan';
+            switchTab('timbangan');
+        });
+    }
+
+    if (btnTimbanganBack) {
+        btnTimbanganBack.addEventListener('click', () => {
+            if (window.handleAndroidBack) {
+                window.handleAndroidBack();
+            } else {
+                recordTabNavigation('beranda');
+                window.location.hash = 'beranda';
+                switchTab('beranda');
+            }
+        });
+    }
+
+    if (btnTimbanganCurrencyIdr) {
+        btnTimbanganCurrencyIdr.addEventListener('click', () => {
+            if (currentTimbanganCurrency !== 'IDR') {
+                currentTimbanganCurrency = 'IDR';
+                renderTimbangan();
+            }
+        });
+    }
+
+    if (btnTimbanganCurrencyJpy) {
+        btnTimbanganCurrencyJpy.addEventListener('click', () => {
+            if (currentTimbanganCurrency !== 'JPY') {
+                currentTimbanganCurrency = 'JPY';
+                renderTimbangan();
+            }
+        });
+    }
+
+    if (btnTimbanganCurrencyUsd) {
+        btnTimbanganCurrencyUsd.addEventListener('click', () => {
+            if (currentTimbanganCurrency !== 'USD') {
+                currentTimbanganCurrency = 'USD';
+                renderTimbangan();
+            }
+        });
+    }
+
+    if (btnTimbanganPrevMonth) {
+        btnTimbanganPrevMonth.addEventListener('click', () => shiftTimbanganMonth(-1));
+    }
+
+    if (btnTimbanganNextMonth) {
+        btnTimbanganNextMonth.addEventListener('click', () => shiftTimbanganMonth(1));
+    }
+
+    if (calcPriceInput) {
+        attachAmountInputFormatting(calcPriceInput, () => currentTimbanganCurrency);
+        calcPriceInput.addEventListener('input', () => renderTimbanganCalculator());
+    }
+
+    if (calcCategorySelect) {
+        calcCategorySelect.addEventListener('change', () => renderTimbanganCalculator());
+    }
+
+    if (calcWalletSelect) {
+        calcWalletSelect.addEventListener('change', () => renderTimbanganCalculator());
+    }
+
     const syncTimeInputs = () => {
         const timeVal = getTimeValueFromForm();
         if (timeVal) {
@@ -5349,6 +5857,7 @@ async function init() {
                     if (currentTransactions && currentTransactions.length > 0) {
                         renderMonthlyChart(currentTransactions);
                         renderDonutChart(currentTransactions);
+                        renderTimbangan();
                     }
                 }
             });
@@ -5363,6 +5872,7 @@ async function init() {
                 if (currentTransactions && currentTransactions.length > 0) {
                     renderMonthlyChart(currentTransactions);
                     renderDonutChart(currentTransactions);
+                    renderTimbangan();
                 }
             }
         };
