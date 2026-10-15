@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Tahap 5: Pengaturan per kategori (submenu)
+- Ditambah: Restrukturisasi halaman Pengaturan menjadi daftar kelompok baris rapi dengan ikon garis outline, nama kelompok, penjelasan satu baris di bawahnya, dan panah kanan tanpa kartu bersarang (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Submenu terpisah untuk masing-masing kelompok pengaturan: Tampilan (tema, format jam), Kategori (pengeluaran, pemasukan, sub kategori), Dompet (kelola dompet, mata uang), Budget (batas pengeluaran bulanan), Data (ekspor CSV/JSON, impor JSON, data contoh), Akun dan sinkron (Google Drive), Tentang (kebijakan privasi, syarat dan ketentuan), dan Zona bahaya (hapus semua data) (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Header pada tiap submenu dengan tombol kembali (target sentuh minimal 44x44px) dan judul kelompok yang mengembalikan tampilan ke daftar utama Pengaturan (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Bagian "Zona Bahaya" diletakkan di paling bawah dan terpisah dari kelompok lain dengan penanda warna merah (#FF453A) sesuai DESIGN.md (`index.html`, `css/style.css`).
+- Diperbaiki: Penanganan tombol back Android (`window.handleAndroidBack`) dari submenu kembali ke daftar utama Pengaturan, dan dari daftar Pengaturan mengikuti navigasi tab yang sudah ada tanpa merusak perilaku web/PWA (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v40` (`sw.js`).
+- Diubah: `PLAN.md` menambahkan dan mencentang item "Pengaturan per kategori" di Tahap 5 (`PLAN.md`).
+
 ## 2026-10-15: Tahap 5: Timbangan
 - Ditambah: Halaman baru "Timbangan" sesuai nama Mizan yang menampilkan keseimbangan keuangan dan simulasi belanja tanpa mengubah skema data (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Fitur "Timbangan bulan ini" dengan visualisasi timbangan garis outline SVG (non-emoji, miring statis tanpa animasi sesuai selisih pemasukan dan pengeluaran), pemilih bulan, rincian per sisi, dan label status "Surplus Rp ..." atau "Defisit Rp ..." (`index.html`, `css/style.css`, `js/app.js`).

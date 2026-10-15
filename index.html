@@ -324,149 +324,417 @@
 
         <!-- 5. Halaman Pengaturan -->
         <main id="page-pengaturan" class="page-view hidden" role="tabpanel" aria-label="Pengaturan">
-            <!-- 1. Tampilan -->
-            <section class="settings-card" aria-labelledby="theme-section-title">
-                <div class="settings-card-header">
-                    <h2 id="theme-section-title" class="card-title">Tampilan</h2>
-                    <p class="settings-card-desc">Pilihan tema untuk tampilan di perangkat ini (disimpan lokal).</p>
-                </div>
-                <div class="radio-group" id="theme-options">
-                    <label>
-                        <input type="radio" name="theme-setting" value="system" checked>
-                        <span>Ikuti sistem</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="theme-setting" value="light">
-                        <span>Terang</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="theme-setting" value="dark">
-                        <span>Gelap</span>
-                    </label>
-                </div>
-            </section>
+            <!-- Tampilan Utama: Daftar Kelompok Pengaturan -->
+            <div id="settings-main-view" class="settings-view">
+                <div class="settings-menu-group" role="list">
+                    <!-- 1. Tampilan -->
+                    <button type="button" class="settings-menu-row" data-submenu="tampilan" role="listitem">
+                        <span class="settings-menu-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                        </span>
+                        <div class="settings-menu-text">
+                            <span class="settings-menu-title">Tampilan</span>
+                            <span class="settings-menu-desc">Tema dan format jam</span>
+                        </div>
+                        <span class="settings-menu-arrow" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
 
-            <!-- 2. Format Jam -->
-            <section class="settings-card" aria-labelledby="time-format-section-title">
-                <div class="settings-card-header">
-                    <h2 id="time-format-section-title" class="card-title">Format Jam</h2>
-                    <p class="settings-card-desc">Pilihan format waktu untuk formulir dan tampilan transaksi di perangkat ini.</p>
-                </div>
-                <div class="radio-group" id="time-format-options">
-                    <label>
-                        <input type="radio" name="time-format-setting" value="24" checked>
-                        <span>24 jam (contoh: 14:30)</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="time-format-setting" value="12">
-                        <span>12 jam (contoh: 02:30 PM)</span>
-                    </label>
-                </div>
-            </section>
+                    <!-- 2. Kategori -->
+                    <button type="button" class="settings-menu-row" data-submenu="kategori" role="listitem">
+                        <span class="settings-menu-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            </svg>
+                        </span>
+                        <div class="settings-menu-text">
+                            <span class="settings-menu-title">Kategori</span>
+                            <span class="settings-menu-desc">Pengeluaran, pemasukan, dan sub kategori</span>
+                        </div>
+                        <span class="settings-menu-arrow" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
 
-            <!-- 3. Dompet -->
-            <section class="settings-card" aria-labelledby="wallet-section-title">
-                <div class="settings-card-header">
-                    <h2 id="wallet-section-title" class="card-title">Dompet</h2>
-                    <p class="settings-card-desc">Kelola dompet atau rekening sumber dana (misal: Tunai, Rekening Bank, E-Wallet).</p>
-                </div>
-                <ul id="wallet-settings-list" class="category-items" aria-label="Daftar dompet"></ul>
-                <form id="form-add-wallet" class="category-add-form wallet-add-form">
-                    <input type="text" id="input-add-wallet" placeholder="Nama dompet baru..." required autocomplete="off" aria-label="Nama dompet baru">
-                    <select id="select-add-wallet-currency" class="wallet-currency-select" aria-label="Pilih mata uang dompet baru">
-                        <option value="IDR" selected>Rupiah (IDR)</option>
-                        <option value="JPY">Yen (JPY)</option>
-                        <option value="USD">Dolar (USD)</option>
-                    </select>
-                    <button type="submit" class="btn-primary btn-small">Tambah Dompet</button>
-                </form>
-            </section>
+                    <!-- 3. Dompet -->
+                    <button type="button" class="settings-menu-row" data-submenu="dompet" role="listitem">
+                        <span class="settings-menu-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
+                                <path d="M16 3H4a2 2 0 0 0-2 2v2"></path>
+                                <circle cx="16" cy="14" r="1"></circle>
+                            </svg>
+                        </span>
+                        <div class="settings-menu-text">
+                            <span class="settings-menu-title">Dompet</span>
+                            <span class="settings-menu-desc">Kelola dompet dan rekening sumber dana</span>
+                        </div>
+                        <span class="settings-menu-arrow" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
 
-            <!-- 4. Kategori Transaksi -->
-            <section class="settings-card" aria-labelledby="category-section-title">
-                <div class="settings-card-header">
-                    <h2 id="category-section-title" class="card-title">Kategori Transaksi</h2>
-                    <p class="settings-card-desc">Atur kategori untuk memilah pengeluaran dan pemasukan transaksi Anda.</p>
+                    <!-- 4. Budget -->
+                    <button type="button" class="settings-menu-row" data-submenu="budget" role="listitem">
+                        <span class="settings-menu-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 2a10 10 0 0 1 10 10h-10z"></path>
+                            </svg>
+                        </span>
+                        <div class="settings-menu-text">
+                            <span class="settings-menu-title">Budget</span>
+                            <span class="settings-menu-desc">Batas pengeluaran bulanan per kategori</span>
+                        </div>
+                        <span class="settings-menu-arrow" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+
+                    <!-- 5. Data -->
+                    <button type="button" class="settings-menu-row" data-submenu="data" role="listitem">
+                        <span class="settings-menu-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                            </svg>
+                        </span>
+                        <div class="settings-menu-text">
+                            <span class="settings-menu-title">Data</span>
+                            <span class="settings-menu-desc">Ekspor CSV dan JSON, impor JSON, data contoh</span>
+                        </div>
+                        <span class="settings-menu-arrow" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+
+                    <!-- 6. Akun dan Sinkron -->
+                    <button type="button" class="settings-menu-row" data-submenu="akun" role="listitem">
+                        <span class="settings-menu-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                            </svg>
+                        </span>
+                        <div class="settings-menu-text">
+                            <span class="settings-menu-title">Akun dan Sinkron</span>
+                            <span class="settings-menu-desc">Google Drive dan status sinkronisasi</span>
+                        </div>
+                        <span class="settings-menu-arrow" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+
+                    <!-- 7. Tentang -->
+                    <button type="button" class="settings-menu-row" data-submenu="tentang" role="listitem">
+                        <span class="settings-menu-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                        <div class="settings-menu-text">
+                            <span class="settings-menu-title">Tentang</span>
+                            <span class="settings-menu-desc">Kebijakan privasi dan syarat dan ketentuan</span>
+                        </div>
+                        <span class="settings-menu-arrow" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
                 </div>
 
-                <div class="settings-group">
-                    <h3 class="category-group-title expense">Pengeluaran</h3>
-                    <ul id="expense-category-list" class="category-items" aria-label="Daftar kategori pengeluaran"></ul>
-                    <form id="form-add-expense-cat" class="category-add-form">
-                        <input type="text" id="input-add-expense-cat" placeholder="Tambah kategori pengeluaran..." required autocomplete="off" aria-label="Tambah kategori pengeluaran">
-                        <button type="submit" class="btn-primary btn-small">Tambah</button>
-                    </form>
+                <!-- 8. Zona Bahaya (terpisah di paling bawah) -->
+                <div class="settings-menu-group settings-menu-danger-group" role="list">
+                    <button type="button" class="settings-menu-row settings-menu-row-danger" data-submenu="bahaya" role="listitem">
+                        <span class="settings-menu-icon danger-icon" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </span>
+                        <div class="settings-menu-text">
+                            <span class="settings-menu-title danger-text">Zona Bahaya</span>
+                            <span class="settings-menu-desc">Hapus seluruh data transaksi</span>
+                        </div>
+                        <span class="settings-menu-arrow" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
                 </div>
+            </div>
 
-                <div class="settings-divider" aria-hidden="true"></div>
-
-                <div class="settings-group">
-                    <h3 class="category-group-title income">Pemasukan</h3>
-                    <ul id="income-category-list" class="category-items" aria-label="Daftar kategori pemasukan"></ul>
-                    <form id="form-add-income-cat" class="category-add-form">
-                        <input type="text" id="input-add-income-cat" placeholder="Tambah kategori pemasukan..." required autocomplete="off" aria-label="Tambah kategori pemasukan">
-                        <button type="submit" class="btn-primary btn-small">Tambah</button>
-                    </form>
+            <!-- Submenu-submenu Pengaturan -->
+            <!-- Submenu 1: Tampilan -->
+            <div id="submenu-tampilan" class="settings-submenu-view hidden" data-submenu-id="tampilan">
+                <div class="settings-submenu-header">
+                    <button type="button" class="btn-icon btn-submenu-back" aria-label="Kembali ke Pengaturan" title="Kembali ke Pengaturan">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <h2 class="settings-submenu-title">Tampilan</h2>
                 </div>
-            </section>
-
-            <!-- 5. Budget Pengeluaran Bulanan -->
-            <section class="settings-card" aria-labelledby="budget-section-title">
-                <div class="settings-card-header">
-                    <h2 id="budget-section-title" class="card-title">Budget Pengeluaran Bulanan</h2>
-                    <p class="settings-card-desc">Batas pengeluaran per bulan untuk tiap kategori (berlaku terus setiap bulan).</p>
-                </div>
-                <ul id="budget-settings-list" class="category-items" aria-label="Daftar budget per kategori"></ul>
-                <form id="form-set-budget" class="budget-add-form">
-                    <div class="budget-form-row">
-                        <select id="select-budget-cat" required aria-label="Pilih kategori pengeluaran untuk budget">
-                            <option value="" disabled selected>Pilih kategori pengeluaran</option>
-                        </select>
-                        <input type="text" inputmode="numeric" id="input-budget-amount" placeholder="Batas bulanan (Rp)..." required aria-label="Batas bulanan dalam rupiah" autocomplete="off">
-                        <button type="submit" class="btn-primary btn-small">Simpan Budget</button>
+                <section class="settings-card" aria-labelledby="theme-section-title">
+                    <div class="settings-card-header">
+                        <h3 id="theme-section-title" class="card-title">Tema</h3>
+                        <p class="settings-card-desc">Pilihan tema untuk tampilan di perangkat ini (disimpan lokal).</p>
                     </div>
-                </form>
-            </section>
+                    <div class="radio-group" id="theme-options">
+                        <label>
+                            <input type="radio" name="theme-setting" value="system" checked>
+                            <span>Ikuti sistem</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="theme-setting" value="light">
+                            <span>Terang</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="theme-setting" value="dark">
+                            <span>Gelap</span>
+                        </label>
+                    </div>
+                </section>
+                <section class="settings-card" aria-labelledby="time-format-section-title">
+                    <div class="settings-card-header">
+                        <h3 id="time-format-section-title" class="card-title">Format Jam</h3>
+                        <p class="settings-card-desc">Pilihan format waktu untuk formulir dan tampilan transaksi di perangkat ini.</p>
+                    </div>
+                    <div class="radio-group" id="time-format-options">
+                        <label>
+                            <input type="radio" name="time-format-setting" value="24" checked>
+                            <span>24 jam (contoh: 14:30)</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="time-format-setting" value="12">
+                            <span>12 jam (contoh: 02:30 PM)</span>
+                        </label>
+                    </div>
+                </section>
+            </div>
 
-            <!-- 6. Data dan Akun -->
-            <section class="settings-card" aria-labelledby="data-account-title">
-                <div class="settings-card-header">
-                    <h2 id="data-account-title" class="card-title">Data dan Akun</h2>
-                    <p class="settings-card-desc">Cadangan data lokal dan sinkronisasi otomatis dengan Google Drive.</p>
+            <!-- Submenu 2: Kategori -->
+            <div id="submenu-kategori" class="settings-submenu-view hidden" data-submenu-id="kategori">
+                <div class="settings-submenu-header">
+                    <button type="button" class="btn-icon btn-submenu-back" aria-label="Kembali ke Pengaturan" title="Kembali ke Pengaturan">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <h2 class="settings-submenu-title">Kategori</h2>
                 </div>
-                <div class="data-account-content">
-                    <p id="settings-sync-status" class="sync-status" role="status">Belum login. Data hanya tersimpan di perangkat ini.</p>
+                <section class="settings-card" aria-labelledby="category-section-title">
+                    <div class="settings-card-header">
+                        <h3 id="category-section-title" class="card-title">Kategori Transaksi</h3>
+                        <p class="settings-card-desc">Atur kategori untuk memilah pengeluaran dan pemasukan transaksi Anda.</p>
+                    </div>
+
+                    <div class="settings-group">
+                        <h4 class="category-group-title expense">Pengeluaran</h4>
+                        <ul id="expense-category-list" class="category-items" aria-label="Daftar kategori pengeluaran"></ul>
+                        <form id="form-add-expense-cat" class="category-add-form">
+                            <input type="text" id="input-add-expense-cat" placeholder="Tambah kategori pengeluaran..." required autocomplete="off" aria-label="Tambah kategori pengeluaran">
+                            <button type="submit" class="btn-primary btn-small">Tambah</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-divider" aria-hidden="true"></div>
+
+                    <div class="settings-group">
+                        <h4 class="category-group-title income">Pemasukan</h4>
+                        <ul id="income-category-list" class="category-items" aria-label="Daftar kategori pemasukan"></ul>
+                        <form id="form-add-income-cat" class="category-add-form">
+                            <input type="text" id="input-add-income-cat" placeholder="Tambah kategori pemasukan..." required autocomplete="off" aria-label="Tambah kategori pemasukan">
+                            <button type="submit" class="btn-primary btn-small">Tambah</button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Submenu 3: Dompet -->
+            <div id="submenu-dompet" class="settings-submenu-view hidden" data-submenu-id="dompet">
+                <div class="settings-submenu-header">
+                    <button type="button" class="btn-icon btn-submenu-back" aria-label="Kembali ke Pengaturan" title="Kembali ke Pengaturan">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <h2 class="settings-submenu-title">Dompet</h2>
+                </div>
+                <section class="settings-card" aria-labelledby="wallet-section-title">
+                    <div class="settings-card-header">
+                        <h3 id="wallet-section-title" class="card-title">Dompet</h3>
+                        <p class="settings-card-desc">Kelola dompet atau rekening sumber dana (misal: Tunai, Rekening Bank, E-Wallet).</p>
+                    </div>
+                    <ul id="wallet-settings-list" class="category-items" aria-label="Daftar dompet"></ul>
+                    <form id="form-add-wallet" class="category-add-form wallet-add-form">
+                        <input type="text" id="input-add-wallet" placeholder="Nama dompet baru..." required autocomplete="off" aria-label="Nama dompet baru">
+                        <select id="select-add-wallet-currency" class="wallet-currency-select" aria-label="Pilih mata uang dompet baru">
+                            <option value="IDR" selected>Rupiah (IDR)</option>
+                            <option value="JPY">Yen (JPY)</option>
+                            <option value="USD">Dolar (USD)</option>
+                        </select>
+                        <button type="submit" class="btn-primary btn-small">Tambah Dompet</button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Submenu 4: Budget -->
+            <div id="submenu-budget" class="settings-submenu-view hidden" data-submenu-id="budget">
+                <div class="settings-submenu-header">
+                    <button type="button" class="btn-icon btn-submenu-back" aria-label="Kembali ke Pengaturan" title="Kembali ke Pengaturan">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <h2 class="settings-submenu-title">Budget</h2>
+                </div>
+                <section class="settings-card" aria-labelledby="budget-section-title">
+                    <div class="settings-card-header">
+                        <h3 id="budget-section-title" class="card-title">Budget Pengeluaran Bulanan</h3>
+                        <p class="settings-card-desc">Batas pengeluaran per bulan untuk tiap kategori (berlaku terus setiap bulan).</p>
+                    </div>
+                    <ul id="budget-settings-list" class="category-items" aria-label="Daftar budget per kategori"></ul>
+                    <form id="form-set-budget" class="budget-add-form">
+                        <div class="budget-form-row">
+                            <select id="select-budget-cat" required aria-label="Pilih kategori pengeluaran untuk budget">
+                                <option value="" disabled selected>Pilih kategori pengeluaran</option>
+                            </select>
+                            <input type="text" inputmode="numeric" id="input-budget-amount" placeholder="Batas bulanan (Rp)..." required aria-label="Batas bulanan dalam rupiah" autocomplete="off">
+                            <button type="submit" class="btn-primary btn-small">Simpan Budget</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Submenu 5: Data -->
+            <div id="submenu-data" class="settings-submenu-view hidden" data-submenu-id="data">
+                <div class="settings-submenu-header">
+                    <button type="button" class="btn-icon btn-submenu-back" aria-label="Kembali ke Pengaturan" title="Kembali ke Pengaturan">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <h2 class="settings-submenu-title">Data</h2>
+                </div>
+                <section class="settings-card" aria-labelledby="data-section-title">
+                    <div class="settings-card-header">
+                        <h3 id="data-section-title" class="card-title">Cadangan dan Pemulihan</h3>
+                        <p class="settings-card-desc">Ekspor dan impor data transaksi lokal dalam format JSON atau CSV.</p>
+                    </div>
                     <div class="data-account-actions">
-                        <button type="button" id="btn-login" class="btn-primary btn-small">Login Google</button>
-                        <button type="button" id="btn-sync-now" class="btn-secondary btn-small hidden">Sinkron</button>
-                        <button type="button" id="btn-logout" class="btn-secondary btn-small hidden">Logout</button>
                         <button type="button" id="btn-export" class="btn-secondary btn-small">Ekspor JSON</button>
+                        <button type="button" id="btn-export-csv" class="btn-secondary btn-small">Ekspor CSV</button>
                         <button type="button" id="btn-import-json" class="btn-secondary btn-small">Impor JSON</button>
                         <input type="file" id="input-import-json" accept=".json,application/json" class="hidden" aria-label="Pilih file JSON untuk impor">
-                        <button type="button" id="btn-export-csv" class="btn-secondary btn-small">Ekspor CSV</button>
+                    </div>
+
+                    <div class="settings-divider" aria-hidden="true"></div>
+
+                    <div class="settings-card-header">
+                        <h3 class="card-title">Data Contoh (Dummy)</h3>
+                        <p class="settings-card-desc">Isi data contoh untuk mencoba fitur aplikasi, atau bersihkan kapan saja.</p>
+                    </div>
+                    <div class="data-account-actions">
                         <button type="button" id="btn-fill-dummy" class="btn-secondary btn-small">Isi Data Contoh</button>
                         <button type="button" id="btn-clear-dummy" class="btn-secondary btn-small">Hapus Data Contoh</button>
-                        <button type="button" id="btn-install" class="btn-primary btn-small hidden">Install Aplikasi</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Submenu 6: Akun dan Sinkron -->
+            <div id="submenu-akun" class="settings-submenu-view hidden" data-submenu-id="akun">
+                <div class="settings-submenu-header">
+                    <button type="button" class="btn-icon btn-submenu-back" aria-label="Kembali ke Pengaturan" title="Kembali ke Pengaturan">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <h2 class="settings-submenu-title">Akun dan Sinkron</h2>
+                </div>
+                <section class="settings-card" aria-labelledby="data-account-title">
+                    <div class="settings-card-header">
+                        <h3 id="data-account-title" class="card-title">Akun dan Sinkronisasi</h3>
+                        <p class="settings-card-desc">Cadangan data lokal dan sinkronisasi otomatis dengan Google Drive.</p>
+                    </div>
+                    <div class="data-account-content">
+                        <p id="settings-sync-status" class="sync-status" role="status">Belum login. Data hanya tersimpan di perangkat ini.</p>
+                        <div class="data-account-actions">
+                            <button type="button" id="btn-login" class="btn-primary btn-small">Login Google</button>
+                            <button type="button" id="btn-sync-now" class="btn-secondary btn-small hidden">Sinkron</button>
+                            <button type="button" id="btn-logout" class="btn-secondary btn-small hidden">Logout</button>
+                            <button type="button" id="btn-install" class="btn-primary btn-small hidden">Install Aplikasi</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Submenu 7: Tentang -->
+            <div id="submenu-tentang" class="settings-submenu-view hidden" data-submenu-id="tentang">
+                <div class="settings-submenu-header">
+                    <button type="button" class="btn-icon btn-submenu-back" aria-label="Kembali ke Pengaturan" title="Kembali ke Pengaturan">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <h2 class="settings-submenu-title">Tentang</h2>
+                </div>
+                <section class="settings-card" aria-labelledby="about-section-title">
+                    <div class="settings-card-header">
+                        <h3 id="about-section-title" class="card-title">Mizan Okane</h3>
+                        <p class="settings-card-desc">Aplikasi pencatat keuangan pribadi offline-first yang aman, tanpa server pihak ketiga, dan data tersimpan di perangkat Anda sendiri.</p>
                     </div>
                     <div class="settings-divider" aria-hidden="true"></div>
-                    <div class="data-account-links">
-                        <a href="privasi.html" class="footer-link">Kebijakan Privasi</a>
-                        <span class="footer-separator" aria-hidden="true">&bull;</span>
-                        <a href="syarat.html" class="footer-link">Syarat dan Ketentuan</a>
+                    <div class="settings-about-links">
+                        <a href="privasi.html" class="settings-about-link">
+                            <span>Kebijakan Privasi</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </a>
+                        <a href="syarat.html" class="settings-about-link">
+                            <span>Syarat dan Ketentuan</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </a>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <!-- 7. Zona Bahaya -->
-            <section id="danger-zone" class="settings-card" aria-labelledby="danger-zone-title">
-                <div class="settings-card-header">
-                    <h2 id="danger-zone-title" class="card-title">Zona Bahaya</h2>
-                    <p class="settings-card-desc">Hapus seluruh data transaksi dari perangkat ini dan sinkronisasi.</p>
+            <!-- Submenu 8: Zona Bahaya -->
+            <div id="submenu-bahaya" class="settings-submenu-view hidden" data-submenu-id="bahaya">
+                <div class="settings-submenu-header">
+                    <button type="button" class="btn-icon btn-submenu-back" aria-label="Kembali ke Pengaturan" title="Kembali ke Pengaturan">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <h2 class="settings-submenu-title">Zona Bahaya</h2>
                 </div>
-                <div class="danger-zone-actions">
-                    <button type="button" id="btn-delete-all-data" class="btn-danger btn-small">Hapus Semua Data</button>
-                </div>
-            </section>
+                <section id="danger-zone" class="settings-card" aria-labelledby="danger-zone-title">
+                    <div class="settings-card-header">
+                        <h3 id="danger-zone-title" class="card-title">Zona Bahaya</h3>
+                        <p class="settings-card-desc">Hapus seluruh data transaksi dari perangkat ini dan sinkronisasi. Tindakan ini tidak dapat dibatalkan.</p>
+                    </div>
+                    <div class="danger-zone-actions">
+                        <button type="button" id="btn-delete-all-data" class="btn-danger btn-small">Hapus Semua Data</button>
+                    </div>
+                </section>
+            </div>
         </main>
 
         <!-- 5. Tombol Melayang Tambah Transaksi -->

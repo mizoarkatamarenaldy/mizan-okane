@@ -269,6 +269,37 @@ function switchTab(tabId) {
         renderTimbangan();
     }
 
+    if (tabId === 'pengaturan') {
+        closeSettingsSubmenu();
+    }
+
+    window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+let activeSettingsSubmenu = null;
+
+export function openSettingsSubmenu(submenuId) {
+    activeSettingsSubmenu = submenuId;
+    const mainView = document.getElementById('settings-main-view');
+    if (mainView) {
+        mainView.classList.add('hidden');
+    }
+    document.querySelectorAll('.settings-submenu-view').forEach(view => {
+        const isMatch = view.dataset.submenuId === submenuId;
+        view.classList.toggle('hidden', !isMatch);
+    });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+export function closeSettingsSubmenu() {
+    activeSettingsSubmenu = null;
+    document.querySelectorAll('.settings-submenu-view').forEach(view => {
+        view.classList.add('hidden');
+    });
+    const mainView = document.getElementById('settings-main-view');
+    if (mainView) {
+        mainView.classList.remove('hidden');
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
@@ -308,6 +339,12 @@ window.handleAndroidBack = function() {
     if (formScreen && !formScreen.classList.contains('hidden')) {
         resetForm();
         closeFormScreen();
+        return true;
+    }
+
+    // 2b. Jika sedang berada di submenu Pengaturan, kembali ke daftar Pengaturan
+    if (currentActiveTab === 'pengaturan' && activeSettingsSubmenu) {
+        closeSettingsSubmenu();
         return true;
     }
 
@@ -2772,7 +2809,12 @@ function render() {
             `;
             const btnEmptyWallet = document.getElementById('btn-empty-wallet');
             if (btnEmptyWallet) {
-                btnEmptyWallet.addEventListener('click', () => switchTab('pengaturan'));
+                btnEmptyWallet.addEventListener('click', () => {
+                    recordTabNavigation('pengaturan');
+                    window.location.hash = 'pengaturan';
+                    switchTab('pengaturan');
+                    openSettingsSubmenu('dompet');
+                });
             }
         } else {
             let balancesHtml = '';
@@ -3742,7 +3784,12 @@ function renderBudgetSection() {
         `;
         const btnEmptyBudget = document.getElementById('btn-empty-budget');
         if (btnEmptyBudget) {
-            btnEmptyBudget.addEventListener('click', () => switchTab('pengaturan'));
+            btnEmptyBudget.addEventListener('click', () => {
+                recordTabNavigation('pengaturan');
+                window.location.hash = 'pengaturan';
+                switchTab('pengaturan');
+                openSettingsSubmenu('budget');
+            });
         }
         if (budgetSummaryBanner) {
             budgetSummaryBanner.innerHTML = '';
@@ -5882,6 +5929,22 @@ async function init() {
             colorSchemeMedia.addListener(onSystemThemeChange);
         }
     }
+
+    // Inisialisasi navigasi kelompok dan submenu Pengaturan
+    document.querySelectorAll('.settings-menu-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const submenu = row.dataset.submenu;
+            if (submenu) {
+                openSettingsSubmenu(submenu);
+            }
+        });
+    });
+
+    document.querySelectorAll('.btn-submenu-back').forEach(btn => {
+        btn.addEventListener('click', () => {
+            closeSettingsSubmenu();
+        });
+    });
 
     // Sinkron dimulai setelah data lokal tampil, jadi app tetap jalan walau offline atau belum login.
     initSync({ onState: renderSyncState, onRemoteApplied: loadData })
