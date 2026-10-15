@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Rapikan dokumen ke folder dev
+- Ditambah: Folder `dev/` sebagai tempat terpusat untuk dokumen rencana, aturan, dan spesifikasi.
+- Ditambah: Berkas `dev/RULES.md` memuat aturan kerja dan alur commit/push untuk agent yang dipindahkan dari `PLAN.md` dengan penyesuaian jalur file dan aturan dua tempat untuk penulisan fitur baru.
+- Ditambah: Berkas `dev/PLANSPEC.md` memuat spesifikasi lengkap dan sub-poin dari setiap item tahap dengan judul yang sama persis dengan judul singkat di `dev/PLAN.md`.
+- Diubah: Memindahkan `PLAN.md`, `CHANGELOG.md`, dan `DESIGN.md` ke folder `dev/` (`dev/PLAN.md`, `dev/CHANGELOG.md`, `dev/DESIGN.md`) menggunakan `git mv`.
+- Diubah: Berkas `dev/PLAN.md` dirampingkan hanya menyisakan judul, petunjuk berkas, keputusan terkunci, versi 1, dan daftar tahap ringkas (judul singkat dan checkbox) tanpa mengubah status centang.
+
 ## 2026-10-15: Tahap 5: Pengaturan per kategori (submenu)
 - Ditambah: Restrukturisasi halaman Pengaturan menjadi daftar kelompok baris rapi dengan ikon garis outline, nama kelompok, penjelasan satu baris di bawahnya, dan panah kanan tanpa kartu bersarang (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Submenu terpisah untuk masing-masing kelompok pengaturan: Tampilan (tema, format jam), Kategori (pengeluaran, pemasukan, sub kategori), Dompet (kelola dompet, mata uang), Budget (batas pengeluaran bulanan), Data (ekspor CSV/JSON, impor JSON, data contoh), Akun dan sinkron (Google Drive), Tentang (kebijakan privasi, syarat dan ketentuan), dan Zona bahaya (hapus semua data) (`index.html`, `css/style.css`, `js/app.js`).
