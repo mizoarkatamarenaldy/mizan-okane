@@ -71,6 +71,15 @@
             <!-- Hero: Total Saldo dan Ringkasan Bulan Ini -->
             <section class="summary" aria-label="Ringkasan Saldo">
                 <div class="summary-balance summary-item balance">
+                    <div class="budget-month-controls summary-month-controls" role="group" aria-label="Pilih bulan saldo beranda">
+                        <button type="button" id="btn-beranda-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <span id="beranda-month-label" class="budget-month-label summary-month-label" aria-live="polite">Oktober 2026</span>
+                        <button type="button" id="btn-beranda-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya" disabled aria-disabled="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
                     <span class="summary-balance-label">Total Saldo</span>
                     <strong id="total-balance" class="summary-balance-amount tabular-nums">Rp 0</strong>
                 </div>

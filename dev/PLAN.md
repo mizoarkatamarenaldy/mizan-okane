@@ -68,3 +68,4 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Data contoh (dummy)
   - [x] Hapus semua data
   - [x] Pengaturan per kategori
+  - [x] Navigasi bulan di kartu saldo Beranda

@@ -185,3 +185,13 @@ tombol di Pengaturan, di bagian "Zona bahaya". Semua transaksi asli di-soft dele
 - Tombol back Android: dari submenu kembali ke daftar Pengaturan, dari daftar Pengaturan ikut aturan back yang sudah ada. Kebijakan Privasi dan Syarat dan Ketentuan tetap kembali ke Pengaturan. Perilaku web/PWA tidak rusak.
 - Semua teks berbahasa Indonesia. Target sentuh minimal 44x44px.
 - Berjalan juga tanpa login Google.
+
+## Navigasi bulan di kartu saldo Beranda
+1. Di kartu saldo Beranda, tambahkan pemilih bulan di atas tulisan "TOTAL SALDO": tombol bulan sebelumnya, nama bulan dan tahun di tengah (contoh: "Oktober 2026"), tombol bulan sesudahnya.
+2. Saat pertama dibuka, bulan yang tampil adalah bulan berjalan.
+3. "Total Saldo" untuk bulan terpilih = saldo posisi akhir bulan itu, yaitu jumlah semua transaksi dari awal sampai akhir bulan terpilih, dihitung per mata uang (Rupiah, Yen, USD) seperti tampilan sekarang. Transaksi dengan penanda "terhapus" tidak dihitung. Transfer antar dompet tetap diperlakukan seperti perhitungan saldo yang sudah ada.
+4. "Pemasukan" dan "Pengeluaran" di kartu yang sama juga mengikuti bulan terpilih.
+5. Tombol bulan sesudahnya dinonaktifkan kalau bulan yang tampil sudah bulan berjalan. Tombol bulan sebelumnya tidak dibatasi.
+6. Kalau sudah ada fungsi atau komponen pemilih bulan di halaman lain (misalnya Statistik), pakai ulang, jangan buat baru.
+7. Bagian "Timbangan Bulan Ini" tidak diubah.
+8. Pilihan bulan tidak perlu disimpan, tiap buka aplikasi kembali ke bulan berjalan.

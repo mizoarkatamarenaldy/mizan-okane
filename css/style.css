@@ -721,6 +721,15 @@ p {
     text-align: center;
 }
 
+.summary-month-controls {
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.summary-month-label {
+    min-width: 140px;
+}
+
 .summary-balance-label,
 .summary-item.balance span {
     font-size: var(--font-size-small, 12px);

@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Navigasi bulan di kartu saldo Beranda
+- Ditambah: Pemilih bulan di kartu saldo Beranda di atas tulisan "TOTAL SALDO" dengan tombol bulan sebelumnya, nama bulan dan tahun di tengah (format Indonesia penuh, contoh: "Oktober 2026"), serta tombol bulan sesudahnya (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Penonaktifan tombol bulan sesudahnya jika bulan yang tampil adalah bulan berjalan, serta tombol bulan sebelumnya yang tidak dibatasi (`js/app.js`).
+- Ditambah: Fungsi `getBerandaMonthSummary` untuk menghitung posisi saldo akhir bulan terpilih (akumulasi seluruh transaksi dari awal hingga akhir bulan terpilih) per mata uang (Rupiah, Yen, USD), serta total pemasukan dan pengeluaran khusus pada bulan terpilih dengan mengabaikan transaksi terhapus (`js/app.js`).
+- Diubah: Pilihan bulan kembali ke bulan berjalan setiap kali aplikasi dibuka tanpa disimpan ke penyimpanan lokal, serta bagian "Timbangan Bulan Ini" tetap tidak diubah (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v41` (`sw.js`).
+
 ## 2026-10-15: Perketat petunjuk baca RULES dan PLANSPEC
 - Diubah: Memperbarui baris petunjuk di `dev/PLAN.md` tepat di bawah judul agar mewajibkan membaca `dev/RULES.md` sebelum mengerjakan apa pun serta merujuk spesifikasi ke `dev/PLANSPEC.md` dan desain ke `dev/DESIGN.md`.
 - Diubah: Memperbarui aturan kerja di `dev/RULES.md` mengenai kewajiban membaca `dev/RULES.md` dan `dev/PLAN.md` di awal sesi, membaca `dev/PLANSPEC.md` hanya pada item yang dikerjakan, ketentuan satu baris checkbox di `dev/PLAN.md` dengan spek di `dev/PLANSPEC.md`, serta prioritas spek jika berbeda dengan `dev/PLAN.md`.

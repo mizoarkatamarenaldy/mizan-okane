@@ -50,6 +50,9 @@ const btnFormBack = document.getElementById('btn-form-back');
 const settingsSyncStatusEl = document.getElementById('settings-sync-status');
 
 const filterWalletSelect = document.getElementById('filter-wallet');
+const berandaMonthLabel = document.getElementById('beranda-month-label');
+const btnBerandaPrevMonth = document.getElementById('btn-beranda-prev-month');
+const btnBerandaNextMonth = document.getElementById('btn-beranda-next-month');
 const totalBalanceEl = document.getElementById('total-balance');
 const totalIncomeEl = document.getElementById('total-income');
 const totalExpenseEl = document.getElementById('total-expense');
@@ -158,6 +161,7 @@ const LAST_WALLET_KEY = 'mizan-okane:last-wallet-id';
 let currentTimeFormat = DEFAULT_TIME_FORMAT;
 let currentChartType = 'expense';
 let currentDonutType = 'expense';
+let selectedBerandaMonth = '';
 let selectedDonutMonth = '';
 let activeDonutCategory = null;
 let currentStatsCurrency = 'IDR';
@@ -2733,7 +2737,103 @@ function createTxItemElement(tx, filterWallet) {
     return txEl;
 }
 
-function render() {
+export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurrencies = ['IDR']) {
+    const totalBalanceByCurrency = new Map();
+    const incomeByCurrency = new Map();
+    const expenseByCurrency = new Map();
+
+    for (const c of activeCurrencies) {
+        totalBalanceByCurrency.set(c, 0);
+        incomeByCurrency.set(c, 0);
+        expenseByCurrency.set(c, 0);
+    }
+
+    for (const tx of transactions || []) {
+        if (tx.deleted || !(tx.amount > 0) || !tx.date) continue;
+        const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
+        if (!match) continue;
+        const txMonth = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+        const curr = getTransactionCurrency(tx);
+
+        if (txMonth <= targetMonthKey) {
+            if (tx.type === 'income') {
+                totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) + tx.amount);
+            } else if (tx.type === 'expense') {
+                totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) - tx.amount);
+            }
+        }
+
+        if (txMonth === targetMonthKey) {
+            if (tx.type === 'income') {
+                incomeByCurrency.set(curr, (incomeByCurrency.get(curr) || 0) + tx.amount);
+            } else if (tx.type === 'expense') {
+                expenseByCurrency.set(curr, (expenseByCurrency.get(curr) || 0) + tx.amount);
+            }
+        }
+    }
+
+    return {
+        totalBalanceByCurrency,
+        incomeByCurrency,
+        expenseByCurrency
+    };
+}
+
+function shiftBerandaMonth(delta) {
+    if (!selectedBerandaMonth) {
+        selectedBerandaMonth = getLocalYearMonthString();
+    }
+    const currentMonth = getLocalYearMonthString();
+    if (delta > 0 && selectedBerandaMonth >= currentMonth) {
+        return;
+    }
+    const [yStr, mStr] = selectedBerandaMonth.split('-');
+    let y = parseInt(yStr, 10);
+    let m = parseInt(mStr, 10) + delta;
+    if (m < 1) {
+        m = 12;
+        y--;
+    } else if (m > 12) {
+        m = 1;
+        y++;
+    }
+    const nextMonthStr = `${y}-${String(m).padStart(2, '0')}`;
+    if (delta > 0 && nextMonthStr > currentMonth) {
+        selectedBerandaMonth = currentMonth;
+    } else {
+        selectedBerandaMonth = nextMonthStr;
+    }
+    renderSummaryCard();
+}
+
+function renderSummaryCard() {
+    if (!totalBalanceEl || !totalIncomeEl || !totalExpenseEl) return;
+
+    if (!selectedBerandaMonth) {
+        selectedBerandaMonth = getLocalYearMonthString();
+    }
+    const currentMonth = getLocalYearMonthString();
+    if (selectedBerandaMonth > currentMonth) {
+        selectedBerandaMonth = currentMonth;
+    }
+
+    if (berandaMonthLabel) {
+        const [yStr, mStr] = selectedBerandaMonth.split('-');
+        const mNum = parseInt(mStr, 10);
+        const monthName = INDO_MONTHS_FULL[mNum - 1] || '';
+        berandaMonthLabel.textContent = `${monthName} ${yStr}`;
+    }
+
+    if (btnBerandaNextMonth) {
+        const isCurrentOrFuture = selectedBerandaMonth >= currentMonth;
+        btnBerandaNextMonth.disabled = isCurrentOrFuture;
+        if (isCurrentOrFuture) {
+            btnBerandaNextMonth.setAttribute('aria-disabled', 'true');
+        } else {
+            btnBerandaNextMonth.removeAttribute('aria-disabled');
+        }
+    }
+
     const activeWallets = getActiveWallets();
     const activeCurrencies = [];
     if (activeWallets.some(w => (w.currency || 'IDR') === 'IDR')) activeCurrencies.push('IDR');
@@ -2741,26 +2841,58 @@ function render() {
     if (activeWallets.some(w => w.currency === 'USD')) activeCurrencies.push('USD');
     if (activeCurrencies.length === 0) activeCurrencies.push('IDR');
 
+    const { totalBalanceByCurrency, incomeByCurrency, expenseByCurrency } =
+        getBerandaMonthSummary(currentTransactions, selectedBerandaMonth, activeCurrencies);
+
+    if (activeCurrencies.length === 1) {
+        const c = activeCurrencies[0];
+        let bal = totalBalanceByCurrency.get(c) || 0;
+        let inc = incomeByCurrency.get(c) || 0;
+        let exp = expenseByCurrency.get(c) || 0;
+        if (c === 'USD') {
+            bal = Math.round(bal * 100) / 100;
+            inc = Math.round(inc * 100) / 100;
+            exp = Math.round(exp * 100) / 100;
+        }
+        totalBalanceEl.textContent = currencyFormatter.format(bal, c);
+        totalIncomeEl.textContent = '+' + currencyFormatter.format(inc, c);
+        totalExpenseEl.textContent = '−' + currencyFormatter.format(exp, c);
+    } else {
+        totalBalanceEl.innerHTML = activeCurrencies.map(c => {
+            let bal = totalBalanceByCurrency.get(c) || 0;
+            if (c === 'USD') bal = Math.round(bal * 100) / 100;
+            return `<span class="summary-balance-line">${escapeHTML(currencyFormatter.format(bal, c))}</span>`;
+        }).join('');
+
+        totalIncomeEl.innerHTML = activeCurrencies.map(c => {
+            let inc = incomeByCurrency.get(c) || 0;
+            if (c === 'USD') inc = Math.round(inc * 100) / 100;
+            return `<span class="summary-item-line">+${escapeHTML(currencyFormatter.format(inc, c))}</span>`;
+        }).join('');
+
+        totalExpenseEl.innerHTML = activeCurrencies.map(c => {
+            let exp = expenseByCurrency.get(c) || 0;
+            if (c === 'USD') exp = Math.round(exp * 100) / 100;
+            return `<span class="summary-item-line">−${escapeHTML(currencyFormatter.format(exp, c))}</span>`;
+        }).join('');
+    }
+}
+
+function render() {
+    renderSummaryCard();
+
+    const activeWallets = getActiveWallets();
     const walletBalances = new Map();
     for (const w of activeWallets) {
         walletBalances.set(w.id, 0);
-    }
-
-    const incomeByCurrency = new Map();
-    const expenseByCurrency = new Map();
-    for (const c of activeCurrencies) {
-        incomeByCurrency.set(c, 0);
-        expenseByCurrency.set(c, 0);
     }
 
     currentTransactions.forEach(tx => {
         const curr = getTransactionCurrency(tx);
         const wId = tx.walletId || DEFAULT_WALLET_ID;
         if (tx.type === 'income') {
-            incomeByCurrency.set(curr, (incomeByCurrency.get(curr) || 0) + tx.amount);
             walletBalances.set(wId, (walletBalances.get(wId) || 0) + tx.amount);
         } else if (tx.type === 'expense') {
-            expenseByCurrency.set(curr, (expenseByCurrency.get(curr) || 0) + tx.amount);
             walletBalances.set(wId, (walletBalances.get(wId) || 0) - tx.amount);
         } else if (tx.type === 'transfer') {
             const fromId = tx.walletId || DEFAULT_WALLET_ID;
@@ -2771,33 +2903,6 @@ function render() {
             }
         }
     });
-
-    if (activeCurrencies.length === 1) {
-        const c = activeCurrencies[0];
-        const inc = incomeByCurrency.get(c) || 0;
-        const exp = expenseByCurrency.get(c) || 0;
-        const bal = inc - exp;
-        totalBalanceEl.textContent = currencyFormatter.format(bal, c);
-        totalIncomeEl.textContent = '+' + currencyFormatter.format(inc, c);
-        totalExpenseEl.textContent = '−' + currencyFormatter.format(exp, c);
-    } else {
-        totalBalanceEl.innerHTML = activeCurrencies.map(c => {
-            const inc = incomeByCurrency.get(c) || 0;
-            const exp = expenseByCurrency.get(c) || 0;
-            const bal = inc - exp;
-            return `<span class="summary-balance-line">${escapeHTML(currencyFormatter.format(bal, c))}</span>`;
-        }).join('');
-
-        totalIncomeEl.innerHTML = activeCurrencies.map(c => {
-            const inc = incomeByCurrency.get(c) || 0;
-            return `<span class="summary-item-line">+${escapeHTML(currencyFormatter.format(inc, c))}</span>`;
-        }).join('');
-
-        totalExpenseEl.innerHTML = activeCurrencies.map(c => {
-            const exp = expenseByCurrency.get(c) || 0;
-            return `<span class="summary-item-line">−${escapeHTML(currencyFormatter.format(exp, c))}</span>`;
-        }).join('');
-    }
 
     if (walletBalancesContainer) {
         if (activeWallets.length === 0) {
@@ -5475,6 +5580,7 @@ async function init() {
         currentCategories = await getCategories();
         currentBudgets = await getBudgets();
         currentWallets = await getWallets();
+        selectedBerandaMonth = getLocalYearMonthString();
         selectedBudgetMonth = getLocalYearMonthString();
         selectedDonutMonth = getLocalYearMonthString();
         selectedTimbanganMonth = getLocalYearMonthString();
@@ -5787,6 +5893,14 @@ async function init() {
                 renderDonutChart(currentTransactions);
             }
         });
+    }
+
+    if (btnBerandaPrevMonth) {
+        btnBerandaPrevMonth.addEventListener('click', () => shiftBerandaMonth(-1));
+    }
+
+    if (btnBerandaNextMonth) {
+        btnBerandaNextMonth.addEventListener('click', () => shiftBerandaMonth(1));
     }
 
     if (btnBerandaTimbangan) {
