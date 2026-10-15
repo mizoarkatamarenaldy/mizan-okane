@@ -195,3 +195,25 @@ tombol di Pengaturan, di bagian "Zona bahaya". Semua transaksi asli di-soft dele
 6. Kalau sudah ada fungsi atau komponen pemilih bulan di halaman lain (misalnya Statistik), pakai ulang, jangan buat baru.
 7. Bagian "Timbangan Bulan Ini" tidak diubah.
 8. Pilihan bulan tidak perlu disimpan, tiap buka aplikasi kembali ke bulan berjalan.
+
+## Mata uang opsional
+
+Tujuan: Yen dan Dolar tidak muncul kalau pengguna belum punya dompet dengan mata uang itu.
+
+Aturan:
+- Rupiah selalu tersedia.
+- Yen tampil hanya kalau ada minimal satu dompet Yen yang belum terhapus.
+- Dolar tampil hanya kalau ada minimal satu dompet Dolar yang belum terhapus.
+- Dompet yang sudah ditandai "terhapus" tidak dihitung.
+- Berlaku di semua tempat yang punya pilihan mata uang: kartu Budget di Beranda, dan tempat lain yang punya tombol Rupiah/Yen/Dolar. Cari tempat-tempat itu di kode.
+- Kalau hanya Rupiah yang tersedia, tombol pemilih mata uang disembunyikan sama sekali.
+- Kalau mata uang yang sedang dipilih jadi tidak tersedia (misalnya dompet Yen terakhir dihapus), otomatis kembali ke Rupiah.
+- Form buat dompet tetap menawarkan Rupiah, Yen, dan Dolar. Dari sinilah pengguna mengaktifkan mata uang baru.
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+- Tidak ada elemen tampilan baru, jadi tidak ada warna, font, atau animasi baru di luar dev/DESIGN.md.
+
+Cek manual:
+- Data baru tanpa dompet Yen/Dolar: pemilih mata uang tidak muncul.
+- Buat dompet Yen: tab Yen muncul. Hapus dompet itu: tab hilang dan tampilan kembali ke Rupiah.
+- Buat dompet Dolar: tab Dolar muncul.
+

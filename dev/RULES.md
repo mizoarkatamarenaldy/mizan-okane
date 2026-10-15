@@ -6,6 +6,7 @@
 - Saat mengerjakan item, ikuti spek di dev/PLANSPEC.md. Kalau spek dan PLAN.md berbeda, spek yang berlaku.
 - Kerjakan SATU tahap per sesi. Khusus Tahap 5, kerjakan SATU fitur per sesi. Jangan lompat ke tahap atau fitur lain.
 - Jangan ubah file di luar tahap yang sedang dikerjakan.
+- Dilarang menjalankan `npm run build`, `npx cap sync`, `npx cap copy`, atau perintah build apa pun. Folder www/ dan android/ hanya dibangun oleh pemilik. Dilarang `git add` pada kedua folder itu. Kalau keduanya muncul di `git status --short`, berhenti dan laporkan.
 - Bagian "Keputusan terkunci" tidak boleh diubah tanpa izin pemilik.
 - Jangan pernah menaruh data transaksi asli, token, kunci, atau file `.env` di repo. Repo ini publik, isinya hanya kode dan dokumen.
 - Di akhir tahap atau fitur, centang tahap atau fitur itu di dev/PLAN.md dan tambahkan satu entri di paling atas `dev/CHANGELOG.md` sesuai format di file itu. Tahap 5 baru dicentang setelah semua fiturnya tercentang. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
@@ -18,7 +19,7 @@ Sebelum mulai kerja, jalankan `git branch --show-current`. Hasilnya harus `main`
 Setelah tahap selesai:
 1. Jalankan `git status --short`. Kalau ada file yang muncul tapi bukan bagian dari tahap ini (selain dev/PLAN.md, dev/CHANGELOG.md, dev/PLANSPEC.md, dan dev/RULES.md), berhenti: jangan commit, jangan push, laporkan ke pemilik.
 2. Tambahkan entri di dev/CHANGELOG.md. Cantumkan file yang diubah berdasarkan hasil `git status --short`.
-3. Stage file dengan menyebut namanya satu per satu. Khusus folder android/, boleh disebut sebagai folder (git add android/) asalkan isinya sudah dicek lewat git status --short dan semuanya bagian dari tahap ini. Dilarang `git add -A` dan `git add .`
+3. Stage file dengan menyebut namanya satu per satu. Dilarang `git add -A` dan `git add .`
 4. Commit dengan pesan lengkap: judul singkat dengan format "tahap N: nama singkat", isi penjelasan, lalu dua baris trailer di bawah, dipisah satu baris kosong dari isi pesan.
 
    Co-authored-by: Claude <noreply@anthropic.com>

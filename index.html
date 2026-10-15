@@ -114,7 +114,7 @@
                 <div class="budget-header">
                     <h2 id="budget-section-title" class="card-title">Budget</h2>
                     <div class="budget-controls-wrapper">
-                        <div class="type-segmented-control budget-currency-control" role="radiogroup" aria-label="Pilihan mata uang budget">
+                        <div id="budget-currency-control" class="type-segmented-control budget-currency-control" role="radiogroup" aria-label="Pilihan mata uang budget">
                             <button type="button" id="btn-budget-currency-idr" class="chart-toggle-btn is-active" data-currency="IDR" aria-pressed="true">Rupiah</button>
                             <button type="button" id="btn-budget-currency-jpy" class="chart-toggle-btn" data-currency="JPY" aria-pressed="false">Yen</button>
                             <button type="button" id="btn-budget-currency-usd" class="chart-toggle-btn" data-currency="USD" aria-pressed="false">Dolar</button>
@@ -168,7 +168,7 @@
 
         <!-- 3. Halaman Statistik -->
         <main id="page-statistik" class="page-view hidden" role="tabpanel" aria-label="Statistik">
-            <div class="stats-currency-bar">
+            <div id="stats-currency-bar" class="stats-currency-bar">
                 <span class="stats-currency-label">Mata Uang</span>
                 <div class="type-segmented-control stats-currency-control" role="radiogroup" aria-label="Pilihan mata uang statistik">
                     <button type="button" id="btn-stats-currency-idr" class="chart-toggle-btn is-active" data-currency="IDR" aria-pressed="true">Rupiah</button>
@@ -236,7 +236,7 @@
             </div>
 
             <!-- Pilihan Mata Uang -->
-            <div class="stats-currency-bar">
+            <div id="timbangan-currency-bar" class="stats-currency-bar">
                 <span class="stats-currency-label">Mata Uang</span>
                 <div class="type-segmented-control timbangan-currency-control" role="radiogroup" aria-label="Pilihan mata uang timbangan">
                     <button type="button" id="btn-timbangan-currency-idr" class="chart-toggle-btn is-active" data-currency="IDR" aria-pressed="true">Rupiah</button>

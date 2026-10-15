@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Mata uang opsional
+- Ditambah: Template prompt untuk instruksi Antigravity (`dev/PROMPT.md`).
+- Ditambah: Fungsi `getAvailableCurrencies` untuk mendeteksi ketersediaan mata uang (Rupiah selalu tersedia, Yen jika ada minimal satu dompet Yen aktif yang belum terhapus, Dolar jika ada minimal satu dompet Dolar aktif yang belum terhapus) (`js/app.js`).
+- Ditambah: Atribut ID pada elemen pemilih mata uang di kartu budget Beranda (`budget-currency-control`), halaman Statistik (`stats-currency-bar`), dan halaman Timbangan (`timbangan-currency-bar`) (`index.html`).
+- Diubah: Menyembunyikan tombol Yen dan Dolar jika pengguna belum memiliki dompet aktif dengan mata uang tersebut, serta menyembunyikan kontrol pemilih mata uang sama sekali jika hanya Rupiah yang tersedia di kartu budget Beranda, halaman Statistik, dan halaman Timbangan (`js/app.js`, `index.html`).
+- Diubah: Mengembalikan pilihan mata uang secara otomatis ke Rupiah jika mata uang yang sedang dipilih menjadi tidak tersedia (misalnya saat dompet terakhir dengan mata uang tersebut dihapus) (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v42` (`sw.js`).
+- Diubah: Memperbarui aturan kerja larangan perintah build dan alur staging di `dev/RULES.md`, penambahan dan pencentangan item di `dev/PLAN.md`, serta spesifikasi fitur di `dev/PLANSPEC.md`.
+
 ## 2026-10-15: Navigasi bulan di kartu saldo Beranda
 - Ditambah: Pemilih bulan di kartu saldo Beranda di atas tulisan "TOTAL SALDO" dengan tombol bulan sebelumnya, nama bulan dan tahun di tengah (format Indonesia penuh, contoh: "Oktober 2026"), serta tombol bulan sesudahnya (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Penonaktifan tombol bulan sesudahnya jika bulan yang tampil adalah bulan berjalan, serta tombol bulan sebelumnya yang tidak dibatasi (`js/app.js`).

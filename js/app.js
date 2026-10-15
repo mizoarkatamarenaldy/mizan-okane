@@ -104,15 +104,18 @@ const inputAddIncomeCat = document.getElementById('input-add-income-cat');
 const btnStatsCurrencyIdr = document.getElementById('btn-stats-currency-idr');
 const btnStatsCurrencyJpy = document.getElementById('btn-stats-currency-jpy');
 const btnStatsCurrencyUsd = document.getElementById('btn-stats-currency-usd');
+const statsCurrencyBar = document.getElementById('stats-currency-bar') || document.querySelector('#page-statistik .stats-currency-bar');
 const btnBudgetCurrencyIdr = document.getElementById('btn-budget-currency-idr');
 const btnBudgetCurrencyJpy = document.getElementById('btn-budget-currency-jpy');
 const btnBudgetCurrencyUsd = document.getElementById('btn-budget-currency-usd');
+const budgetCurrencyControl = document.getElementById('budget-currency-control') || document.querySelector('.budget-currency-control');
 
 const btnBerandaTimbangan = document.getElementById('btn-beranda-timbangan');
 const btnTimbanganBack = document.getElementById('btn-timbangan-back');
 const btnTimbanganCurrencyIdr = document.getElementById('btn-timbangan-currency-idr');
 const btnTimbanganCurrencyJpy = document.getElementById('btn-timbangan-currency-jpy');
 const btnTimbanganCurrencyUsd = document.getElementById('btn-timbangan-currency-usd');
+const timbanganCurrencyBar = document.getElementById('timbangan-currency-bar') || document.querySelector('#page-timbangan .stats-currency-bar');
 const btnTimbanganPrevMonth = document.getElementById('btn-timbangan-prev-month');
 const btnTimbanganNextMonth = document.getElementById('btn-timbangan-next-month');
 const timbanganMonthLabel = document.getElementById('timbangan-month-label');
@@ -271,6 +274,10 @@ function switchTab(tabId) {
 
     if (tabId === 'timbangan') {
         renderTimbangan();
+    }
+
+    if (tabId === 'statistik') {
+        updateStatsCurrencyUI();
     }
 
     if (tabId === 'pengaturan') {
@@ -609,6 +616,18 @@ function getWalletName(walletId) {
     if (found && found.name) return found.name;
     if (id === DEFAULT_WALLET_ID) return DEFAULT_WALLET_NAME;
     return DEFAULT_WALLET_NAME;
+}
+
+export function getAvailableCurrencies() {
+    const activeWallets = getActiveWallets();
+    const currencies = ['IDR'];
+    if (activeWallets.some(w => w.currency === 'JPY')) {
+        currencies.push('JPY');
+    }
+    if (activeWallets.some(w => w.currency === 'USD')) {
+        currencies.push('USD');
+    }
+    return currencies;
 }
 
 export function getWalletCurrency(walletId) {
@@ -1509,6 +1528,25 @@ function getNiceCeiling(maxVal) {
 }
 
 function updateStatsCurrencyUI() {
+    const avail = getAvailableCurrencies();
+    if (!avail.includes(currentStatsCurrency)) {
+        currentStatsCurrency = 'IDR';
+    }
+
+    const hasJpy = avail.includes('JPY');
+    const hasUsd = avail.includes('USD');
+    const onlyIdr = avail.length === 1;
+
+    if (statsCurrencyBar) {
+        statsCurrencyBar.classList.toggle('hidden', onlyIdr);
+    }
+    if (btnStatsCurrencyJpy) {
+        btnStatsCurrencyJpy.classList.toggle('hidden', !hasJpy);
+    }
+    if (btnStatsCurrencyUsd) {
+        btnStatsCurrencyUsd.classList.toggle('hidden', !hasUsd);
+    }
+
     const isIdr = currentStatsCurrency === 'IDR';
     const isJpy = currentStatsCurrency === 'JPY';
     const isUsd = currentStatsCurrency === 'USD';
@@ -1527,6 +1565,25 @@ function updateStatsCurrencyUI() {
 }
 
 function updateBudgetCurrencyUI() {
+    const avail = getAvailableCurrencies();
+    if (!avail.includes(currentBudgetCurrency)) {
+        currentBudgetCurrency = 'IDR';
+    }
+
+    const hasJpy = avail.includes('JPY');
+    const hasUsd = avail.includes('USD');
+    const onlyIdr = avail.length === 1;
+
+    if (budgetCurrencyControl) {
+        budgetCurrencyControl.classList.toggle('hidden', onlyIdr);
+    }
+    if (btnBudgetCurrencyJpy) {
+        btnBudgetCurrencyJpy.classList.toggle('hidden', !hasJpy);
+    }
+    if (btnBudgetCurrencyUsd) {
+        btnBudgetCurrencyUsd.classList.toggle('hidden', !hasUsd);
+    }
+
     const isIdr = currentBudgetCurrency === 'IDR';
     const isJpy = currentBudgetCurrency === 'JPY';
     const isUsd = currentBudgetCurrency === 'USD';
@@ -1851,6 +1908,8 @@ function updateDonutTypeUI() {
 
 function renderDonutChart(transactions) {
     if (!donutContainer) return;
+
+    updateStatsCurrencyUI();
 
     if (!selectedDonutMonth) {
         selectedDonutMonth = getLocalYearMonthString();
@@ -2278,6 +2337,25 @@ function getWalletCurrentBalance(walletId) {
 }
 
 function updateTimbanganCurrencyUI() {
+    const avail = getAvailableCurrencies();
+    if (!avail.includes(currentTimbanganCurrency)) {
+        currentTimbanganCurrency = 'IDR';
+    }
+
+    const hasJpy = avail.includes('JPY');
+    const hasUsd = avail.includes('USD');
+    const onlyIdr = avail.length === 1;
+
+    if (timbanganCurrencyBar) {
+        timbanganCurrencyBar.classList.toggle('hidden', onlyIdr);
+    }
+    if (btnTimbanganCurrencyJpy) {
+        btnTimbanganCurrencyJpy.classList.toggle('hidden', !hasJpy);
+    }
+    if (btnTimbanganCurrencyUsd) {
+        btnTimbanganCurrencyUsd.classList.toggle('hidden', !hasUsd);
+    }
+
     const isIdr = currentTimbanganCurrency === 'IDR';
     const isJpy = currentTimbanganCurrency === 'JPY';
     const isUsd = currentTimbanganCurrency === 'USD';
@@ -5743,6 +5821,7 @@ async function init() {
 
     if (btnBudgetCurrencyJpy) {
         btnBudgetCurrencyJpy.addEventListener('click', () => {
+            if (!getAvailableCurrencies().includes('JPY')) return;
             if (currentBudgetCurrency !== 'JPY') {
                 currentBudgetCurrency = 'JPY';
                 renderBudgetSection();
@@ -5752,6 +5831,7 @@ async function init() {
 
     if (btnBudgetCurrencyUsd) {
         btnBudgetCurrencyUsd.addEventListener('click', () => {
+            if (!getAvailableCurrencies().includes('USD')) return;
             if (currentBudgetCurrency !== 'USD') {
                 currentBudgetCurrency = 'USD';
                 renderBudgetSection();
@@ -5772,6 +5852,7 @@ async function init() {
 
     if (btnStatsCurrencyJpy) {
         btnStatsCurrencyJpy.addEventListener('click', () => {
+            if (!getAvailableCurrencies().includes('JPY')) return;
             if (currentStatsCurrency !== 'JPY') {
                 currentStatsCurrency = 'JPY';
                 updateStatsCurrencyUI();
@@ -5783,6 +5864,7 @@ async function init() {
 
     if (btnStatsCurrencyUsd) {
         btnStatsCurrencyUsd.addEventListener('click', () => {
+            if (!getAvailableCurrencies().includes('USD')) return;
             if (currentStatsCurrency !== 'USD') {
                 currentStatsCurrency = 'USD';
                 updateStatsCurrencyUI();
@@ -5934,6 +6016,7 @@ async function init() {
 
     if (btnTimbanganCurrencyJpy) {
         btnTimbanganCurrencyJpy.addEventListener('click', () => {
+            if (!getAvailableCurrencies().includes('JPY')) return;
             if (currentTimbanganCurrency !== 'JPY') {
                 currentTimbanganCurrency = 'JPY';
                 renderTimbangan();
@@ -5943,6 +6026,7 @@ async function init() {
 
     if (btnTimbanganCurrencyUsd) {
         btnTimbanganCurrencyUsd.addEventListener('click', () => {
+            if (!getAvailableCurrencies().includes('USD')) return;
             if (currentTimbanganCurrency !== 'USD') {
                 currentTimbanganCurrency = 'USD';
                 renderTimbangan();
