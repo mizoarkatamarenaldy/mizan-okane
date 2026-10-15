@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Logo aplikasi
+- Ditambah: Berkas logo sumber `assets/icon-only.png`.
+- Ditambah: Berkas ikon web dan PWA baru `icons/favicon-32x32.png` dan `icons/apple-touch-icon.png`.
+- Ditambah: Tautan favicon 32x32 dan apple-touch-icon 180x180 pada tag `<head>` di `index.html`.
+- Diubah: Memperbarui ikon PWA standar 192x192 dan 512x512 purpose "any" (`icons/icon-192x192.png`, `icons/icon-512x512.png`) serta ikon maskable 192x192 dan 512x512 dengan logo di tengah 80% dan latar belakang warna sudut sumber (`icons/icon-192x192-maskable.png`, `icons/icon-512x512-maskable.png`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v44` dan menambahkan ikon favicon serta apple-touch-icon ke daftar precache `ASSETS_TO_CACHE` (`sw.js`).
+- Diubah: Menambahkan dan mencentang item di `dev/PLAN.md` serta menambahkan spesifikasi di `dev/PLANSPEC.md`.
+
 ## 2026-10-15: Beranda: sembunyikan budget dan dompet bila tidak perlu
 - Ditambah: Penanda ID `wallets-section` dan `budget-section` serta kelas bawaan `hidden` pada elemen kartu dompet dan kartu budget di Beranda (`index.html`).
 - Ditambah: Referensi DOM `walletsSection` dan `budgetSection` untuk mengatur visibilitas kartu di Beranda secara dinamis (`js/app.js`).

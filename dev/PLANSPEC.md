@@ -242,3 +242,30 @@ Cek manual:
 - Hapus semua budget: kartu Budget hilang lagi.
 - Punya 1 dompet: Beranda tidak menampilkan deretan kartu dompet.
 - Tambah dompet kedua: deretan kartu dompet muncul. Hapus sampai tersisa 1: deretan hilang lagi.
+
+## Logo aplikasi
+
+Tujuan: Memasang logo aplikasi di sisi web (PWA) supaya ikon install, tab browser, dan layar utama HP tidak lagi memakai ikon bawaan. Ikon APK dikerjakan pemilik secara manual dan bukan bagian item ini.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru di dalam aplikasi. Perubahan hanya pada ikon PWA, favicon, dan ikon layar utama iOS.
+
+Aturan:
+- Gambar sumber ada di assets/icon-only.png (PNG 1024x1024, sudah disiapkan pemilik). Jangan diubah atau ditimpa.
+- Buat ikon PNG ukuran 192x192 dan 512x512 untuk purpose "any".
+- Buat ikon maskable ukuran 192x192 dan 512x512. Logo diperkecil sekitar 80% dan ditaruh di tengah, sisanya diisi warna latar yang diambil dari piksel sudut gambar sumber.
+- Buat favicon PNG 32x32 dan apple-touch-icon 180x180, lalu tautkan keduanya di index.html.
+- Daftarkan semua ikon di manifest. Kalau sudah ada entri ikon lama, ganti dengan yang baru.
+- Naikkan versi cache service worker. Kalau service worker punya daftar file precache, masukkan file ikon baru ke daftar itu.
+- Cari sendiri lokasi manifest, index.html, dan service worker di folder sumber web. Jangan edit www/.
+- Untuk membuat ukuran-ukuran itu, pakai alat yang sudah ada di komputer atau perintah sekali jalan. Jangan tambah dependency di package.json dan jangan commit skrip pembuatnya.
+- Jangan sentuh android/. Jangan jalankan build apa pun.
+- Folder assets/ dan file ikon baru adalah bagian dari item ini, jadi boleh di-stage satu per satu lewat git add sesuai alur RULES.md.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka situs di browser, lihat tab: favicon baru muncul (muat ulang keras kalau masih ikon lama).
+- Di DevTools tab Application > Manifest: semua ikon terdaftar tanpa error, dan pratinjau maskable tidak terpotong.
+- Di HP atau PC yang sudah install PWA lama: setelah dibuka dua kali, ikon dan cache ter-update ke versi baru.

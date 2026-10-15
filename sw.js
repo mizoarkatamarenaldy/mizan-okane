@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mizan-v43';
+const CACHE_NAME = 'mizan-v44';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,7 +12,9 @@ const ASSETS_TO_CACHE = [
   './icons/icon-192x192.png',
   './icons/icon-512x512.png',
   './icons/icon-192x192-maskable.png',
-  './icons/icon-512x512-maskable.png'
+  './icons/icon-512x512-maskable.png',
+  './icons/favicon-32x32.png',
+  './icons/apple-touch-icon.png'
 ];
 
 // Request ke layanan Google (login dan Drive API) tidak boleh di-cache:
