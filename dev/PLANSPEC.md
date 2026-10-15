@@ -217,3 +217,28 @@ Cek manual:
 - Buat dompet Yen: tab Yen muncul. Hapus dompet itu: tab hilang dan tampilan kembali ke Rupiah.
 - Buat dompet Dolar: tab Dolar muncul.
 
+## Beranda: sembunyikan budget dan dompet bila tidak perlu
+
+Tujuan: Beranda tidak menampilkan elemen yang tidak berguna. Kartu Budget tidak muncul kalau belum ada budget, dan deretan dompet tidak muncul kalau dompetnya cuma satu.
+
+Tempat dan tampilan:
+- Halaman Beranda, kartu "Budget" (judul, navigasi bulan, teks "Belum ada budget yang diatur", tombol "Atur Budget").
+- Halaman Beranda, deretan kartu kecil dompet di bawah kartu saldo (contoh: "Cash Rp 0").
+- Halaman Pengaturan: kalau halaman "Budget" (tempat memilih kategori dan menyimpan batas bulanan) belum bisa dibuka dari Pengaturan, tambahkan satu baris menu "Budget" yang membuka halaman itu. Pakai gaya baris menu yang sudah ada di Pengaturan. Kalau sudah ada, jangan ubah apa pun di Pengaturan.
+
+Aturan:
+- Kartu Budget hanya tampil kalau ada minimal satu budget kategori yang tersimpan. Kalau belum ada, seluruh kartu (termasuk teks kosong dan tombol "Atur Budget") disembunyikan. Karena budget berlaku setiap bulan, aturan ini tidak bergantung pada bulan yang dilihat.
+- Halaman Budget harus selalu bisa dibuka dari Pengaturan, supaya budget pertama tetap bisa ditambahkan saat kartu Beranda tersembunyi.
+- Deretan kartu dompet di Beranda hanya tampil kalau jumlah dompet 2 atau lebih. Kalau cuma 1 dompet, deretannya disembunyikan.
+- Kartu saldo, tombol "Timbangan Bulan Ini", dan elemen Beranda lainnya tidak berubah.
+- Halaman lain (Statistik, Riwayat) tidak diubah.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Belum ada budget sama sekali: buka Beranda, kartu Budget tidak muncul. Buka Pengaturan, halaman Budget bisa dibuka.
+- Tambah satu budget dari halaman Budget, kembali ke Beranda: kartu Budget muncul. Pindah bulan: kartu tetap tampil.
+- Hapus semua budget: kartu Budget hilang lagi.
+- Punya 1 dompet: Beranda tidak menampilkan deretan kartu dompet.
+- Tambah dompet kedua: deretan kartu dompet muncul. Hapus sampai tersisa 1: deretan hilang lagi.

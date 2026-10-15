@@ -57,6 +57,7 @@ const totalBalanceEl = document.getElementById('total-balance');
 const totalIncomeEl = document.getElementById('total-income');
 const totalExpenseEl = document.getElementById('total-expense');
 const walletBalancesContainer = document.getElementById('wallet-balances');
+const walletsSection = document.getElementById('wallets-section') || document.querySelector('.wallets-section');
 
 const confirmDialog = document.getElementById('confirm-dialog');
 const confirmDialogTitle = document.getElementById('confirm-dialog-title');
@@ -93,6 +94,7 @@ const btnBudgetNextMonth = document.getElementById('btn-budget-next-month');
 const budgetMonthInput = document.getElementById('budget-month-input');
 const budgetSummaryBanner = document.getElementById('budget-summary-banner');
 const budgetListContainer = document.getElementById('budget-list');
+const budgetSection = document.getElementById('budget-section') || document.querySelector('.budget-section');
 
 const expenseCategoryList = document.getElementById('expense-category-list');
 const incomeCategoryList = document.getElementById('income-category-list');
@@ -2982,23 +2984,17 @@ function render() {
         }
     });
 
+    if (walletsSection) {
+        if (activeWallets.length < 2) {
+            walletsSection.classList.add('hidden');
+        } else {
+            walletsSection.classList.remove('hidden');
+        }
+    }
+
     if (walletBalancesContainer) {
-        if (activeWallets.length === 0) {
-            walletBalancesContainer.innerHTML = `
-                <div class="empty-state wallet-empty">
-                    <p class="empty-state-text">Belum ada dompet.</p>
-                    <button type="button" class="btn-action-outline" id="btn-empty-wallet">Tambah Dompet</button>
-                </div>
-            `;
-            const btnEmptyWallet = document.getElementById('btn-empty-wallet');
-            if (btnEmptyWallet) {
-                btnEmptyWallet.addEventListener('click', () => {
-                    recordTabNavigation('pengaturan');
-                    window.location.hash = 'pengaturan';
-                    switchTab('pengaturan');
-                    openSettingsSubmenu('dompet');
-                });
-            }
+        if (activeWallets.length < 2) {
+            walletBalancesContainer.innerHTML = '';
         } else {
             let balancesHtml = '';
             for (const w of activeWallets) {
@@ -3927,6 +3923,30 @@ export function getActiveMonthlyExpenses(transactions, targetMonthKey, currency 
 function renderBudgetSection() {
     if (!budgetListContainer) return;
 
+    const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
+    const budgetedCats = Object.keys(budgetMap).filter(cat => typeof budgetMap[cat] === 'number' && budgetMap[cat] > 0);
+
+    if (budgetSection) {
+        if (budgetedCats.length === 0) {
+            budgetSection.classList.add('hidden');
+            budgetListContainer.innerHTML = '';
+            if (budgetSummaryBanner) {
+                budgetSummaryBanner.innerHTML = '';
+                budgetSummaryBanner.classList.add('hidden');
+            }
+            return;
+        } else {
+            budgetSection.classList.remove('hidden');
+        }
+    } else if (budgetedCats.length === 0) {
+        budgetListContainer.innerHTML = '';
+        if (budgetSummaryBanner) {
+            budgetSummaryBanner.innerHTML = '';
+            budgetSummaryBanner.classList.add('hidden');
+        }
+        return;
+    }
+
     updateBudgetCurrencyUI();
 
     if (!selectedBudgetMonth) {
@@ -3948,32 +3968,6 @@ function renderBudgetSection() {
                 <p class="empty-state-text">Budget hanya tersedia untuk mata uang Rupiah.</p>
             </div>
         `;
-        if (budgetSummaryBanner) {
-            budgetSummaryBanner.innerHTML = '';
-            budgetSummaryBanner.classList.add('hidden');
-        }
-        return;
-    }
-
-    const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
-    const budgetedCats = Object.keys(budgetMap).filter(cat => typeof budgetMap[cat] === 'number' && budgetMap[cat] > 0);
-
-    if (budgetedCats.length === 0) {
-        budgetListContainer.innerHTML = `
-            <div class="empty-state">
-                <p class="empty-state-text">Belum ada budget yang diatur.</p>
-                <button type="button" class="btn-action-outline" id="btn-empty-budget">Atur Budget</button>
-            </div>
-        `;
-        const btnEmptyBudget = document.getElementById('btn-empty-budget');
-        if (btnEmptyBudget) {
-            btnEmptyBudget.addEventListener('click', () => {
-                recordTabNavigation('pengaturan');
-                window.location.hash = 'pengaturan';
-                switchTab('pengaturan');
-                openSettingsSubmenu('budget');
-            });
-        }
         if (budgetSummaryBanner) {
             budgetSummaryBanner.innerHTML = '';
             budgetSummaryBanner.classList.add('hidden');

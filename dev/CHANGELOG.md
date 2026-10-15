@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-15: Beranda: sembunyikan budget dan dompet bila tidak perlu
+- Ditambah: Penanda ID `wallets-section` dan `budget-section` serta kelas bawaan `hidden` pada elemen kartu dompet dan kartu budget di Beranda (`index.html`).
+- Ditambah: Referensi DOM `walletsSection` dan `budgetSection` untuk mengatur visibilitas kartu di Beranda secara dinamis (`js/app.js`).
+- Diubah: Menyembunyikan deretan kartu dompet di Beranda jika jumlah dompet aktif kurang dari 2 (hanya 1 dompet atau belum ada), dan menampilkannya hanya jika ada 2 dompet atau lebih (`js/app.js`).
+- Diubah: Menyembunyikan seluruh kartu Budget di Beranda jika belum ada kategori dengan batas budget yang tersimpan, dan menampilkannya hanya jika minimal satu budget kategori telah diatur (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v43` (`sw.js`).
+- Diubah: Menambahkan dan mencentang item di `dev/PLAN.md` serta menambahkan spesifikasi fitur di `dev/PLANSPEC.md`.
+
 ## 2026-10-15: Mata uang opsional
 - Ditambah: Template prompt untuk instruksi Antigravity (`dev/PROMPT.md`).
 - Ditambah: Fungsi `getAvailableCurrencies` untuk mendeteksi ketersediaan mata uang (Rupiah selalu tersedia, Yen jika ada minimal satu dompet Yen aktif yang belum terhapus, Dolar jika ada minimal satu dompet Dolar aktif yang belum terhapus) (`js/app.js`).

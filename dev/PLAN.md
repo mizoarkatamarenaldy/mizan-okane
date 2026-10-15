@@ -70,3 +70,4 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Pengaturan per kategori
   - [x] Navigasi bulan di kartu saldo Beranda
   - [x] Mata uang opsional
+  - [x] Beranda: sembunyikan budget dan dompet bila tidak perlu
