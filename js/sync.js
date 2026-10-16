@@ -1,7 +1,7 @@
 // Sinkron Google Drive (appDataFolder) dengan Google Identity Services token flow.
 // IndexedDB tetap sumber utama; modul ini hanya menyalin snapshot ke/dari Drive.
 // Access token hanya disimpan di memori (variabel JS), tidak pernah ke storage.
-import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta, getCategories, saveCategories, getBudgets, saveBudgets, getWallets, saveWallets } from './db.js';
+import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta, getCategories, saveCategories, getBudgets, saveBudgets, getWallets, saveWallets, getSettings, saveSettings } from './db.js';
 
 const CLIENT_ID = '663070681186-pjrnce0fcpjecvbf9o2fj99e59e3s0un.apps.googleusercontent.com';
 const SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
@@ -9,7 +9,7 @@ const GIS_SRC = 'https://accounts.google.com/gsi/client';
 const DRIVE_API = 'https://www.googleapis.com/drive/v3';
 const DRIVE_UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
 const FILE_NAME = 'mizan-okane-data.json';
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 const SYNC_DEBOUNCE_MS = 1500;
 const SILENT_TOKEN_TIMEOUT_MS = 15000;
 
@@ -263,10 +263,11 @@ function mergeWallets(localWallets, remoteWallets) {
     return Array.from(merged.values());
 }
 
-function buildPayload(transactions, categories, budgets, wallets) {
+function buildPayload(transactions, categories, budgets, wallets, settings) {
     const cleanTransactions = (transactions || []).filter(tx => !tx.dummy);
     const payload = {
         app: 'mizan-okane',
+        version: SCHEMA_VERSION,
         schemaVersion: SCHEMA_VERSION,
         exportedAt: new Date().toISOString(),
         transactions: cleanTransactions
@@ -280,11 +281,14 @@ function buildPayload(transactions, categories, budgets, wallets) {
     if (wallets) {
         payload.wallets = wallets;
     }
+    if (settings) {
+        payload.settings = settings;
+    }
     return JSON.stringify(payload);
 }
 
-async function uploadRemote(fileId, transactions, categories, budgets, wallets) {
-    const content = buildPayload(transactions, categories, budgets, wallets);
+async function uploadRemote(fileId, transactions, categories, budgets, wallets, settings) {
+    const content = buildPayload(transactions, categories, budgets, wallets, settings);
 
     if (fileId) {
         const res = await driveFetch(
@@ -343,14 +347,15 @@ async function runSync(force = null) {
     const localCategories = await getCategories();
     const localBudgets = await getBudgets();
     const localWallets = await getWallets();
+    const localSettings = await getSettings();
     const dirty = meta.syncedRev === null
-        ? (localReal.length > 0 || (localCategories.updatedAt || 0) > 0 || (localBudgets.updatedAt || 0) > 0 || localWallets.some(w => (w.updatedAt || 0) > 0))
+        ? (localReal.length > 0 || (localCategories.updatedAt || 0) > 0 || (localBudgets.updatedAt || 0) > 0 || localWallets.some(w => (w.updatedAt || 0) > 0) || (localSettings.updatedAt || 0) > 0)
         : meta.syncedRev !== revAtStart;
 
     const remoteFile = await findRemoteFile();
 
-    const push = async (categoriesToPush = localCategories, budgetsToPush = localBudgets, walletsToPush = localWallets) => {
-        const saved = await uploadRemote(remoteFile?.id || null, localReal, categoriesToPush, budgetsToPush, walletsToPush);
+    const push = async (categoriesToPush = localCategories, budgetsToPush = localBudgets, walletsToPush = localWallets, settingsToPush = localSettings) => {
+        const saved = await uploadRemote(remoteFile?.id || null, localReal, categoriesToPush, budgetsToPush, walletsToPush, settingsToPush);
         return { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };
     };
 
@@ -372,12 +377,20 @@ async function runSync(force = null) {
             const mergedWallets = mergeWallets(localWallets, remoteData.wallets);
             await saveWallets(mergedWallets);
         }
+        if (remoteData.settings && typeof remoteData.settings === 'object') {
+            if ((remoteData.settings.updatedAt || 0) > (localSettings.updatedAt || 0)) {
+                await saveSettings(remoteData.settings);
+                if (remoteData.settings.theme) {
+                    try { localStorage.setItem('mizan-theme', remoteData.settings.theme); } catch {}
+                }
+            }
+        }
         await listeners.onRemoteApplied();
         return { ...meta, syncedRev: revAtStart, remoteVersion: version, lastSyncAt: Date.now() };
     };
 
     if (force === 'local') {
-        meta = await push(localCategories, localBudgets, localWallets);
+        meta = await push(localCategories, localBudgets, localWallets, localSettings);
     } else if (force === 'remote') {
         if (!remoteFile) throw new Error('File di Drive sudah tidak ada. Ketuk Sinkron untuk mengunggah data perangkat ini.');
         const remoteData = await downloadRemote(remoteFile.id);
@@ -391,12 +404,18 @@ async function runSync(force = null) {
             const mergedWallets = mergeWallets(localWallets, remoteData.wallets);
             await saveWallets(mergedWallets);
         }
+        if (remoteData.settings && typeof remoteData.settings === 'object') {
+            await saveSettings(remoteData.settings);
+            if (remoteData.settings.theme) {
+                try { localStorage.setItem('mizan-theme', remoteData.settings.theme); } catch {}
+            }
+        }
         meta = await pull(remoteData, remoteFile.version);
     } else if (!remoteFile) {
-        meta = await push(localCategories, localBudgets, localWallets);
+        meta = await push(localCategories, localBudgets, localWallets, localSettings);
     } else if (remoteFile.version === meta.remoteVersion) {
         if (dirty) {
-            meta = await push(localCategories, localBudgets, localWallets);
+            meta = await push(localCategories, localBudgets, localWallets, localSettings);
         } else {
             meta = { ...meta, lastSyncAt: Date.now() };
         }
@@ -420,6 +439,12 @@ async function runSync(force = null) {
             return !lw || (rw.updatedAt || 0) > (lw.updatedAt || 0);
         });
 
+        const remoteHasSettings = remoteData.settings && typeof remoteData.settings === 'object';
+        const remoteSettingsTime = remoteHasSettings ? (remoteData.settings.updatedAt || 0) : -1;
+        const localSettingsTime = localSettings.updatedAt || 0;
+        const remoteSettingsWins = remoteHasSettings && remoteSettingsTime > localSettingsTime;
+        const finalSettings = remoteSettingsWins ? remoteData.settings : localSettings;
+
         if (!dirty) {
             if (remoteCatWins) {
                 await saveCategories(remoteData.categories);
@@ -430,15 +455,25 @@ async function runSync(force = null) {
             if (Array.isArray(remoteData.wallets)) {
                 await saveWallets(finalWallets);
             }
+            if (remoteSettingsWins) {
+                await saveSettings(remoteData.settings);
+                if (remoteData.settings.theme) {
+                    try { localStorage.setItem('mizan-theme', remoteData.settings.theme); } catch {}
+                }
+            }
             meta = await pull(remoteData, remoteFile.version);
-        } else if (localReal.length === 0 && !remoteCatWins && !remoteBudgetWins && !remoteWalletsNewer) {
-            const saved = await uploadRemote(remoteFile.id, remoteData.transactions, finalCategories, finalBudgets, finalWallets);
+        } else if (localReal.length === 0 && !remoteCatWins && !remoteBudgetWins && !remoteWalletsNewer && !remoteSettingsWins) {
+            const saved = await uploadRemote(remoteFile.id, remoteData.transactions, finalCategories, finalBudgets, finalWallets, finalSettings);
             const currentLocal = await getAllTransactions();
             const localDummies = currentLocal.filter(tx => tx.dummy);
             await replaceAllTransactions([...(remoteData.transactions || []), ...localDummies]);
             await saveCategories(finalCategories);
             await saveBudgets(finalBudgets);
             await saveWallets(finalWallets);
+            await saveSettings(finalSettings);
+            if (finalSettings.theme) {
+                try { localStorage.setItem('mizan-theme', finalSettings.theme); } catch {}
+            }
             await listeners.onRemoteApplied();
             meta = { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };
         } else if (localReal.length === 0) {
@@ -451,9 +486,15 @@ async function runSync(force = null) {
             if (Array.isArray(remoteData.wallets)) {
                 await saveWallets(finalWallets);
             }
+            if (remoteSettingsWins) {
+                await saveSettings(remoteData.settings);
+                if (remoteData.settings.theme) {
+                    try { localStorage.setItem('mizan-theme', remoteData.settings.theme); } catch {}
+                }
+            }
             meta = await pull(remoteData, remoteFile.version);
         } else if (remoteData.transactions.length === 0) {
-            meta = await push(finalCategories, finalBudgets, finalWallets);
+            meta = await push(finalCategories, finalBudgets, finalWallets, finalSettings);
         } else {
             // Gabung data
             const merged = new Map();
@@ -471,7 +512,7 @@ async function runSync(force = null) {
             const mergedList = Array.from(merged.values());
             
             // Simpan hasil gabungan ke Drive (hanya transaksi asli)
-            const saved = await uploadRemote(remoteFile.id, mergedList, finalCategories, finalBudgets, finalWallets);
+            const saved = await uploadRemote(remoteFile.id, mergedList, finalCategories, finalBudgets, finalWallets, finalSettings);
             // Simpan ke lokal bersama transaksi dummy lokal
             const currentLocal = await getAllTransactions();
             const localDummies = currentLocal.filter(tx => tx.dummy);
@@ -479,6 +520,10 @@ async function runSync(force = null) {
             await saveCategories(finalCategories);
             await saveBudgets(finalBudgets);
             await saveWallets(finalWallets);
+            await saveSettings(finalSettings);
+            if (finalSettings.theme) {
+                try { localStorage.setItem('mizan-theme', finalSettings.theme); } catch {}
+            }
             await listeners.onRemoteApplied();
             
             meta = { ...meta, syncedRev: revAtStart, remoteVersion: saved.version, lastSyncAt: Date.now() };

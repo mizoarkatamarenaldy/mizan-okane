@@ -1,4 +1,4 @@
-import { initDB, saveTransaction, getAllTransactions, replaceAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT } from './db.js';
+import { initDB, saveTransaction, getAllTransactions, replaceAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT, getSettings, saveSettings, DEFAULT_SETTINGS } from './db.js';
 import { initSync, markDirty, signIn, signOut, syncNow, ensureToken } from './sync.js';
 
 // DOM Elements
@@ -208,6 +208,17 @@ function applyThemeUI(themeSetting) {
         }
     }
     applyTheme(themeSetting);
+}
+
+export async function getAppSettings() {
+    const dbSettings = await getSettings();
+    const storedTheme = getStoredTheme();
+    const format = currentTimeFormat || await getTimeFormat();
+    return {
+        theme: storedTheme,
+        timeFormat: format,
+        updatedAt: dbSettings.updatedAt || 0
+    };
 }
 
 // Token Palet DESIGN.md untuk Diagram Donut
@@ -1493,6 +1504,7 @@ async function loadData() {
     try {
         currentTimeFormat = await getTimeFormat();
         applyTimeFormatUI(currentTimeFormat);
+        applyThemeUI(getStoredTheme());
         currentCategories = await getCategories();
         currentBudgets = await getBudgets();
         currentWallets = await getWallets();
@@ -4970,14 +4982,17 @@ export async function exportBackupJson() {
         const cats = await getCategories();
         const bgs = await getBudgets();
         const wts = await getWallets();
+        const stgs = await getAppSettings();
         const data = {
             app: 'mizan-okane',
-            schemaVersion: 1,
+            version: 2,
+            schemaVersion: 2,
             exportedAt: new Date().toISOString(),
             transactions: realTx,
+            wallets: wts,
             categories: cats,
             budgets: bgs,
-            wallets: wts
+            settings: stgs
         };
         const fileName = `mizan-okane-backup-${new Date().toISOString().split('T')[0]}.json`;
         const jsonContent = JSON.stringify(data, null, 2);
@@ -5135,6 +5150,7 @@ async function handleImportJson(file) {
     let rawCategories = null;
     let rawBudgets = null;
     let rawWallets = null;
+    let rawSettings = null;
 
     if (Array.isArray(parsed)) {
         rawTransactions = parsed;
@@ -5151,9 +5167,12 @@ async function handleImportJson(file) {
         if (Array.isArray(parsed.wallets)) {
             rawWallets = parsed.wallets;
         }
+        if (parsed.settings && typeof parsed.settings === 'object') {
+            rawSettings = parsed.settings;
+        }
     }
 
-    if (!rawTransactions && !rawCategories && !rawBudgets && !rawWallets) {
+    if (!rawTransactions && !rawCategories && !rawBudgets && !rawWallets && !rawSettings) {
         showNotification("Format file cadangan tidak dikenali. Pastikan file berisi data cadangan mizan-okane.", "error");
         return;
     }
@@ -5161,7 +5180,7 @@ async function handleImportJson(file) {
     const validImportedTx = [];
     if (Array.isArray(rawTransactions)) {
         for (const item of rawTransactions) {
-            if (isValidTransaction(item)) {
+            if (isValidTransaction(item) && !item.dummy) {
                 validImportedTx.push(sanitizeImportedTx(item));
             }
         }
@@ -5206,9 +5225,9 @@ async function handleImportJson(file) {
         let categoriesChanged = false;
         if (rawCategories && Array.isArray(rawCategories.income) && Array.isArray(rawCategories.expense)) {
             const localCategories = await getCategories();
-            const remoteCatTime = typeof rawCategories.updatedAt === 'number' ? rawCategories.updatedAt : -1;
+            const remoteCatTime = typeof rawCategories.updatedAt === 'number' ? rawCategories.updatedAt : 0;
             const localCatTime = localCategories.updatedAt || 0;
-            if (remoteCatTime > localCatTime) {
+            if (remoteCatTime > localCatTime || (localCatTime === 0 && (rawCategories.income.length > 0 || rawCategories.expense.length > 0))) {
                 await saveCategories(rawCategories);
                 categoriesChanged = true;
             }
@@ -5217,9 +5236,9 @@ async function handleImportJson(file) {
         let budgetsChanged = false;
         if (rawBudgets && typeof rawBudgets.items === 'object' && !Array.isArray(rawBudgets.items)) {
             const localBudgets = await getBudgets();
-            const remoteBudgetTime = typeof rawBudgets.updatedAt === 'number' ? rawBudgets.updatedAt : -1;
+            const remoteBudgetTime = typeof rawBudgets.updatedAt === 'number' ? rawBudgets.updatedAt : 0;
             const localBudgetTime = localBudgets.updatedAt || 0;
-            if (remoteBudgetTime > localBudgetTime) {
+            if (remoteBudgetTime > localBudgetTime || (localBudgetTime === 0 && Object.keys(rawBudgets.items).length > 0)) {
                 await saveBudgets(rawBudgets);
                 budgetsChanged = true;
             }
@@ -5235,12 +5254,50 @@ async function handleImportJson(file) {
             }
         }
 
-        const hasChanges = (txAdded > 0 || txUpdated > 0 || categoriesChanged || budgetsChanged || walletsChanged);
+        let settingsChanged = false;
+        if (rawSettings && typeof rawSettings === 'object') {
+            const localSettings = await getAppSettings();
+            const remoteSettingsTime = typeof rawSettings.updatedAt === 'number' ? rawSettings.updatedAt : 0;
+            const localSettingsTime = localSettings.updatedAt || 0;
+            if (remoteSettingsTime > localSettingsTime || (localSettingsTime === 0 && (rawSettings.theme || rawSettings.timeFormat))) {
+                let appliedTheme = localSettings.theme;
+                let appliedFormat = localSettings.timeFormat;
+                if (rawSettings.theme && VALID_THEMES.includes(rawSettings.theme)) {
+                    appliedTheme = rawSettings.theme;
+                    try {
+                        localStorage.setItem(THEME_STORAGE_KEY, appliedTheme);
+                    } catch (e) {
+                        console.warn("Gagal menyimpan tema dari impor", e);
+                    }
+                    applyThemeUI(appliedTheme);
+                }
+                if (rawSettings.timeFormat && (rawSettings.timeFormat === '12' || rawSettings.timeFormat === '24')) {
+                    appliedFormat = rawSettings.timeFormat;
+                    currentTimeFormat = appliedFormat;
+                    await saveTimeFormat(appliedFormat);
+                    applyTimeFormatUI(appliedFormat);
+                }
+                await saveSettings({
+                    theme: appliedTheme,
+                    timeFormat: appliedFormat,
+                    updatedAt: remoteSettingsTime > 0 ? remoteSettingsTime : Date.now()
+                });
+                settingsChanged = true;
+            }
+        }
+
+        const hasChanges = (txAdded > 0 || txUpdated > 0 || categoriesChanged || budgetsChanged || walletsChanged || settingsChanged);
 
         if (hasChanges) {
             resetForm();
             await loadData();
             await markDirty();
+            render();
+            if (currentTransactions && currentTransactions.length > 0) {
+                renderMonthlyChart(currentTransactions);
+                renderDonutChart(currentTransactions);
+                renderTimbangan();
+            }
 
             const details = [];
             if (txAdded > 0) details.push(`${txAdded} transaksi baru ditambahkan`);
@@ -5248,6 +5305,7 @@ async function handleImportJson(file) {
             if (walletsChanged) details.push('daftar dompet diperbarui');
             if (categoriesChanged) details.push('kategori diperbarui');
             if (budgetsChanged) details.push('budget diperbarui');
+            if (settingsChanged) details.push('pengaturan diperbarui');
 
             const detailStr = details.length > 0 ? details.join(', ') : 'data diperbarui';
             showNotification(`Impor data berhasil (${detailStr}).`, 'success');
@@ -6172,6 +6230,7 @@ async function init() {
                     await saveTimeFormat(newFormat);
                     applyTimeFormatUI(newFormat);
                     render();
+                    markDirty().catch(err => console.error("Gagal menandai perubahan format waktu untuk sinkron", err));
                 }
             });
         }
@@ -6183,7 +6242,7 @@ async function init() {
 
     if (themeRadios) {
         for (const radio of themeRadios) {
-            radio.addEventListener('change', (e) => {
+            radio.addEventListener('change', async (e) => {
                 if (e.target.checked) {
                     const newTheme = e.target.value;
                     try {
@@ -6197,6 +6256,12 @@ async function init() {
                         renderDonutChart(currentTransactions);
                         renderTimbangan();
                     }
+                    try {
+                        await saveSettings({ theme: newTheme, timeFormat: currentTimeFormat, updatedAt: Date.now() });
+                    } catch (err) {
+                        console.warn('Gagal menyimpan pengaturan tema ke IndexedDB:', err);
+                    }
+                    markDirty().catch(err => console.error("Gagal menandai perubahan tema untuk sinkron", err));
                 }
             });
         }

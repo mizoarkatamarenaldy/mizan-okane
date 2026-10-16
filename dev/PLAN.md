@@ -73,7 +73,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Beranda: sembunyikan budget dan dompet bila tidak perlu
   - [x] Logo aplikasi
   - [x] Audit logika matematis
-  - [ ] Backup lengkap
+  - [x] Backup lengkap
   - [ ] Hapus dompet
   - [ ] Reset setelan pabrik
   - [ ] Data contoh lengkap

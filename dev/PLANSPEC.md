@@ -599,3 +599,24 @@ Cek manual:
 - Kategori dengan budget 0 atau tanpa budget: tidak ada tulisan NaN atau Infinity.
 - Transaksi tanggal 31 pukul 23:59 dan tanggal 1 bulan berikutnya pukul 00:00 masuk ke bulan masing-masing.
 - Ekspor JSON, impor kembali, bandingkan semua saldo. Hasilnya harus sama.
+
+## Backup lengkap
+
+Tujuan: ekspor dan impor JSON memuat semua yang dibuat pengguna, bukan transaksi saja, supaya backup bisa mengembalikan aplikasi seutuhnya.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Tombol ekspor dan impor JSON yang ada tetap dipakai.
+
+Aturan:
+- File ekspor memuat: transaksi, dompet (termasuk mata uang dan status arsip), kategori, sub kategori, budget, dan pengaturan (tema, format jam, mata uang opsional, dan pengaturan lain yang tersimpan).
+- Tulis nomor versi format di file ekspor.
+- Backup lama tanpa nomor versi tetap bisa diimpor.
+- Impor tetap memakai aturan konflik yang sudah ada (ID unik, waktu ubah terbaru menang).
+- Data contoh tidak pernah ikut diekspor.
+
+Data:
+- Struktur file ekspor berubah. Periksa apakah file sinkron Drive sudah memuat dompet, kategori, sub kategori, budget, dan pengaturan, lalu samakan isinya dengan ekspor.
+
+Cek manual:
+- Buat dompet, kategori, dan budget sendiri, ekspor JSON, pakai "Hapus semua data", impor file tadi: semuanya kembali.
+- Impor file backup lama (tanpa nomor versi): berhasil tanpa error.

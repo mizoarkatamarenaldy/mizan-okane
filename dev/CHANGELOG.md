@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Backup lengkap
+- Ditambah: Fungsi `getSettings` dan `saveSettings` di `js/db.js` untuk menyimpan dan membaca preferensi pengguna (tema dan format jam) dengan penanda waktu pembaruan `updatedAt` di store `meta` IndexedDB.
+- Ditambah: Fungsi `getAppSettings` di `js/app.js` untuk menyatukan pengaturan tema dan format waktu aktif beserta timestamp.
+- Diubah: Pembuatan file cadangan ekspor JSON pada `exportBackupJson` ditingkatkan ke format versi 2 (`version: 2` dan `schemaVersion: 2`) yang memuat data lengkap meliputi transaksi pengguna (tanpa data contoh), dompet (termasuk mata uang dan status arsip), kategori, sub kategori, budget, dan pengaturan (`js/app.js`).
+- Diubah: Logika impor cadangan JSON pada `handleImportJson` mendukung pemulihan pengaturan aplikasi (tema dan format waktu), mengabaikan data contoh, tetap menjaga kompatibilitas mundur untuk file cadangan lama tanpa nomor versi atau tanpa pengaturan, serta konsisten menerapkan aturan resolusi konflik (ID unik dan updatedAt terbaru menang) (`js/app.js`).
+- Diubah: Sinkronisasi Google Drive pada `js/sync.js` disamakan dengan struktur cadangan baru: versi skema dinaikkan ke versi 2 serta payload, pengunggahan, dan resolusi konflik turut menyertakan data pengaturan (`settings`).
+- Diubah: Penyesuaian pendengar perubahan tema dan format waktu untuk memicu `saveSettings` dan `markDirty` sinkronisasi Drive (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v46` (`sw.js`).
+- Diubah: Mencentang item "Backup lengkap" di `dev/PLAN.md` serta menambahkan spesifikasi di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Audit logika matematis
 - Diperbaiki: Penanganan tanda negatif pada pembacaan nominal mata uang IDR dan JPY di fungsi `parseAmount` agar angka negatif seperti `-1.500.000` tidak diubah menjadi positif (`js/app.js`).
 - Diperbaiki: Masalah penempelan (paste) atau input angka IDR/JPY berformat koma/sen (misal `1.500.000,00` atau `25.000,50`) di fungsi `parseAmount` dan `formatInputWithCursor` agar pecahan koma dipotong dan tidak keliru mengalikan nilai nominal 100 kali lipat (`js/app.js`).

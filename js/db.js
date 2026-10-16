@@ -318,9 +318,77 @@ export function saveTimeFormat(format) {
   return new Promise((resolve, reject) => {
     const value = format === '12' ? '12' : DEFAULT_TIME_FORMAT;
     const transaction = db.transaction([META_STORE], 'readwrite');
-    const request = transaction.objectStore(META_STORE).put(value, 'timeFormat');
-    request.onsuccess = () => resolve(value);
+    const store = transaction.objectStore(META_STORE);
+    store.put(value, 'timeFormat');
+    const req = store.get('settings');
+    req.onsuccess = () => {
+      const current = req.result || {};
+      const updated = {
+        theme: (current.theme === 'light' || current.theme === 'dark' || current.theme === 'system') ? current.theme : 'system',
+        timeFormat: value,
+        updatedAt: Date.now()
+      };
+      store.put(updated, 'settings');
+    };
+    transaction.oncomplete = () => resolve(value);
+    transaction.onerror = (event) => reject(event.target.error);
+  });
+}
+
+export const DEFAULT_SETTINGS = {
+  theme: 'system',
+  timeFormat: '24',
+  updatedAt: 0
+};
+
+export function getSettings() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([META_STORE], 'readonly');
+    const request = transaction.objectStore(META_STORE).get('settings');
+    request.onsuccess = (event) => {
+      const stored = event.target.result;
+      if (stored && typeof stored === 'object') {
+        resolve({
+          theme: (stored.theme === 'light' || stored.theme === 'dark' || stored.theme === 'system') ? stored.theme : 'system',
+          timeFormat: stored.timeFormat === '12' ? '12' : DEFAULT_TIME_FORMAT,
+          updatedAt: typeof stored.updatedAt === 'number' ? stored.updatedAt : 0
+        });
+      } else {
+        const timeReq = transaction.objectStore(META_STORE).get('timeFormat');
+        timeReq.onsuccess = (tEvent) => {
+          const tStored = tEvent.target.result;
+          resolve({
+            theme: 'system',
+            timeFormat: tStored === '12' ? '12' : DEFAULT_TIME_FORMAT,
+            updatedAt: 0
+          });
+        };
+        timeReq.onerror = () => {
+          resolve({
+            theme: 'system',
+            timeFormat: DEFAULT_TIME_FORMAT,
+            updatedAt: 0
+          });
+        };
+      }
+    };
     request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+export function saveSettings(settings) {
+  return new Promise((resolve, reject) => {
+    const toSave = {
+      theme: (settings && (settings.theme === 'light' || settings.theme === 'dark' || settings.theme === 'system')) ? settings.theme : 'system',
+      timeFormat: (settings && settings.timeFormat === '12') ? '12' : DEFAULT_TIME_FORMAT,
+      updatedAt: (settings && typeof settings.updatedAt === 'number') ? settings.updatedAt : Date.now()
+    };
+    const transaction = db.transaction([META_STORE], 'readwrite');
+    const store = transaction.objectStore(META_STORE);
+    store.put(toSave, 'settings');
+    store.put(toSave.timeFormat, 'timeFormat');
+    transaction.oncomplete = () => resolve(toSave);
+    transaction.onerror = (event) => reject(event.target.error);
   });
 }
 
