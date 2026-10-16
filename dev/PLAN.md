@@ -75,15 +75,6 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Audit logika matematis
   - [x] Backup lengkap
   - [x] Hapus dompet
-  - [ ] Reset setelan pabrik
-  - [ ] Data contoh lengkap
-  - [ ] Klik dompet untuk filter riwayat
-  - [ ] Filter bulan di Riwayat
-  - [ ] Warna kartu saldo multi mata uang
-  - [ ] Pencarian riwayat
-  - [ ] Catatan di bawah angka
-  - [ ] Tombol Timbangan di tengah navigasi
-  - [ ] Tentang Pengembang
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri
