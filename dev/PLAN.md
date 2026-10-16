@@ -72,7 +72,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Mata uang opsional
   - [x] Beranda: sembunyikan budget dan dompet bila tidak perlu
   - [x] Logo aplikasi
-  - [ ] Audit logika matematis
+  - [x] Audit logika matematis
   - [ ] Backup lengkap
   - [ ] Hapus dompet
   - [ ] Reset setelan pabrik

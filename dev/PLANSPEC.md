@@ -556,3 +556,46 @@ Data:
 
 Cek manual:
 - Belum ditentukan. Ditulis saat spek rinci dibuat.
+## Audit logika matematis
+
+Tujuan: Memeriksa semua perhitungan angka di aplikasi supaya hasilnya benar dan konsisten, lalu memperbaiki kesalahan yang jelas. Pemilik paling sering memakai Rupiah dan merasa ada yang janggal, jadi Rupiah diperiksa paling teliti. Aplikasi keuangan tidak boleh salah hitung.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Aturan:
+- Buka hanya bagian "Mata uang per dompet", "Transfer antar dompet", "Budget per kategori", dan "Timbangan" di dev/PLANSPEC.md sebagai acuan perilaku yang benar.
+- Periksa kode di bagian berikut:
+  1. Saldo: saldo dompet dan saldo total per bulan (pemasukan dikurangi pengeluaran). Transaksi berpenanda "terhapus" tidak boleh ikut dihitung.
+  2. Transfer antar dompet: total semua dompet tidak berubah akibat transfer, dan transfer tidak dihitung sebagai pemasukan atau pengeluaran di statistik.
+  3. Multi mata uang, dengan prioritas utama Rupiah, lalu Yen, lalu USD. Periksa:
+     - Rupiah dan Yen: tanpa desimal. Angka disimpan dan dijumlahkan sebagai bilangan bulat, tidak ada ekor pecahan.
+     - Input angka dengan titik pemisah ribuan: "1.500.000" harus terbaca 1500000, bukan 1,5. Periksa juga saat edit transaksi lama (angka ditampilkan dengan titik lalu dibaca ulang), saat tempel angka, dan saat ada koma.
+     - Angka besar (miliaran) tidak rusak, tidak berubah jadi notasi ilmiah, dan tidak tampil NaN.
+     - Saldo negatif tampil dan terhitung benar.
+     - USD: desimal tidak punya ekor aneh (misalnya 0,1 + 0,2).
+     - Mata uang yang berbeda tidak boleh dijumlahkan jadi satu angka.
+  4. Budget per kategori: sisa budget, persentase terpakai, kategori dengan sub kategori, dan kasus budget bernilai 0 (tidak boleh ada pembagian dengan nol).
+  5. Grafik bulanan dan diagram donut: jumlah per bulan benar, persentase donut berjumlah 100 persen, dan bulan tanpa data tidak membuat error atau NaN.
+  6. Batas bulan: transaksi tanggal 1 pukul 00:00 dan tanggal terakhir pukul 23:59 masuk ke bulan yang benar, termasuk pada format jam 12 jam dan 24 jam, serta tidak bergeser karena zona waktu.
+  7. Timbangan: perhitungannya sesuai spek bagian "Timbangan".
+  8. Impor JSON dan ekspor CSV/JSON: angka yang diekspor lalu diimpor kembali hasilnya sama persis.
+- Kalau menemukan kesalahan yang jelas dan perbaikannya kecil, langsung perbaiki.
+- Kalau temuan butuh perubahan struktur data atau keputusan perilaku, jangan diperbaiki. Catat saja di laporan akhir.
+- Jangan membuat file baru di repo. Jangan menambah fitur. Jangan merapikan kode yang tidak berkaitan dengan perhitungan.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Rupiah: buat transaksi 1.500.000, 25.000, dan 750. Saldo harus tepat 1.525.750. Buka transaksi 1.500.000 untuk diedit lalu simpan tanpa mengubah angka, nilainya harus tetap 1.500.000.
+- Rupiah: input 2.000.000.000 (dua miliar). Tampil benar, saldo benar, tidak ada NaN.
+- Rupiah: saldo dompet jadi negatif karena pengeluaran lebih besar. Tampil dan terhitung benar.
+- Yen: transaksi 1.280 dan 450 di dompet Yen. Saldo 1.730, tanpa desimal.
+- Dompet Rupiah dan dompet Yen sama-sama punya saldo. Keduanya tidak dijumlahkan jadi satu angka.
+- USD: 3 transaksi 0,10, 0,20, 12,35. Saldo tepat 12,65.
+- Transfer Rp 100.000 dari dompet A ke B. Saldo A turun, B naik 100.000, saldo total tetap, statistik pemasukan dan pengeluaran tidak berubah.
+- Hapus satu transaksi. Saldo, budget, grafik, dan donut mengabaikannya.
+- Kategori dengan budget 0 atau tanpa budget: tidak ada tulisan NaN atau Infinity.
+- Transaksi tanggal 31 pukul 23:59 dan tanggal 1 bulan berikutnya pukul 00:00 masuk ke bulan masing-masing.
+- Ekspor JSON, impor kembali, bandingkan semua saldo. Hasilnya harus sama.

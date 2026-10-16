@@ -779,13 +779,32 @@ function populateWalletFilterOptions() {
 // Formatter angka dan uang (titik pemisah ribuan)
 export function formatNumber(val) {
     if (val === null || val === undefined || val === '') return '';
-    const str = String(val);
-    const isNegative = str.startsWith('-');
-    let digits = str.replace(/\D/g, '');
+    if (typeof val === 'number') {
+        if (!Number.isFinite(val)) return '';
+        const rounded = Math.round(val);
+        const isNeg = rounded < 0;
+        const absStr = String(Math.abs(rounded));
+        const formatted = absStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return isNeg ? `-${formatted}` : formatted;
+    }
+    const str = String(val).trim();
+    if (!str) return '';
+    const isNegative = str.includes('-');
+    let clean = str;
+    if (clean.includes('.') && clean.includes(',')) {
+        if (clean.lastIndexOf(',') > clean.lastIndexOf('.')) {
+            clean = clean.slice(0, clean.lastIndexOf(','));
+        } else {
+            clean = clean.slice(0, clean.lastIndexOf('.'));
+        }
+    } else if (/,\d{1,2}$/.test(clean)) {
+        clean = clean.slice(0, clean.lastIndexOf(','));
+    }
+    let digits = clean.replace(/\D/g, '');
     if (!digits) return '';
     digits = digits.replace(/^0+(?=\d)/, '');
     const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    return isNegative ? `-${formatted}` : formatted;
+    return (isNegative && formatted !== '0') ? `-${formatted}` : formatted;
 }
 
 export function formatAmountForInput(amount, currency = 'IDR') {
@@ -826,8 +845,20 @@ export function parseAmount(str, currency = 'IDR') {
         return Math.round(parsed * 100) / 100;
     }
 
-    const digits = s.replace(/\D/g, '');
-    return digits ? parseInt(digits, 10) : 0;
+    const isNegative = s.includes('-');
+    let clean = s;
+    if (clean.includes('.') && clean.includes(',')) {
+        if (clean.lastIndexOf(',') > clean.lastIndexOf('.')) {
+            clean = clean.slice(0, clean.lastIndexOf(','));
+        } else {
+            clean = clean.slice(0, clean.lastIndexOf('.'));
+        }
+    } else if (/,\d{1,2}$/.test(clean)) {
+        clean = clean.slice(0, clean.lastIndexOf(','));
+    }
+    const digits = clean.replace(/\D/g, '');
+    const val = digits ? parseInt(digits, 10) : 0;
+    return (isNegative && val !== 0) ? -val : val;
 }
 
 export function formatCurrency(val, currency = 'IDR') {
@@ -875,10 +906,21 @@ export function formatInputWithCursor(input, currency = 'IDR') {
     const originalCursor = input.selectionStart !== null ? input.selectionStart : originalValue.length;
 
     if (!isUsd) {
-        const textBeforeCursor = originalValue.slice(0, originalCursor);
+        let valToFormat = originalValue;
+        if (valToFormat.includes(',') && valToFormat.includes('.')) {
+            if (valToFormat.lastIndexOf(',') > valToFormat.lastIndexOf('.')) {
+                valToFormat = valToFormat.slice(0, valToFormat.lastIndexOf(','));
+            } else {
+                valToFormat = valToFormat.slice(0, valToFormat.lastIndexOf('.'));
+            }
+        } else if (/,\d{1,2}$/.test(valToFormat)) {
+            valToFormat = valToFormat.slice(0, valToFormat.lastIndexOf(','));
+        }
+
+        const textBeforeCursor = valToFormat.slice(0, originalCursor);
         const digitsBeforeCursor = textBeforeCursor.replace(/\D/g, '').length;
 
-        const rawDigits = originalValue.replace(/\D/g, '');
+        const rawDigits = valToFormat.replace(/\D/g, '');
         if (!rawDigits) {
             input.value = '';
             return;
@@ -1288,8 +1330,14 @@ function formatGroupDate(dateString) {
 }
 
 function formatDate(dateString) {
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
+    if (!dateString) return '';
+    const match = String(dateString).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return dateString;
+    const y = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const d = parseInt(match[3], 10);
+    const mShort = INDO_MONTHS_SHORT[m - 1] || '';
+    return `${d} ${mShort} ${y}`;
 }
 
 export function formatTimeDisplay(timeStr, format = '24') {
@@ -1491,21 +1539,28 @@ const INDO_MONTHS_FULL = [
 ];
 
 function formatCompactCurrency(value) {
-    if (value === 0) return '0';
-    if (value >= 1_000_000_000) {
-        const val = value / 1_000_000_000;
-        return (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' M';
+    if (value === 0 || !value) return '0';
+    const isNeg = typeof value === 'number' && value < 0;
+    const absVal = typeof value === 'number' ? Math.abs(value) : Math.abs(Number(value) || 0);
+    const sign = isNeg ? '-' : '';
+    if (absVal >= 1_000_000_000_000) {
+        const val = absVal / 1_000_000_000_000;
+        return sign + (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' T';
     }
-    if (value >= 1_000_000) {
-        const val = value / 1_000_000;
-        return (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' jt';
+    if (absVal >= 1_000_000_000) {
+        const val = absVal / 1_000_000_000;
+        return sign + (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' M';
     }
-    if (value >= 1_000) {
-        const val = value / 1_000;
-        return (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' rb';
+    if (absVal >= 1_000_000) {
+        const val = absVal / 1_000_000;
+        return sign + (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' jt';
     }
-    if (typeof value === 'number' && value % 1 !== 0) {
-        return (Math.round(value * 100) / 100).toFixed(2).replace('.', ',');
+    if (absVal >= 1_000) {
+        const val = absVal / 1_000;
+        return sign + (val % 1 === 0 ? val.toFixed(0) : val.toFixed(1).replace('.', ',')) + ' rb';
+    }
+    if (typeof absVal === 'number' && absVal % 1 !== 0) {
+        return sign + (Math.round(absVal * 100) / 100).toFixed(2).replace('.', ',');
     }
     return formatNumber(value);
 }
@@ -1674,6 +1729,11 @@ function renderMonthlyChart(transactions) {
         const key = `${year}-${month}`;
         const item = monthData.get(key) || { total: 0, count: 0 };
         item.total += tx.amount;
+        if (currentStatsCurrency === 'USD') {
+            item.total = Math.round(item.total * 100) / 100;
+        } else {
+            item.total = Math.round(item.total);
+        }
         item.count += 1;
         monthData.set(key, item);
     }
@@ -1740,7 +1800,10 @@ function renderMonthlyChart(transactions) {
         }
     }
 
-    const avgAmount = monthsWithAmount > 0 ? Math.round(totalAmountAll / monthsWithAmount) : 0;
+    totalAmountAll = currentStatsCurrency === 'USD' ? Math.round(totalAmountAll * 100) / 100 : Math.round(totalAmountAll);
+    const avgAmount = monthsWithAmount > 0
+        ? (currentStatsCurrency === 'USD' ? Math.round((totalAmountAll / monthsWithAmount) * 100) / 100 : Math.round(totalAmountAll / monthsWithAmount))
+        : 0;
     if (chartSummaryText) {
         chartSummaryText.textContent = `Rata-rata: ${currencyFormatter.format(avgAmount, currentStatsCurrency)} / bulan`;
     }
@@ -1983,6 +2046,11 @@ function renderDonutChart(transactions) {
         totalAmount += tx.amount;
     }
 
+    for (const [k, item] of categoryMap.entries()) {
+        item.amount = currentStatsCurrency === 'USD' ? Math.round(item.amount * 100) / 100 : Math.round(item.amount);
+    }
+    totalAmount = currentStatsCurrency === 'USD' ? Math.round(totalAmount * 100) / 100 : Math.round(totalAmount);
+
     if (totalAmount <= 0) {
         donutContainer.innerHTML = `
             <div class="empty-state">
@@ -2059,6 +2127,11 @@ function renderDonutChart(transactions) {
                     noSubCount += 1;
                 }
             }
+
+            for (const [sub, item] of subcatMap.entries()) {
+                item.amount = currentStatsCurrency === 'USD' ? Math.round(item.amount * 100) / 100 : Math.round(item.amount);
+            }
+            noSubAmount = currentStatsCurrency === 'USD' ? Math.round(noSubAmount * 100) / 100 : Math.round(noSubAmount);
 
             let subcatDetailHtml = '';
             if (subcatMap.size > 0) {
@@ -2334,6 +2407,8 @@ function getWalletCurrentBalance(walletId) {
     const curr = getWalletCurrency(walletId);
     if (curr === 'USD') {
         bal = Math.round(bal * 100) / 100;
+    } else {
+        bal = Math.round(bal);
     }
     return bal;
 }
@@ -2437,9 +2512,12 @@ function getTimbanganMonthlyData(monthKey, currency) {
     if (currency === 'USD') {
         income = Math.round(income * 100) / 100;
         expense = Math.round(expense * 100) / 100;
+    } else {
+        income = Math.round(income);
+        expense = Math.round(expense);
     }
 
-    const diff = currency === 'USD' ? Math.round((income - expense) * 100) / 100 : (income - expense);
+    const diff = currency === 'USD' ? Math.round((income - expense) * 100) / 100 : Math.round(income - expense);
     return { income, expense, diff, txCount };
 }
 
@@ -2619,6 +2697,8 @@ function renderTimbanganCalculator() {
     let newWalletBal = walletBal - price;
     if (currentTimbanganCurrency === 'USD') {
         newWalletBal = Math.round(newWalletBal * 100) / 100;
+    } else {
+        newWalletBal = Math.round(newWalletBal);
     }
 
     if (calcResultWallet) {
@@ -2659,10 +2739,14 @@ function renderTimbanganCalculator() {
     let newMonthExpense = currentMonthExpense + price;
     if (currentTimbanganCurrency === 'USD') {
         newMonthExpense = Math.round(newMonthExpense * 100) / 100;
+    } else {
+        newMonthExpense = Math.round(newMonthExpense);
     }
     let newMonthDiff = monthIncome - newMonthExpense;
     if (currentTimbanganCurrency === 'USD') {
         newMonthDiff = Math.round(newMonthDiff * 100) / 100;
+    } else {
+        newMonthDiff = Math.round(newMonthDiff);
     }
 
     if (calcResultMonthlyScale) {
@@ -2851,6 +2935,15 @@ export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurre
             }
         }
     }
+    for (const [c, val] of totalBalanceByCurrency.entries()) {
+        totalBalanceByCurrency.set(c, c === 'USD' ? Math.round(val * 100) / 100 : Math.round(val));
+    }
+    for (const [c, val] of incomeByCurrency.entries()) {
+        incomeByCurrency.set(c, c === 'USD' ? Math.round(val * 100) / 100 : Math.round(val));
+    }
+    for (const [c, val] of expenseByCurrency.entries()) {
+        expenseByCurrency.set(c, c === 'USD' ? Math.round(val * 100) / 100 : Math.round(val));
+    }
 
     return {
         totalBalanceByCurrency,
@@ -2968,6 +3061,7 @@ function render() {
     }
 
     currentTransactions.forEach(tx => {
+        if (tx.deleted) return;
         const curr = getTransactionCurrency(tx);
         const wId = tx.walletId || DEFAULT_WALLET_ID;
         if (tx.type === 'income') {
@@ -2998,9 +3092,10 @@ function render() {
         } else {
             let balancesHtml = '';
             for (const w of activeWallets) {
-                const bal = walletBalances.get(w.id) || 0;
-                const isZero = bal === 0;
+                const rawBal = walletBalances.get(w.id) || 0;
                 const curr = getWalletCurrency(w.id);
+                const bal = curr === 'USD' ? Math.round(rawBal * 100) / 100 : Math.round(rawBal);
+                const isZero = bal === 0;
                 balancesHtml += `
                     <div class="wallet-balance-item${isZero ? ' is-zero' : ''}">
                         <span class="wallet-balance-name">${escapeHTML(w.name)}</span>
@@ -3917,6 +4012,10 @@ export function getActiveMonthlyExpenses(transactions, targetMonthKey, currency 
             totalExpense += tx.amount;
         }
     }
+    for (const [cat, val] of categoryTotals.entries()) {
+        categoryTotals.set(cat, currency === 'USD' ? Math.round(val * 100) / 100 : Math.round(val));
+    }
+    totalExpense = currency === 'USD' ? Math.round(totalExpense * 100) / 100 : Math.round(totalExpense);
     return { categoryTotals, totalExpense };
 }
 

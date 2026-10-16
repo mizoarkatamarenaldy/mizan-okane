@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Audit logika matematis
+- Diperbaiki: Penanganan tanda negatif pada pembacaan nominal mata uang IDR dan JPY di fungsi `parseAmount` agar angka negatif seperti `-1.500.000` tidak diubah menjadi positif (`js/app.js`).
+- Diperbaiki: Masalah penempelan (paste) atau input angka IDR/JPY berformat koma/sen (misal `1.500.000,00` atau `25.000,50`) di fungsi `parseAmount` dan `formatInputWithCursor` agar pecahan koma dipotong dan tidak keliru mengalikan nilai nominal 100 kali lipat (`js/app.js`).
+- Diperbaiki: Pergeseran tanggal dan bulan akibat perbedaan zona waktu pada `formatDate` dengan mengganti parsing `new Date(dateString)` menjadi pembacaan langsung komponen tanggal dari string YYYY-MM-DD (`js/app.js`).
+- Diperbaiki: Pencegahan ekor desimal floating point (seperti `0.1 + 0.2`) pada kalkulasi USD serta pembulatan bilangan bulat konsisten untuk IDR dan JPY pada `renderMonthlyChart`, `renderDonutChart`, `getWalletCurrentBalance`, `getTimbanganMonthlyData`, `renderTimbanganCalculator`, `getBerandaMonthSummary`, `render`, dan `getActiveMonthlyExpenses` (`js/app.js`).
+- Diperbaiki: Dukungan angka negatif, kelipatan triliun (T), dan pembulatan desimal bersih pada fungsi `formatCompactCurrency` (`js/app.js`).
+- Diperbaiki: Pengecekan transaksi berpenanda `tx.deleted` pada kalkulasi akumulasi saldo dompet di fungsi `render()` (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v45` (`sw.js`).
+- Diubah: Mencentang item "Audit logika matematis" di `dev/PLAN.md` serta menambahkan spesifikasi di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Catat rencana Tauri, Kotlin, dan pemisahan folder (sesi dokumen saja)
 - Ditambah: Bagian "Rencana setelah Tahap 5" di paling bawah `dev/PLAN.md` berisi Konversi Tauri, Konversi Kotlin, dan Pemisahan folder (hanya dicatat dan belum dikerjakan).
 - Ditambah: Tiga bagian spesifikasi di akhir berkas `dev/PLANSPEC.md` untuk Konversi Tauri, Konversi Kotlin, dan Pemisahan folder (hanya dicatat dan belum dikerjakan).
