@@ -32,44 +32,6 @@ export function initDB() {
   });
 }
 
-export function saveTransaction(tx) {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.put(tx);
-
-    request.onsuccess = () => resolve(tx);
-    request.onerror = (event) => reject(event.target.error);
-  });
-}
-
-export function getAllTransactions() {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.getAll();
-
-    request.onsuccess = (event) => resolve(event.target.result);
-    request.onerror = (event) => reject(event.target.error);
-  });
-}
-
-// Ganti seluruh isi store transaksi dalam satu transaksi IndexedDB,
-// supaya tidak ada keadaan setengah terisi kalau gagal di tengah.
-export function replaceAllTransactions(list) {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    store.clear();
-    for (const tx of list) {
-      store.put(tx);
-    }
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = (event) => reject(event.target.error);
-    transaction.onabort = (event) => reject(event.target.error);
-  });
-}
-
 export function getMeta(key) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([META_STORE], 'readonly');
@@ -97,6 +59,275 @@ export function deleteMeta(key) {
   });
 }
 
+const DEMO_MODE_KEY = 'mizan_demo_mode';
+
+export function isDemoMode() {
+  try {
+    return localStorage.getItem(DEMO_MODE_KEY) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
+export function setDemoMode(enabled) {
+  try {
+    if (enabled) {
+      localStorage.setItem(DEMO_MODE_KEY, 'true');
+    } else {
+      localStorage.removeItem(DEMO_MODE_KEY);
+    }
+  } catch (e) {}
+}
+
+export const SAMPLE_WALLETS = [
+  {
+    id: 'wallet_sample_kas',
+    name: 'Kas Tunai',
+    currency: 'IDR',
+    createdAt: 1700000000000,
+    updatedAt: 1700000000000,
+    deleted: false
+  },
+  {
+    id: 'wallet_sample_bank',
+    name: 'Rekening Bank',
+    currency: 'IDR',
+    createdAt: 1700000000000,
+    updatedAt: 1700000000000,
+    deleted: false
+  },
+  {
+    id: 'wallet_sample_jpy',
+    name: 'Dompet Yen',
+    currency: 'JPY',
+    createdAt: 1700000000000,
+    updatedAt: 1700000000000,
+    deleted: false
+  },
+  {
+    id: 'wallet_sample_usd',
+    name: 'Akun USD',
+    currency: 'USD',
+    createdAt: 1700000000000,
+    updatedAt: 1700000000000,
+    deleted: false
+  }
+];
+
+export const SAMPLE_CATEGORIES = {
+  income: ['Gaji', 'Bonus', 'Investasi', 'Lainnya'],
+  expense: ['Makan', 'Transport', 'Tagihan', 'Belanja', 'Hiburan', 'Lainnya'],
+  subcategories: {
+    income: {
+      'Gaji': ['Gaji Pokok', 'Tunjangan'],
+      'Bonus': ['Bonus Tahunan', 'Komisi'],
+      'Investasi': ['Dividen', 'Bunga']
+    },
+    expense: {
+      'Makan': ['Restoran', 'Belanja Bahan', 'Kopi & Camilan'],
+      'Transport': ['Bensin', 'Parkir', 'Transportasi Umum'],
+      'Tagihan': ['Listrik', 'Air & IPL', 'Internet'],
+      'Belanja': ['Kebutuhan Rumah', 'Pakaian', 'Elektronik'],
+      'Hiburan': ['Streaming', 'Hobi', 'Liburan']
+    }
+  },
+  updatedAt: 1700000000000
+};
+
+export const SAMPLE_BUDGETS = {
+  items: {
+    'Makan': 2500000,
+    'Transport': 800000,
+    'Tagihan': 1200000,
+    'Belanja': 1500000,
+    'Hiburan': 600000
+  },
+  updatedAt: 1700000000000
+};
+
+export function getSampleTransactions(referenceDate = new Date()) {
+  const ref = (referenceDate instanceof Date && !isNaN(referenceDate.getTime())) ? referenceDate : new Date();
+  const curY = ref.getFullYear();
+  const curM = String(ref.getMonth() + 1).padStart(2, '0');
+
+  const prevDate = new Date(curY, ref.getMonth() - 1, 1);
+  const prevY = prevDate.getFullYear();
+  const prevM = String(prevDate.getMonth() + 1).padStart(2, '0');
+
+  const makeDate = (isPrev, day) => {
+    const y = isPrev ? prevY : curY;
+    const m = isPrev ? prevM : curM;
+    return `${y}-${m}-${String(day).padStart(2, '0')}`;
+  };
+
+  const makeTimestamp = (dateStr, timeStr) => {
+    return new Date(`${dateStr}T${timeStr}:00`).getTime();
+  };
+
+  const rawList = [
+    { id: 'sample_tx_01', isPrev: true, day: 1, time: '08:30', type: 'income', amount: 12000000, category: 'Gaji', subcategory: 'Gaji Pokok', walletId: 'wallet_sample_bank', note: 'Gaji bulan lalu' },
+    { id: 'sample_tx_02', isPrev: true, day: 5, time: '12:30', type: 'expense', amount: 1800000, category: 'Makan', subcategory: 'Restoran', walletId: 'wallet_sample_bank', note: 'Kuliner & makan luar' },
+    { id: 'sample_tx_03', isPrev: true, day: 10, time: '08:15', type: 'expense', amount: 600000, category: 'Transport', subcategory: 'Bensin', walletId: 'wallet_sample_bank', note: 'Bensin & tol' },
+    { id: 'sample_tx_04', isPrev: true, day: 15, time: '14:00', type: 'expense', amount: 1050000, category: 'Tagihan', subcategory: 'Listrik', walletId: 'wallet_sample_bank', note: 'Listrik PLN & internet' },
+    { id: 'sample_tx_05', isPrev: true, day: 20, time: '16:45', type: 'expense', amount: 900000, category: 'Belanja', subcategory: 'Pakaian', walletId: 'wallet_sample_bank', note: 'Pakaian dinas' },
+    { id: 'sample_tx_06', isPrev: true, day: 25, time: '19:20', type: 'expense', amount: 400000, category: 'Hiburan', subcategory: 'Liburan', walletId: 'wallet_sample_bank', note: 'Tiket wahana wisata' },
+
+    { id: 'sample_tx_07', isPrev: false, day: 1, time: '08:00', type: 'income', amount: 100000, category: 'Gaji', subcategory: 'Tunjangan', walletId: 'wallet_sample_jpy', note: 'Uang saku perjalanan dinas' },
+    { id: 'sample_tx_08', isPrev: false, day: 1, time: '08:00', type: 'income', amount: 1500.00, category: 'Gaji', subcategory: 'Gaji Pokok', walletId: 'wallet_sample_usd', note: 'Saldo awal akun USD' },
+
+    { id: 'sample_tx_09', isPrev: false, day: 1, time: '08:30', type: 'income', amount: 12000000, category: 'Gaji', subcategory: 'Gaji Pokok', walletId: 'wallet_sample_bank', note: 'Gaji bulanan' },
+    { id: 'sample_tx_10', isPrev: false, day: 8, time: '10:00', type: 'income', amount: 250.00, category: 'Investasi', subcategory: 'Dividen', walletId: 'wallet_sample_usd', note: 'Dividen saham luar negeri' },
+    { id: 'sample_tx_11', isPrev: false, day: 10, time: '11:15', type: 'income', amount: 2500000, category: 'Bonus', subcategory: 'Komisi', walletId: 'wallet_sample_bank', note: 'Bonus pencapaian proyek' },
+
+    { id: 'sample_tx_12', isPrev: false, day: 2, time: '09:00', type: 'transfer', amount: 1500000, walletId: 'wallet_sample_bank', toWalletId: 'wallet_sample_kas', note: 'Tarik tunai ATM' },
+
+    { id: 'sample_tx_13', isPrev: false, day: 3, time: '10:00', type: 'expense', amount: 450000, category: 'Makan', subcategory: 'Belanja Bahan', walletId: 'wallet_sample_kas', note: 'Belanja mingguan pasar' },
+    { id: 'sample_tx_14', isPrev: false, day: 4, time: '07:45', type: 'expense', amount: 250000, category: 'Transport', subcategory: 'Bensin', walletId: 'wallet_sample_kas', note: 'Isi bensin mobil' },
+    { id: 'sample_tx_15', isPrev: false, day: 5, time: '12:30', type: 'expense', amount: 125000, category: 'Makan', subcategory: 'Restoran', walletId: 'wallet_sample_bank', note: 'Makan siang bersama tim' },
+    { id: 'sample_tx_16', isPrev: false, day: 5, time: '14:20', type: 'expense', amount: 650000, category: 'Tagihan', subcategory: 'Listrik', walletId: 'wallet_sample_bank', note: 'Token listrik PLN' },
+    { id: 'sample_tx_17', isPrev: false, day: 6, time: '16:00', type: 'expense', amount: 50000, category: 'Transport', subcategory: 'Parkir', walletId: 'wallet_sample_kas', note: 'Parkir harian kantor' },
+    { id: 'sample_tx_18', isPrev: false, day: 7, time: '15:10', type: 'expense', amount: 45000, category: 'Makan', subcategory: 'Kopi & Camilan', walletId: 'wallet_sample_kas', note: 'Kopi sore' },
+    { id: 'sample_tx_19', isPrev: false, day: 8, time: '09:00', type: 'expense', amount: 400000, category: 'Tagihan', subcategory: 'Internet', walletId: 'wallet_sample_bank', note: 'Langganan Wi-Fi rumah' },
+    { id: 'sample_tx_20', isPrev: false, day: 9, time: '13:45', type: 'expense', amount: 350000, category: 'Belanja', subcategory: 'Kebutuhan Rumah', walletId: 'wallet_sample_bank', note: 'Perlengkapan mandi dan dapur' },
+    { id: 'sample_tx_21', isPrev: false, day: 11, time: '20:00', type: 'expense', amount: 180000, category: 'Hiburan', subcategory: 'Streaming', walletId: 'wallet_sample_bank', note: 'Langganan streaming video' },
+
+    { id: 'sample_tx_22', isPrev: false, day: 12, time: '18:30', type: 'expense', amount: 3500, category: 'Makan', subcategory: 'Restoran', walletId: 'wallet_sample_jpy', note: 'Makan malam ramen' },
+    { id: 'sample_tx_23', isPrev: false, day: 13, time: '14:00', type: 'expense', amount: 49.90, category: 'Belanja', subcategory: 'Elektronik', walletId: 'wallet_sample_usd', note: 'Aksesoris komputer' },
+    { id: 'sample_tx_24', isPrev: false, day: 14, time: '16:00', type: 'expense', amount: 12000, category: 'Belanja', subcategory: 'Pakaian', walletId: 'wallet_sample_jpy', note: 'Oleh-oleh kemeja' },
+    { id: 'sample_tx_25', isPrev: false, day: 15, time: '17:30', type: 'expense', amount: 12.99, category: 'Tagihan', subcategory: 'Internet', walletId: 'wallet_sample_usd', note: 'Langganan server cloud' }
+  ];
+
+  return rawList.map(item => {
+    const dateStr = makeDate(item.isPrev, item.day);
+    const ts = makeTimestamp(dateStr, item.time);
+    const tx = {
+      id: item.id,
+      type: item.type,
+      amount: item.amount,
+      date: dateStr,
+      time: item.time,
+      walletId: item.walletId,
+      note: item.note,
+      createdAt: ts,
+      updatedAt: ts,
+      deleted: false,
+      dummy: true
+    };
+    if (item.type === 'transfer') {
+      tx.toWalletId = item.toWalletId;
+      tx.category = 'Transfer';
+    } else {
+      tx.category = item.category;
+      if (item.subcategory) {
+        tx.subcategory = item.subcategory;
+      }
+    }
+    return tx;
+  });
+}
+
+export async function activateSampleData(referenceDate = new Date()) {
+  const wallets = [...SAMPLE_WALLETS];
+  const categories = JSON.parse(JSON.stringify(SAMPLE_CATEGORIES));
+  const budgets = JSON.parse(JSON.stringify(SAMPLE_BUDGETS));
+  const transactions = getSampleTransactions(referenceDate);
+
+  await setMeta('demo_wallets', wallets);
+  await setMeta('demo_categories', categories);
+  await setMeta('demo_budgets', budgets);
+  await setMeta('demo_transactions', transactions);
+  setDemoMode(true);
+}
+
+export async function clearSampleData() {
+  setDemoMode(false);
+  await deleteMeta('demo_wallets');
+  await deleteMeta('demo_categories');
+  await deleteMeta('demo_budgets');
+  await deleteMeta('demo_transactions');
+}
+
+export function saveRealTransaction(tx) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.put(tx);
+
+    request.onsuccess = () => resolve(tx);
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+export function saveTransaction(tx) {
+  if (isDemoMode()) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([META_STORE], 'readwrite');
+      const store = transaction.objectStore(META_STORE);
+      const req = store.get('demo_transactions');
+      req.onsuccess = () => {
+        const list = Array.isArray(req.result) ? [...req.result] : [];
+        const idx = list.findIndex(t => t.id === tx.id);
+        if (idx >= 0) {
+          list[idx] = tx;
+        } else {
+          list.push(tx);
+        }
+        const putReq = store.put(list, 'demo_transactions');
+        putReq.onsuccess = () => resolve(tx);
+        putReq.onerror = (e) => reject(e.target.error);
+      };
+      req.onerror = (e) => reject(e.target.error);
+    });
+  }
+  return saveRealTransaction(tx);
+}
+
+export function getRealTransactions() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+
+    request.onsuccess = (event) => resolve(event.target.result || []);
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+export function getAllTransactions() {
+  if (isDemoMode()) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([META_STORE], 'readonly');
+      const request = transaction.objectStore(META_STORE).get('demo_transactions');
+      request.onsuccess = (event) => resolve(Array.isArray(event.target.result) ? event.target.result : []);
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+  return getRealTransactions();
+}
+
+// Ganti seluruh isi store transaksi dalam satu transaksi IndexedDB,
+// supaya tidak ada keadaan setengah terisi kalau gagal di tengah.
+export function replaceAllRealTransactions(list) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    store.clear();
+    for (const tx of list) {
+      store.put(tx);
+    }
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = (event) => reject(event.target.error);
+    transaction.onabort = (event) => reject(event.target.error);
+  });
+}
+
+export function replaceAllTransactions(list) {
+  if (isDemoMode()) {
+    return setMeta('demo_transactions', Array.isArray(list) ? list : []);
+  }
+  return replaceAllRealTransactions(list);
+}
+
 export const DEFAULT_CATEGORIES = {
   income: ['Gaji', 'Bonus', 'Hadiah', 'Lainnya'],
   expense: ['Makan', 'Transport', 'Hiburan', 'Belanja', 'Tagihan', 'Lainnya'],
@@ -107,7 +338,7 @@ export const DEFAULT_CATEGORIES = {
   updatedAt: 0
 };
 
-export function getCategories() {
+export function getRealCategories() {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([META_STORE], 'readonly');
     const request = transaction.objectStore(META_STORE).get('categories');
@@ -142,34 +373,57 @@ export function getCategories() {
   });
 }
 
-export function saveCategories(categories) {
-  return new Promise((resolve, reject) => {
-    const cleanSubcategories = {
-      income: {},
-      expense: {}
-    };
-    if (categories && typeof categories.subcategories === 'object' && categories.subcategories !== null) {
-      if (typeof categories.subcategories.income === 'object' && categories.subcategories.income !== null) {
-        for (const [cat, subs] of Object.entries(categories.subcategories.income)) {
-          if (Array.isArray(subs)) {
-            cleanSubcategories.income[cat] = subs.map(s => String(s).trim()).filter(Boolean);
-          }
+export function getCategories() {
+  if (isDemoMode()) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([META_STORE], 'readonly');
+      const request = transaction.objectStore(META_STORE).get('demo_categories');
+      request.onsuccess = (event) => {
+        const stored = event.target.result;
+        if (stored && Array.isArray(stored.income) && Array.isArray(stored.expense)) {
+          resolve(stored);
+        } else {
+          resolve(JSON.parse(JSON.stringify(SAMPLE_CATEGORIES)));
         }
-      }
-      if (typeof categories.subcategories.expense === 'object' && categories.subcategories.expense !== null) {
-        for (const [cat, subs] of Object.entries(categories.subcategories.expense)) {
-          if (Array.isArray(subs)) {
-            cleanSubcategories.expense[cat] = subs.map(s => String(s).trim()).filter(Boolean);
-          }
+      };
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+  return getRealCategories();
+}
+
+function sanitizeCategories(categories) {
+  const cleanSubcategories = {
+    income: {},
+    expense: {}
+  };
+  if (categories && typeof categories.subcategories === 'object' && categories.subcategories !== null) {
+    if (typeof categories.subcategories.income === 'object' && categories.subcategories.income !== null) {
+      for (const [cat, subs] of Object.entries(categories.subcategories.income)) {
+        if (Array.isArray(subs)) {
+          cleanSubcategories.income[cat] = subs.map(s => String(s).trim()).filter(Boolean);
         }
       }
     }
-    const toSave = {
-      income: Array.isArray(categories.income) ? categories.income : [...DEFAULT_CATEGORIES.income],
-      expense: Array.isArray(categories.expense) ? categories.expense : [...DEFAULT_CATEGORIES.expense],
-      subcategories: cleanSubcategories,
-      updatedAt: typeof categories.updatedAt === 'number' ? categories.updatedAt : Date.now()
-    };
+    if (typeof categories.subcategories.expense === 'object' && categories.subcategories.expense !== null) {
+      for (const [cat, subs] of Object.entries(categories.subcategories.expense)) {
+        if (Array.isArray(subs)) {
+          cleanSubcategories.expense[cat] = subs.map(s => String(s).trim()).filter(Boolean);
+        }
+      }
+    }
+  }
+  return {
+    income: Array.isArray(categories?.income) ? categories.income : [...DEFAULT_CATEGORIES.income],
+    expense: Array.isArray(categories?.expense) ? categories.expense : [...DEFAULT_CATEGORIES.expense],
+    subcategories: cleanSubcategories,
+    updatedAt: typeof categories?.updatedAt === 'number' ? categories.updatedAt : Date.now()
+  };
+}
+
+export function saveRealCategories(categories) {
+  return new Promise((resolve, reject) => {
+    const toSave = sanitizeCategories(categories);
     const transaction = db.transaction([META_STORE], 'readwrite');
     const request = transaction.objectStore(META_STORE).put(toSave, 'categories');
     request.onsuccess = () => resolve(toSave);
@@ -177,12 +431,25 @@ export function saveCategories(categories) {
   });
 }
 
+export function saveCategories(categories) {
+  if (isDemoMode()) {
+    return new Promise((resolve, reject) => {
+      const toSave = sanitizeCategories(categories);
+      const transaction = db.transaction([META_STORE], 'readwrite');
+      const request = transaction.objectStore(META_STORE).put(toSave, 'demo_categories');
+      request.onsuccess = () => resolve(toSave);
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+  return saveRealCategories(categories);
+}
+
 export const DEFAULT_BUDGETS = {
   items: {},
   updatedAt: 0
 };
 
-export function getBudgets() {
+export function getRealBudgets() {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([META_STORE], 'readonly');
     const request = transaction.objectStore(META_STORE).get('budgets');
@@ -205,26 +472,62 @@ export function getBudgets() {
   });
 }
 
-export function saveBudgets(budgets) {
-  return new Promise((resolve, reject) => {
-    const cleanItems = {};
-    if (budgets && typeof budgets.items === 'object' && !Array.isArray(budgets.items)) {
-      for (const [k, v] of Object.entries(budgets.items)) {
-        const num = Number(v);
-        if (k && Number.isFinite(num) && num > 0) {
-          cleanItems[k] = Math.round(num);
+export function getBudgets() {
+  if (isDemoMode()) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([META_STORE], 'readonly');
+      const request = transaction.objectStore(META_STORE).get('demo_budgets');
+      request.onsuccess = (event) => {
+        const stored = event.target.result;
+        if (stored && typeof stored === 'object' && stored.items && typeof stored.items === 'object') {
+          resolve(stored);
+        } else {
+          resolve(JSON.parse(JSON.stringify(SAMPLE_BUDGETS)));
         }
+      };
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+  return getRealBudgets();
+}
+
+function sanitizeBudgets(budgets) {
+  const cleanItems = {};
+  if (budgets && typeof budgets.items === 'object' && !Array.isArray(budgets.items)) {
+    for (const [k, v] of Object.entries(budgets.items)) {
+      const num = Number(v);
+      if (k && Number.isFinite(num) && num > 0) {
+        cleanItems[k] = Math.round(num);
       }
     }
-    const toSave = {
-      items: cleanItems,
-      updatedAt: typeof budgets?.updatedAt === 'number' ? budgets.updatedAt : Date.now()
-    };
+  }
+  return {
+    items: cleanItems,
+    updatedAt: typeof budgets?.updatedAt === 'number' ? budgets.updatedAt : Date.now()
+  };
+}
+
+export function saveRealBudgets(budgets) {
+  return new Promise((resolve, reject) => {
+    const toSave = sanitizeBudgets(budgets);
     const transaction = db.transaction([META_STORE], 'readwrite');
     const request = transaction.objectStore(META_STORE).put(toSave, 'budgets');
     request.onsuccess = () => resolve(toSave);
     request.onerror = (event) => reject(event.target.error);
   });
+}
+
+export function saveBudgets(budgets) {
+  if (isDemoMode()) {
+    return new Promise((resolve, reject) => {
+      const toSave = sanitizeBudgets(budgets);
+      const transaction = db.transaction([META_STORE], 'readwrite');
+      const request = transaction.objectStore(META_STORE).put(toSave, 'demo_budgets');
+      request.onsuccess = () => resolve(toSave);
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+  return saveRealBudgets(budgets);
 }
 
 export const DEFAULT_WALLET_ID = 'default';
@@ -241,7 +544,7 @@ export const DEFAULT_WALLETS = [
   }
 ];
 
-export function getWallets() {
+export function getRealWallets() {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([META_STORE], 'readonly');
     const request = transaction.objectStore(META_STORE).get('wallets');
@@ -282,22 +585,58 @@ export function getWallets() {
   });
 }
 
-export function saveWallets(wallets) {
+export function getWallets() {
+  if (isDemoMode()) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([META_STORE], 'readonly');
+      const request = transaction.objectStore(META_STORE).get('demo_wallets');
+      request.onsuccess = (event) => {
+        const stored = event.target.result;
+        if (Array.isArray(stored) && stored.length > 0) {
+          resolve(stored);
+        } else {
+          resolve([...SAMPLE_WALLETS]);
+        }
+      };
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+  return getRealWallets();
+}
+
+function sanitizeWallets(wallets) {
+  const list = Array.isArray(wallets) ? wallets : [];
+  return list.map(w => ({
+    id: String(w.id),
+    name: String(w.name).trim(),
+    currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
+    createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
+    updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : Date.now(),
+    deleted: !!w.deleted
+  }));
+}
+
+export function saveRealWallets(wallets) {
   return new Promise((resolve, reject) => {
-    const list = Array.isArray(wallets) ? wallets : [];
-    const clean = list.map(w => ({
-      id: String(w.id),
-      name: String(w.name).trim(),
-      currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
-      createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
-      updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : Date.now(),
-      deleted: !!w.deleted
-    }));
+    const clean = sanitizeWallets(wallets);
     const transaction = db.transaction([META_STORE], 'readwrite');
     const request = transaction.objectStore(META_STORE).put(clean, 'wallets');
     request.onsuccess = () => resolve(clean);
     request.onerror = (event) => reject(event.target.error);
   });
+}
+
+export function saveWallets(wallets) {
+  if (isDemoMode()) {
+    return new Promise((resolve, reject) => {
+      const clean = sanitizeWallets(wallets);
+      const transaction = db.transaction([META_STORE], 'readwrite');
+      const request = transaction.objectStore(META_STORE).put(clean, 'demo_wallets');
+      request.onsuccess = () => resolve(clean);
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+  return saveRealWallets(wallets);
 }
 
 export const DEFAULT_TIME_FORMAT = '24';
@@ -419,10 +758,11 @@ export async function resetDatabase() {
     updatedAt: 0
   };
 
-  await replaceAllTransactions([]);
-  await saveCategories(initialCategories);
-  await saveBudgets(initialBudgets);
-  await saveWallets(initialWallets);
+  await clearSampleData();
+  await replaceAllRealTransactions([]);
+  await saveRealCategories(initialCategories);
+  await saveRealBudgets(initialBudgets);
+  await saveRealWallets(initialWallets);
   await saveSettings(initialSettings);
   await saveTimeFormat(DEFAULT_TIME_FORMAT);
   await setMeta('localRev', 0);

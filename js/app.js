@@ -1,4 +1,4 @@
-import { initDB, saveTransaction, getAllTransactions, replaceAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT, getSettings, saveSettings, DEFAULT_SETTINGS, resetDatabase, setMeta } from './db.js';
+import { initDB, saveTransaction, getAllTransactions, replaceAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT, getSettings, saveSettings, DEFAULT_SETTINGS, resetDatabase, setMeta, isDemoMode, activateSampleData, clearSampleData, getRealTransactions, getRealCategories, getRealBudgets, getRealWallets } from './db.js';
 import { initSync, markDirty, signIn, signOut, syncNow, ensureToken, clearRemoteData, isLinked } from './sync.js';
 
 // DOM Elements
@@ -4797,7 +4797,9 @@ const btnImportJson = document.getElementById('btn-import-json');
 const inputImportJson = document.getElementById('input-import-json');
 const btnExportCsv = document.getElementById('btn-export-csv');
 const btnFillDummy = document.getElementById('btn-fill-dummy');
-const btnClearDummy = document.getElementById('btn-clear-dummy');
+const btnExitDummy = document.getElementById('btn-exit-dummy') || document.getElementById('btn-clear-dummy');
+const btnBannerExitDummy = document.getElementById('btn-banner-exit-dummy');
+const btnClearDummy = btnExitDummy;
 
 function formatTime(ts) {
     return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -5016,11 +5018,11 @@ export async function exportViaCapacitor(fileName, dataContent, dialogTitle) {
 
 export async function exportBackupJson() {
     try {
-        const allTx = await getAllTransactions();
+        const allTx = await getRealTransactions();
         const realTx = allTx.filter(tx => !tx.dummy);
-        const cats = await getCategories();
-        const bgs = await getBudgets();
-        const wts = await getWallets();
+        const cats = await getRealCategories();
+        const bgs = await getRealBudgets();
+        const wts = await getRealWallets();
         const stgs = await getAppSettings();
         const data = {
             app: 'mizan-okane',
@@ -5167,6 +5169,10 @@ function walletsDiffer(w1, w2) {
 }
 
 async function handleImportJson(file) {
+    if (isDemoMode()) {
+        showNotification("Tidak dapat mengimpor saat dalam mode data contoh. Silakan keluar dari mode data contoh terlebih dahulu.", "warn");
+        return;
+    }
     let text;
     try {
         text = await file.text();
@@ -5395,7 +5401,7 @@ function getLocalDateString() {
 
 btnExportCsv.addEventListener('click', async () => {
     try {
-        const allTx = await getAllTransactions();
+        const allTx = await getRealTransactions();
         const activeTx = allTx.filter(tx => !tx.deleted && !tx.dummy);
 
         if (activeTx.length === 0) {
@@ -5464,207 +5470,96 @@ btnExportCsv.addEventListener('click', async () => {
     }
 });
 
-// --- Data Contoh (Dummy) ---
+// --- Data Contoh Lengkap ---
 
-export function generateDummyTransactions(categories, wallets) {
-    const list = [];
-    const expenseCats = (categories && Array.isArray(categories.expense) && categories.expense.length > 0)
-        ? categories.expense
-        : ['Makan', 'Transport', 'Hiburan', 'Belanja', 'Tagihan', 'Lainnya'];
-    const incomeCats = (categories && Array.isArray(categories.income) && categories.income.length > 0)
-        ? categories.income
-        : ['Gaji', 'Bonus', 'Hadiah', 'Lainnya'];
-    const activeWallets = (wallets && Array.isArray(wallets) && wallets.filter(w => !w.deleted).length > 0)
-        ? wallets.filter(w => !w.deleted)
-        : [{ id: DEFAULT_WALLET_ID, name: DEFAULT_WALLET_NAME }];
+export function updateDemoModeUI() {
+    const demoBanner = document.getElementById('demo-mode-indicator');
+    const btnExit = document.getElementById('btn-exit-dummy');
+    const isDemo = isDemoMode();
 
-    const now = new Date();
-
-    // Sekitar 40 transaksi: 25 pengeluaran, 10 pemasukan, 5 transfer
-    const types = [
-        ...Array(25).fill('expense'),
-        ...Array(10).fill('income'),
-        ...Array(5).fill('transfer')
-    ];
-    // Acak urutan tipe (Fisher-Yates)
-    for (let i = types.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [types[i], types[j]] = [types[j], types[i]];
+    if (demoBanner) {
+        demoBanner.classList.toggle('hidden', !isDemo);
+        demoBanner.setAttribute('aria-hidden', String(!isDemo));
     }
 
-    const expenseNotes = {
-        'Makan': ['Makan siang nasi padang', 'Kopi & roti bakar', 'Sarapan bubur ayam', 'Makan malam seafood', 'Beli snack martabak', 'Pesan makan online', 'Kopi susu gula aren'],
-        'Transport': ['Bensin motor', 'Isi bensin mobil', 'Tiket KRL', 'Ojek online ke kantor', 'Parkir seharian', 'Tol dalam kota'],
-        'Hiburan': ['Nonton bioskop', 'Langganan streaming film', 'Beli game online', 'Tiket konser mini', 'Karaoke keluarga'],
-        'Belanja': ['Belanja mingguan supermarket', 'Beli kaos polos', 'Keperluan rumah tangga', 'Beli perlengkapan mandi', 'Belanja kebutuhan dapur'],
-        'Tagihan': ['Bayar listrik PLN', 'Tagihan air PDAM', 'Paket data internet', 'Iuran keamanan & sampah', 'Langganan wifi'],
-        'Lainnya': ['Potong rambut', 'Fotokopi dokumen', 'Obat di apotek', 'Beli baterai remote', 'Sedekah subuh']
-    };
-
-    const incomeNotes = {
-        'Gaji': ['Gaji bulanan', 'Uang lembur akhir pekan', 'Insentif kinerja bulanan'],
-        'Bonus': ['Bonus pencapaian target', 'Bonus tahunan', 'Reward proyek'],
-        'Hadiah': ['Kado ulang tahun', 'THR dari keluarga', 'Hadiah lomba'],
-        'Lainnya': ['Penjualan barang bekas', 'Freelance jasa penulisan', 'Cashback belanja', 'Pengembalian pinjaman']
-    };
-
-    const transferNotes = [
-        'Pindah saldo ke tabungan',
-        'Tarik tunai untuk belanja',
-        'Top up dana darurat',
-        'Alokasi anggaran bulanan',
-        'Kirim dana operasional'
-    ];
-
-    for (let i = 0; i < 40; i++) {
-        const type = types[i];
-        // Tersebar merata dalam 60 hari terakhir (~2 bulan)
-        const baseOffset = Math.floor((i * 59) / 39);
-        const jitter = Math.floor(Math.random() * 3) - 1;
-        const dayOffset = Math.min(59, Math.max(0, baseOffset + jitter));
-        const txDateObj = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOffset);
-        const year = txDateObj.getFullYear();
-        const month = String(txDateObj.getMonth() + 1).padStart(2, '0');
-        const day = String(txDateObj.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-
-        // Jam acak antara 07:00 sampai 22:00
-        const hour = Math.floor(Math.random() * 16) + 7;
-        const minute = Math.floor(Math.random() * 12) * 5;
-        const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-
-        // Dompet asal
-        const wallet = activeWallets[Math.floor(Math.random() * activeWallets.length)];
-        const walletId = wallet.id;
-        const walletCurr = getWalletCurrency(walletId);
-
-        let category = '';
-        let note = '';
-        let amount = 0;
-        let toWalletId = undefined;
-        let actualType = type;
-
-        if (actualType === 'expense') {
-            category = expenseCats[Math.floor(Math.random() * expenseCats.length)];
-            const pool = expenseNotes[category] || expenseNotes['Lainnya'];
-            note = pool[Math.floor(Math.random() * pool.length)];
-            const steps = walletCurr === 'USD'
-                ? [2.5, 4.75, 8.5, 12, 15.99, 25.5, 34, 50, 75.25, 110]
-                : (walletCurr === 'JPY'
-                    ? [300, 500, 800, 1200, 1800, 2500, 3000, 4500, 6000, 8000]
-                    : [15000, 20000, 25000, 35000, 45000, 50000, 75000, 90000, 120000, 150000, 200000, 250000, 350000]);
-            amount = steps[Math.floor(Math.random() * steps.length)];
-        } else if (actualType === 'income') {
-            category = incomeCats[Math.floor(Math.random() * incomeCats.length)];
-            const pool = incomeNotes[category] || incomeNotes['Lainnya'];
-            note = pool[Math.floor(Math.random() * pool.length)];
-            const steps = walletCurr === 'USD'
-                ? [25, 50, 100, 250, 500, 1200, 2500]
-                : (walletCurr === 'JPY'
-                    ? [25000, 50000, 80000, 120000, 200000, 300000, 400000]
-                    : [300000, 500000, 750000, 1200000, 2000000, 3500000, 4500000, 5500000]);
-            amount = steps[Math.floor(Math.random() * steps.length)];
-        } else if (actualType === 'transfer') {
-            category = 'Transfer';
-            note = transferNotes[Math.floor(Math.random() * transferNotes.length)];
-            const steps = walletCurr === 'USD'
-                ? [10, 20, 50, 100, 200]
-                : (walletCurr === 'JPY'
-                    ? [1000, 2000, 5000, 10000, 20000, 30000]
-                    : [50000, 100000, 200000, 250000, 500000, 750000, 1000000]);
-            amount = steps[Math.floor(Math.random() * steps.length)];
-            const sameCurrWallets = activeWallets.filter(w => getWalletCurrency(w.id) === walletCurr && w.id !== walletId);
-            if (sameCurrWallets.length > 0) {
-                const toWallet = sameCurrWallets[Math.floor(Math.random() * sameCurrWallets.length)];
-                toWalletId = toWallet.id;
-            } else {
-                actualType = 'expense';
-                category = expenseCats[Math.floor(Math.random() * expenseCats.length)];
-                const pool = expenseNotes[category] || expenseNotes['Lainnya'];
-                note = pool[Math.floor(Math.random() * pool.length)];
-            }
-        }
-
-        const createdAt = txDateObj.getTime() + (hour * 3600 + minute * 60) * 1000;
-        const tx = {
-            id: `dummy_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}`,
-            type: actualType,
-            amount,
-            date: dateStr,
-            time: timeStr,
-            category,
-            walletId,
-            note,
-            createdAt,
-            updatedAt: createdAt,
-            deleted: false,
-            dummy: true
-        };
-        if (toWalletId !== undefined) {
-            tx.toWalletId = toWalletId;
-        } else if (actualType !== 'transfer' && categories && categories.subcategories && categories.subcategories[actualType]) {
-            const subs = categories.subcategories[actualType][category];
-            if (Array.isArray(subs) && subs.length > 0 && Math.random() > 0.3) {
-                tx.subcategory = subs[Math.floor(Math.random() * subs.length)];
-            }
-        }
-
-        list.push(tx);
+    if (btnExit) {
+        btnExit.disabled = !isDemo;
+        btnExit.setAttribute('aria-disabled', String(!isDemo));
     }
 
-    return list;
+    if (isDemo) {
+        const demoSyncNotice = 'Mode data contoh aktif. Sinkronisasi dengan Google Drive dinonaktifkan.';
+        if (syncStatusEl) {
+            syncStatusEl.textContent = demoSyncNotice;
+            syncStatusEl.dataset.tone = 'warn';
+        }
+        if (settingsSyncStatusEl) {
+            settingsSyncStatusEl.textContent = demoSyncNotice;
+            settingsSyncStatusEl.dataset.tone = 'warn';
+        }
+        updateHeaderSyncUI('offline', 'warn', demoSyncNotice);
+    }
 }
 
 export async function performFillDummy() {
     try {
-        const allTx = await getAllTransactions();
-        const realTx = allTx.filter(tx => !tx.dummy);
-        const categories = await getCategories();
-        const wallets = await getWallets();
-        const newDummies = generateDummyTransactions(categories, wallets);
-        await replaceAllTransactions([...realTx, ...newDummies]);
+        await activateSampleData();
+        try { localStorage.removeItem(LAST_WALLET_KEY); } catch (e) {}
+        currentWalletFilter = 'all';
+        selectedBerandaMonth = '';
+        selectedDonutMonth = '';
+        activeDonutCategory = null;
+        selectedTimbanganMonth = '';
         resetForm();
         await loadData();
-        showNotification('Data contoh berhasil diisi (40 transaksi).', 'success');
+        updateDemoModeUI();
+        showNotification('Mode data contoh aktif. Data asli aman dan terpisah.', 'success');
     } catch (err) {
         console.error('Gagal mengisi data contoh', err);
         showNotification('Gagal mengisi data contoh.', 'error');
     }
 }
 
-export async function performClearDummy() {
+export async function performExitDummy() {
     try {
-        const allTx = await getAllTransactions();
-        const realTx = allTx.filter(tx => !tx.dummy);
-        const dummyCount = allTx.length - realTx.length;
-        if (dummyCount === 0) {
-            showNotification('Tidak ada data contoh yang tersimpan.', 'info');
-            return;
-        }
-        await replaceAllTransactions(realTx);
+        await clearSampleData();
+        try { localStorage.removeItem(LAST_WALLET_KEY); } catch (e) {}
+        currentWalletFilter = 'all';
+        selectedBerandaMonth = '';
+        selectedDonutMonth = '';
+        activeDonutCategory = null;
+        selectedTimbanganMonth = '';
         resetForm();
         await loadData();
-        showNotification('Data contoh berhasil dihapus.', 'success');
+        updateDemoModeUI();
+        showNotification('Kembali ke data asli.', 'success');
     } catch (err) {
-        console.error('Gagal menghapus data contoh', err);
-        showNotification('Gagal menghapus data contoh.', 'error');
+        console.error('Gagal keluar dari mode data contoh', err);
+        showNotification('Gagal keluar dari mode data contoh.', 'error');
     }
 }
+
+export const performClearDummy = performExitDummy;
 
 if (btnFillDummy) {
     btnFillDummy.addEventListener('click', () => {
         pendingDeleteId = null;
         pendingCategoryDelete = null;
+        pendingSubcategoryDelete = null;
         pendingBudgetDelete = null;
         pendingWalletDelete = null;
         pendingLogout = false;
         pendingClearDummy = false;
         pendingFillDummy = true;
         if (confirmDialogTitle) {
-            confirmDialogTitle.textContent = 'Isi data contoh? Sekitar 40 transaksi acak dalam 2 bulan terakhir akan ditambahkan ke perangkat ini.';
+            if (isDemoMode()) {
+                confirmDialogTitle.textContent = 'Muat ulang data contoh? Seluruh data contoh akan dikembalikan ke setelan awal. Data asli Anda tetap aman.';
+            } else {
+                confirmDialogTitle.textContent = 'Aktifkan mode data contoh? Satu set data lengkap (dompet Rupiah, Yen, USD, kategori, budget, dan transaksi) akan dimuat untuk mencoba fitur. Data asli Anda aman dan tidak tertimpa.';
+            }
         }
         if (btnConfirmDelete) {
-            btnConfirmDelete.textContent = 'Isi Data';
+            btnConfirmDelete.textContent = isDemoMode() ? 'Muat Ulang' : 'Aktifkan';
             btnConfirmDelete.className = 'btn-primary';
         }
         if (confirmDialog && typeof confirmDialog.showModal === 'function') {
@@ -5673,36 +5568,37 @@ if (btnFillDummy) {
     });
 }
 
-if (btnClearDummy) {
-    btnClearDummy.addEventListener('click', async () => {
-        try {
-            const allTx = await getAllTransactions();
-            const dummyCount = allTx.filter(tx => tx.dummy).length;
-            if (dummyCount === 0) {
-                showNotification('Tidak ada data contoh yang tersimpan.', 'info');
-                return;
-            }
-            pendingDeleteId = null;
-            pendingCategoryDelete = null;
-            pendingBudgetDelete = null;
-            pendingWalletDelete = null;
-            pendingLogout = false;
-            pendingFillDummy = false;
-            pendingClearDummy = true;
-            if (confirmDialogTitle) {
-                confirmDialogTitle.textContent = `Hapus semua data contoh (${dummyCount} transaksi)? Data asli Anda tidak akan terpengaruh.`;
-            }
-            if (btnConfirmDelete) {
-                btnConfirmDelete.textContent = 'Hapus';
-                btnConfirmDelete.className = 'btn-danger';
-            }
-            if (confirmDialog && typeof confirmDialog.showModal === 'function') {
-                confirmDialog.showModal();
-            }
-        } catch (err) {
-            console.error('Gagal memeriksa data contoh', err);
-        }
-    });
+function handleExitDemoPrompt() {
+    if (!isDemoMode()) {
+        showNotification('Aplikasi sedang tidak dalam mode data contoh.', 'info');
+        return;
+    }
+    pendingDeleteId = null;
+    pendingCategoryDelete = null;
+    pendingSubcategoryDelete = null;
+    pendingBudgetDelete = null;
+    pendingWalletDelete = null;
+    pendingLogout = false;
+    pendingFillDummy = false;
+    pendingClearDummy = true;
+    if (confirmDialogTitle) {
+        confirmDialogTitle.textContent = 'Keluar dari mode data contoh? Aplikasi akan kembali menampilkan data asli Anda.';
+    }
+    if (btnConfirmDelete) {
+        btnConfirmDelete.textContent = 'Keluar';
+        btnConfirmDelete.className = 'btn-primary';
+    }
+    if (confirmDialog && typeof confirmDialog.showModal === 'function') {
+        confirmDialog.showModal();
+    }
+}
+
+if (btnExitDummy) {
+    btnExitDummy.addEventListener('click', handleExitDemoPrompt);
+}
+
+if (btnBannerExitDummy) {
+    btnBannerExitDummy.addEventListener('click', handleExitDemoPrompt);
 }
 
 // --- Hapus Semua Data / Reset Setelan Pabrik (Zona Bahaya) ---
@@ -5749,6 +5645,7 @@ export async function performDeleteAllData() {
         resetForm();
 
         await loadData();
+        updateDemoModeUI();
 
         showNotification('Aplikasi berhasil dikembalikan ke setelan awal.', 'success');
         return true;
@@ -5869,6 +5766,7 @@ async function init() {
         init24TimeSelectOptions();
         resetForm(); // Set default date, kategori, dan dompet
         await loadData();
+        updateDemoModeUI();
         const initialTab = getTabFromHash();
         recordTabNavigation(initialTab);
         switchTab(initialTab);

@@ -1,7 +1,7 @@
 // Sinkron Google Drive (appDataFolder) dengan Google Identity Services token flow.
 // IndexedDB tetap sumber utama; modul ini hanya menyalin snapshot ke/dari Drive.
 // Access token hanya disimpan di memori (variabel JS), tidak pernah ke storage.
-import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getSettings, saveSettings, DEFAULT_TIME_FORMAT } from './db.js';
+import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getSettings, saveSettings, DEFAULT_TIME_FORMAT, isDemoMode } from './db.js';
 
 const CLIENT_ID = '663070681186-pjrnce0fcpjecvbf9o2fj99e59e3s0un.apps.googleusercontent.com';
 const SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
@@ -335,6 +335,9 @@ async function saveSyncMeta(meta) {
 // - Soft delete (deleted: true) ikut digabung dan bisa menang jika updatedAt lebih baru.
 // Aturan Tahap 5: Kategori, budget, dan dompet ikut digabung (yang terbaru menang berdasarkan updatedAt).
 async function runSync(force = null) {
+    if (isDemoMode()) {
+        return await getSyncMeta();
+    }
     const account = getAccount();
     let meta = await getSyncMeta();
     if (meta.account !== account?.email) {
@@ -577,6 +580,7 @@ async function ensureTokenAndSync() {
 }
 
 export async function syncNow({ interactive = false, force = null } = {}) {
+    if (isDemoMode()) return;
     if (!isLinked()) {
         setState({ status: 'signed-out', email: null, message: '' });
         return;
@@ -747,6 +751,7 @@ export async function clearRemoteData() {
 
 // Dipanggil setiap kali data lokal berubah (tambah, edit, hapus).
 export async function markDirty() {
+    if (isDemoMode()) return;
     await setMeta('localRev', (await getLocalRev()) + 1);
     if (!isLinked()) return;
 

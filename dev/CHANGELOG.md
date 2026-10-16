@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Data contoh lengkap
+- Ditambah: Generator data contoh satu set tetap (`getSampleTransactions`, `SAMPLE_WALLETS`, `SAMPLE_CATEGORIES`, `SAMPLE_BUDGETS`) di `js/db.js` dengan data lengkap mencakup dompet IDR, JPY, USD, kategori dan sub kategori, budget dengan indikator aman dan peringatan, transaksi pemasukan, pengeluaran, serta transfer antar dompet satu mata uang.
+- Ditambah: Pemisahan penyimpanan data contoh di `META_STORE` (`demo_transactions`, `demo_wallets`, `demo_categories`, `demo_budgets`) serta fungsi pengelola mode contoh (`isDemoMode`, `activateSampleData`, `clearSampleData`) di `js/db.js` sehingga data asli pengguna aman dan tidak tertimpa.
+- Ditambah: Penanda banner visual jelas (`demo-mode-indicator`) di bawah header aplikasi yang menampilkan status mode data contoh beserta tombol cepat untuk keluar dari mode contoh (`index.html`, `css/style.css`).
+- Ditambah: Tombol "Keluar Mode Data Contoh" di Pengaturan pada kartu Data untuk kembali ke data asli kapan saja (`index.html`, `js/app.js`).
+- Diubah: Perilaku tombol "Isi Data Contoh" di Pengaturan kini memuat satu set tetap yang identik setiap kali diaktifkan atau dimuat ulang (`js/app.js`).
+- Diubah: Isolasi penuh dari Google Drive saat mode contoh aktif dengan menghentikan proses `runSync`, `syncNow`, dan `markDirty` sehingga tidak ada data contoh yang dikirim ke Drive (`js/sync.js`).
+- Diubah: Ekspor JSON dan CSV selalu mengambil data asli pengguna lewat `getRealTransactions`, `getRealWallets`, `getRealCategories`, dan `getRealBudgets`, serta impor JSON dicegah saat berada dalam mode data contoh (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v49` (`sw.js`).
+- Diubah: Mencentang item "Data contoh lengkap" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Reset setelan pabrik
 - Ditambah: Fungsi `resetDatabase` di `js/db.js` untuk mengosongkan store transaksi dan mengembalikan kategori, sub kategori, dompet, budget, pengaturan (tema dan format jam), dan nomor revisi lokal ke kondisi awal bawaan.
 - Ditambah: Fungsi `clearRemoteData` di `js/sync.js` untuk mengosongkan file cadangan di Google Drive `appDataFolder` dengan menghapus seluruh data transaksi buatan pengguna dan menyetel ulang kategori, dompet, budget, dan pengaturan ke bawaan awal tanpa memutus sesi login Google.

@@ -66,6 +66,18 @@
             </div>
         </header>
 
+        <!-- Penanda Mode Data Contoh -->
+        <div id="demo-mode-indicator" class="demo-mode-indicator hidden" role="status" aria-live="polite">
+            <div class="demo-mode-indicator-content">
+                <span class="demo-mode-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    Mode Data Contoh
+                </span>
+                <span class="demo-mode-desc">Data asli aman</span>
+            </div>
+            <button type="button" id="btn-banner-exit-dummy" class="btn-demo-banner-exit" aria-label="Keluar dari mode data contoh">Keluar</button>
+        </div>
+
         <!-- 1. Halaman Beranda -->
         <main id="page-beranda" class="page-view" role="tabpanel" aria-label="Beranda">
 
@@ -661,12 +673,12 @@
                     <div class="settings-divider" aria-hidden="true"></div>
 
                     <div class="settings-card-header">
-                        <h3 class="card-title">Data Contoh (Dummy)</h3>
-                        <p class="settings-card-desc">Isi data contoh untuk mencoba fitur aplikasi, atau bersihkan kapan saja.</p>
+                        <h3 class="card-title">Data Contoh</h3>
+                        <p class="settings-card-desc">Coba semua fitur aplikasi dengan satu set data contoh lengkap, atau kembali ke data asli kapan saja.</p>
                     </div>
                     <div class="data-account-actions">
                         <button type="button" id="btn-fill-dummy" class="btn-secondary btn-small">Isi Data Contoh</button>
-                        <button type="button" id="btn-clear-dummy" class="btn-secondary btn-small">Hapus Data Contoh</button>
+                        <button type="button" id="btn-exit-dummy" class="btn-secondary btn-small" disabled aria-disabled="true">Keluar Mode Data Contoh</button>
                     </div>
                 </section>
             </div>

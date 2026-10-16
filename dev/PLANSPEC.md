@@ -376,3 +376,24 @@ Data:
 Cek manual:
 - Reset saat login: data kosong di aplikasi, muat ulang, data lama tidak kembali dari Drive.
 - Reset saat tidak login: aplikasi kembali ke keadaan awal.
+
+## Data contoh lengkap
+
+Tujuan: mengganti data contoh lama (angka acak) dengan satu set tetap yang lengkap, supaya bisa mencoba semua fitur. Menggantikan perilaku item lama "Data contoh (dummy)".
+
+Tempat dan tampilan:
+- Tombol data contoh yang sudah ada di Pengaturan tetap di tempatnya. Tambahkan tombol keluar dari mode data contoh yang kembali ke data asli.
+
+Aturan:
+- Satu set tetap, hasilnya sama setiap kali: beberapa dompet (Rupiah, Yen, USD), kategori dan sub kategori, budget, transaksi pemasukan dan pengeluaran, dan transfer antar dompet satu mata uang.
+- Data contoh disimpan terpisah dari data asli, jadi data asli tidak tertimpa.
+- Data contoh tidak pernah disinkronkan ke Drive, tidak ikut ekspor, dan tidak ikut impor.
+- Tampilkan penanda jelas bahwa aplikasi sedang dalam mode data contoh.
+- Tidak boleh berisi data asli milik pemilik.
+
+Data:
+- Tidak ada perubahan struktur data. Tidak ada pengaruh ke sinkron Drive, ekspor, atau impor karena data contoh dipisah.
+
+Cek manual:
+- Aktifkan data contoh saat login Google: tidak ada yang masuk ke Drive, data asli utuh setelah keluar dari mode data contoh.
+- Aktifkan dua kali: isinya identik.
