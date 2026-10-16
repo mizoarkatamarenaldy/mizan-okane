@@ -72,3 +72,15 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Mata uang opsional
   - [x] Beranda: sembunyikan budget dan dompet bila tidak perlu
   - [x] Logo aplikasi
+  - [ ] Audit logika matematis
+  - [ ] Backup lengkap
+  - [ ] Hapus dompet
+  - [ ] Reset setelan pabrik
+  - [ ] Data contoh lengkap
+  - [ ] Klik dompet untuk filter riwayat
+  - [ ] Filter bulan di Riwayat
+  - [ ] Warna kartu saldo multi mata uang
+  - [ ] Pencarian riwayat
+  - [ ] Catatan di bawah angka
+  - [ ] Tombol Timbangan di tengah navigasi
+  - [ ] Tentang Pengembang

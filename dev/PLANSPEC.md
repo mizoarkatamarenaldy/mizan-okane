@@ -269,3 +269,245 @@ Cek manual:
 - Buka situs di browser, lihat tab: favicon baru muncul (muat ulang keras kalau masih ikon lama).
 - Di DevTools tab Application > Manifest: semua ikon terdaftar tanpa error, dan pratinjau maskable tidak terpotong.
 - Di HP atau PC yang sudah install PWA lama: setelah dibuka dua kali, ikon dan cache ter-update ke versi baru.
+
+## Audit logika matematis
+
+Tujuan: memeriksa semua perhitungan uang di aplikasi karena pemilik merasa ada angka yang janggal. Hasilnya laporan temuan saja.
+
+Aturan:
+- Periksa: saldo per dompet, Total Saldo di kartu Beranda per mata uang, transfer antar dompet, tambah/edit/hapus transaksi, budget per kategori dan sub kategori, grafik bulanan, diagram donut, ringkasan Timbangan, impor JSON, ekspor CSV dan JSON.
+- Transfer: saldo dompet asal turun dan dompet tujuan naik dengan nominal sama, Total Saldo tidak berubah, dan transfer tidak dihitung sebagai pemasukan atau pengeluaran. Periksa juga perilaku transfer antar dompet beda mata uang.
+- Transaksi bertanda terhapus tidak boleh ikut dihitung di mana pun.
+- Periksa cara angka disimpan dan dibulatkan, terutama USD dengan desimal.
+- Periksa arti Total Saldo saat pindah bulan: kumulatif sampai bulan itu atau hanya hasil bulan itu, dan apakah konsisten di semua tempat.
+- Sengaja TIDAK mengubah kode. Laporan disampaikan di chat, bukan sebagai file baru.
+- Format laporan: daftar temuan, tiap temuan berisi file dan fungsi, skenario, hasil sekarang, hasil seharusnya.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Pemilik membaca laporan lalu mencocokkan dengan skenario: Cash Rp 10.000, transfer Rp 3.000 ke Bank, Total Saldo tetap Rp 10.000 dan Pemasukan/Pengeluaran bulan itu tidak berubah.
+- Perbaikan temuan dikerjakan di sesi terpisah.
+
+## Backup lengkap
+
+Tujuan: ekspor dan impor JSON memuat semua yang dibuat pengguna, bukan transaksi saja, supaya backup bisa mengembalikan aplikasi seutuhnya.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Tombol ekspor dan impor JSON yang ada tetap dipakai.
+
+Aturan:
+- File ekspor memuat: transaksi, dompet (termasuk mata uang dan status arsip), kategori, sub kategori, budget, dan pengaturan (tema, format jam, mata uang opsional, dan pengaturan lain yang tersimpan).
+- Tulis nomor versi format di file ekspor.
+- Backup lama tanpa nomor versi tetap bisa diimpor.
+- Impor tetap memakai aturan konflik yang sudah ada (ID unik, waktu ubah terbaru menang).
+- Data contoh tidak pernah ikut diekspor.
+
+Data:
+- Struktur file ekspor berubah. Periksa apakah file sinkron Drive sudah memuat dompet, kategori, sub kategori, budget, dan pengaturan, lalu samakan isinya dengan ekspor.
+
+Cek manual:
+- Buat dompet, kategori, dan budget sendiri, ekspor JSON, reset setelan pabrik, impor file tadi: semuanya kembali.
+- Impor file backup lama (tanpa nomor versi): berhasil tanpa error.
+
+## Hapus dompet
+
+Tujuan: pengguna bisa menghapus dompet tanpa kehilangan riwayat transaksinya.
+
+Tempat dan tampilan:
+- Aksi hapus pada pengaturan dompet, dengan konfirmasi lewat UI web yang sudah dipakai di aplikasi. Teks konfirmasi menyebut nama dompet dan sisa saldonya.
+
+Aturan:
+- Dompet tidak dibuang, tetapi diberi penanda terarsip (soft delete, sama seperti transaksi).
+- Riwayat transaksi dompet terarsip tetap tampil dengan nama dompetnya dan label "dihapus".
+- Dompet terarsip tidak muncul di pilihan dompet saat tambah transaksi dan transfer, dan tidak muncul sebagai kartu dompet di Beranda.
+- Total Saldo tidak menghitung dompet terarsip. Pemasukan dan Pengeluaran per bulan tetap menghitung riwayatnya.
+- Status arsip ikut sinkron Drive, ekspor, dan impor.
+- Sengaja TIDAK ada fitur memulihkan dompet di fitur ini.
+
+Data:
+- Dompet mendapat penanda terarsip. Berpengaruh ke sinkron Drive, ekspor, dan impor.
+
+Cek manual:
+- Hapus dompet yang punya transaksi: riwayatnya tetap ada dengan label "dihapus", kartu dompet hilang dari Beranda, Total Saldo berkurang sebesar saldo dompet itu.
+- Ekspor lalu impor di perangkat lain: dompet tetap terarsip.
+
+## Reset setelan pabrik
+
+Tujuan: mengubah perilaku tombol "Hapus semua data" menjadi mengembalikan aplikasi ke keadaan awal seperti baru dipasang. Menggantikan perilaku item lama "Hapus semua data" (jangan ubah barisnya di PLAN.md).
+
+Tempat dan tampilan:
+- Tombol "Hapus semua data" yang sudah ada di Pengaturan tetap di tempatnya. Teks konfirmasi menyebut bahwa transaksi, dompet, kategori, sub kategori, budget, dan pengaturan ikut terhapus, dan menyarankan ekspor backup dulu.
+
+Aturan:
+- Setelah reset: tidak ada transaksi, dompet, kategori, sub kategori, dan budget buatan pengguna, dan semua pengaturan kembali ke bawaan awal.
+- Jika sedang login Google, data di Drive appDataFolder juga dikosongkan supaya data lama tidak kembali lewat sinkron. Login Google tidak diputus.
+- Jika tidak login, hanya data lokal yang dikosongkan.
+- Konfirmasi lewat UI web yang sudah ada.
+
+Data:
+- Tidak ada perubahan struktur data. Berpengaruh ke sinkron Drive (file dikosongkan).
+
+Cek manual:
+- Reset saat login: data kosong di aplikasi, buka di perangkat lain atau muat ulang, data lama tidak kembali.
+- Reset saat tidak login: aplikasi kembali ke keadaan awal.
+
+## Data contoh lengkap
+
+Tujuan: mengganti data contoh lama (angka acak) dengan satu set tetap yang lengkap, supaya bisa mencoba semua fitur. Menggantikan perilaku item lama "Data contoh (dummy)" (jangan ubah barisnya di PLAN.md).
+
+Tempat dan tampilan:
+- Tombol data contoh yang sudah ada di Pengaturan tetap di tempatnya. Tambahkan tombol keluar dari mode data contoh yang kembali ke data asli.
+
+Aturan:
+- Satu set tetap, hasilnya sama setiap kali: beberapa dompet (Rupiah, Yen, USD), kategori dan sub kategori, budget, transaksi pemasukan dan pengeluaran, dan transfer antar dompet satu mata uang.
+- Data contoh disimpan terpisah dari data asli, jadi data asli tidak tertimpa.
+- Data contoh tidak pernah disinkronkan ke Drive, tidak ikut ekspor, dan tidak ikut impor.
+- Tampilkan penanda jelas bahwa aplikasi sedang dalam mode data contoh.
+- Tidak boleh berisi data asli milik pemilik.
+
+Data:
+- Tidak ada perubahan struktur data. Tidak ada pengaruh ke sinkron Drive, ekspor, atau impor karena data contoh dipisah.
+
+Cek manual:
+- Aktifkan data contoh saat login Google: tidak ada yang masuk ke Drive, data asli utuh setelah keluar dari mode data contoh.
+- Aktifkan dua kali: isinya identik.
+
+## Klik dompet untuk filter riwayat
+
+Tujuan: kartu dompet di Beranda bisa diklik untuk melihat riwayat dompet itu saja.
+
+Tempat dan tampilan:
+- Kartu dompet di Beranda menjadi bisa diklik. Kartu terpilih ditandai dengan gaya yang sudah ada di dev/DESIGN.md.
+
+Aturan:
+- Klik kartu dompet mengatur dropdown dompet di Riwayat ke dompet itu. Jika Riwayat ada di halaman terpisah, pindah ke halaman Riwayat dengan filter terpasang.
+- Klik kartu yang sama lagi mengembalikan ke "Semua Dompet".
+- Transfer muncul di kedua dompet (keluar di asal, masuk di tujuan).
+- Tidak ada logika filter baru, hanya memakai dropdown dompet yang ada.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Klik kartu Cash: riwayat hanya transaksi Cash. Klik lagi: semua dompet.
+- Lakukan transfer Cash ke Bank: transaksi muncul di riwayat Cash dan Bank.
+
+## Filter bulan di Riwayat
+
+Tujuan: melihat riwayat per bulan, dengan ringkasan pemasukan dan pengeluaran bulan itu.
+
+Tempat dan tampilan:
+- Dropdown bulan di sebelah dropdown "Semua Dompet" di Riwayat Transaksi, dengan opsi "Semua bulan".
+- Ringkasan Pemasukan (hijau) dan Pengeluaran (merah) di samping judul Riwayat Transaksi.
+
+Aturan:
+- Bulan dipakai bersama dengan navigasi bulan di kartu saldo Beranda: mengganti bulan di salah satu tempat mengubah yang lain. Default bulan yang sedang aktif.
+- Ringkasan mengikuti filter bulan dan filter dompet sekaligus.
+- Jika lebih dari satu mata uang, ringkasan ditampilkan per mata uang.
+- Transfer tidak dihitung sebagai pemasukan atau pengeluaran.
+- Angka ringkasan harus sama dengan angka di kartu saldo untuk bulan dan dompet yang sama.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Pilihan filter tidak disimpan.
+
+Cek manual:
+- Pilih Oktober 2026: hanya transaksi Oktober tampil, ringkasan sama dengan kartu saldo Oktober.
+- Pilih "Semua bulan": semua transaksi tampil.
+
+## Warna kartu saldo multi mata uang
+
+Tujuan: menyamakan warna kartu saldo Beranda saat ada lebih dari satu mata uang dengan saat satu mata uang.
+
+Tempat dan tampilan:
+- Kartu saldo di Beranda: Total Saldo putih, Pemasukan hijau, Pengeluaran merah, untuk setiap baris mata uang. Susunan baris per mata uang tetap.
+
+Aturan:
+- Hanya mengubah warna, memakai warna yang sudah ada di dev/DESIGN.md. Jangan tambah warna baru.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Aktifkan Rupiah, Yen, dan USD: semua baris Total Saldo putih, Pemasukan hijau, Pengeluaran merah, sama seperti tampilan satu mata uang.
+
+## Pencarian riwayat
+
+Tujuan: mencari transaksi dengan cepat, terutama untuk data hasil impor yang banyak.
+
+Tempat dan tampilan:
+- Tombol search di Riwayat Transaksi yang membuka kolom pencarian.
+
+Aturan:
+- Mencari di catatan, nama kategori, nama sub kategori, nominal, dan nama dompet.
+- Bekerja bersama filter dompet dan filter bulan, dan ringkasan pemasukan dan pengeluaran mengikuti hasil pencarian.
+- Pencarian tidak membedakan huruf besar kecil.
+- Riwayat pencarian tidak disimpan.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Cari "dapur": hanya transaksi dengan kata itu di catatan atau kategori tampil.
+- Cari saat filter dompet Cash aktif: hanya hasil dari Cash.
+
+## Catatan di bawah angka
+
+Tujuan: catatan transaksi tampil lebih lega dan terbaca penuh walau panjang.
+
+Tempat dan tampilan:
+- Di baris transaksi, catatan tampil di baris sendiri di bawah baris yang berisi kategori dan nominal.
+- Jika catatan lebih panjang dari lebar yang tersedia, teks bergeser pelan agar bisa dibaca seluruhnya.
+
+Aturan:
+- Jika pengguna mengaktifkan pengaturan kurangi animasi di perangkat (prefers-reduced-motion), teks tidak bergeser, tetapi dipotong dengan "...".
+- Catatan pendek tidak bergeser.
+- Izin dari pemilik: boleh menambah satu animasi geser teks ini di luar dev/DESIGN.md, dan boleh menambahkan satu baris tentangnya di dev/DESIGN.md. Tidak boleh menambah animasi, warna, font, atau bayangan lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Transaksi dengan catatan pendek: tampil statis di bawah baris kategori dan nominal.
+- Transaksi dengan catatan sangat panjang: teks bergeser. Dengan kurangi animasi aktif: teks terpotong "...".
+
+## Tombol Timbangan di tengah navigasi
+
+Tujuan: akses cepat ke halaman Timbangan lewat tombol menonjol di tengah navigasi bar.
+
+Tempat dan tampilan:
+- Tombol Timbangan di tengah navigasi bar, lebih besar dan sedikit menonjol dari bar, dengan ikon timbangan yang sudah ada. Membuka halaman Timbangan.
+
+Aturan:
+- Menu navigasi lain dibagi seimbang di kiri dan kanan tombol tengah.
+- Jika Timbangan sudah ada sebagai menu biasa di navigasi, pindahkan menjadi tombol tengah ini, jangan ada dua.
+- Izin dari pemilik: boleh menambah gaya tombol menonjol (ukuran dan posisi) memakai warna dan token yang sudah ada di dev/DESIGN.md, dan boleh menambahkan satu baris tentangnya di dev/DESIGN.md. Tidak boleh menambah warna, font, bayangan, atau animasi baru.
+- Perilaku tombol back Android yang sudah diperbaiki tidak boleh berubah.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Tombol tampil di tengah di web dan APK, membuka halaman Timbangan, navigasi lain tetap berfungsi.
+- Tombol back Android dari halaman Timbangan kembali seperti sebelumnya.
+
+## Tentang Pengembang
+
+Tujuan: mengarahkan pengguna ke web portofolio pembuat aplikasi.
+
+Tempat dan tampilan:
+- Baris menu baru "Tentang Pengembang" di Pengaturan, di bagian yang sama dengan Kebijakan Privasi dan Syarat dan Ketentuan.
+
+Aturan:
+- Membuka https://mizoarkatamarenaldy.github.io di browser, bukan di dalam aplikasi. Web: tab baru dengan rel noopener. APK: browser bawaan HP.
+- Pakai nama panggung "Mizo Arkatama Renaldy" saja. Jangan tulis nama asli di mana pun di repo.
+- Tidak ada halaman baru.
+- Jika butuh plugin Capacitor baru, tulis di laporan akhir agar pemilik menjalankan build sendiri. Jangan jalankan build apa pun.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Di web: ketuk "Tentang Pengembang", web portofolio terbuka di tab baru.
+- Di APK: web portofolio terbuka di browser HP, bukan di dalam aplikasi.

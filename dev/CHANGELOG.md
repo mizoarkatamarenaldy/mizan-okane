@@ -10,6 +10,10 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-16: Daftarkan rencana fitur baru (sesi dokumen saja)
+- Ditambah: 12 baris rencana fitur baru pada daftar Tahap 5 di `dev/PLAN.md`.
+- Ditambah: 12 bagian spesifikasi lengkap fitur baru di akhir berkas `dev/PLANSPEC.md`.
+
 ## 2026-10-15: Logo aplikasi
 - Ditambah: Berkas logo sumber `assets/icon-only.png`.
 - Ditambah: Berkas ikon web dan PWA baru `icons/favicon-32x32.png` dan `icons/apple-touch-icon.png`.
