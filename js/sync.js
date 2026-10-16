@@ -1,7 +1,7 @@
 // Sinkron Google Drive (appDataFolder) dengan Google Identity Services token flow.
 // IndexedDB tetap sumber utama; modul ini hanya menyalin snapshot ke/dari Drive.
 // Access token hanya disimpan di memori (variabel JS), tidak pernah ke storage.
-import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta, getCategories, saveCategories, getBudgets, saveBudgets, getWallets, saveWallets, getSettings, saveSettings } from './db.js';
+import { getAllTransactions, replaceAllTransactions, getMeta, setMeta, deleteMeta, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getSettings, saveSettings, DEFAULT_TIME_FORMAT } from './db.js';
 
 const CLIENT_ID = '663070681186-pjrnce0fcpjecvbf9o2fj99e59e3s0un.apps.googleusercontent.com';
 const SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
@@ -667,6 +667,82 @@ export async function signOut() {
     removeFirstTapListener();
     await deleteMeta(META_KEY_LINKED);
     setState({ status: 'signed-out', email: null, lastSyncAt: null, message: '' });
+}
+
+export async function clearRemoteData() {
+    if (!isLinked()) return;
+
+    if (!tokenValid()) {
+        if (pendingToken) {
+            await pendingToken.promise;
+        } else {
+            await requestToken();
+        }
+    }
+
+    clearTimeout(debounceTimer);
+    syncAgain = false;
+
+    const params = new URLSearchParams({
+        spaces: 'appDataFolder',
+        q: `name = '${FILE_NAME}' and trashed = false`,
+        fields: 'files(id,version,modifiedTime)',
+        orderBy: 'modifiedTime desc',
+        pageSize: '10'
+    });
+    const res = await driveFetch(`${DRIVE_API}/files?${params}`);
+    const data = await res.json();
+    const files = data.files || [];
+
+    const defaultCats = {
+        income: [...DEFAULT_CATEGORIES.income],
+        expense: [...DEFAULT_CATEGORIES.expense],
+        subcategories: { income: {}, expense: {} },
+        updatedAt: 0
+    };
+    const defaultBuds = { items: {}, updatedAt: 0 };
+    const defaultWals = [{
+        id: DEFAULT_WALLET_ID,
+        name: DEFAULT_WALLET_NAME,
+        currency: 'IDR',
+        createdAt: Date.now(),
+        updatedAt: 0,
+        deleted: false
+    }];
+    const defaultSets = {
+        theme: 'system',
+        timeFormat: DEFAULT_TIME_FORMAT,
+        updatedAt: 0
+    };
+
+    let remoteVersion = null;
+    if (files.length > 0) {
+        const primaryFile = files[0];
+        const saved = await uploadRemote(primaryFile.id, [], defaultCats, defaultBuds, defaultWals, defaultSets);
+        remoteVersion = saved.version;
+
+        for (let i = 1; i < files.length; i++) {
+            try {
+                await driveFetch(`${DRIVE_API}/files/${files[i].id}`, { method: 'DELETE' });
+            } catch (err) {
+                console.warn('Gagal menghapus file duplikat Drive', err);
+            }
+        }
+    } else {
+        const saved = await uploadRemote(null, [], defaultCats, defaultBuds, defaultWals, defaultSets);
+        remoteVersion = saved.version;
+    }
+
+    const account = getAccount();
+    const meta = {
+        account: account?.email || null,
+        syncedRev: 0,
+        remoteVersion: remoteVersion,
+        lastSyncAt: Date.now()
+    };
+    await saveSyncMeta(meta);
+    await setMeta('localRev', 0);
+    setState({ status: 'synced', lastSyncAt: meta.lastSyncAt, message: '' });
 }
 
 // Dipanggil setiap kali data lokal berubah (tambah, edit, hapus).

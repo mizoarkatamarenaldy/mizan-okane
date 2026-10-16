@@ -1,5 +1,5 @@
-import { initDB, saveTransaction, getAllTransactions, replaceAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT, getSettings, saveSettings, DEFAULT_SETTINGS } from './db.js';
-import { initSync, markDirty, signIn, signOut, syncNow, ensureToken } from './sync.js';
+import { initDB, saveTransaction, getAllTransactions, replaceAllTransactions, getCategories, saveCategories, DEFAULT_CATEGORIES, getBudgets, saveBudgets, DEFAULT_BUDGETS, getWallets, saveWallets, DEFAULT_WALLET_ID, DEFAULT_WALLET_NAME, getTimeFormat, saveTimeFormat, DEFAULT_TIME_FORMAT, getSettings, saveSettings, DEFAULT_SETTINGS, resetDatabase, setMeta } from './db.js';
+import { initSync, markDirty, signIn, signOut, syncNow, ensureToken, clearRemoteData, isLinked } from './sync.js';
 
 // DOM Elements
 const formTitle = document.getElementById('form-title');
@@ -5705,65 +5705,70 @@ if (btnClearDummy) {
     });
 }
 
-// --- Hapus Semua Data (Zona Bahaya) ---
+// --- Hapus Semua Data / Reset Setelan Pabrik (Zona Bahaya) ---
 
 export async function performDeleteAllData() {
     try {
-        const allTx = await getAllTransactions();
-        const now = Date.now();
-        const updatedRealTx = [];
-        let hasChanges = false;
-
-        for (const tx of allTx) {
-            if (tx.dummy) {
-                // Transaksi contoh (dummy) dibuang langsung dari IndexedDB
-                hasChanges = true;
-            } else {
-                if (!tx.deleted) {
-                    tx.deleted = true;
-                    tx.updatedAt = now;
-                    hasChanges = true;
-                }
-                updatedRealTx.push(tx);
+        if (isLinked()) {
+            if (!navigator.onLine) {
+                showNotification('Tidak dapat mereset: perangkat sedang offline. Hubungkan ke internet untuk mengosongkan data di Google Drive.', 'error');
+                return false;
             }
+            await clearRemoteData();
         }
 
-        if (hasChanges) {
-            await replaceAllTransactions(updatedRealTx);
-            resetForm();
-            await loadData();
-            ensureToken();
-            markDirty().catch(err => console.error("Gagal menandai penghapusan semua data untuk sinkron", err));
+        // Reset database lokal (transaksi, dompet, kategori, sub kategori, budget, pengaturan)
+        await resetDatabase();
+
+        // Reset penyimpanan lokal (localStorage)
+        try {
+            localStorage.removeItem(LAST_WALLET_KEY);
+            localStorage.setItem(THEME_STORAGE_KEY, 'system');
+        } catch (e) {
+            console.warn('Gagal mereset localStorage', e);
         }
 
-        showNotification('Semua data transaksi berhasil dihapus.', 'success');
+        if (!isLinked()) {
+            await setMeta('sync', { account: null, syncedRev: null, remoteVersion: null, lastSyncAt: null });
+        }
+
+        // Kembalikan state runtime UI ke nilai bawaan
+        currentTimeFormat = DEFAULT_TIME_FORMAT;
+        applyTimeFormatUI(currentTimeFormat);
+        applyThemeUI('system');
+        currentWalletFilter = 'all';
+        currentChartType = 'expense';
+        currentDonutType = 'expense';
+        selectedBerandaMonth = '';
+        selectedDonutMonth = '';
+        activeDonutCategory = null;
+        currentStatsCurrency = 'IDR';
+        currentBudgetCurrency = 'IDR';
+        currentTimbanganCurrency = 'IDR';
+        selectedTimbanganMonth = '';
+        resetForm();
+
+        await loadData();
+
+        showNotification('Aplikasi berhasil dikembalikan ke setelan awal.', 'success');
+        return true;
     } catch (error) {
-        console.error('Gagal menghapus semua data transaksi', error);
-        showNotification('Terjadi kesalahan saat menghapus data.', 'error');
+        console.error('Gagal mengembalikan aplikasi ke setelan awal', error);
+        showNotification('Terjadi kesalahan saat mereset data: ' + (error?.message || error), 'error');
+        return false;
     }
 }
 
 if (btnDeleteAllData) {
-    btnDeleteAllData.addEventListener('click', async () => {
-        try {
-            const allTx = await getAllTransactions();
-            const hasDeletableTx = allTx.some(tx => !tx.deleted || tx.dummy);
-            if (!hasDeletableTx) {
-                showNotification('Tidak ada data transaksi untuk dihapus.', 'info');
-                return;
-            }
-            if (inputConfirmDeleteAll) {
-                inputConfirmDeleteAll.value = '';
-            }
-            if (btnDeleteAllConfirm) {
-                btnDeleteAllConfirm.disabled = true;
-            }
-            if (deleteAllDialog && typeof deleteAllDialog.showModal === 'function') {
-                deleteAllDialog.showModal();
-            }
-        } catch (err) {
-            console.error('Gagal memeriksa data transaksi', err);
-            showNotification('Terjadi kesalahan saat memeriksa data.', 'error');
+    btnDeleteAllData.addEventListener('click', () => {
+        if (inputConfirmDeleteAll) {
+            inputConfirmDeleteAll.value = '';
+        }
+        if (btnDeleteAllConfirm) {
+            btnDeleteAllConfirm.disabled = true;
+        }
+        if (deleteAllDialog && typeof deleteAllDialog.showModal === 'function') {
+            deleteAllDialog.showModal();
         }
     });
 }
@@ -5804,11 +5809,19 @@ if (btnDeleteAllConfirm) {
             return;
         }
         btnDeleteAllConfirm.disabled = true;
+        const originalText = btnDeleteAllConfirm.textContent;
+        btnDeleteAllConfirm.textContent = 'Mereset...';
         try {
-            await performDeleteAllData();
-        } finally {
-            if (deleteAllDialog && deleteAllDialog.open) {
+            const success = await performDeleteAllData();
+            if (success && deleteAllDialog && deleteAllDialog.open) {
                 deleteAllDialog.close();
+            }
+        } finally {
+            if (btnDeleteAllConfirm) {
+                btnDeleteAllConfirm.textContent = originalText;
+                if (!deleteAllDialog || !deleteAllDialog.open) {
+                    btnDeleteAllConfirm.disabled = true;
+                }
             }
         }
     });

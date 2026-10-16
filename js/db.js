@@ -392,4 +392,41 @@ export function saveSettings(settings) {
   });
 }
 
+export async function resetDatabase() {
+  const initialCategories = {
+    income: [...DEFAULT_CATEGORIES.income],
+    expense: [...DEFAULT_CATEGORIES.expense],
+    subcategories: { income: {}, expense: {} },
+    updatedAt: 0
+  };
+  const initialBudgets = {
+    items: {},
+    updatedAt: 0
+  };
+  const initialWallets = [
+    {
+      id: DEFAULT_WALLET_ID,
+      name: DEFAULT_WALLET_NAME,
+      currency: 'IDR',
+      createdAt: Date.now(),
+      updatedAt: 0,
+      deleted: false
+    }
+  ];
+  const initialSettings = {
+    theme: 'system',
+    timeFormat: DEFAULT_TIME_FORMAT,
+    updatedAt: 0
+  };
+
+  await replaceAllTransactions([]);
+  await saveCategories(initialCategories);
+  await saveBudgets(initialBudgets);
+  await saveWallets(initialWallets);
+  await saveSettings(initialSettings);
+  await saveTimeFormat(DEFAULT_TIME_FORMAT);
+  await setMeta('localRev', 0);
+}
+
+
 

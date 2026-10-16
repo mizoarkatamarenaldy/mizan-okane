@@ -75,6 +75,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Audit logika matematis
   - [x] Backup lengkap
   - [x] Hapus dompet
+  - [x] Reset setelan pabrik
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Reset setelan pabrik
+- Ditambah: Fungsi `resetDatabase` di `js/db.js` untuk mengosongkan store transaksi dan mengembalikan kategori, sub kategori, dompet, budget, pengaturan (tema dan format jam), dan nomor revisi lokal ke kondisi awal bawaan.
+- Ditambah: Fungsi `clearRemoteData` di `js/sync.js` untuk mengosongkan file cadangan di Google Drive `appDataFolder` dengan menghapus seluruh data transaksi buatan pengguna dan menyetel ulang kategori, dompet, budget, dan pengaturan ke bawaan awal tanpa memutus sesi login Google.
+- Diubah: Perilaku `performDeleteAllData` di `js/app.js` yang sebelumnya hanya menandai soft-delete transaksi kini melakukan reset total ke setelan pabrik: membersihkan data transaksi (asli dan dummy), dompet, kategori, sub kategori, budget, pengaturan lokal, mengosongkan data Google Drive jika sedang login, serta memuat ulang UI ke tampilan awal.
+- Diubah: Tombol `btn-delete-all-data` selalu membuka dialog konfirmasi tanpa memblokir saat transaksi kosong (`js/app.js`).
+- Diubah: Teks deskripsi kartu Zona Bahaya dan dialog konfirmasi `delete-all-dialog` diperbarui untuk menegaskan bahwa transaksi, dompet, kategori, sub kategori, budget, dan pengaturan akan ikut terhapus serta menyarankan pengguna melakukan ekspor cadangan terlebih dahulu (`index.html`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v48` (`sw.js`).
+- Diubah: Mencentang item "Reset setelan pabrik" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
+
 ## 2026-10-17: Hapus dompet
 - Ditambah: Fungsi pembantu `isWalletDeleted` di `js/app.js` untuk mendeteksi dompet yang terarsip (soft delete).
 - Diubah: Dialog konfirmasi penghapusan dompet pada `handleDeleteWalletPrompt` kini menampilkan nama dompet beserta sisa saldonya, serta menghapus batasan pemblokiran penghapusan dompet yang masih memiliki riwayat transaksi (`js/app.js`).

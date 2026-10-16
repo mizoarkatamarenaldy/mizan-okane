@@ -356,3 +356,23 @@ Data:
 Cek manual:
 - Hapus dompet yang punya transaksi: riwayatnya tetap ada dengan label "dihapus", kartu dompet hilang dari Beranda, Total Saldo berkurang sebesar saldo dompet itu.
 - Ekspor lalu impor di perangkat lain: dompet tetap terarsip.
+
+## Reset setelan pabrik
+
+Tujuan: mengubah perilaku tombol "Hapus semua data" menjadi mengembalikan aplikasi ke keadaan awal seperti baru dipasang. Menggantikan perilaku item lama "Hapus semua data".
+
+Tempat dan tampilan:
+- Tombol "Hapus semua data" yang sudah ada di Pengaturan tetap di tempatnya. Teks konfirmasi menyebut bahwa transaksi, dompet, kategori, sub kategori, budget, dan pengaturan ikut terhapus, dan menyarankan ekspor backup dulu.
+
+Aturan:
+- Setelah reset: tidak ada transaksi, dompet, kategori, sub kategori, dan budget buatan pengguna, dan semua pengaturan kembali ke bawaan awal.
+- Jika sedang login Google, data di Drive appDataFolder juga dikosongkan supaya data lama tidak kembali lewat sinkron. Login Google tidak diputus.
+- Jika tidak login, hanya data lokal yang dikosongkan.
+- Konfirmasi lewat UI web yang sudah ada.
+
+Data:
+- Tidak ada perubahan struktur data. Berpengaruh ke sinkron Drive (file dikosongkan).
+
+Cek manual:
+- Reset saat login: data kosong di aplikasi, muat ulang, data lama tidak kembali dari Drive.
+- Reset saat tidak login: aplikasi kembali ke keadaan awal.
