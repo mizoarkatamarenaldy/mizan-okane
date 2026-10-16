@@ -84,3 +84,8 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [ ] Catatan di bawah angka
   - [ ] Tombol Timbangan di tengah navigasi
   - [ ] Tentang Pengembang
+
+## Rencana setelah Tahap 5
+- [ ] Konversi Tauri
+- [ ] Konversi Kotlin
+- [ ] Pemisahan folder

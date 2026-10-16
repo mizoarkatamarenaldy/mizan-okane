@@ -10,6 +10,10 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Catat rencana Tauri, Kotlin, dan pemisahan folder (sesi dokumen saja)
+- Ditambah: Bagian "Rencana setelah Tahap 5" di paling bawah `dev/PLAN.md` berisi Konversi Tauri, Konversi Kotlin, dan Pemisahan folder (hanya dicatat dan belum dikerjakan).
+- Ditambah: Tiga bagian spesifikasi di akhir berkas `dev/PLANSPEC.md` untuk Konversi Tauri, Konversi Kotlin, dan Pemisahan folder (hanya dicatat dan belum dikerjakan).
+
 ## 2026-10-16: Daftarkan rencana fitur baru (sesi dokumen saja)
 - Ditambah: 12 baris rencana fitur baru pada daftar Tahap 5 di `dev/PLAN.md`.
 - Ditambah: 12 bagian spesifikasi lengkap fitur baru di akhir berkas `dev/PLANSPEC.md`.

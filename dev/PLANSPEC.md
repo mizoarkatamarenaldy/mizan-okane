@@ -511,3 +511,48 @@ Data:
 Cek manual:
 - Di web: ketuk "Tentang Pengembang", web portofolio terbuka di tab baru.
 - Di APK: web portofolio terbuka di browser HP, bukan di dalam aplikasi.
+
+## Konversi Tauri
+
+Tujuan: Mengonversi aplikasi memakai Tauri. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+
+Aturan:
+- Item ini baru boleh dikerjakan setelah semua fitur Tahap 5 tercentang.
+- Item ini menyentuh "Keputusan terkunci" (bagian APK dan Capacitor). Sebelum dikerjakan, pemilik harus memberi prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut persis bagian mana yang boleh diubah.
+- Spek rinci (target platform, nasib Capacitor, jalur login Google) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+
+Data:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+Cek manual:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+## Konversi Kotlin
+
+Tujuan: Mengonversi aplikasi memakai Kotlin. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+
+Aturan:
+- Item ini baru boleh dikerjakan setelah "Konversi Tauri" selesai.
+- Item ini menyentuh "Keputusan terkunci" (bagian Bentuk PWA, penyimpanan, dan APK dengan Capacitor). Sebelum dikerjakan, pemilik harus memberi prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut persis bagian mana yang boleh diubah.
+- Spek rinci (apa yang dikonversi, nasib versi PWA dan Capacitor, jalur login Google, nasib data di IndexedDB dan Drive) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+
+Data:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+Cek manual:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+## Pemisahan folder
+
+Tujuan: Memisahkan struktur folder repo. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+
+Aturan:
+- Item ini baru boleh dikerjakan setelah semua fitur Tahap 5 tercentang.
+- Item ini mengubah struktur repo, jadi wajib ada prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut folder mana yang boleh dipindah.
+- Spek rinci (folder apa dipisah jadi apa, dampak ke GitHub Pages, www/, android/, dan alur RULES.md) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+
+Data:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+Cek manual:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
