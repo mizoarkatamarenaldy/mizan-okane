@@ -74,7 +74,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Logo aplikasi
   - [x] Audit logika matematis
   - [x] Backup lengkap
-  - [ ] Hapus dompet
+  - [x] Hapus dompet
   - [ ] Reset setelan pabrik
   - [ ] Data contoh lengkap
   - [ ] Klik dompet untuk filter riwayat

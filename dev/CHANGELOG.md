@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Hapus dompet
+- Ditambah: Fungsi pembantu `isWalletDeleted` di `js/app.js` untuk mendeteksi dompet yang terarsip (soft delete).
+- Diubah: Dialog konfirmasi penghapusan dompet pada `handleDeleteWalletPrompt` kini menampilkan nama dompet beserta sisa saldonya, serta menghapus batasan pemblokiran penghapusan dompet yang masih memiliki riwayat transaksi (`js/app.js`).
+- Diubah: Eksekusi penghapusan dompet pada `performDeleteWallet` memperbarui opsi dompet, filter riwayat, dan menampilkan notifikasi sukses (`js/app.js`).
+- Diubah: Riwayat transaksi dompet terarsip di `createTxItemElement` tetap menampilkan nama dompet yang disertai label `(dihapus)` baik untuk transaksi pemasukan/pengeluaran maupun transfer (`js/app.js`).
+- Diubah: Perhitungan ringkasan kartu Beranda pada `getBerandaMonthSummary` mengecualikan dompet terarsip dari Total Saldo namun tetap memperhitungkan riwayat transaksi pada ringkasan pemasukan dan pengeluaran per bulan (`js/app.js`).
+- Diubah: Deteksi dompet pada transfer antar dompet di `updateTypeUI` mendukung mata uang Rupiah, Yen, dan USD (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v47` (`sw.js`).
+- Diubah: Mencentang item "Hapus dompet" di `dev/PLAN.md` serta menambahkan spesifikasi di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Backup lengkap
 - Ditambah: Fungsi `getSettings` dan `saveSettings` di `js/db.js` untuk menyimpan dan membaca preferensi pengguna (tema dan format jam) dengan penanda waktu pembaruan `updatedAt` di store `meta` IndexedDB.
 - Ditambah: Fungsi `getAppSettings` di `js/app.js` untuk menyatukan pengaturan tema dan format waktu aktif beserta timestamp.

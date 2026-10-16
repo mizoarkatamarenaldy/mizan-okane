@@ -590,17 +590,21 @@ function updateTypeUI(type) {
         }
         const fromCurr = getWalletCurrency(txWalletInput ? txWalletInput.value : null);
         const active = getActiveWallets();
-        const sameCurrWallets = active.filter(w => (w.currency === 'JPY' ? 'JPY' : 'IDR') === fromCurr);
+        const sameCurrWallets = active.filter(w => getWalletCurrency(w.id) === fromCurr);
         if (sameCurrWallets.length < 2) {
-            const idrCount = active.filter(w => (w.currency || 'IDR') === 'IDR').length;
-            const jpyCount = active.filter(w => w.currency === 'JPY').length;
-            if (idrCount < 2 && jpyCount < 2) {
+            const idrCount = active.filter(w => getWalletCurrency(w.id) === 'IDR').length;
+            const jpyCount = active.filter(w => getWalletCurrency(w.id) === 'JPY').length;
+            const usdCount = active.filter(w => getWalletCurrency(w.id) === 'USD').length;
+            if (idrCount < 2 && jpyCount < 2 && usdCount < 2) {
                 showNotification('Transfer butuh minimal 2 dompet dengan mata uang yang sama.', 'warn');
                 txTypeInputs[0].checked = true;
                 updateTypeUI('expense');
                 return;
             } else {
-                const candidate = active.find(w => (idrCount >= 2 ? (w.currency || 'IDR') === 'IDR' : w.currency === 'JPY'));
+                const candidate = active.find(w => {
+                    const c = getWalletCurrency(w.id);
+                    return (c === 'IDR' && idrCount >= 2) || (c === 'JPY' && jpyCount >= 2) || (c === 'USD' && usdCount >= 2);
+                });
                 if (candidate) {
                     populateWalletOptions(candidate.id);
                 } else {
@@ -621,6 +625,12 @@ function updateTypeUI(type) {
 
 function getActiveWallets() {
     return (currentWallets || []).filter(w => !w.deleted);
+}
+
+function isWalletDeleted(walletId) {
+    const id = walletId || DEFAULT_WALLET_ID;
+    const found = (currentWallets || []).find(w => w.id === id);
+    return !!(found && found.deleted);
 }
 
 function getWalletName(walletId) {
@@ -711,7 +721,7 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
     if (selectedFromVal && !active.some(w => w.id === selectedFromVal)) {
         const oldWalletName = getWalletName(selectedFromVal);
         const oldCurr = getWalletCurrency(selectedFromVal);
-        html += `<option value="${escapeHTML(selectedFromVal)}" selected>${escapeHTML(oldWalletName)} (${oldCurr}) (Dihapus)</option>`;
+        html += `<option value="${escapeHTML(selectedFromVal)}" selected>${escapeHTML(oldWalletName)} (${oldCurr}) (dihapus)</option>`;
     }
 
     for (const w of active) {
@@ -743,7 +753,7 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
             if (selectedToVal && !eligibleWallets.some(w => w.id === selectedToVal) && selectedToVal !== targetId) {
                 const oldWalletName = getWalletName(selectedToVal);
                 const oldCurr = getWalletCurrency(selectedToVal);
-                toHtml += `<option value="${escapeHTML(selectedToVal)}" selected>${escapeHTML(oldWalletName)} (${oldCurr}) (Dihapus)</option>`;
+                toHtml += `<option value="${escapeHTML(selectedToVal)}" selected>${escapeHTML(oldWalletName)} (${oldCurr}) (dihapus)</option>`;
             }
 
             for (const w of eligibleWallets) {
@@ -2854,14 +2864,19 @@ function createTxItemElement(tx, filterWallet) {
     if (isTransfer) {
         const fromName = getWalletName(tx.walletId);
         const toName = getWalletName(tx.toWalletId);
+        const fromDeleted = isWalletDeleted(tx.walletId);
+        const toDeleted = isWalletDeleted(tx.toWalletId);
+        const fromText = `${escapeHTML(fromName)}${fromDeleted ? ' (dihapus)' : ''}`;
+        const toText = `${escapeHTML(toName)}${toDeleted ? ' (dihapus)' : ''}`;
         categoryText = 'Transfer';
-        walletText = `${escapeHTML(fromName)} &rarr; ${escapeHTML(toName)}`;
+        walletText = `${fromText} &rarr; ${toText}`;
         amountClass = 'transfer';
         sign = ''; // Transfer: teks biru, tanpa tanda +/−, ada label "Transfer"
     } else {
         sign = tx.type === 'income' ? '+' : '−';
         amountClass = tx.type === 'income' ? 'income' : 'expense';
-        walletText = escapeHTML(getWalletName(tx.walletId));
+        const wName = escapeHTML(getWalletName(tx.walletId));
+        walletText = isWalletDeleted(tx.walletId) ? `${wName} (dihapus)` : wName;
     }
 
     const timeFormatted = tx.time ? formatTimeDisplay(tx.time, currentTimeFormat) : '';
@@ -2913,7 +2928,7 @@ function createTxItemElement(tx, filterWallet) {
     return txEl;
 }
 
-export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurrencies = ['IDR']) {
+export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurrencies = ['IDR'], wallets = currentWallets) {
     const totalBalanceByCurrency = new Map();
     const incomeByCurrency = new Map();
     const expenseByCurrency = new Map();
@@ -2924,6 +2939,19 @@ export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurre
         expenseByCurrency.set(c, 0);
     }
 
+    const walletList = Array.isArray(wallets) ? wallets : (currentWallets || []);
+    const walletDeletedMap = new Map();
+    for (const w of walletList) {
+        if (w && typeof w.id === 'string') {
+            walletDeletedMap.set(w.id, !!w.deleted);
+        }
+    }
+    const isWalletActive = (id) => {
+        const wId = id || DEFAULT_WALLET_ID;
+        if (!walletDeletedMap.has(wId)) return wId === DEFAULT_WALLET_ID;
+        return !walletDeletedMap.get(wId);
+    };
+
     for (const tx of transactions || []) {
         if (tx.deleted || !(tx.amount > 0) || !tx.date) continue;
         const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
@@ -2932,10 +2960,25 @@ export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurre
         const curr = getTransactionCurrency(tx);
 
         if (txMonth <= targetMonthKey) {
+            const fromId = tx.walletId || DEFAULT_WALLET_ID;
+            const fromActive = isWalletActive(fromId);
+
             if (tx.type === 'income') {
-                totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) + tx.amount);
+                if (fromActive) {
+                    totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) + tx.amount);
+                }
             } else if (tx.type === 'expense') {
-                totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) - tx.amount);
+                if (fromActive) {
+                    totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) - tx.amount);
+                }
+            } else if (tx.type === 'transfer') {
+                const toId = tx.toWalletId;
+                const toActive = isWalletActive(toId);
+                if (fromActive && !toActive) {
+                    totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) - tx.amount);
+                } else if (!fromActive && toActive) {
+                    totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) + tx.amount);
+                }
             }
         }
 
@@ -3027,7 +3070,7 @@ function renderSummaryCard() {
     if (activeCurrencies.length === 0) activeCurrencies.push('IDR');
 
     const { totalBalanceByCurrency, incomeByCurrency, expenseByCurrency } =
-        getBerandaMonthSummary(currentTransactions, selectedBerandaMonth, activeCurrencies);
+        getBerandaMonthSummary(currentTransactions, selectedBerandaMonth, activeCurrencies, currentWallets);
 
     if (activeCurrencies.length === 1) {
         const c = activeCurrencies[0];
@@ -3935,16 +3978,6 @@ function handleDeleteWalletPrompt(walletId) {
     const wallet = currentWallets.find(w => w.id === walletId);
     if (!wallet) return;
 
-    // Dompet yang masih punya transaksi aktif tidak bisa dihapus.
-    const hasActiveTransactions = currentTransactions.some(tx => !tx.deleted && (
-        (tx.walletId || DEFAULT_WALLET_ID) === walletId ||
-        (tx.type === 'transfer' && tx.toWalletId === walletId)
-    ));
-    if (hasActiveTransactions) {
-        showNotification(`Dompet "${wallet.name}" tidak bisa dihapus karena masih memiliki transaksi aktif.`, 'warn');
-        return;
-    }
-
     const active = getActiveWallets();
     if (active.length <= 1) {
         showNotification('Dompet tidak bisa dihapus karena minimal harus ada satu dompet.', 'warn');
@@ -3957,8 +3990,12 @@ function handleDeleteWalletPrompt(walletId) {
     pendingWalletDelete = walletId;
     pendingLogout = false;
 
+    const bal = getWalletCurrentBalance(wallet.id);
+    const curr = getWalletCurrency(wallet.id);
+    const formattedBal = currencyFormatter.format(bal, curr);
+
     if (confirmDialogTitle) {
-        confirmDialogTitle.textContent = `Hapus dompet "${wallet.name}"?`;
+        confirmDialogTitle.textContent = `Hapus dompet "${wallet.name}" dengan sisa saldo ${formattedBal}?`;
     }
     if (btnConfirmDelete) {
         btnConfirmDelete.textContent = 'Hapus';
@@ -3992,8 +4029,10 @@ async function performDeleteWallet(walletId) {
             } else {
                 updateTypeUI(getSelectedType());
             }
+            populateWalletOptions();
             populateWalletFilterOptions();
             markDirty().catch(err => console.error("Gagal menandai penghapusan dompet untuk sinkron", err));
+            showNotification(`Dompet "${wallet.name}" berhasil dihapus.`, 'success');
         } catch (error) {
             console.error("Gagal menghapus dompet", error);
             showNotification("Terjadi kesalahan saat menghapus dompet.", "error");

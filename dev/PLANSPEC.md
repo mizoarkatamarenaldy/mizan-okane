@@ -620,3 +620,25 @@ Data:
 Cek manual:
 - Buat dompet, kategori, dan budget sendiri, ekspor JSON, pakai "Hapus semua data", impor file tadi: semuanya kembali.
 - Impor file backup lama (tanpa nomor versi): berhasil tanpa error.
+
+## Hapus dompet
+
+Tujuan: pengguna bisa menghapus dompet tanpa kehilangan riwayat transaksinya.
+
+Tempat dan tampilan:
+- Aksi hapus pada pengaturan dompet, dengan konfirmasi lewat UI web yang sudah dipakai di aplikasi. Teks konfirmasi menyebut nama dompet dan sisa saldonya.
+
+Aturan:
+- Dompet tidak dibuang, tetapi diberi penanda terarsip (soft delete, sama seperti transaksi).
+- Riwayat transaksi dompet terarsip tetap tampil dengan nama dompetnya dan label "dihapus".
+- Dompet terarsip tidak muncul di pilihan dompet saat tambah transaksi dan transfer, dan tidak muncul sebagai kartu dompet di Beranda.
+- Total Saldo tidak menghitung dompet terarsip. Pemasukan dan Pengeluaran per bulan tetap menghitung riwayatnya.
+- Status arsip ikut sinkron Drive, ekspor, dan impor.
+- Sengaja TIDAK ada fitur memulihkan dompet di fitur ini.
+
+Data:
+- Dompet mendapat penanda terarsip. Berpengaruh ke sinkron Drive, ekspor, dan impor.
+
+Cek manual:
+- Hapus dompet yang punya transaksi: riwayatnya tetap ada dengan label "dihapus", kartu dompet hilang dari Beranda, Total Saldo berkurang sebesar saldo dompet itu.
+- Ekspor lalu impor di perangkat lain: dompet tetap terarsip.
