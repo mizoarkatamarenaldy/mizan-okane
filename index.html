@@ -300,6 +300,14 @@
                 <div id="timbangan-scale-container" class="timbangan-scale-container">
                     <!-- Outline Scale SVG & Verdict diisi secara reaktif via JS -->
                 </div>
+
+                <!-- Baris terpisah bernama "Equilibrium" di bawah timbangan bulan ini -->
+                <div id="timbangan-equilibrium-row" class="timbangan-equilibrium-row">
+                    <span class="timbangan-equilibrium-label">Equilibrium</span>
+                    <div id="timbangan-equilibrium-values" class="timbangan-equilibrium-values tabular-nums">
+                        <span class="timbangan-equilibrium-val is-zero">Rp 0</span>
+                    </div>
+                </div>
             </section>
 
             <!-- Bagian 2: Kalkulator "Timbang Sebelum Beli" -->
@@ -362,6 +370,17 @@
                             <strong id="calc-result-monthly-scale" class="calc-result-val tabular-nums">Surplus Rp 0</strong>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Bagian 3: Sesuaikan Saldo -->
+            <section class="timbangan-section timbangan-adjust-section" aria-labelledby="timbangan-adjust-title">
+                <div class="settings-card-header">
+                    <h3 id="timbangan-adjust-title" class="card-title">Sesuaikan Saldo</h3>
+                    <p class="settings-card-desc">Samakan saldo dompet di aplikasi dengan saldo riil saat ada selisih.</p>
+                </div>
+                <div id="timbangan-adjust-wallet-list" class="timbangan-adjust-wallet-list">
+                    <!-- Diisi via JS: nama dompet, saldo di app, dan tombol Sesuaikan -->
                 </div>
             </section>
         </main>
@@ -1035,6 +1054,55 @@
                 <div class="confirm-dialog-actions">
                     <button type="button" id="btn-delete-all-cancel" class="btn-secondary">Batal</button>
                     <button type="button" id="btn-delete-all-confirm" class="btn-danger" disabled>Hapus Semua Data</button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Dialog Sesuaikan Saldo di Timbangan -->
+        <dialog id="adjust-balance-dialog" class="confirm-dialog adjust-balance-dialog" closedby="any" aria-labelledby="adjust-dialog-title">
+            <div class="confirm-dialog-content">
+                <h3 id="adjust-dialog-title" class="confirm-dialog-title">Berapa saldo riil sekarang?</h3>
+                
+                <!-- Tampilan saldo di app sebagai pembanding -->
+                <div class="adjust-dialog-compare-box">
+                    <span class="adjust-dialog-wallet-name" id="adjust-dialog-wallet-name">Dompet</span>
+                    <div class="adjust-dialog-app-bal-row">
+                        <span class="adjust-dialog-app-bal-label">Saldo di app:</span>
+                        <strong class="adjust-dialog-app-bal-val tabular-nums" id="adjust-dialog-app-bal">Rp 0</strong>
+                    </div>
+                </div>
+
+                <!-- Satu kolom nominal -->
+                <div class="form-group adjust-dialog-amount-group">
+                    <label for="adjust-real-balance-input" class="form-label" id="adjust-amount-label">Saldo riil sekarang</label>
+                    <div class="amount-input-wrapper">
+                        <span class="amount-currency-prefix" id="adjust-amount-prefix" aria-hidden="true">Rp</span>
+                        <input type="text" inputmode="numeric" id="adjust-real-balance-input" class="tx-amount-large tabular-nums" placeholder="0" autocomplete="off" aria-label="Saldo riil sekarang">
+                    </div>
+                </div>
+
+                <!-- Selisih sebelum disimpan / pesan saldo sudah sama -->
+                <div id="adjust-diff-box" class="adjust-diff-box hidden" aria-live="polite">
+                    <div id="adjust-diff-row" class="adjust-diff-row">
+                        <span class="adjust-diff-label">Selisih:</span>
+                        <strong id="adjust-diff-val" class="adjust-diff-val tabular-nums">+Rp 0</strong>
+                    </div>
+                    <p id="adjust-same-message" class="adjust-same-message hidden">Saldo sudah sama</p>
+                </div>
+
+                <!-- Pilihan kategori jika selisih plus (Bunga, Cashback, Koreksi) -->
+                <div id="adjust-category-group" class="adjust-category-group hidden">
+                    <span class="form-label">Kategori Penyesuaian</span>
+                    <div id="adjust-category-chips" class="adjust-category-chips" role="radiogroup" aria-label="Kategori penyesuaian">
+                        <button type="button" class="adjust-cat-chip is-active" data-category="Bunga" role="radio" aria-checked="true">Bunga</button>
+                        <button type="button" class="adjust-cat-chip" data-category="Cashback" role="radio" aria-checked="false">Cashback</button>
+                        <button type="button" class="adjust-cat-chip" data-category="Koreksi" role="radio" aria-checked="false">Koreksi</button>
+                    </div>
+                </div>
+
+                <div class="confirm-dialog-actions">
+                    <button type="button" id="btn-adjust-cancel" class="btn-secondary">Batal</button>
+                    <button type="button" id="btn-adjust-confirm" class="btn-primary" disabled>Konfirmasi</button>
                 </div>
             </div>
         </dialog>

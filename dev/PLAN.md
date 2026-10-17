@@ -86,6 +86,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Tentang Pengembang
   - [x] Dompet dipilih manual di form transaksi dan transfer
   - [x] Geser urutan dompet dan kategori
+  - [x] Penyesuaian saldo di Timbangan
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

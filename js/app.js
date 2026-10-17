@@ -143,6 +143,25 @@ const calcResultBudgetRow = document.getElementById('calc-result-budget-row');
 const calcResultBudget = document.getElementById('calc-result-budget');
 const calcResultMonthlyScale = document.getElementById('calc-result-monthly-scale');
 
+const timbanganEquilibriumRow = document.getElementById('timbangan-equilibrium-row');
+const timbanganEquilibriumValues = document.getElementById('timbangan-equilibrium-values');
+const timbanganAdjustWalletList = document.getElementById('timbangan-adjust-wallet-list');
+
+const adjustBalanceDialog = document.getElementById('adjust-balance-dialog');
+const adjustDialogWalletName = document.getElementById('adjust-dialog-wallet-name');
+const adjustDialogAppBal = document.getElementById('adjust-dialog-app-bal');
+const adjustAmountPrefix = document.getElementById('adjust-amount-prefix');
+const adjustAmountLabel = document.getElementById('adjust-amount-label');
+const adjustRealBalanceInput = document.getElementById('adjust-real-balance-input');
+const adjustDiffBox = document.getElementById('adjust-diff-box');
+const adjustDiffRow = document.getElementById('adjust-diff-row');
+const adjustDiffVal = document.getElementById('adjust-diff-val');
+const adjustSameMessage = document.getElementById('adjust-same-message');
+const adjustCategoryGroup = document.getElementById('adjust-category-group');
+const adjustCategoryChips = document.getElementById('adjust-category-chips');
+const btnAdjustCancel = document.getElementById('btn-adjust-cancel');
+const btnAdjustConfirm = document.getElementById('btn-adjust-confirm');
+
 const walletSettingsList = document.getElementById('wallet-settings-list');
 const formAddWallet = document.getElementById('form-add-wallet');
 const inputAddWallet = document.getElementById('input-add-wallet');
@@ -1354,6 +1373,9 @@ export function getCategoryIconSvg(categoryName, type) {
     if (type === 'transfer') {
         return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`;
     }
+    if (type === 'penyesuaian') {
+        return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 7l9-4 9 4M3 7l3 7a4 4 0 0 0 6 0L6 7M21 7l-3 7a4 4 0 0 1-6 0l6-7M7 21h10"/></svg>`;
+    }
 
     const norm = String(categoryName || '').trim().toLowerCase();
     switch (norm) {
@@ -2504,6 +2526,8 @@ function getWalletCurrentBalance(walletId) {
         } else if (tx.type === 'transfer') {
             if (fromId === walletId) bal -= tx.amount;
             if (tx.toWalletId === walletId) bal += tx.amount;
+        } else if (tx.type === 'penyesuaian' && fromId === walletId) {
+            bal += tx.amount;
         }
     }
     const curr = getWalletCurrency(walletId);
@@ -2919,27 +2943,223 @@ function renderTimbanganCalculator() {
     }
 }
 
+function renderTimbanganEquilibrium() {
+    if (!timbanganEquilibriumValues) return;
+
+    if (!selectedTimbanganMonth) {
+        selectedTimbanganMonth = getLocalYearMonthString();
+    }
+
+    const totalsByCurrency = new Map();
+    for (const tx of currentTransactions) {
+        if (tx.deleted || tx.type !== 'penyesuaian' || !tx.date) continue;
+        const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
+        if (!match) continue;
+        const txMonth = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+        if (txMonth !== selectedTimbanganMonth) continue;
+
+        const curr = getTransactionCurrency(tx);
+        const prev = totalsByCurrency.get(curr) || 0;
+        totalsByCurrency.set(curr, prev + tx.amount);
+    }
+
+    const entries = Array.from(totalsByCurrency.entries());
+
+    if (entries.length === 0) {
+        const formattedZero = currencyFormatter.format(0, currentTimbanganCurrency || 'IDR');
+        timbanganEquilibriumValues.innerHTML = `<span class="timbangan-equilibrium-val is-zero">${formattedZero}</span>`;
+        return;
+    }
+
+    const roundedEntries = entries.map(([curr, total]) => {
+        const rounded = curr === 'USD' ? Math.round(total * 100) / 100 : Math.round(total);
+        return [curr, rounded];
+    });
+
+    const order = { IDR: 0, JPY: 1, USD: 2 };
+    roundedEntries.sort((a, b) => (order[a[0]] ?? 99) - (order[b[0]] ?? 99));
+
+    const html = roundedEntries.map(([curr, val]) => {
+        let cls = 'is-zero';
+        let text = '';
+        if (val > 0) {
+            cls = 'is-plus';
+            text = '+' + currencyFormatter.format(val, curr);
+        } else if (val < 0) {
+            cls = 'is-minus';
+            text = '−' + currencyFormatter.format(Math.abs(val), curr);
+        } else {
+            cls = 'is-zero';
+            text = currencyFormatter.format(0, curr);
+        }
+        return `<span class="timbangan-equilibrium-val ${cls}">${escapeHTML(text)}</span>`;
+    }).join('<span class="equilibrium-sep"> &bull; </span>');
+
+    timbanganEquilibriumValues.innerHTML = html;
+}
+
+let currentAdjustWalletId = null;
+let currentAdjustDiff = 0;
+let currentAdjustCategory = 'Bunga';
+
+function renderTimbanganAdjustSection() {
+    if (!timbanganAdjustWalletList) return;
+    const active = getActiveWallets();
+    if (active.length === 0) {
+        timbanganAdjustWalletList.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada dompet.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    for (const w of active) {
+        const bal = getWalletCurrentBalance(w.id);
+        const curr = w.currency || 'IDR';
+        html += `
+            <div class="timbangan-adjust-row">
+                <div class="timbangan-adjust-wallet-info">
+                    <span class="timbangan-adjust-wallet-name">${escapeHTML(w.name)}</span>
+                    <span class="timbangan-adjust-wallet-balance tabular-nums">${escapeHTML(currencyFormatter.format(bal, curr))}</span>
+                </div>
+                <button type="button" class="btn-secondary btn-small btn-adjust-wallet" data-wallet-id="${escapeHTML(w.id)}" aria-label="Sesuaikan saldo dompet ${escapeHTML(w.name)}">Sesuaikan</button>
+            </div>
+        `;
+    }
+    timbanganAdjustWalletList.innerHTML = html;
+
+    timbanganAdjustWalletList.querySelectorAll('.btn-adjust-wallet').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const walletId = btn.dataset.walletId;
+            openAdjustDialog(walletId);
+        });
+    });
+}
+
+function openAdjustDialog(walletId) {
+    const wallet = currentWallets.find(w => w.id === walletId);
+    if (!wallet) return;
+
+    currentAdjustWalletId = walletId;
+    const curr = wallet.currency || 'IDR';
+    const appBal = getWalletCurrentBalance(walletId);
+
+    if (adjustDialogWalletName) {
+        adjustDialogWalletName.textContent = wallet.name;
+    }
+    if (adjustDialogAppBal) {
+        adjustDialogAppBal.textContent = currencyFormatter.format(appBal, curr);
+    }
+    if (adjustAmountPrefix) {
+        adjustAmountPrefix.textContent = curr === 'USD' ? '$' : (curr === 'JPY' ? '¥' : 'Rp');
+    }
+    if (adjustAmountLabel) {
+        adjustAmountLabel.textContent = curr === 'USD' ? 'Saldo riil sekarang ($)' : (curr === 'JPY' ? 'Saldo riil sekarang (¥)' : 'Saldo riil sekarang (Rp)');
+    }
+    if (adjustRealBalanceInput) {
+        adjustRealBalanceInput.value = '';
+        adjustRealBalanceInput.setAttribute('inputmode', curr === 'USD' ? 'decimal' : 'numeric');
+    }
+
+    currentAdjustDiff = 0;
+    currentAdjustCategory = 'Bunga';
+
+    if (adjustCategoryChips) {
+        adjustCategoryChips.querySelectorAll('.adjust-cat-chip').forEach(chip => {
+            const isDefault = chip.dataset.category === 'Bunga';
+            chip.classList.toggle('is-active', isDefault);
+            chip.setAttribute('aria-checked', String(isDefault));
+        });
+    }
+
+    updateAdjustDialogDiffUI(appBal, curr);
+
+    if (adjustBalanceDialog && typeof adjustBalanceDialog.showModal === 'function') {
+        adjustBalanceDialog.showModal();
+        if (adjustRealBalanceInput) {
+            adjustRealBalanceInput.focus();
+        }
+    }
+}
+
+function updateAdjustDialogDiffUI(appBal, curr) {
+    if (!adjustRealBalanceInput || !adjustDiffBox || !btnAdjustConfirm) return;
+
+    const rawVal = adjustRealBalanceInput.value.trim();
+    if (!rawVal) {
+        adjustDiffBox.classList.add('hidden');
+        if (adjustCategoryGroup) adjustCategoryGroup.classList.add('hidden');
+        btnAdjustConfirm.disabled = true;
+        currentAdjustDiff = 0;
+        return;
+    }
+
+    const realBal = parseAmount(rawVal, curr);
+    if (isNaN(realBal)) {
+        adjustDiffBox.classList.add('hidden');
+        if (adjustCategoryGroup) adjustCategoryGroup.classList.add('hidden');
+        btnAdjustConfirm.disabled = true;
+        currentAdjustDiff = 0;
+        return;
+    }
+
+    const diff = curr === 'USD' 
+        ? Math.round((realBal - appBal) * 100) / 100 
+        : Math.round(realBal - appBal);
+
+    currentAdjustDiff = diff;
+    adjustDiffBox.classList.remove('hidden');
+
+    if (diff === 0) {
+        if (adjustDiffRow) adjustDiffRow.classList.add('hidden');
+        if (adjustSameMessage) adjustSameMessage.classList.remove('hidden');
+        if (adjustCategoryGroup) adjustCategoryGroup.classList.add('hidden');
+        btnAdjustConfirm.disabled = true;
+    } else if (diff > 0) {
+        if (adjustDiffRow) adjustDiffRow.classList.remove('hidden');
+        if (adjustSameMessage) adjustSameMessage.classList.add('hidden');
+        if (adjustDiffVal) {
+            adjustDiffVal.textContent = '+' + currencyFormatter.format(diff, curr);
+            adjustDiffVal.className = 'adjust-diff-val tabular-nums is-plus';
+        }
+        if (adjustCategoryGroup) adjustCategoryGroup.classList.remove('hidden');
+        btnAdjustConfirm.disabled = false;
+    } else {
+        if (adjustDiffRow) adjustDiffRow.classList.remove('hidden');
+        if (adjustSameMessage) adjustSameMessage.classList.add('hidden');
+        if (adjustDiffVal) {
+            adjustDiffVal.textContent = '−' + currencyFormatter.format(Math.abs(diff), curr);
+            adjustDiffVal.className = 'adjust-diff-val tabular-nums is-minus';
+        }
+        if (adjustCategoryGroup) adjustCategoryGroup.classList.add('hidden');
+        currentAdjustCategory = 'Koreksi';
+        btnAdjustConfirm.disabled = false;
+    }
+}
+
 function renderTimbangan() {
     updateTimbanganCurrencyUI();
     renderTimbanganScale();
+    renderTimbanganEquilibrium();
     populateTimbanganCalcOptions();
     renderTimbanganCalculator();
+    renderTimbanganAdjustSection();
 }
 
 function createTxItemElement(tx, filterWallet) {
     const txEl = document.createElement('div');
     txEl.className = 'tx-item';
     txEl.dataset.id = tx.id;
-    txEl.tabIndex = 0;
-    txEl.setAttribute('role', 'button');
-    const displayCategory = getTxCategoryDisplayText(tx);
-    txEl.setAttribute('aria-label', `Transaksi ${escapeHTML(displayCategory || tx.type)}, ketuk untuk edit`);
+    const isTransfer = tx.type === 'transfer';
+    const isPenyesuaian = tx.type === 'penyesuaian';
 
     let sign = '';
     let amountClass = '';
+    const displayCategory = getTxCategoryDisplayText(tx);
     let categoryText = escapeHTML(displayCategory);
     let walletText = '';
-    const isTransfer = tx.type === 'transfer';
 
     if (isTransfer) {
         const fromName = getWalletName(tx.walletId);
@@ -2952,11 +3172,27 @@ function createTxItemElement(tx, filterWallet) {
         walletText = `${fromText} &rarr; ${toText}`;
         amountClass = 'transfer';
         sign = ''; // Transfer: teks biru, tanpa tanda +/−, ada label "Transfer"
+    } else if (isPenyesuaian) {
+        categoryText = `Penyesuaian: ${escapeHTML(tx.category || 'Koreksi')}`;
+        const isPlus = tx.amount >= 0;
+        sign = isPlus ? '+' : '−';
+        amountClass = isPlus ? 'income' : 'expense';
+        const wName = escapeHTML(getWalletName(tx.walletId));
+        walletText = isWalletDeleted(tx.walletId) ? `${wName} (dihapus)` : wName;
     } else {
         sign = tx.type === 'income' ? '+' : '−';
         amountClass = tx.type === 'income' ? 'income' : 'expense';
         const wName = escapeHTML(getWalletName(tx.walletId));
         walletText = isWalletDeleted(tx.walletId) ? `${wName} (dihapus)` : wName;
+    }
+
+    if (isPenyesuaian) {
+        txEl.classList.add('is-readonly');
+        txEl.setAttribute('aria-label', `Transaksi ${escapeHTML(categoryText)}, nominal ${sign}${currencyFormatter.format(Math.abs(tx.amount), getTransactionCurrency(tx))}`);
+    } else {
+        txEl.tabIndex = 0;
+        txEl.setAttribute('role', 'button');
+        txEl.setAttribute('aria-label', `Transaksi ${escapeHTML(displayCategory || tx.type)}, ketuk untuk edit`);
     }
 
     const timeFormatted = tx.time ? formatTimeDisplay(tx.time, currentTimeFormat) : '';
@@ -2972,7 +3208,7 @@ function createTxItemElement(tx, filterWallet) {
             <div class="tx-item-main">
                 <span class="tx-item-category">${categoryText}${isTransfer ? ' <span class="tx-transfer-badge">Transfer</span>' : ''}</span>
                 <div class="tx-item-amount-col">
-                    <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(tx.amount, getTransactionCurrency(tx))}</span>
+                    <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(Math.abs(tx.amount), getTransactionCurrency(tx))}</span>
                 </div>
             </div>
             ${hasNote ? `
@@ -2985,30 +3221,34 @@ function createTxItemElement(tx, filterWallet) {
             </div>
         </div>
         <div class="tx-actions">
+            ${isPenyesuaian ? '' : `
             <button type="button" class="btn-icon btn-edit" data-id="${tx.id}" aria-label="Ubah transaksi" title="Ubah">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
             </button>
+            `}
             <button type="button" class="btn-icon btn-delete" data-id="${tx.id}" aria-label="Hapus transaksi" title="Hapus">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
         </div>
     `;
 
-    // Klik baris atau tekan Enter/Spasi membuka formulir edit
-    txEl.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-delete')) return;
-        handleEdit(tx.id);
-        openFormScreen();
-    });
-
-    txEl.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            if (e.target.closest('.btn-delete') || e.target.closest('.btn-edit')) return;
-            e.preventDefault();
+    if (!isPenyesuaian) {
+        // Klik baris atau tekan Enter/Spasi membuka formulir edit
+        txEl.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-delete')) return;
             handleEdit(tx.id);
             openFormScreen();
-        }
-    });
+        });
+
+        txEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (e.target.closest('.btn-delete') || e.target.closest('.btn-edit')) return;
+                e.preventDefault();
+                handleEdit(tx.id);
+                openFormScreen();
+            }
+        });
+    }
 
     return txEl;
 }
@@ -3095,7 +3335,7 @@ export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurre
     };
 
     for (const tx of transactions || []) {
-        if (tx.deleted || !(tx.amount > 0) || !tx.date) continue;
+        if (tx.deleted || !(Math.abs(tx.amount) > 0) || !tx.date) continue;
         const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
         if (!match) continue;
         const txMonth = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
@@ -3119,6 +3359,10 @@ export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurre
                 if (fromActive && !toActive) {
                     totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) - tx.amount);
                 } else if (!fromActive && toActive) {
+                    totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) + tx.amount);
+                }
+            } else if (tx.type === 'penyesuaian') {
+                if (fromActive) {
                     totalBalanceByCurrency.set(curr, (totalBalanceByCurrency.get(curr) || 0) + tx.amount);
                 }
             }
@@ -3163,6 +3407,9 @@ export function matchesHistorySearch(tx, query, wallets = currentWallets) {
     // 2. Kategori
     if (tx.type === 'transfer') {
         if ('transfer'.includes(q)) return true;
+        if (typeof tx.category === 'string' && tx.category.toLowerCase().includes(q)) return true;
+    } else if (tx.type === 'penyesuaian') {
+        if ('penyesuaian'.includes(q)) return true;
         if (typeof tx.category === 'string' && tx.category.toLowerCase().includes(q)) return true;
     } else if (typeof tx.category === 'string' && tx.category.toLowerCase().includes(q)) {
         return true;
@@ -3595,6 +3842,8 @@ function render() {
             if (toId) {
                 walletBalances.set(toId, (walletBalances.get(toId) || 0) + tx.amount);
             }
+        } else if (tx.type === 'penyesuaian') {
+            walletBalances.set(wId, (walletBalances.get(wId) || 0) + tx.amount);
         }
     });
 
@@ -3705,6 +3954,10 @@ function render() {
                         } else if (currentWalletFilter === (tx.walletId || DEFAULT_WALLET_ID)) {
                             netByCurrency.set(c, net - tx.amount);
                         } else if (currentWalletFilter === tx.toWalletId) {
+                            netByCurrency.set(c, net + tx.amount);
+                        }
+                    } else if (tx.type === 'penyesuaian') {
+                        if (currentWalletFilter === 'all' || currentWalletFilter === (tx.walletId || DEFAULT_WALLET_ID)) {
                             netByCurrency.set(c, net + tx.amount);
                         }
                     }
@@ -5367,7 +5620,7 @@ async function handleSubmit(e) {
 
 function handleEdit(id) {
     const tx = currentTransactions.find(t => t.id === id);
-    if (!tx) return;
+    if (!tx || tx.type === 'penyesuaian') return;
 
     txIdInput.value = tx.id;
     for (const radio of txTypeInputs) {
@@ -5418,7 +5671,13 @@ function handleDelete(id) {
     pendingWalletDelete = null;
     pendingLogout = false;
     if (confirmDialogTitle) {
-        confirmDialogTitle.textContent = (tx && tx.type === 'transfer') ? 'Hapus transfer ini?' : 'Hapus transaksi ini?';
+        if (tx && tx.type === 'transfer') {
+            confirmDialogTitle.textContent = 'Hapus transfer ini?';
+        } else if (tx && tx.type === 'penyesuaian') {
+            confirmDialogTitle.textContent = 'Hapus penyesuaian ini?';
+        } else {
+            confirmDialogTitle.textContent = 'Hapus transaksi ini?';
+        }
     }
     if (btnConfirmDelete) {
         btnConfirmDelete.textContent = 'Hapus';
@@ -5876,9 +6135,14 @@ if (btnExport) {
 function isValidTransaction(item) {
     if (!item || typeof item !== 'object') return false;
     if (typeof item.id !== 'string' || item.id.trim() === '') return false;
-    if (item.type !== 'income' && item.type !== 'expense' && item.type !== 'transfer') return false;
+    if (item.type !== 'income' && item.type !== 'expense' && item.type !== 'transfer' && item.type !== 'penyesuaian') return false;
     const amt = typeof item.amount === 'number' ? item.amount : Number(item.amount);
-    if (!Number.isFinite(amt) || amt <= 0) return false;
+    if (!Number.isFinite(amt)) return false;
+    if (item.type === 'penyesuaian') {
+        if (amt === 0) return false;
+    } else {
+        if (amt <= 0) return false;
+    }
     if (typeof item.date !== 'string' || item.date.trim() === '') return false;
     return true;
 }
@@ -6252,7 +6516,7 @@ btnExportCsv.addEventListener('click', async () => {
                 escapeCSVField(tx.date),
                 escapeCSVField(tx.time || ''),
                 escapeCSVField(walletName),
-                escapeCSVField(tx.type),
+                escapeCSVField(tx.type === 'penyesuaian' ? 'Penyesuaian' : tx.type),
                 escapeCSVField(tx.category || (tx.type === 'transfer' ? 'Transfer' : '')),
                 escapeCSVField(tx.amount),
                 escapeCSVField(tx.note || ''),
@@ -6565,6 +6829,121 @@ if (deleteAllDialog) {
             );
             if (!isInside) {
                 deleteAllDialog.close();
+            }
+        });
+    }
+}
+
+if (adjustRealBalanceInput) {
+    adjustRealBalanceInput.addEventListener('input', () => {
+        const wallet = currentWallets.find(w => w.id === currentAdjustWalletId);
+        const curr = wallet ? (wallet.currency || 'IDR') : 'IDR';
+        formatInputWithCursor(adjustRealBalanceInput, curr);
+        const appBal = getWalletCurrentBalance(currentAdjustWalletId);
+        updateAdjustDialogDiffUI(appBal, curr);
+    });
+
+    adjustRealBalanceInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (btnAdjustConfirm && !btnAdjustConfirm.disabled) {
+                btnAdjustConfirm.click();
+            }
+        }
+    });
+}
+
+if (adjustCategoryChips) {
+    adjustCategoryChips.querySelectorAll('.adjust-cat-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            adjustCategoryChips.querySelectorAll('.adjust-cat-chip').forEach(c => {
+                c.classList.remove('is-active');
+                c.setAttribute('aria-checked', 'false');
+            });
+            chip.classList.add('is-active');
+            chip.setAttribute('aria-checked', 'true');
+            currentAdjustCategory = chip.dataset.category || 'Koreksi';
+        });
+    });
+}
+
+if (btnAdjustCancel && adjustBalanceDialog) {
+    btnAdjustCancel.addEventListener('click', () => {
+        adjustBalanceDialog.close();
+    });
+}
+
+if (btnAdjustConfirm) {
+    btnAdjustConfirm.addEventListener('click', async () => {
+        if (!currentAdjustWalletId || currentAdjustDiff === 0) return;
+        const wallet = currentWallets.find(w => w.id === currentAdjustWalletId);
+        if (!wallet) return;
+
+        btnAdjustConfirm.disabled = true;
+        const originalText = btnAdjustConfirm.textContent;
+        btnAdjustConfirm.textContent = 'Menyimpan...';
+
+        const now = new Date();
+        const date = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const cat = currentAdjustDiff > 0 ? (currentAdjustCategory || 'Bunga') : 'Koreksi';
+
+        const tx = {
+            id: crypto.randomUUID(),
+            type: 'penyesuaian',
+            amount: currentAdjustDiff,
+            walletId: currentAdjustWalletId,
+            category: cat,
+            date,
+            time,
+            note: '',
+            createdAt: now.getTime(),
+            updatedAt: now.getTime(),
+            deleted: false
+        };
+
+        if (isDemoMode()) {
+            tx.dummy = true;
+        }
+
+        try {
+            ensureToken();
+            await saveTransaction(tx);
+            if (adjustBalanceDialog && adjustBalanceDialog.open) {
+                adjustBalanceDialog.close();
+            }
+            await loadData();
+            if (!tx.dummy) {
+                markDirty().catch(err => console.error("Gagal menandai penyesuaian untuk sinkron", err));
+            }
+            showNotification('Saldo berhasil disesuaikan.', 'success');
+        } catch (err) {
+            console.error('Gagal menyimpan penyesuaian saldo:', err);
+            showNotification('Gagal menyimpan penyesuaian saldo.', 'error');
+        } finally {
+            if (btnAdjustConfirm) {
+                btnAdjustConfirm.textContent = originalText;
+                if (!adjustBalanceDialog || !adjustBalanceDialog.open) {
+                    btnAdjustConfirm.disabled = true;
+                }
+            }
+        }
+    });
+}
+
+if (adjustBalanceDialog) {
+    if (!('closedBy' in HTMLDialogElement.prototype)) {
+        adjustBalanceDialog.addEventListener('click', (event) => {
+            if (event.target !== adjustBalanceDialog) return;
+            const rect = adjustBalanceDialog.getBoundingClientRect();
+            const isInside = (
+                rect.top <= event.clientY &&
+                event.clientY <= rect.top + rect.height &&
+                rect.left <= event.clientX &&
+                event.clientX <= rect.left + rect.width
+            );
+            if (!isInside) {
+                adjustBalanceDialog.close();
             }
         });
     }

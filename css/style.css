@@ -1705,6 +1705,10 @@ p {
     border-color: var(--border);
 }
 
+.tx-item.is-readonly {
+    cursor: default;
+}
+
 .tx-item:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -1737,6 +1741,10 @@ p {
 
 .tx-item-icon.transfer {
     color: var(--transfer);
+}
+
+.tx-item-icon.penyesuaian {
+    color: var(--accent);
 }
 
 .tx-item-content {
@@ -2692,6 +2700,99 @@ p {
 
 .calc-result-val.is-negative {
     color: var(--expense);
+}
+
+/* Baris Equilibrium di Bawah Timbangan Bulan Ini */
+.timbangan-equilibrium-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    margin-top: 14px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card, 8px);
+    box-sizing: border-box;
+}
+
+.timbangan-equilibrium-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.timbangan-equilibrium-values {
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.timbangan-equilibrium-val.is-plus {
+    color: var(--income);
+}
+
+.timbangan-equilibrium-val.is-minus {
+    color: var(--expense);
+}
+
+.timbangan-equilibrium-val.is-zero {
+    color: var(--text-secondary);
+}
+
+.equilibrium-sep {
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+/* Bagian Sesuaikan Saldo di Halaman Timbangan */
+.timbangan-adjust-section {
+    margin-top: 16px;
+}
+
+.timbangan-adjust-wallet-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.timbangan-adjust-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    min-height: 44px;
+    box-sizing: border-box;
+}
+
+.timbangan-adjust-wallet-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.timbangan-adjust-wallet-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.timbangan-adjust-wallet-balance {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.btn-adjust-wallet {
+    flex-shrink: 0;
 }
 
 /* ==========================================================================
@@ -4197,6 +4298,133 @@ button:disabled {
 
 .delete-all-input {
     width: 100%;
+}
+
+/* Dialog Sesuaikan Saldo di Timbangan */
+.adjust-balance-dialog {
+    max-width: 400px;
+    text-align: left;
+}
+
+.adjust-dialog-compare-box {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-sizing: border-box;
+}
+
+.adjust-dialog-wallet-name {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.adjust-dialog-app-bal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.adjust-dialog-app-bal-label {
+    color: var(--text);
+}
+
+.adjust-dialog-app-bal-val {
+    color: var(--text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.adjust-dialog-amount-group {
+    margin-bottom: 12px;
+}
+
+.adjust-diff-box {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    padding: 10px 14px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+.adjust-diff-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.adjust-diff-label {
+    color: var(--text-secondary);
+}
+
+.adjust-diff-val {
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.adjust-diff-val.is-plus {
+    color: var(--income);
+}
+
+.adjust-diff-val.is-minus {
+    color: var(--expense);
+}
+
+.adjust-same-message {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
+.adjust-category-group {
+    margin-top: 12px;
+    margin-bottom: 16px;
+}
+
+.adjust-category-chips {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.adjust-cat-chip {
+    flex: 1;
+    min-height: 44px;
+    padding: 8px 10px;
+    border-radius: var(--radius-input, 6px);
+    border: 1px solid var(--border);
+    background: var(--surface-raised);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.adjust-cat-chip:hover {
+    border-color: var(--accent);
+}
+
+.adjust-cat-chip.is-active {
+    background: var(--accent);
+    color: var(--btn-primary-text);
+    font-weight: 600;
+    border-color: var(--accent);
 }
 
 /* ==========================================================================

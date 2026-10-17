@@ -604,3 +604,46 @@ Cek manual:
 - Impor file backup lama tanpa field urutan: impor berhasil dan urutan sesuai urutan di file.
 - Login Google di dua perangkat, geser urutan di satu perangkat, sinkron: perangkat lain menampilkan urutan yang sama.
 
+## Penyesuaian saldo di Timbangan
+
+Tujuan: Pengguna bisa menyamakan saldo dompet di app dengan saldo riil (rekening bank, e-wallet, uang di saku) saat ada selisih yang tidak diinput, misalnya bunga atau cashback. Selisih dicatat sebagai transaksi penyesuaian yang tidak mengotori surplus/defisit gaya hidup.
+
+Tempat dan tampilan:
+- Halaman Timbangan: tambah bagian "Sesuaikan saldo" berisi daftar dompet. Tiap baris menampilkan nama dompet, saldo di app (sesuai mata uang dompet), dan tombol "Sesuaikan".
+- Klik "Sesuaikan" membuka dialog dengan teks "Berapa saldo riil sekarang?", satu kolom nominal, dan tampilan saldo di app sebagai pembanding.
+- Setelah nominal diisi, dialog menampilkan selisih (plus atau minus) sebelum disimpan, misalnya "Selisih: +Rp12.500". Pengguna harus menekan tombol konfirmasi untuk menyimpan.
+- Kalau selisih plus, ada pilihan kategori: Bunga, Cashback, Koreksi. Kalau selisih minus, kategori otomatis Koreksi, tanpa pilihan.
+- Kalau selisih 0, tampil pesan "Saldo sudah sama" dan tidak ada transaksi yang dibuat.
+- Halaman Timbangan: tambah satu baris terpisah bernama "Equilibrium" di bawah timbangan bulan ini, berisi total penyesuaian pada bulan yang sedang ditampilkan Timbangan (plus hijau, minus merah, per mata uang bila lebih dari satu). Baris ini tidak ikut menggerakkan timbangan.
+- Di Riwayat, transaksi penyesuaian muncul dengan label "Penyesuaian" dan nama kategorinya (Bunga, Cashback, atau Koreksi).
+- Tampilan baru wajib mengikuti dev/DESIGN.md.
+
+Aturan:
+- Penyesuaian adalah tipe transaksi baru, terpisah dari pemasukan, pengeluaran, dan transfer.
+- Penyesuaian mengubah saldo dompet, tetapi TIDAK dihitung di: surplus/defisit Timbangan, grafik pemasukan dan pengeluaran, diagram donut, budget per kategori, ringkasan Pemasukan/Pengeluaran di Riwayat, dan angka pemasukan/pengeluaran di kartu saldo Beranda. Perlakuannya mirip transfer, tetapi tipenya berbeda dan tidak boleh digabung dengan transfer.
+- Nominal penyesuaian memakai mata uang dompetnya, termasuk desimal untuk USD.
+- Tanggal dan waktu transaksi penyesuaian adalah saat dikonfirmasi.
+- Transaksi penyesuaian hanya bisa dihapus (soft delete seperti transaksi lain), tidak bisa diedit nominalnya. Menghapusnya mengembalikan saldo dompet seperti sebelum penyesuaian.
+- Bunga, Cashback, Koreksi adalah daftar tetap, tidak muncul di daftar kategori pemasukan atau pengeluaran biasa dan tidak bisa dipilih di form transaksi biasa.
+- Fitur ini sengaja TIDAK punya: deteksi selisih otomatis, indikator timbangan miring, pengingat, atau penyesuaian massal untuk banyak dompet sekaligus.
+- Kalkulator "Timbang sebelum beli" dan timbangan bulan ini yang sudah ada tidak diubah.
+- Mode data contoh: fitur boleh dicoba dan hanya berlaku di data contoh. Mode tanpa login berjalan sama.
+
+Data:
+- Tipe transaksi baru "penyesuaian" dengan kategori penyesuaian (Bunga, Cashback, atau Koreksi). Ikut disimpan di IndexedDB, ikut sinkron Drive memakai aturan konflik yang sudah ada (tanpa aturan baru), ikut ekspor dan impor JSON, dan ikut backup lengkap.
+- Ekspor CSV memuat transaksi penyesuaian dengan tipe "Penyesuaian" dan kategorinya.
+- Impor JSON dari backup lama tanpa tipe ini tetap berhasil.
+- Hitungan saldo dompet, total saldo, dan audit logika matematis harus memasukkan penyesuaian dengan benar.
+
+Cek manual:
+- Dompet Krombank saldo di app Rp100.000. Klik "Sesuaikan", isi 112.500: dialog menampilkan selisih +Rp12.500 dan pilihan Bunga/Cashback/Koreksi. Pilih Bunga, konfirmasi: saldo dompet jadi Rp112.500, di Riwayat muncul "Penyesuaian: Bunga".
+- Setelah itu cek surplus/defisit Timbangan, grafik, donut, budget, ringkasan Riwayat, dan kartu saldo Beranda: semuanya tidak berubah. Baris "Equilibrium" menampilkan +Rp12.500 hijau.
+- Sesuaikan lagi dengan nominal lebih kecil dari saldo app (misalnya 110.000): selisih -Rp2.500, kategori otomatis Koreksi tanpa pilihan, saldo jadi Rp110.000, baris Equilibrium bulan itu menjadi +Rp10.000.
+- Isi nominal yang sama dengan saldo di app: tampil "Saldo sudah sama", tidak ada transaksi baru.
+- Hapus transaksi penyesuaian di Riwayat: saldo dompet kembali ke nilai sebelum penyesuaian, baris Equilibrium ikut berubah.
+- Dompet Yen dan dompet USD: nominal dan selisih memakai mata uang dompet masing-masing, USD menerima desimal.
+- Ganti bulan di Timbangan: baris Equilibrium mengikuti bulan yang ditampilkan.
+- Ekspor backup JSON, reset setelan pabrik, impor lagi: transaksi penyesuaian kembali dan saldo benar. Impor file backup lama tanpa penyesuaian: berhasil.
+- Login Google di dua perangkat, buat penyesuaian di satu perangkat, sinkron: perangkat lain menampilkan saldo dan transaksi yang sama.
+
+

@@ -10,6 +10,18 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Penyesuaian saldo di Timbangan
+- Ditambah: Bagian "Sesuaikan Saldo" pada halaman Timbangan yang menampilkan daftar dompet aktif, saldo di aplikasi, dan tombol "Sesuaikan" untuk menyamakan saldo aplikasi dengan saldo riil fisik atau rekening bank (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Dialog "Sesuaikan Saldo" dengan pertanyaan "Berapa saldo riil sekarang?", tampilan saldo aplikasi sebagai pembanding, kolom input nominal dengan pemformatan mata uang, perhitungan selisih otomatis (plus/minus), pesan "Saldo sudah sama", serta pilihan kategori (Bunga, Cashback, Koreksi) ketika selisih positif atau otomatis Koreksi ketika negatif (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Baris "Equilibrium" di bawah timbangan bulan ini yang menampilkan total penyesuaian pada bulan yang sedang ditampilkan Timbangan (plus warna hijau, minus warna merah, per mata uang bila lebih dari satu) tanpa memengaruhi kemiringan timbangan (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Tipe transaksi baru `penyesuaian` dengan kategori tetap (Bunga, Cashback, Koreksi) yang tersimpan di IndexedDB, disinkronkan ke Google Drive, diekspor/diimpor pada cadangan JSON dan backup lengkap, serta diekspor pada file CSV dengan tipe "Penyesuaian" (`js/app.js`).
+- Ditambah: Dukungan kompatibilitas backward pada validator transaksi `isValidTransaction` agar cadangan dengan transaksi penyesuaian (termasuk nominal negatif) dapat diimpor tanpa kendala, dan cadangan lama tanpa penyesuaian tetap berhasil diimpor (`js/app.js`).
+- Diubah: Perhitungan saldo dompet, total saldo kartu Beranda, dan total netto riwayat harian kini memperhitungkan transaksi penyesuaian secara matematis akurat di semua mata uang (IDR, JPY, USD) (`js/app.js`).
+- Diubah: Transaksi penyesuaian tidak dihitung pada surplus/defisit Timbangan, diagram donut, grafik statistik, ringkasan pemasukan/pengeluaran Riwayat, budget kategori, serta angka pemasukan/pengeluaran kartu saldo Beranda (`js/app.js`).
+- Diubah: Transaksi penyesuaian di Riwayat tampil dengan label "Penyesuaian: [Kategori]", ikon timbangan garis, tanda plus/minus sesuai arah selisih, dan hanya dapat dihapus (soft delete) tanpa opsi ubah nominal (`js/app.js`, `css/style.css`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v59` (`sw.js`).
+- Diubah: Mencentang item "Penyesuaian saldo di Timbangan" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Geser urutan dompet dan kategori
 - Ditambah: Pegangan geser berikon garis tiga (`≡`, `.btn-drag-handle`) pada setiap baris daftar dompet, daftar kategori pemasukan, daftar kategori pengeluaran, dan daftar sub kategori di Pengaturan untuk mengatur urutan secara manual (`css/style.css`, `js/app.js`).
 - Ditambah: Mekanisme geser urutan berbasis pointer events (`enableListDragReorder`) yang mendukung interaksi sentuh (layar HP/APK) dan mouse (PC) tanpa mengganggu kemampuan scroll halaman ketika menyentuh area baris di luar ikon pegangan (`js/app.js`, `css/style.css`).
