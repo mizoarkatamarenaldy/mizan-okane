@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Statistik: satu bulan terpilih
+- Ditambah: Navigasi bulan bersama di bagian atas halaman Statistik (`.stats-month-bar`) menggunakan pola navigasi kartu saldo Beranda (`#btn-stats-prev-month`, `#stats-month-label`, `#btn-stats-next-month`) yang mengendalikan grafik pemasukan, grafik pengeluaran, dan diagram donut sekaligus (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Penanda visual yang jelas pada grafik batang bulanan di mana batang untuk bulan yang dipilih ditampilkan dengan warna penuh (`opacity: 1`), label nilai di atas batang dan label bulan menjadi tebal (`font-weight: 700`, `var(--text)`), sementara batang bulan lainnya tampil lebih pudar (`opacity: 0.35`, `var(--text-secondary)`) sesuai token `dev/DESIGN.md` pada tema gelap dan terang (`css/style.css`, `js/app.js`).
+- Ditambah: Logika pergeseran rentang jendela grafik bulanan (`statsChartWindowStart`, `statsChartWindowEnd`) agar otomatis bergeser memuat bulan terpilih bila pengguna memilih bulan di luar rentang grafik awal (`js/app.js`).
+- Diperbaiki: Navigasi bulan khusus lama pada diagram donut dihapus dan digantikan sepenuhnya oleh navigasi bersama di bagian atas (`index.html`, `js/app.js`).
+- Diubah: Interaksi klik/hover untuk memilih bulan pada grafik batang dinonaktifkan sesuai spesifikasi (`js/app.js`, `css/style.css`).
+- Diubah: Membuka atau kembali ke tab Statistik dari halaman lain otomatis mengatur ulang bulan terpilih ke bulan berjalan (`js/app.js`).
+- Diubah: Mencentang item "Statistik: satu bulan terpilih" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Ikon neraca di header
 - Ditambah: Ikon neraca (timbangan dua piringan) sederhana berupa SVG inline dengan ukuran 22 x 22 px dan warna aksen `var(--accent)` di sebelah kiri tulisan "Mizan Okane" pada header aplikasi (`index.html`, `css/style.css`).
 - Ditambah: Penataan flexbox pada `.app-brand` dengan jarak `gap: 8px` sesuai skala spasi `dev/DESIGN.md`, serta atribut `aria-hidden="true"` dan `pointer-events: none` agar ikon bersifat dekoratif tanpa mengganggu tombol atau navigasi header (`index.html`, `css/style.css`).

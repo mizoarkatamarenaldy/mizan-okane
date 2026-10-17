@@ -1985,6 +1985,21 @@ p {
    Grafik Bulanan & Diagram Donut (Statistik)
    ========================================================================== */
 
+.stats-month-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card, 8px);
+    padding: 10px 14px;
+    margin-bottom: 16px;
+}
+
+.stats-month-bar .summary-month-controls {
+    margin-bottom: 0;
+}
+
 .stats-currency-bar {
     display: flex;
     justify-content: space-between;
@@ -2224,58 +2239,51 @@ p {
 }
 
 .chart-bar-group {
-    cursor: pointer;
-}
-
-.chart-bar-group:focus-visible {
-    outline: none;
+    cursor: default;
 }
 
 .chart-bar {
     fill: var(--danger);
-    transition: fill 0.15s ease, stroke 0.15s ease;
+    opacity: 0.35;
+    transition: fill 0.15s ease, opacity 0.15s ease;
 }
 
-.chart-bar-group:hover .chart-bar,
 .chart-bar-group.is-selected .chart-bar {
-    fill: var(--chart-bar-expense-hover);
-}
-
-.chart-bar-group:focus-visible .chart-bar {
-    stroke: var(--text);
-    stroke-width: 2px;
-    fill: var(--chart-bar-expense-hover);
+    fill: var(--danger);
+    opacity: 1;
 }
 
 .monthly-chart.is-income .chart-bar {
     fill: var(--tone-ok);
+    opacity: 0.35;
 }
 
-.monthly-chart.is-income .chart-bar-group:hover .chart-bar,
 .monthly-chart.is-income .chart-bar-group.is-selected .chart-bar {
-    fill: var(--chart-bar-income-hover);
-}
-
-.monthly-chart.is-income .chart-bar-group:focus-visible .chart-bar {
-    stroke: var(--text);
-    stroke-width: 2px;
-    fill: var(--chart-bar-income-hover);
+    fill: var(--tone-ok);
+    opacity: 1;
 }
 
 .chart-bar-value {
-    fill: var(--chart-bar-value);
+    fill: var(--text-secondary);
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 500;
     font-family: inherit;
+}
+
+.chart-bar-group.is-selected .chart-bar-value {
+    fill: var(--text);
+    font-weight: 700;
 }
 
 .chart-month-label {
-    fill: var(--text);
+    fill: var(--text-secondary);
     font-size: 12px;
     font-family: inherit;
+    font-weight: 500;
 }
 
 .chart-bar-group.is-selected .chart-month-label {
+    fill: var(--text);
     font-weight: 700;
 }
 

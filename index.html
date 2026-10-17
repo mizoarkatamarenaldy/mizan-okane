@@ -204,6 +204,17 @@
 
         <!-- 3. Halaman Statistik -->
         <main id="page-statistik" class="page-view hidden" role="tabpanel" aria-label="Statistik">
+            <div id="stats-month-bar" class="stats-month-bar">
+                <div class="budget-month-controls summary-month-controls stats-month-controls" role="group" aria-label="Pilih bulan statistik">
+                    <button type="button" id="btn-stats-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <span id="stats-month-label" class="budget-month-label summary-month-label" aria-live="polite">Oktober 2026</span>
+                    <button type="button" id="btn-stats-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya" disabled aria-disabled="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
+            </div>
             <div id="stats-currency-bar" class="stats-currency-bar">
                 <span class="stats-currency-label">Mata Uang</span>
                 <div class="type-segmented-control stats-currency-control" role="radiogroup" aria-label="Pilihan mata uang statistik">
@@ -234,21 +245,9 @@
                     <div class="donut-header-title">
                         <h2 id="donut-section-title" class="card-title">Diagram Pengeluaran per Kategori</h2>
                     </div>
-                    <div class="donut-controls">
-                        <div class="budget-month-controls donut-month-controls" role="group" aria-label="Pilih bulan diagram kategori">
-                            <button type="button" id="btn-donut-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                            </button>
-                            <span id="donut-month-label" class="budget-month-label donut-month-label" aria-live="polite">Okt 2026</span>
-                            <button type="button" id="btn-donut-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                            </button>
-                        </div>
-                        <input type="hidden" id="donut-month-input">
-                        <div class="type-segmented-control chart-toggle-group" role="radiogroup" aria-label="Pilihan jenis transaksi diagram kategori">
-                            <button type="button" id="btn-donut-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
-                            <button type="button" id="btn-donut-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
-                        </div>
+                    <div class="type-segmented-control chart-toggle-group" role="radiogroup" aria-label="Pilihan jenis transaksi diagram kategori">
+                        <button type="button" id="btn-donut-expense" class="chart-toggle-btn is-active" data-type="expense" aria-pressed="true">Pengeluaran</button>
+                        <button type="button" id="btn-donut-income" class="chart-toggle-btn" data-type="income" aria-pressed="false">Pemasukan</button>
                     </div>
                 </div>
                 <div id="donut-detail" class="chart-detail hidden" aria-live="polite"></div>

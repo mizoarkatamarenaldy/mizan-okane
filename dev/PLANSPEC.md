@@ -887,3 +887,32 @@ Cek manual:
 - Buka aplikasi di lebar HP: ikon timbangan muncul di kiri tulisan "Mizan Okane", sejajar dan tidak terpotong, tinggi header sama seperti sebelumnya.
 - Ganti ke mode gelap lalu kembali ke mode terang: ikon tetap terlihat jelas di keduanya.
 - Pindah ke halaman lain (Riwayat, Statistik, Pengaturan, Timbangan): ikon tetap tampil di header dan tidak mengganggu tombol atau navigasi yang ada.
+
+## Statistik: satu bulan terpilih
+
+Tujuan: Grafik pemasukan, grafik pengeluaran, dan diagram donut di halaman Statistik selalu menunjuk bulan yang sama. Sekarang pilihan bulannya terpisah, sehingga bisa terjadi grafik menyorot satu bulan sementara donut menampilkan bulan lain.
+
+Tempat dan tampilan:
+- Halaman Statistik. Satu navigasi bulan di bagian atas halaman, memakai pola navigasi bulan yang sudah ada di kartu saldo Beranda (tombol sebelumnya, nama bulan dan tahun, tombol berikutnya). Gunakan ulang komponen atau gaya yang sudah ada kalau memungkinkan.
+- Navigasi bulan lama yang khusus untuk donut dihapus, diganti navigasi bersama ini.
+- Diagram donut dan ringkasan kategori di bawahnya menampilkan data bulan yang dipilih di navigasi bersama.
+- Grafik batang pemasukan bulanan dan grafik batang pengeluaran bulanan tetap menampilkan deretan bulan seperti sekarang, tetapi batang bulan yang dipilih diberi penanda yang jelas (misalnya warna batang penuh sementara batang lain lebih pudar, memakai token warna di dev/DESIGN.md).
+- Kalau bulan yang dipilih berada di luar rentang bulan yang sedang tampil di grafik, rentang grafik digeser supaya memuat bulan itu.
+
+Aturan:
+- Bulan awal saat halaman Statistik dibuka adalah bulan berjalan.
+- Mengubah bulan di navigasi bersama memperbarui grafik pemasukan, grafik pengeluaran, dan donut sekaligus.
+- Perilaku per mata uang tetap seperti sekarang, tidak ada konversi nilai antar mata uang.
+- Transfer antar dompet tetap tidak dihitung sebagai pemasukan atau pengeluaran, seperti aturan yang sudah ada.
+- Grafik batang tidak bisa diklik untuk memilih bulan. Hal itu sengaja TIDAK dilakukan di item ini.
+- Tidak menambah tab Harian, Bulanan, atau Tahunan. Itu item terpisah.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Statistik: navigasi bulan tampil di atas dan menunjuk bulan berjalan. Donut dan batang yang dipenanda sama-sama bulan itu.
+- Tekan tombol sebelumnya sampai bulan Oktober: donut berubah ke data Oktober, batang Oktober di kedua grafik diberi penanda, dan angka di donut sama dengan angka batang Oktober.
+- Pilih bulan yang jauh ke belakang (di luar rentang grafik awal): rentang grafik bergeser dan batang bulan itu tetap terlihat dengan penanda.
+- Pindah ke halaman lain lalu kembali ke Statistik: bulan awal kembali ke bulan berjalan, tidak error.
+- Mode gelap: penanda batang tetap jelas dan teks tetap terbaca.

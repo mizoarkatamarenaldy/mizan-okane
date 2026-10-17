@@ -85,11 +85,14 @@ const chartContainer = document.getElementById('chart-container');
 const chartSummaryText = document.getElementById('chart-summary-text');
 const chartDetail = document.getElementById('chart-detail');
 
+const statsMonthLabel = document.getElementById('stats-month-label');
+const btnStatsPrevMonth = document.getElementById('btn-stats-prev-month');
+const btnStatsNextMonth = document.getElementById('btn-stats-next-month');
 const donutSectionTitle = document.getElementById('donut-section-title');
-const donutMonthLabel = document.getElementById('donut-month-label');
-const btnDonutPrevMonth = document.getElementById('btn-donut-prev-month');
-const donutMonthInput = document.getElementById('donut-month-input');
-const btnDonutNextMonth = document.getElementById('btn-donut-next-month');
+const donutMonthLabel = document.getElementById('stats-month-label');
+const btnDonutPrevMonth = document.getElementById('btn-stats-prev-month');
+const donutMonthInput = null;
+const btnDonutNextMonth = document.getElementById('btn-stats-next-month');
 const btnDonutExpense = document.getElementById('btn-donut-expense');
 const btnDonutIncome = document.getElementById('btn-donut-income');
 const donutDetail = document.getElementById('donut-detail');
@@ -195,7 +198,10 @@ let currentTimeFormat = DEFAULT_TIME_FORMAT;
 let currentChartType = 'expense';
 let currentDonutType = 'expense';
 let selectedBerandaMonth = '';
+let selectedStatsMonth = '';
 let selectedDonutMonth = '';
+let statsChartWindowStart = null;
+let statsChartWindowEnd = null;
 let activeDonutCategory = null;
 let currentStatsCurrency = 'IDR';
 let currentBudgetCurrency = 'IDR';
@@ -318,7 +324,15 @@ function switchTab(tabId) {
     }
 
     if (tabId === 'statistik') {
+        selectedStatsMonth = getLocalYearMonthString();
+        selectedDonutMonth = selectedStatsMonth;
+        activeDonutCategory = null;
+        statsChartWindowStart = null;
+        statsChartWindowEnd = null;
+        updateStatsMonthNavUI();
         updateStatsCurrencyUI();
+        renderMonthlyChart(currentTransactions);
+        renderDonutChart(currentTransactions);
     }
 
     if (tabId === 'pengaturan') {
@@ -1886,26 +1900,55 @@ function renderMonthlyChart(transactions) {
         return;
     }
 
-    if (!selectedDonutMonth) {
-        selectedDonutMonth = getLocalYearMonthString();
+    if (!selectedStatsMonth) {
+        selectedStatsMonth = getLocalYearMonthString();
     }
-    const activeMonth = selectedDonutMonth;
+    selectedDonutMonth = selectedStatsMonth;
+    const activeMonth = selectedStatsMonth;
     const [activeY, activeM] = activeMonth.split('-').map(Number);
+    const activeTotalMonths = activeY * 12 + (activeM - 1);
+
+    const currMonthStr = getLocalYearMonthString();
+    const [currY, currM] = currMonthStr.split('-').map(Number);
+    const currTotalMonths = currY * 12 + (currM - 1);
 
     const rawKeys = Array.from(monthData.keys()).sort();
-    const minKey = rawKeys.length > 0 ? rawKeys[0] : activeMonth;
+    const minKey = rawKeys.length > 0 ? rawKeys[0] : currMonthStr;
     const [minY, minM] = minKey.split('-').map(Number);
+    const minTotalMonths = minY * 12 + (minM - 1);
 
-    // Hitung jumlah bulan dari data terawal sampai bulan aktif (inklusif)
-    const monthsSpan = (activeY - minY) * 12 + (activeM - minM) + 1;
+    // Hitung jumlah bulan dari data terawal sampai bulan berjalan (inklusif)
+    const monthsSpan = Math.max(1, currTotalMonths - minTotalMonths + 1);
     // Panjang jendela dibatasi minimal 3 dan maksimal 6 bulan
     const windowLength = Math.min(6, Math.max(3, monthsSpan));
 
-    // Jendela selalu berakhir di bulan aktif (urutan paling lama ke paling baru)
+    // Rentang jendela grafik: default berakhir di bulan berjalan
+    let startTotalMonths;
+    let endTotalMonths;
+
+    if (statsChartWindowStart === null || statsChartWindowEnd === null) {
+        endTotalMonths = currTotalMonths;
+        startTotalMonths = endTotalMonths - (windowLength - 1);
+    } else {
+        startTotalMonths = statsChartWindowStart;
+        endTotalMonths = statsChartWindowEnd;
+    }
+
+    // Kalau bulan yang dipilih berada di luar rentang bulan yang sedang tampil di grafik,
+    // rentang grafik digeser supaya memuat bulan itu
+    if (activeTotalMonths < startTotalMonths) {
+        startTotalMonths = activeTotalMonths;
+        endTotalMonths = startTotalMonths + (windowLength - 1);
+    } else if (activeTotalMonths > endTotalMonths) {
+        endTotalMonths = activeTotalMonths;
+        startTotalMonths = endTotalMonths - (windowLength - 1);
+    }
+
+    statsChartWindowStart = startTotalMonths;
+    statsChartWindowEnd = endTotalMonths;
+
     const displayMonths = [];
-    const activeTotalMonths = activeY * 12 + (activeM - 1);
-    const startTotalMonths = activeTotalMonths - (windowLength - 1);
-    for (let mIdx = startTotalMonths; mIdx <= activeTotalMonths; mIdx++) {
+    for (let mIdx = startTotalMonths; mIdx <= endTotalMonths; mIdx++) {
         const y = Math.floor(mIdx / 12);
         const m = (mIdx % 12) + 1;
         displayMonths.push(`${y}-${String(m).padStart(2, '0')}`);
@@ -1970,8 +2013,7 @@ function renderMonthlyChart(transactions) {
         `;
     }
 
-    const latestKey = displayMonths[displayMonths.length - 1];
-    updateDetail(latestKey);
+    updateDetail(activeMonth);
 
     const chartSvgClass = isIncome ? 'expense-chart monthly-chart is-income' : 'expense-chart monthly-chart is-expense';
     const chartAriaLabel = `Grafik total ${typeLabel} per bulan`;
@@ -2009,7 +2051,7 @@ function renderMonthlyChart(transactions) {
         const shortYear = yStr.slice(2);
         const shortLabel = `${shortName} '${shortYear}`;
         const fullLabel = `${INDO_MONTHS_FULL[mNum - 1]} ${yStr}`;
-        const isSelected = key === latestKey;
+        const isSelected = key === activeMonth;
 
         const labelY = Math.max(16, barY - 6);
         const topLabel = amount > 0 ? formatCompactCurrency(amount) : '';
@@ -2017,8 +2059,6 @@ function renderMonthlyChart(transactions) {
         svgHtml += `
             <g class="chart-bar-group ${isSelected ? 'is-selected' : ''}"
                data-key="${key}"
-               tabindex="0"
-               role="button"
                aria-label="${fullLabel}: ${currencyFormatter.format(amount, currentStatsCurrency)}">
                 <rect class="chart-hit-area" x="${paddingLeft + index * slotWidth}" y="0" width="${slotWidth}" height="${svgHeight}" fill="transparent" />
                 <rect class="chart-bar" x="${barX}" y="${barY}" width="${barWidth}" height="${barHeight}" rx="3" ry="3" />
@@ -2031,25 +2071,6 @@ function renderMonthlyChart(transactions) {
     svgHtml += `</svg>`;
     chartContainer.innerHTML = svgHtml;
 
-    const groups = chartContainer.querySelectorAll('.chart-bar-group');
-    groups.forEach(group => {
-        const onSelect = () => {
-            groups.forEach(g => g.classList.remove('is-selected'));
-            group.classList.add('is-selected');
-            updateDetail(group.dataset.key);
-        };
-
-        group.addEventListener('click', onSelect);
-        group.addEventListener('mouseenter', onSelect);
-        group.addEventListener('focus', onSelect);
-        group.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onSelect();
-            }
-        });
-    });
-
     if (isScrollable) {
         requestAnimationFrame(() => {
             chartContainer.scrollLeft = chartContainer.scrollWidth;
@@ -2061,11 +2082,37 @@ function renderExpenseChart(transactions) {
     renderMonthlyChart(transactions);
 }
 
-function shiftDonutMonth(delta) {
-    if (!selectedDonutMonth) {
-        selectedDonutMonth = getLocalYearMonthString();
+function updateStatsMonthNavUI() {
+    if (!selectedStatsMonth) {
+        selectedStatsMonth = getLocalYearMonthString();
     }
-    const [yStr, mStr] = selectedDonutMonth.split('-');
+    const currentMonth = getLocalYearMonthString();
+    if (statsMonthLabel) {
+        const [yStr, mStr] = selectedStatsMonth.split('-');
+        const mNum = parseInt(mStr, 10);
+        const monthName = INDO_MONTHS_FULL[mNum - 1] || '';
+        statsMonthLabel.textContent = `${monthName} ${yStr}`;
+    }
+    if (btnStatsNextMonth) {
+        const isCurrentOrFuture = selectedStatsMonth >= currentMonth;
+        btnStatsNextMonth.disabled = isCurrentOrFuture;
+        if (isCurrentOrFuture) {
+            btnStatsNextMonth.setAttribute('aria-disabled', 'true');
+        } else {
+            btnStatsNextMonth.removeAttribute('aria-disabled');
+        }
+    }
+}
+
+function shiftStatsMonth(delta) {
+    if (!selectedStatsMonth) {
+        selectedStatsMonth = getLocalYearMonthString();
+    }
+    const currentMonth = getLocalYearMonthString();
+    if (delta > 0 && selectedStatsMonth >= currentMonth) {
+        return;
+    }
+    const [yStr, mStr] = selectedStatsMonth.split('-');
     let y = parseInt(yStr, 10);
     let m = parseInt(mStr, 10) + delta;
     if (m < 1) {
@@ -2075,14 +2122,20 @@ function shiftDonutMonth(delta) {
         m = 1;
         y++;
     }
-    selectedDonutMonth = `${y}-${String(m).padStart(2, '0')}`;
-    activeDonutCategory = null;
-    if (donutMonthInput) {
-        donutMonthInput.value = selectedDonutMonth;
+    const nextMonthStr = `${y}-${String(m).padStart(2, '0')}`;
+    if (delta > 0 && nextMonthStr > currentMonth) {
+        selectedStatsMonth = currentMonth;
+    } else {
+        selectedStatsMonth = nextMonthStr;
     }
-    renderDonutChart(currentTransactions);
+    selectedDonutMonth = selectedStatsMonth;
+    activeDonutCategory = null;
+    updateStatsMonthNavUI();
     renderMonthlyChart(currentTransactions);
+    renderDonutChart(currentTransactions);
 }
+
+const shiftDonutMonth = shiftStatsMonth;
 
 function updateDonutTypeUI() {
     const isIncome = currentDonutType === 'income';
@@ -2104,21 +2157,12 @@ function renderDonutChart(transactions) {
 
     updateStatsCurrencyUI();
 
-    if (!selectedDonutMonth) {
-        selectedDonutMonth = getLocalYearMonthString();
+    if (!selectedStatsMonth) {
+        selectedStatsMonth = getLocalYearMonthString();
     }
+    selectedDonutMonth = selectedStatsMonth;
 
-    if (donutMonthInput && donutMonthInput.value !== selectedDonutMonth) {
-        donutMonthInput.value = selectedDonutMonth;
-    }
-
-    if (donutMonthLabel) {
-        const [yStr, mStr] = selectedDonutMonth.split('-');
-        const mNum = parseInt(mStr, 10);
-        const monthName = INDO_MONTHS_SHORT[mNum - 1] || '';
-        donutMonthLabel.textContent = `${monthName} ${yStr}`;
-    }
-
+    updateStatsMonthNavUI();
     updateDonutTypeUI();
 
     const isIncome = currentDonutType === 'income';
@@ -2137,7 +2181,7 @@ function renderDonutChart(transactions) {
         if (!match) return false;
         const year = match[1];
         const month = String(parseInt(match[2], 10)).padStart(2, '0');
-        return `${year}-${month}` === selectedDonutMonth;
+        return `${year}-${month}` === selectedStatsMonth;
     });
 
     if (monthTx.length === 0) {
@@ -4037,6 +4081,7 @@ function render() {
         }
     }
 
+    updateStatsMonthNavUI();
     renderMonthlyChart(currentTransactions);
     renderBudgetSection();
     renderDonutChart(currentTransactions);
@@ -6593,7 +6638,10 @@ export async function performFillDummy() {
         currentWalletFilter = 'all';
         currentHistoryMonthFilter = '';
         selectedBerandaMonth = '';
+        selectedStatsMonth = '';
         selectedDonutMonth = '';
+        statsChartWindowStart = null;
+        statsChartWindowEnd = null;
         activeDonutCategory = null;
         selectedTimbanganMonth = '';
         resetForm();
@@ -6613,7 +6661,10 @@ export async function performExitDummy() {
         currentWalletFilter = 'all';
         currentHistoryMonthFilter = '';
         selectedBerandaMonth = '';
+        selectedStatsMonth = '';
         selectedDonutMonth = '';
+        statsChartWindowStart = null;
+        statsChartWindowEnd = null;
         activeDonutCategory = null;
         selectedTimbanganMonth = '';
         resetForm();
@@ -6724,7 +6775,10 @@ export async function performDeleteAllData() {
         currentChartType = 'expense';
         currentDonutType = 'expense';
         selectedBerandaMonth = '';
+        selectedStatsMonth = '';
         selectedDonutMonth = '';
+        statsChartWindowStart = null;
+        statsChartWindowEnd = null;
         activeDonutCategory = null;
         currentStatsCurrency = 'IDR';
         currentBudgetCurrency = 'IDR';
@@ -6963,9 +7017,13 @@ async function init() {
         currentWallets = await getWallets();
         selectedBerandaMonth = getLocalYearMonthString();
         selectedBudgetMonth = getLocalYearMonthString();
-        selectedDonutMonth = getLocalYearMonthString();
+        selectedStatsMonth = getLocalYearMonthString();
+        selectedDonutMonth = selectedStatsMonth;
+        statsChartWindowStart = null;
+        statsChartWindowEnd = null;
         selectedTimbanganMonth = getLocalYearMonthString();
         currentHistoryMonthFilter = selectedBerandaMonth;
+        updateStatsMonthNavUI();
         initDateSelectOptions();
         init24TimeSelectOptions();
         resetForm(); // Set default date, kategori, dan dompet
@@ -7330,23 +7388,12 @@ async function init() {
         });
     }
 
-    if (btnDonutPrevMonth) {
-        btnDonutPrevMonth.addEventListener('click', () => shiftDonutMonth(-1));
+    if (btnStatsPrevMonth) {
+        btnStatsPrevMonth.addEventListener('click', () => shiftStatsMonth(-1));
     }
 
-    if (btnDonutNextMonth) {
-        btnDonutNextMonth.addEventListener('click', () => shiftDonutMonth(1));
-    }
-
-    if (donutMonthInput) {
-        donutMonthInput.addEventListener('change', () => {
-            if (donutMonthInput.value) {
-                selectedDonutMonth = donutMonthInput.value;
-                activeDonutCategory = null;
-                renderDonutChart(currentTransactions);
-                renderMonthlyChart(currentTransactions);
-            }
-        });
+    if (btnStatsNextMonth) {
+        btnStatsNextMonth.addEventListener('click', () => shiftStatsMonth(1));
     }
 
     if (btnDonutExpense) {
