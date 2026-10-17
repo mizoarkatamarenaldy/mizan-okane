@@ -83,6 +83,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Pencarian riwayat
   - [x] Catatan di bawah angka
   - [x] Tombol Timbangan di tengah navigasi
+  - [x] Tentang Pengembang
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

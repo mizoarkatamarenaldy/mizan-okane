@@ -5465,6 +5465,43 @@ export async function exportViaCapacitor(fileName, dataContent, dialogTitle) {
     }
 }
 
+export async function openDeveloperPortfolio(event) {
+    const portfolioUrl = 'https://mizoarkatamarenaldy.github.io';
+    if (isCapacitorApp()) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+        const appLauncher = getCapacitorPlugin('AppLauncher');
+        if (appLauncher && typeof appLauncher.openUrl === 'function') {
+            try {
+                await appLauncher.openUrl({ url: portfolioUrl });
+                return;
+            } catch (err) {
+                console.warn('Gagal membuka web pengembang via AppLauncher:', err);
+            }
+        }
+        const browser = getCapacitorPlugin('Browser');
+        if (browser && typeof browser.open === 'function') {
+            try {
+                await browser.open({ url: portfolioUrl });
+                return;
+            } catch (err) {
+                console.warn('Gagal membuka web pengembang via Browser:', err);
+            }
+        }
+        try {
+            window.open(portfolioUrl, '_system');
+        } catch {
+            window.open(portfolioUrl, '_blank', 'noopener,noreferrer');
+        }
+        return;
+    }
+
+    if (!event) {
+        window.open(portfolioUrl, '_blank', 'noopener,noreferrer');
+    }
+}
+
 export async function exportBackupJson() {
     try {
         const allTx = await getRealTransactions();
@@ -6799,6 +6836,13 @@ async function init() {
             closeSettingsSubmenu();
         });
     });
+
+    const devLink = document.getElementById('link-about-developer');
+    if (devLink) {
+        devLink.addEventListener('click', (e) => {
+            openDeveloperPortfolio(e);
+        });
+    }
 
     // Sinkron dimulai setelah data lokal tampil, jadi app tetap jalan walau offline atau belum login.
     initSync({ onState: renderSyncState, onRemoteApplied: loadData })

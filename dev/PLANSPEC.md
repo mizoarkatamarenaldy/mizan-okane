@@ -517,3 +517,23 @@ Data:
 Cek manual:
 - Tombol tampil di tengah di web dan APK, membuka halaman Timbangan, navigasi lain tetap berfungsi.
 - Tombol back Android dari halaman Timbangan kembali seperti sebelumnya.
+
+## Tentang Pengembang
+
+Tujuan: mengarahkan pengguna ke web portofolio pembuat aplikasi.
+
+Tempat dan tampilan:
+- Baris menu baru "Tentang Pengembang" di Pengaturan, di bagian yang sama dengan Kebijakan Privasi dan Syarat dan Ketentuan.
+
+Aturan:
+- Membuka https://mizoarkatamarenaldy.github.io di browser, bukan di dalam aplikasi. Web: tab baru dengan rel noopener. APK: browser bawaan HP.
+- Pakai nama panggung "Mizo Arkatama Renaldy" saja. Jangan tulis nama asli di mana pun di repo.
+- Tidak ada halaman baru.
+- Jika butuh plugin Capacitor baru, tulis di laporan akhir agar pemilik menjalankan build sendiri. Jangan jalankan build apa pun.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Di web: ketuk "Tentang Pengembang", web portofolio terbuka di tab baru.
+- Di APK: web portofolio terbuka di browser HP, bukan di dalam aplikasi.

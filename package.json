@@ -21,6 +21,7 @@
   "homepage": "https://github.com/mizoarkatamarenaldy/mizan-okane#readme",
   "dependencies": {
     "@capacitor/android": "^8.5.3",
+    "@capacitor/app-launcher": "^8.0.1",
     "@capacitor/cli": "^8.5.3",
     "@capacitor/core": "^8.5.3",
     "@capacitor/filesystem": "^8.1.4",

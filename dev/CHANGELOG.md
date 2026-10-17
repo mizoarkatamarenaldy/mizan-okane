@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Tentang Pengembang
+- Ditambah: Baris menu baru "Tentang Pengembang" di Pengaturan pada kartu Tentang yang mengarahkan ke web portofolio pembuat aplikasi `https://mizoarkatamarenaldy.github.io` (`index.html`).
+- Ditambah: Penanganan navigasi portofolio pengembang `openDeveloperPortfolio` di `js/app.js` yang membuka URL di tab baru dengan `rel="noopener"` pada web browser, serta memanfaatkan plugin Capacitor `@capacitor/app-launcher` (dengan fallback `@capacitor/browser` dan browser sistem) agar terbuka di browser bawaan HP di luar aplikasi pada mode APK Android.
+- Ditambah: Dependensi plugin `@capacitor/app-launcher` pada `package.json` dan `package-lock.json` untuk mendukung pembukaan browser eksternal bawaan perangkat Android.
+- Diubah: Pembaruan deskripsi submenu Tentang pada baris menu Pengaturan (`index.html`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v56` (`sw.js`).
+- Diubah: Mencentang item "Tentang Pengembang" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Tombol Timbangan di tengah navigasi
 - Ditambah: Tombol Timbangan menonjol di tengah bar navigasi bawah HP (`.bottom-nav .nav-tab-center-btn`) dengan ikon timbangan di dalam wadah melingkar (`.nav-center-icon-wrap`) yang sedikit menonjol ke atas dari bar navigasi (`index.html`, `css/style.css`).
 - Ditambah: Gaya tab tengah pada navigasi desktop (`.desktop-nav .nav-tab-center-btn`) agar Timbangan tampil menonjol dan seimbang di antara menu kiri dan kanan (`index.html`, `css/style.css`).
