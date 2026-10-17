@@ -748,3 +748,46 @@ Kriteria selesai
 - Balasan chat berisi ringkasan: ukuran akhir .btn-month-nav sebelum perubahan, dan apakah diubah atau tidak.
 - git status --short hanya menampilkan css/style.css, dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
 
+## Perbaikan UI: semantik dan keyboard
+
+Tujuan: memperbaiki 5 temuan aksesibilitas dari audit UI yang menyangkut semantik HTML, fokus keyboard, dan nama aksesibel.
+
+Catatan umum
+- Nomor baris hanya perkiraan dan bisa bergeser. Cari ulang lewat selector, id, atau nama fungsi, jangan percaya nomor baris.
+- Jangan ubah logika bisnis, alur data, atau teks yang terlihat oleh pengguna.
+
+Item 1: role="listitem" pada .settings-menu-row (index.html)
+- Hapus atribut role="listitem" dari semua tombol .settings-menu-row (ada 8).
+- Periksa wadah induknya. Kalau wadah itu punya role="list", hapus juga role="list" tersebut, karena wadah list tanpa listitem tidak valid.
+- Jangan membungkus dengan elemen baru dan jangan mengubah class.
+
+Item 2: indikator fokus di form transaksi (css/style.css)
+- Tambahkan aturan :focus-visible untuk .type-segment-btn dan .category-chip.
+- Pakai gaya fokus yang sudah ada di css/style.css untuk tombol lain (salin pola dan token yang sama). Jangan menambah warna, ketebalan, atau bayangan baru di luar dev/DESIGN.md.
+
+Item 3: aria-label tombol Ubah dan Hapus di 5 transaksi terakhir Beranda (js/app.js)
+- Cari fungsi yang merender 5 transaksi terakhir di Beranda (sekitar L3225 dan L3229).
+- Ubah aria-label tombol Ubah dan Hapus supaya menyertakan nama kategori transaksi.
+- Format kalimat WAJIB sama persis dengan yang dipakai di daftar Riwayat. Cari dulu pola di Riwayat, lalu ikuti.
+- Gunakan nama kategori yang sama seperti yang tampil di baris transaksi itu. Jangan menyisipkan data lain.
+
+Item 4: select tersembunyi #tx-category (index.html)
+- Tambahkan tabindex="-1" dan aria-hidden="true" pada elemen #tx-category.
+- Pastikan pemilihan kategori lewat .category-chip tetap bekerja seperti sebelumnya.
+
+Item 5: segmen SVG donut (js/app.js)
+- Cari kode yang membuat segmen SVG diagram donut di Statistik.
+- Hapus tabindex dan role="button" dari segmen itu. Legenda donut jadi satu-satunya perhentian keyboard.
+- Handler klik atau sentuh pada segmen dibiarkan. Jangan dihapus.
+- Pastikan legenda donut masih bisa difokus dan dioperasikan lewat keyboard seperti sebelumnya. Kalau ternyata belum bisa, JANGAN diperbaiki di sesi ini, cukup laporkan di balasan chat.
+
+Larangan khusus tugas ini
+- Jangan menyentuh temuan audit lain (target sentuh, ikon kategori, subteks Equilibrium, efek redup dompet, grafik bulanan, kontras, focus trap). Itu sesi lain.
+- Jangan membaca atau menyentuh folder www/ dan android/. Jangan build.
+- Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Kriteria selesai
+- Kelima item sudah dikerjakan sesuai spek.
+- Balasan chat berisi ringkasan singkat per item: file dan selector atau fungsi yang diubah, dan hasil pengecekan pada Item 1 (apakah wadah punya role="list") dan Item 5 (apakah legenda bisa difokus).
+- git status --short hanya menampilkan index.html, css/style.css, js/app.js, dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
+

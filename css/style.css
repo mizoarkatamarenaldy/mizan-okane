@@ -3946,6 +3946,12 @@ button:disabled {
     color: var(--transfer);
 }
 
+.type-segment-item input:focus-visible + .type-segment-btn,
+.type-segment-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* 3. Kategori (chip) */
 .category-chips {
     display: flex;
@@ -3974,6 +3980,11 @@ button:disabled {
 
 .category-chip:hover {
     border-color: var(--accent);
+}
+
+.category-chip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .category-chip.is-selected {

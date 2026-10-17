@@ -389,9 +389,9 @@
         <main id="page-pengaturan" class="page-view hidden" role="tabpanel" aria-label="Pengaturan">
             <!-- Tampilan Utama: Daftar Kelompok Pengaturan -->
             <div id="settings-main-view" class="settings-view">
-                <div class="settings-menu-group" role="list">
+                <div class="settings-menu-group">
                     <!-- 1. Tampilan -->
-                    <button type="button" class="settings-menu-row" data-submenu="tampilan" role="listitem">
+                    <button type="button" class="settings-menu-row" data-submenu="tampilan">
                         <span class="settings-menu-icon" aria-hidden="true">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="5"></circle>
@@ -417,7 +417,7 @@
                     </button>
 
                     <!-- 2. Kategori -->
-                    <button type="button" class="settings-menu-row" data-submenu="kategori" role="listitem">
+                    <button type="button" class="settings-menu-row" data-submenu="kategori">
                         <span class="settings-menu-icon" aria-hidden="true">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
@@ -436,7 +436,7 @@
                     </button>
 
                     <!-- 3. Dompet -->
-                    <button type="button" class="settings-menu-row" data-submenu="dompet" role="listitem">
+                    <button type="button" class="settings-menu-row" data-submenu="dompet">
                         <span class="settings-menu-icon" aria-hidden="true">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
@@ -456,7 +456,7 @@
                     </button>
 
                     <!-- 4. Budget -->
-                    <button type="button" class="settings-menu-row" data-submenu="budget" role="listitem">
+                    <button type="button" class="settings-menu-row" data-submenu="budget">
                         <span class="settings-menu-icon" aria-hidden="true">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -475,7 +475,7 @@
                     </button>
 
                     <!-- 5. Data -->
-                    <button type="button" class="settings-menu-row" data-submenu="data" role="listitem">
+                    <button type="button" class="settings-menu-row" data-submenu="data">
                         <span class="settings-menu-icon" aria-hidden="true">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
@@ -495,7 +495,7 @@
                     </button>
 
                     <!-- 6. Akun dan Sinkron -->
-                    <button type="button" class="settings-menu-row" data-submenu="akun" role="listitem">
+                    <button type="button" class="settings-menu-row" data-submenu="akun">
                         <span class="settings-menu-icon" aria-hidden="true">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
@@ -513,7 +513,7 @@
                     </button>
 
                     <!-- 7. Tentang -->
-                    <button type="button" class="settings-menu-row" data-submenu="tentang" role="listitem">
+                    <button type="button" class="settings-menu-row" data-submenu="tentang">
                         <span class="settings-menu-icon" aria-hidden="true">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -534,8 +534,8 @@
                 </div>
 
                 <!-- 8. Zona Bahaya (terpisah di paling bawah) -->
-                <div class="settings-menu-group settings-menu-danger-group" role="list">
-                    <button type="button" class="settings-menu-row settings-menu-row-danger" data-submenu="bahaya" role="listitem">
+                <div class="settings-menu-group settings-menu-danger-group">
+                    <button type="button" class="settings-menu-row settings-menu-row-danger" data-submenu="bahaya">
                         <span class="settings-menu-icon danger-icon" aria-hidden="true">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
@@ -860,7 +860,7 @@
                         <!-- 3. Kategori (chip) -->
                         <div class="form-group" id="form-group-category">
                             <label for="tx-category" class="form-label">Kategori</label>
-                            <select id="tx-category" class="sr-only" required>
+                            <select id="tx-category" class="sr-only" required tabindex="-1" aria-hidden="true">
                                 <option value="" disabled selected>Pilih kategori</option>
                             </select>
                             <div id="category-chips" class="category-chips" role="radiogroup" aria-label="Pilih Kategori">

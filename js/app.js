@@ -2334,8 +2334,6 @@ function renderDonutChart(transactions) {
                 stroke-dashoffset="${dashOffset}"
                 transform="rotate(-90 110 110)"
                 data-category="${escapeHTML(cat.category)}"
-                tabindex="0"
-                role="button"
                 aria-label="${escapeHTML(cat.category)}: ${currencyFormatter.format(cat.amount, currentStatsCurrency)} (${percentStr})">
             </circle>
         `;
@@ -3222,11 +3220,11 @@ function createTxItemElement(tx, filterWallet) {
         </div>
         <div class="tx-actions">
             ${isPenyesuaian ? '' : `
-            <button type="button" class="btn-icon btn-edit" data-id="${tx.id}" aria-label="Ubah transaksi" title="Ubah">
+            <button type="button" class="btn-icon btn-edit" data-id="${tx.id}" aria-label="Ubah transaksi ${categoryText}" title="Ubah">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
             </button>
             `}
-            <button type="button" class="btn-icon btn-delete" data-id="${tx.id}" aria-label="Hapus transaksi" title="Hapus">
+            <button type="button" class="btn-icon btn-delete" data-id="${tx.id}" aria-label="Hapus transaksi ${categoryText}" title="Hapus">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
         </div>

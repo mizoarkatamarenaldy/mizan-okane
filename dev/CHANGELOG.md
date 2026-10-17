@@ -9,6 +9,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diperbaiki: ...
 - Diubah: ...
 ```
+## 2026-10-17: Perbaikan UI: semantik dan keyboard
+- Diperbaiki: Atribut `role="listitem"` pada 8 tombol submenu Pengaturan (.settings-menu-row) dan atribut `role="list"` pada wadah pembungkusnya (.settings-menu-group) dihapus untuk memulihkan semantik alami tombol bagi pembaca layar (`index.html`).
+- Ditambah: Aturan fokus keyboard `:focus-visible` untuk tombol pemilihan tipe transaksi (.type-segment-btn) dan tombol chip kategori (.category-chip) di form transaksi menggunakan token aksen resmi `dev/DESIGN.md` (`css/style.css`).
+- Diperbaiki: Label aksesibel `aria-label` tombol Ubah dan Hapus pada 5 transaksi terakhir Beranda dan daftar Riwayat kini menyertakan nama kategori transaksi yang sesuai (`js/app.js`).
+- Diperbaiki: Elemen select tersembunyi `#tx-category` diberi atribut `tabindex="-1"` dan `aria-hidden="true"` sehingga tidak lagi menjadi perhentian fokus keyboard kosong saat navigasi form (`index.html`).
+- Diperbaiki: Atribut `tabindex` dan `role="button"` pada segmen lingkaran SVG diagram donut Statistik dihapus agar perhentian fokus keyboard hanya berada di item legenda diagram (`js/app.js`).
+- Diubah: Mencentang item "Perbaikan UI: semantik dan keyboard" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
 
 ## 2026-10-17: Perbaikan UI: target sentuh minimal 44 px
 - Diperbaiki: Area target sentuh tombol aksi sub kategori (.btn-edit-subcat dan .btn-delete-subcat) ditingkatkan tinggi minimalnya dari 40 px menjadi 44 px (`css/style.css`).
