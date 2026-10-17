@@ -75,6 +75,7 @@ Semua angka uang memakai tabular-nums.
 - **Budget per kategori:** nama kategori di kiri, "Rp terpakai dari Rp budget" di kanan, bar tipis 6px, persen. Warna bar mengikuti tabel Warna makna.
 - **Riwayat:** dikelompokkan per tanggal ("Hari ini", "Kemarin", "12 Okt") dengan total harian di header grup. Tiap baris: ikon kategori (garis), nama kategori dan catatan, jumlah rata kanan dengan tanda, dompet dan waktu di baris kecil.
 - **Animasi catatan:** teks catatan yang melebihi lebar bergeser pelan agar terbaca penuh; statis dan terpotong "..." bila kurangi animasi aktif.
+- **Tombol tengah navigasi (Timbangan):** tombol di tengah bar navigasi dibuat lebih besar dan sedikit menonjol ke atas, memakai token warna yang sudah ada tanpa bayangan atau animasi baru.
 - **Form tambah/edit:** di HP berupa bottom sheet, di PC berupa dialog tengah. Urutan: jumlah (besar, keypad angka) → tipe (tombol geser: Pengeluaran / Pemasukan / Transfer) → kategori (chip) → dompet → tanggal dan waktu → catatan. Tombol Simpan selebar form, warna accent.
 - **Status sinkron:** ikon kecil di header. Abu-abu = belum terhubung, centang accent = tersinkron, peringatan amber = gagal. Penjelasan teks hanya muncul saat ikon disentuh. Dilarang banner besar yang menetap.
 - **Toast:** tetap dipakai untuk sukses, gagal, peringatan.

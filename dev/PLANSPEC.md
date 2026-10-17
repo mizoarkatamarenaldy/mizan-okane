@@ -497,3 +497,23 @@ Data:
 Cek manual:
 - Transaksi dengan catatan pendek: tampil statis di bawah baris kategori dan nominal.
 - Transaksi dengan catatan sangat panjang: teks bergeser. Dengan kurangi animasi aktif: teks terpotong "...".
+
+## Tombol Timbangan di tengah navigasi
+
+Tujuan: akses cepat ke halaman Timbangan lewat tombol menonjol di tengah navigasi bar.
+
+Tempat dan tampilan:
+- Tombol Timbangan di tengah navigasi bar, lebih besar dan sedikit menonjol dari bar, dengan ikon timbangan yang sudah ada. Membuka halaman Timbangan.
+
+Aturan:
+- Menu navigasi lain dibagi seimbang di kiri dan kanan tombol tengah.
+- Jika Timbangan sudah ada sebagai menu biasa di navigasi, pindahkan menjadi tombol tengah ini, jangan ada dua.
+- Izin dari pemilik: boleh menambah gaya tombol menonjol (ukuran dan posisi) memakai warna dan token yang sudah ada di dev/DESIGN.md, dan boleh menambahkan satu baris tentangnya di dev/DESIGN.md. Tidak boleh menambah warna, font, bayangan, atau animasi baru.
+- Perilaku tombol back Android yang sudah diperbaiki tidak boleh berubah.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Tombol tampil di tengah di web dan APK, membuka halaman Timbangan, navigasi lain tetap berfungsi.
+- Tombol back Android dari halaman Timbangan kembali seperti sebelumnya.

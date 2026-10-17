@@ -541,6 +541,24 @@ p {
     box-shadow: none;
 }
 
+.desktop-nav .nav-tab-btn.nav-tab-center-btn {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    padding: 8px 14px;
+}
+
+.desktop-nav .nav-tab-btn.nav-tab-center-btn:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
+.desktop-nav .nav-tab-btn.nav-tab-center-btn.is-active {
+    background-color: var(--accent);
+    color: var(--btn-primary-text);
+    border-color: var(--accent);
+}
+
 .desktop-nav .nav-tab-btn .nav-icon {
     flex-shrink: 0;
 }
@@ -3988,6 +4006,44 @@ button:disabled {
 .bottom-nav .nav-label {
     font-size: 11px;
     line-height: 1.1;
+}
+
+/* Tombol Timbangan Menonjol di Tengah Bar Navigasi Bawah */
+.bottom-nav .nav-tab-btn.nav-tab-center-btn {
+    position: relative;
+    padding: 2px 2px 6px 2px;
+}
+
+.bottom-nav .nav-tab-btn.nav-tab-center-btn .nav-center-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -14px;
+    margin-bottom: 2px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.bottom-nav .nav-tab-btn.nav-tab-center-btn:hover .nav-center-icon-wrap {
+    color: var(--text);
+    border-color: var(--text-secondary);
+}
+
+.bottom-nav .nav-tab-btn.nav-tab-center-btn.is-active .nav-center-icon-wrap {
+    background-color: var(--accent);
+    color: var(--btn-primary-text);
+    border-color: var(--accent);
+}
+
+.bottom-nav .nav-tab-btn.nav-tab-center-btn.is-active .nav-label {
+    color: var(--accent);
+    font-weight: 700;
 }
 
 /* ==========================================================================

@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Tombol Timbangan di tengah navigasi
+- Ditambah: Tombol Timbangan menonjol di tengah bar navigasi bawah HP (`.bottom-nav .nav-tab-center-btn`) dengan ikon timbangan di dalam wadah melingkar (`.nav-center-icon-wrap`) yang sedikit menonjol ke atas dari bar navigasi (`index.html`, `css/style.css`).
+- Ditambah: Gaya tab tengah pada navigasi desktop (`.desktop-nav .nav-tab-center-btn`) agar Timbangan tampil menonjol dan seimbang di antara menu kiri dan kanan (`index.html`, `css/style.css`).
+- Diubah: Penataan menu navigasi kini membagi menu lain secara seimbang di kiri (Beranda, Riwayat) dan di kanan (Statistik, Pengaturan) mengapit tombol Timbangan di tengah, baik pada bar navigasi bawah HP maupun tab desktop (`index.html`).
+- Diubah: Dokumentasi panduan desain `dev/DESIGN.md` diperbarui dengan menambahkan aturan tombol tengah navigasi Timbangan (`dev/DESIGN.md`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v55` (`sw.js`).
+- Diubah: Mencentang item "Tombol Timbangan di tengah navigasi" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Catatan di bawah angka
 - Ditambah: Tampilan baris catatan tersendiri (`.tx-item-note-row`) pada item transaksi di bawah baris kategori dan nominal (`js/app.js`, `css/style.css`).
 - Ditambah: Animasi geser teks pelan (`@keyframes txNoteScroll`, `.tx-item-note.is-scrolling`) pada catatan transaksi yang melebihi lebar kontainer agar terbaca penuh, dengan dukungan pengaturan kurangi animasi (`prefers-reduced-motion`) di mana teks terpotong rapi dengan "..." tanpa bergerak (`css/style.css`).
