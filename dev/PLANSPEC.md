@@ -863,4 +863,27 @@ Kriteria selesai
 - Balasan chat berisi ringkasan singkat: cara lama menentukan bulan, cara baru, dan apakah grafik pemasukan ikut berubah.
 - git status --short hanya menampilkan js/app.js, dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
 
+## Ikon neraca di header
 
+Tujuan: Menambahkan ikon neraca (timbangan) kecil di samping tulisan "Mizan Okane" di header, supaya identitas aplikasi lebih terasa sesuai namanya.
+
+Tempat dan tampilan:
+- Di header aplikasi (header tipis), di sebelah kiri tulisan "Mizan Okane", sejajar secara vertikal dengan tulisan itu.
+- Berupa ikon timbangan dua piringan sederhana, digambar sebagai SVG inline (bukan file gambar baru, bukan memakai logo di assets/).
+- Ukuran mengikuti tinggi teks judul header (sekitar 20 sampai 24 px). Jarak ke tulisan secukupnya mengikuti skala spasi di dev/DESIGN.md.
+- Warna ikon memakai token warna yang sudah ada di dev/DESIGN.md (warna yang sama dengan teks judul header atau warna aksen), dan harus terlihat jelas di mode terang dan mode gelap.
+- Ikon bersifat dekoratif: beri aria-hidden="true", tidak bisa diklik, tidak mengubah fungsi header, navigasi, atau tombol yang sudah ada.
+
+Aturan:
+- Hanya menambah ikon di samping tulisan. Tulisan "Mizan Okane" tidak diubah.
+- Header tidak boleh jadi lebih tinggi dari sebelumnya, dan tidak boleh ada elemen header yang bergeser keluar layar di lebar HP kecil.
+- Tidak mengubah file logo di assets/, ikon PWA, atau ikon APK.
+- Tidak menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka aplikasi di lebar HP: ikon timbangan muncul di kiri tulisan "Mizan Okane", sejajar dan tidak terpotong, tinggi header sama seperti sebelumnya.
+- Ganti ke mode gelap lalu kembali ke mode terang: ikon tetap terlihat jelas di keduanya.
+- Pindah ke halaman lain (Riwayat, Statistik, Pengaturan, Timbangan): ikon tetap tampil di header dan tidak mengganggu tombol atau navigasi yang ada.

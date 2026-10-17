@@ -10,6 +10,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Ikon neraca di header
+- Ditambah: Ikon neraca (timbangan dua piringan) sederhana berupa SVG inline dengan ukuran 22 x 22 px dan warna aksen `var(--accent)` di sebelah kiri tulisan "Mizan Okane" pada header aplikasi (`index.html`, `css/style.css`).
+- Ditambah: Penataan flexbox pada `.app-brand` dengan jarak `gap: 8px` sesuai skala spasi `dev/DESIGN.md`, serta atribut `aria-hidden="true"` dan `pointer-events: none` agar ikon bersifat dekoratif tanpa mengganggu tombol atau navigasi header (`index.html`, `css/style.css`).
+- Diubah: Mencentang item "Ikon neraca di header" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Perbaikan UI: grafik bulanan Statistik
 - Diperbaiki: Penentuan jendela bulan pada fungsi `renderMonthlyChart` diubah agar selalu berakhir di bulan aktif (bulan yang dipilih di Statistik) dengan panjang jendela dihitung inklusif dari bulan data terawal relevan dan dibatasi minimal 3 serta maksimal 6 bulan (`js/app.js`).
 - Diperbaiki: Bulan di dalam rentang jendela yang tidak memiliki transaksi kini tetap digambar dengan nilai 0 dan label nama bulan tetap muncul rapi tanpa pembagian dengan nol (`js/app.js`).

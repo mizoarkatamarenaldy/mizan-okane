@@ -481,7 +481,17 @@ p {
 .app-brand {
     display: flex;
     align-items: center;
+    gap: 8px;
     flex: none;
+}
+
+.app-brand-icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    color: var(--accent);
+    display: block;
+    pointer-events: none;
 }
 
 .app-title {
