@@ -5890,6 +5890,7 @@ function renderBudgetSettings() {
     orderedCats.forEach(cat => {
         const li = document.createElement('li');
         li.className = 'category-item';
+        li.setAttribute('data-name', cat);
         const amount = budgetMap[cat];
         const isOrphan = !activeExpenseList.includes(cat);
         const isEditing = editingBudgetCategory === cat;
@@ -5944,6 +5945,7 @@ function renderBudgetSettings() {
                 <div class="category-item-actions">
                     <button type="button" class="btn-icon btn-edit-budget" data-name="${escapeHTML(cat)}" aria-label="Ubah budget ${escapeHTML(cat)}">Ubah</button>
                     <button type="button" class="btn-icon btn-delete-budget" data-name="${escapeHTML(cat)}" aria-label="Hapus budget ${escapeHTML(cat)}">Hapus</button>
+                    <button type="button" class="btn-icon btn-drag-handle" data-name="${escapeHTML(cat)}" aria-label="Geser urutan budget ${escapeHTML(cat)}" title="Geser urutan">≡</button>
                 </div>
             `;
 
@@ -5957,6 +5959,55 @@ function renderBudgetSettings() {
             });
 
             budgetSettingsList.appendChild(li);
+        }
+    });
+
+    enableListDragReorder({
+        container: budgetSettingsList,
+        itemSelector: '.category-item[data-name]',
+        handleSelector: '.btn-drag-handle',
+        onReorder: async (newOrderBudgetCatNames) => {
+            const rawExpenseList = (currentCategories && Array.isArray(currentCategories.expense)) ? currentCategories.expense : [];
+            const sortedExpenseList = [...rawExpenseList].sort((a, b) => (typeof a?.order === 'number' ? a.order : 0) - (typeof b?.order === 'number' ? b.order : 0));
+
+            const budgetSet = new Set(newOrderBudgetCatNames);
+            const budgetQueue = [...newOrderBudgetCatNames];
+            const newExpenseList = [];
+
+            for (const catItem of sortedExpenseList) {
+                const name = getCatName(catItem);
+                if (budgetSet.has(name)) {
+                    const nextBudgetName = budgetQueue.shift();
+                    const existingItem = sortedExpenseList.find(c => getCatName(c) === nextBudgetName);
+                    const itemObj = existingItem
+                        ? (typeof existingItem === 'object' ? { ...existingItem } : { name: nextBudgetName })
+                        : { name: nextBudgetName };
+                    newExpenseList.push(itemObj);
+                } else {
+                    newExpenseList.push(typeof catItem === 'object' ? { ...catItem } : { name });
+                }
+            }
+
+            while (budgetQueue.length > 0) {
+                const orphanName = budgetQueue.shift();
+                newExpenseList.push({ name: orphanName });
+            }
+
+            const orderChanged = newExpenseList.some((item, idx) => getCatName(item) !== getCatName(sortedExpenseList[idx]));
+            for (let i = 0; i < newExpenseList.length; i++) {
+                newExpenseList[i].order = i;
+            }
+
+            if (orderChanged) {
+                currentCategories.expense = newExpenseList;
+                currentCategories.updatedAt = Date.now();
+                await saveCategories(currentCategories);
+                renderCategorySettings();
+                renderBudgetSettings();
+                renderBudgetSection();
+                populateCategoryOptions(txCategoryInput ? txCategoryInput.value : null);
+                markDirty().catch(err => console.error("Gagal menandai perubahan kategori untuk sinkron", err));
+            }
         }
     });
 }

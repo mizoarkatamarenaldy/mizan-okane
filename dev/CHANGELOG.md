@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Geser urutan budget
+- Ditambah: Pegangan geser berikon garis tiga (≡, `.btn-drag-handle`) pada setiap baris daftar budget per kategori di Pengaturan untuk mengatur urutan budget secara manual (`js/app.js`).
+- Ditambah: Mekanisme geser urutan budget menggunakan `enableListDragReorder` yang memperbarui urutan kategori pengeluaran pada IndexedDB, data demo, dan sinkronisasi Google Drive tanpa mengubah struktur data (`js/app.js`).
+- Diubah: Posisi kategori pengeluaran tanpa budget tetap dipertahankan dan tidak terganggu saat urutan budget digeser (`js/app.js`).
+- Diubah: Urutan baru budget langsung tercermin di semua tempat yang menampilkan budget (termasuk Beranda) tanpa pegangan geser di sana (`js/app.js`).
+- Diubah: Mencentang item "Geser urutan budget" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Statistik: tab Harian, Bulanan, Tahunan
 - Ditambah: Tiga tab skala waktu ("Harian", "Bulanan", "Tahunan") di bagian atas halaman Statistik dengan role tablist, tab, tabpanel, aria-selected, dukungan navigasi keyboard (panah kiri/kanan, Home, End, Enter/Spasi), dan target sentuh minimal 44 px sesuai spesifikasi (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Tampilan skala Harian dengan batang per tanggal dari tanggal 1 sampai tanggal terakhir bulan terpilih, hari kosong bernilai nol, serta ringkasan dan diagram donut yang sinkron dengan total bulan terpilih (`js/app.js`, `css/style.css`).

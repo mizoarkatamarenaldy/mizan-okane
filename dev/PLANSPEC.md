@@ -952,3 +952,27 @@ Cek manual:
 - Tes dengan data contoh lengkap dan dengan data kosong: tidak ada error, grafik kosong tampil sebagai nol atau keadaan kosong yang sudah ada.
 - Mode gelap: semua tab terbaca jelas, penanda batang tetap terlihat.
 
+## Geser urutan budget
+
+Tujuan: Pengguna bisa mengubah urutan budget per kategori dengan menggeser lewat ikon garis tiga (≡), supaya budget yang paling penting ada di atas.
+
+Tempat dan tampilan:
+- Di daftar budget per kategori, tempat pengguna mengatur budget. Tiap baris budget mendapat ikon garis tiga (≡) sebagai pegangan geser.
+- Pegangan geser memakai mekanisme dan tampilan yang sama dengan fitur "Geser urutan dompet dan kategori". Jangan membuat mekanisme geser baru.
+- Tidak ada teks baru. Target sentuh pegangan minimal 44 px.
+
+Aturan:
+- Urutan budget mengikuti urutan kategori yang sudah ada. Menggeser budget mengubah urutan kategori itu sendiri, sama seperti menggeser di daftar kategori.
+- Budget hanya tampil untuk kategori yang punya budget. Kategori tanpa budget tidak muncul di daftar budget, tetapi posisinya di urutan kategori tidak berubah.
+- Urutan baru juga terlihat di tempat lain yang menampilkan budget (misalnya Beranda), tanpa pegangan geser di sana.
+- Tidak ada urutan budget yang terpisah dari urutan kategori.
+- Fitur ini sengaja TIDAK menyentuh sub kategori dan tidak mengubah nilai budget.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Memakai field urutan kategori yang sudah ada.
+
+Cek manual:
+- Kondisi awal: ada tiga kategori dengan budget (A, B, C). Aksi: geser C ke paling atas. Hasil: urutan di daftar budget jadi C, A, B, dan urutan di daftar kategori ikut berubah.
+- Kondisi awal: ada kategori tanpa budget di antara A dan B. Aksi: geser B ke atas A. Hasil: kategori tanpa budget tidak muncul di daftar budget dan tidak rusak.
+- Kondisi awal: urutan sudah digeser. Aksi: tutup lalu buka lagi aplikasi, atau sinkron di perangkat lain. Hasil: urutan tetap sama.
+- Aksi: geser lewat layar sentuh di HP, bukan hanya mouse. Hasil: geser berjalan lancar dan halaman tidak ikut tergulung.
