@@ -89,6 +89,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Penyesuaian saldo di Timbangan
   - [x] Perbaikan UI: tombol tambah, banner data contoh, header budget
   - [x] Audit UI: temuan desain dan aksesibilitas
+  - [x] Perbaikan UI: target sentuh minimal 44 px
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

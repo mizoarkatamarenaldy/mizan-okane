@@ -1626,10 +1626,10 @@ p {
     right: 2px;
     top: 50%;
     transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     padding: 0;
     border: none;
     background: transparent;
@@ -2448,8 +2448,10 @@ p {
 }
 
 .btn-timbangan-back {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3274,7 +3276,7 @@ p {
     font-size: 12px;
     font-weight: 500;
     padding: 4px 10px;
-    min-height: 40px;
+    min-height: 44px;
     cursor: pointer;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
@@ -3293,7 +3295,7 @@ p {
     font-size: 12px;
     font-weight: 500;
     padding: 4px 10px;
-    min-height: 40px;
+    min-height: 44px;
     cursor: pointer;
     transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }

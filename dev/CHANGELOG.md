@@ -9,6 +9,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diperbaiki: ...
 - Diubah: ...
 ```
+
+## 2026-10-17: Perbaikan UI: target sentuh minimal 44 px
+- Diperbaiki: Area target sentuh tombol aksi sub kategori (.btn-edit-subcat dan .btn-delete-subcat) ditingkatkan tinggi minimalnya dari 40 px menjadi 44 px (`css/style.css`).
+- Diperbaiki: Ukuran tombol kembali di halaman Timbangan (.btn-timbangan-back) dan tombol bersihkan pencarian riwayat (.btn-search-clear) ditingkatkan dari 40 x 40 px menjadi 44 x 44 px (`css/style.css`).
+- Diubah: Memverifikasi ukuran akhir tombol navigasi bulan (.btn-month-nav) yang telah memenuhi standar minimal 44 x 44 px (`css/style.css`).
+- Diubah: Mencentang item "Perbaikan UI: target sentuh minimal 44 px" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Audit UI: temuan desain dan aksesibilitas
 - Ditambah: Spesifikasi item audit UI serta pelaksanaan pemeriksaan menyeluruh terhadap standar WCAG AA dan token `dev/DESIGN.md` pada 6 halaman aplikasi (Beranda, Riwayat, form tambah & edit transaksi, Timbangan, Statistik, Pengaturan) tanpa perubahan pada kode aplikasi (`dev/PLANSPEC.md`).
 - Diubah: Mencentang item "Audit UI: temuan desain dan aksesibilitas" di `dev/PLAN.md`.

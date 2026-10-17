@@ -711,3 +711,40 @@ Kriteria selesai
 - Tabel temuan sudah ada di balasan chat sesuai format di atas.
 - Tidak ada perubahan di file aplikasi.
 - git status --short hanya menampilkan dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
+
+## Perbaikan UI: target sentuh minimal 44 px
+
+Tujuan: semua tombol yang disebut di bawah punya area sentuh minimal 44 x 44 px, sesuai hasil audit UI.
+
+Catatan umum
+- Nomor baris di bawah hanya perkiraan dan bisa bergeser. Cari ulang lewat nama selector di css/style.css, jangan percaya nomor baris.
+- Ukuran yang dihitung adalah ukuran akhir yang berlaku setelah semua aturan CSS lain (termasuk media query dan aturan yang lebih spesifik) diperhitungkan, bukan hanya satu aturan.
+- Ubah hanya properti ukuran (width, height, min-width, min-height, padding bila memang itu yang menentukan ukuran). Jangan ubah warna, font, bayangan, atau animasi.
+
+Item 1: .btn-month-nav (sekitar L1228)
+- Audit menulis 28 px, tapi di screenshot tombol terlihat lebih besar. Jadi VERIFIKASI DULU.
+- Cari semua aturan CSS yang mengenai .btn-month-nav (termasuk yang menimpa) dan tentukan ukuran akhir lebar dan tingginya.
+- Kalau ukuran akhir sudah 44 x 44 atau lebih, JANGAN ubah apa pun untuk item ini. Cukup laporkan hasil verifikasinya di balasan chat.
+- Kalau salah satu sisi masih di bawah 44 px, naikkan jadi 44 px pada aturan yang benar-benar menentukan ukuran akhir. Pastikan kartu saldo di Beranda tidak rusak tata letaknya.
+
+Item 2: .btn-edit-subcat dan .btn-delete-subcat
+- min-height 40 px jadi 44 px.
+
+Item 3: .btn-timbangan-back
+- 40 x 40 px jadi 44 x 44 px.
+
+Item 4: .btn-search-clear
+- 40 x 40 px jadi 44 x 44 px.
+- Ukuran ikon di dalamnya tetap 16 px.
+
+Larangan khusus tugas ini
+- Jangan menyentuh temuan audit lain (kontras, aria-label, fokus, ikon kategori, grafik, dan seterusnya). Itu sesi lain.
+- Jangan mengubah js/app.js dan index.html.
+- Jangan membaca atau menyentuh folder www/ dan android/. Jangan build.
+- Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Kriteria selesai
+- Item 2 sampai 4 berukuran akhir minimal 44 px. Item 1 sudah diverifikasi dan diubah hanya bila perlu.
+- Balasan chat berisi ringkasan: ukuran akhir .btn-month-nav sebelum perubahan, dan apakah diubah atau tidak.
+- git status --short hanya menampilkan css/style.css, dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
+
