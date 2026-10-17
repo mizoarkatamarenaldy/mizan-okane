@@ -10,6 +10,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI: grafik bulanan Statistik
+- Diperbaiki: Penentuan jendela bulan pada fungsi `renderMonthlyChart` diubah agar selalu berakhir di bulan aktif (bulan yang dipilih di Statistik) dengan panjang jendela dihitung inklusif dari bulan data terawal relevan dan dibatasi minimal 3 serta maksimal 6 bulan (`js/app.js`).
+- Diperbaiki: Bulan di dalam rentang jendela yang tidak memiliki transaksi kini tetap digambar dengan nilai 0 dan label nama bulan tetap muncul rapi tanpa pembagian dengan nol (`js/app.js`).
+- Diubah: Navigasi pemindah bulan di Statistik kini memicu pembaruan `renderMonthlyChart` sehingga grafik pengeluaran dan pemasukan bulanan tetap sinkron dengan bulan aktif (`js/app.js`).
+- Diubah: Mencentang item "Perbaikan UI: grafik bulanan Statistik" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Perbaikan UI: polish kecil
 - Ditambah: Ikon kategori Makan baru berwujud sendok dan garpu pada fungsi `getCategoryIconSvg` sehingga kategori default Makan memiliki visual spesifik dan tidak lagi jatuh ke ikon default tag (`js/app.js`).
 - Ditambah: Subteks penjelas "Penyesuaian saldo bulan ini" di bawah label Equilibrium pada halaman Timbangan beserta penataan baris fleksibel responsif agar label, subteks, dan nominal tetap rapi dan tidak terpotong di layar sempit (`index.html`, `css/style.css`).

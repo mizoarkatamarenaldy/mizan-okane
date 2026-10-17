@@ -830,4 +830,37 @@ Kriteria selesai
 - Balasan chat berisi ringkasan singkat per item: file dan fungsi atau selector yang diubah, bentuk ikon Makan yang dipilih, dan class yang dipakai untuk subteks Equilibrium.
 - git status --short hanya menampilkan index.html, css/style.css, js/app.js, dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
 
+## Perbaikan UI: grafik bulanan Statistik
+
+Tujuan: grafik bulanan di Statistik tetap terlihat seperti grafik (bukan satu batang tunggal) saat data baru sedikit, dengan menampilkan jendela bulan yang tetap dan bulan tanpa data bernilai 0.
+
+Catatan umum
+- Nomor baris hanya perkiraan dan bisa bergeser. Cari ulang lewat nama fungsi, jangan percaya nomor baris.
+- Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md. Pakai gaya batang dan label yang sudah ada.
+
+Item 1: jendela bulan di renderMonthlyChart (js/app.js, sekitar L1893)
+- Cari fungsi renderMonthlyChart dan pahami dulu cara ia menentukan bulan yang ditampilkan.
+- Aturan jendela yang baru:
+  - Jendela selalu berakhir di bulan aktif (bulan yang sedang dipilih di Statistik).
+  - Panjang jendela = jumlah bulan dari bulan data paling awal (yang relevan untuk grafik itu) sampai bulan aktif, dihitung inklusif, lalu dibatasi minimal 3 dan maksimal 6 bulan.
+  - Contoh: data baru ada di bulan aktif saja, jendela 3 bulan (2 bulan sebelumnya + bulan aktif). Data sudah 10 bulan, jendela 6 bulan terakhir.
+  - Bulan di dalam jendela yang tidak punya transaksi bernilai 0 dan tetap digambar sebagai bulan (label tetap muncul, batang 0 boleh tidak terlihat).
+- Urutan bulan tetap dari paling lama ke paling baru, seperti sekarang.
+- Lintas pergantian tahun harus benar (misal bulan aktif Februari, jendela 3 bulan = Desember, Januari, Februari).
+- Skala sumbu dan tinggi batang tetap dihitung dari nilai yang tampil di jendela. Pastikan tidak ada pembagian dengan 0 saat semua bulan bernilai 0.
+- Pastikan label bulan tidak menumpuk atau terpotong di layar sempit (sekitar 360 px) untuk jendela 6 bulan.
+
+Larangan khusus tugas ini
+- JANGAN ubah logika data: cara transaksi dijumlahkan per bulan, filter dompet, mata uang, kategori, transfer, dan soft delete tidak boleh berubah. Yang diubah hanya penentuan daftar bulan yang ditampilkan dan pengisian 0 untuk bulan kosong.
+- Kalau grafik pemasukan bulanan memakai fungsi lain, JANGAN diubah. Kalau ternyata memakai fungsi renderMonthlyChart yang sama, perubahan otomatis berlaku untuk keduanya dan cukup dilaporkan di balasan chat.
+- Jangan menyentuh temuan audit lain (kontras tema terang, focus trap, dan lainnya).
+- Jangan mengubah index.html dan css/style.css. Kalau perbaikan label sempit ternyata mustahil tanpa CSS, JANGAN diubah, cukup laporkan di balasan chat.
+- Jangan membaca atau menyentuh folder www/ dan android/. Jangan build.
+- Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Kriteria selesai
+- Jendela bulan mengikuti aturan di atas, dan bulan tanpa data bernilai 0.
+- Balasan chat berisi ringkasan singkat: cara lama menentukan bulan, cara baru, dan apakah grafik pemasukan ikut berubah.
+- git status --short hanya menampilkan js/app.js, dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
+
 

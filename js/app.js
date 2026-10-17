@@ -1886,28 +1886,29 @@ function renderMonthlyChart(transactions) {
         return;
     }
 
+    if (!selectedDonutMonth) {
+        selectedDonutMonth = getLocalYearMonthString();
+    }
+    const activeMonth = selectedDonutMonth;
+    const [activeY, activeM] = activeMonth.split('-').map(Number);
+
     const rawKeys = Array.from(monthData.keys()).sort();
-    const minKey = rawKeys[0];
-    const maxKey = rawKeys[rawKeys.length - 1];
-
+    const minKey = rawKeys.length > 0 ? rawKeys[0] : activeMonth;
     const [minY, minM] = minKey.split('-').map(Number);
-    const [maxY, maxM] = maxKey.split('-').map(Number);
-    const span = (maxY - minY) * 12 + (maxM - minM) + 1;
 
-    let displayMonths = [];
-    if (span <= 12) {
-        let curY = minY;
-        let curM = minM;
-        while (curY < maxY || (curY === maxY && curM <= maxM)) {
-            displayMonths.push(`${curY}-${String(curM).padStart(2, '0')}`);
-            curM++;
-            if (curM > 12) {
-                curM = 1;
-                curY++;
-            }
-        }
-    } else {
-        displayMonths = rawKeys;
+    // Hitung jumlah bulan dari data terawal sampai bulan aktif (inklusif)
+    const monthsSpan = (activeY - minY) * 12 + (activeM - minM) + 1;
+    // Panjang jendela dibatasi minimal 3 dan maksimal 6 bulan
+    const windowLength = Math.min(6, Math.max(3, monthsSpan));
+
+    // Jendela selalu berakhir di bulan aktif (urutan paling lama ke paling baru)
+    const displayMonths = [];
+    const activeTotalMonths = activeY * 12 + (activeM - 1);
+    const startTotalMonths = activeTotalMonths - (windowLength - 1);
+    for (let mIdx = startTotalMonths; mIdx <= activeTotalMonths; mIdx++) {
+        const y = Math.floor(mIdx / 12);
+        const m = (mIdx % 12) + 1;
+        displayMonths.push(`${y}-${String(m).padStart(2, '0')}`);
     }
 
     let totalAmountAll = 0;
@@ -2080,6 +2081,7 @@ function shiftDonutMonth(delta) {
         donutMonthInput.value = selectedDonutMonth;
     }
     renderDonutChart(currentTransactions);
+    renderMonthlyChart(currentTransactions);
 }
 
 function updateDonutTypeUI() {
@@ -7342,6 +7344,7 @@ async function init() {
                 selectedDonutMonth = donutMonthInput.value;
                 activeDonutCategory = null;
                 renderDonutChart(currentTransactions);
+                renderMonthlyChart(currentTransactions);
             }
         });
     }
