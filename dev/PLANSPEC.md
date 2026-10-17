@@ -537,3 +537,32 @@ Data:
 Cek manual:
 - Di web: ketuk "Tentang Pengembang", web portofolio terbuka di tab baru.
 - Di APK: web portofolio terbuka di browser HP, bukan di dalam aplikasi.
+
+## Dompet dipilih manual di form transaksi dan transfer
+
+Tujuan: Mencegah transaksi atau transfer masuk ke dompet yang salah karena dompet terisi otomatis dari pilihan sebelumnya. Pengguna harus memilih dompet sendiri setiap kali.
+
+Tempat dan tampilan:
+- Form tambah transaksi (pemasukan dan pengeluaran): kolom dompet awalnya kosong dengan teks petunjuk "Pilih dompet".
+- Form transfer antar dompet: kolom dompet asal dan dompet tujuan sama-sama awalnya kosong dengan teks petunjuk "Pilih dompet".
+- Tombol Simpan tidak bisa dipakai (nonaktif) selama ada dompet yang belum dipilih.
+- Pakai kontrol pemilih dompet yang sudah ada, tidak ada elemen tampilan baru.
+
+Aturan:
+- Setiap kali form tambah transaksi atau form transfer dibuka, semua kolom dompet kosong. Tidak ada pilihan yang diingat dari transaksi atau transfer sebelumnya, dari sesi sebelumnya, atau dari filter dompet di Riwayat.
+- Setelah disimpan, form kembali ke keadaan kosong, termasuk dompet.
+- Form tambah transaksi: kalau pengguna hanya punya satu dompet, dompet itu langsung terpilih.
+- Form transfer: tidak ada pemilihan otomatis, aturan yang sudah ada (dompet asal dan tujuan harus beda, mata uang harus sama) tidak diubah.
+- Form edit transaksi dan edit transfer tidak berubah: tetap menampilkan dompet milik data itu.
+- Berlaku sama di mode data contoh dan mode tanpa login.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Punya dua dompet atau lebih. Buka form tambah transaksi: dompet kosong, Simpan nonaktif. Pilih Tunai, simpan. Buka form tambah lagi: dompet kembali kosong.
+- Di Riwayat, klik kartu dompet Bank untuk memfilter, lalu buka form tambah transaksi: dompet tetap kosong, tidak otomatis Bank.
+- Buka form transfer: dompet asal dan tujuan kosong, Simpan nonaktif. Pilih keduanya, isi nominal, simpan. Buka form transfer lagi: keduanya kembali kosong.
+- Punya satu dompet saja. Buka form tambah transaksi: dompet itu sudah terpilih dan Simpan bisa dipakai setelah field lain terisi.
+- Edit transaksi dan edit transfer lama: dompet aslinya tampil dan tidak bisa dikosongkan.
+

@@ -84,6 +84,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Catatan di bawah angka
   - [x] Tombol Timbangan di tengah navigasi
   - [x] Tentang Pengembang
+  - [x] Dompet dipilih manual di form transaksi dan transfer
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

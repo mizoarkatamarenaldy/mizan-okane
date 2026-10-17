@@ -30,6 +30,7 @@ const formGroupSubcategory = document.getElementById('form-group-subcategory');
 const txSubcategoryInput = document.getElementById('tx-subcategory');
 const subcategoryChipsContainer = document.getElementById('subcategory-chips');
 const txNoteInput = document.getElementById('tx-note');
+const btnSave = document.getElementById('btn-save');
 const btnCancel = document.getElementById('btn-cancel');
 const btnDeleteFromForm = document.getElementById('btn-delete-from-form');
 
@@ -576,6 +577,26 @@ function populateCategoryOptions(selectedVal = null, oldCustomCategory = null, s
     populateSubcategoryOptions(targetVal, selectedSub);
 }
 
+export function updateSaveButtonState() {
+    if (!btnSave) return;
+    const isTransfer = getSelectedType() === 'transfer';
+    let isWalletValid = false;
+    if (isTransfer) {
+        const fromWallet = txWalletInput ? txWalletInput.value : '';
+        const toWallet = txToWalletInput ? txToWalletInput.value : '';
+        isWalletValid = Boolean(fromWallet && toWallet && fromWallet !== toWallet);
+    } else {
+        const wallet = txWalletInput ? txWalletInput.value : '';
+        isWalletValid = Boolean(wallet);
+    }
+    btnSave.disabled = !isWalletValid;
+    if (!isWalletValid) {
+        btnSave.setAttribute('aria-disabled', 'true');
+    } else {
+        btnSave.removeAttribute('aria-disabled');
+    }
+}
+
 function updateTypeUI(type) {
     const isTransfer = type === 'transfer';
     if (txWalletLabel) {
@@ -597,35 +618,25 @@ function updateTypeUI(type) {
         txCategoryInput.required = !isTransfer;
     }
 
+    const isEdit = Boolean(txIdInput && txIdInput.value);
+
     if (isTransfer) {
         if (txSubcategoryInput) {
             txSubcategoryInput.value = '';
         }
-        const fromCurr = getWalletCurrency(txWalletInput ? txWalletInput.value : null);
         const active = getActiveWallets();
-        const sameCurrWallets = active.filter(w => getWalletCurrency(w.id) === fromCurr);
-        if (sameCurrWallets.length < 2) {
-            const idrCount = active.filter(w => getWalletCurrency(w.id) === 'IDR').length;
-            const jpyCount = active.filter(w => getWalletCurrency(w.id) === 'JPY').length;
-            const usdCount = active.filter(w => getWalletCurrency(w.id) === 'USD').length;
-            if (idrCount < 2 && jpyCount < 2 && usdCount < 2) {
-                showNotification('Transfer butuh minimal 2 dompet dengan mata uang yang sama.', 'warn');
-                txTypeInputs[0].checked = true;
-                updateTypeUI('expense');
-                return;
-            } else {
-                const candidate = active.find(w => {
-                    const c = getWalletCurrency(w.id);
-                    return (c === 'IDR' && idrCount >= 2) || (c === 'JPY' && jpyCount >= 2) || (c === 'USD' && usdCount >= 2);
-                });
-                if (candidate) {
-                    populateWalletOptions(candidate.id);
-                } else {
-                    populateWalletOptions();
-                }
-            }
-        } else {
-            populateWalletOptions(txWalletInput ? txWalletInput.value : null, txToWalletInput ? txToWalletInput.value : null);
+        const idrCount = active.filter(w => getWalletCurrency(w.id) === 'IDR').length;
+        const jpyCount = active.filter(w => getWalletCurrency(w.id) === 'JPY').length;
+        const usdCount = active.filter(w => getWalletCurrency(w.id) === 'USD').length;
+        if (idrCount < 2 && jpyCount < 2 && usdCount < 2) {
+            showNotification('Transfer butuh minimal 2 dompet dengan mata uang yang sama.', 'warn');
+            txTypeInputs[0].checked = true;
+            updateTypeUI('expense');
+            return;
+        }
+
+        if (!isEdit) {
+            populateWalletOptions('', '');
         }
     } else {
         const currentVal = txCategoryInput ? txCategoryInput.value : '';
@@ -633,7 +644,17 @@ function updateTypeUI(type) {
         const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
         const keepVal = list.includes(currentVal) ? currentVal : null;
         populateCategoryOptions(keepVal, null, currentSub);
+
+        if (!isEdit) {
+            const active = getActiveWallets();
+            if (active.length === 1) {
+                populateWalletOptions(active[0].id);
+            } else {
+                populateWalletOptions(txWalletInput ? txWalletInput.value : '');
+            }
+        }
     }
+    updateSaveButtonState();
 }
 
 function getActiveWallets() {
@@ -681,7 +702,7 @@ export function getTransactionCurrency(tx) {
 }
 
 function updateFormCurrencyUI() {
-    const selectedWalletId = txWalletInput ? txWalletInput.value : DEFAULT_WALLET_ID;
+    const selectedWalletId = txWalletInput ? txWalletInput.value : '';
     const curr = getWalletCurrency(selectedWalletId);
     if (txAmountPrefix) {
         if (curr === 'USD') {
@@ -715,23 +736,29 @@ function updateFormCurrencyUI() {
 function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
     if (!txWalletInput) return;
     const active = getActiveWallets();
+    const isEdit = Boolean(txIdInput && txIdInput.value);
+    const isTransfer = getSelectedType() === 'transfer';
+
     let targetId = selectedFromVal;
     if (!targetId || !active.some(w => w.id === targetId)) {
-        const lastUsed = localStorage.getItem(LAST_WALLET_KEY);
-        if (lastUsed && active.some(w => w.id === lastUsed)) {
-            targetId = lastUsed;
-        } else if (active.some(w => w.id === DEFAULT_WALLET_ID)) {
-            targetId = DEFAULT_WALLET_ID;
-        } else if (active.length > 0) {
+        if (isEdit) {
+            targetId = selectedFromVal || '';
+        } else if (!isTransfer && active.length === 1) {
+            // Form tambah transaksi: kalau pengguna hanya punya satu dompet, dompet itu langsung terpilih.
             targetId = active[0].id;
         } else {
-            targetId = DEFAULT_WALLET_ID;
+            targetId = '';
         }
     }
 
     let html = '';
+    // Placeholder "Pilih dompet" hanya jika belum dipilih atau bukan edit
+    if (!targetId || (!isEdit && active.length > 1)) {
+        html += `<option value="" disabled ${!targetId ? 'selected' : ''}>Pilih dompet</option>`;
+    }
+
     // Jika dompet yang dipilih sebelumnya sudah di-soft-delete (misal saat edit transaksi lama)
-    if (selectedFromVal && !active.some(w => w.id === selectedFromVal)) {
+    if (isEdit && selectedFromVal && !active.some(w => w.id === selectedFromVal)) {
         const oldWalletName = getWalletName(selectedFromVal);
         const oldCurr = getWalletCurrency(selectedFromVal);
         html += `<option value="${escapeHTML(selectedFromVal)}" selected>${escapeHTML(oldWalletName)} (${oldCurr}) (dihapus)</option>`;
@@ -744,26 +771,33 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
     }
 
     txWalletInput.innerHTML = html;
-    if (targetId) {
-        txWalletInput.value = targetId;
-    }
+    txWalletInput.value = targetId || '';
 
     if (txToWalletInput) {
         // Transfer hanya antar dompet semata uang!
-        const fromCurr = getWalletCurrency(targetId);
-        const eligibleWallets = active.filter(w => w.id !== targetId && getWalletCurrency(w.id) === fromCurr);
+        const fromCurr = targetId ? getWalletCurrency(targetId) : null;
+        const eligibleWallets = targetId
+            ? active.filter(w => w.id !== targetId && getWalletCurrency(w.id) === fromCurr)
+            : active;
 
         let targetToId = selectedToVal;
         if (!targetToId || !eligibleWallets.some(w => w.id === targetToId)) {
-            targetToId = eligibleWallets.length > 0 ? eligibleWallets[0].id : '';
+            if (isEdit && selectedToVal && selectedToVal !== targetId) {
+                targetToId = selectedToVal;
+            } else {
+                targetToId = '';
+            }
         }
 
         let toHtml = '';
-        if (eligibleWallets.length === 0) {
+        if (targetId && eligibleWallets.length === 0) {
             toHtml = `<option value="" disabled selected>Tidak ada dompet lain (${fromCurr})</option>`;
         } else {
-            toHtml = `<option value="" disabled ${!targetToId ? 'selected' : ''}>Pilih dompet tujuan</option>`;
-            if (selectedToVal && !eligibleWallets.some(w => w.id === selectedToVal) && selectedToVal !== targetId) {
+            if (!targetToId || !isEdit) {
+                toHtml += `<option value="" disabled ${!targetToId ? 'selected' : ''}>Pilih dompet</option>`;
+            }
+
+            if (isEdit && selectedToVal && !eligibleWallets.some(w => w.id === selectedToVal) && selectedToVal !== targetId) {
                 const oldWalletName = getWalletName(selectedToVal);
                 const oldCurr = getWalletCurrency(selectedToVal);
                 toHtml += `<option value="${escapeHTML(selectedToVal)}" selected>${escapeHTML(oldWalletName)} (${oldCurr}) (dihapus)</option>`;
@@ -777,12 +811,11 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
         }
 
         txToWalletInput.innerHTML = toHtml;
-        if (targetToId) {
-            txToWalletInput.value = targetToId;
-        }
+        txToWalletInput.value = targetToId || '';
     }
 
     updateFormCurrencyUI();
+    updateSaveButtonState();
 }
 
 function populateWalletFilterOptions() {
@@ -4935,7 +4968,20 @@ async function handleSubmit(e) {
     }
     hideTimeError();
 
-    const selectedWalletId = (txWalletInput && txWalletInput.value) ? txWalletInput.value : DEFAULT_WALLET_ID;
+    let selectedType = 'expense';
+    for (const radio of txTypeInputs) {
+        if (radio.checked) {
+            selectedType = radio.value;
+            break;
+        }
+    }
+
+    const selectedWalletId = (txWalletInput && txWalletInput.value) ? txWalletInput.value : '';
+    if (!selectedWalletId) {
+        showNotification(selectedType === 'transfer' ? 'Pilih dompet asal.' : 'Pilih dompet.', 'warn');
+        return;
+    }
+
     const curr = getWalletCurrency(selectedWalletId);
     const amount = parseAmount(txAmountInput.value, curr);
     if (isNaN(amount) || amount <= 0) {
@@ -4945,16 +4991,6 @@ async function handleSubmit(e) {
 
     // Minta token dalam handler interaksi pengguna bila token sudah habis
     ensureToken();
-
-    let selectedType = 'expense';
-    for (const radio of txTypeInputs) {
-        if (radio.checked) {
-            selectedType = radio.value;
-            break;
-        }
-    }
-
-    localStorage.setItem(LAST_WALLET_KEY, selectedWalletId);
 
     let selectedToWalletId = null;
     let selectedCategory = '';
@@ -6477,22 +6513,13 @@ async function init() {
             if (getSelectedType() === 'transfer' && txToWalletInput) {
                 populateWalletOptions(txWalletInput.value, txToWalletInput.value);
             }
+            updateSaveButtonState();
         });
     }
 
     if (txToWalletInput) {
         txToWalletInput.addEventListener('change', () => {
-            if (getSelectedType() === 'transfer' && txWalletInput) {
-                if (txWalletInput.value === txToWalletInput.value) {
-                    const active = getActiveWallets();
-                    const fromCurr = getWalletCurrency(txToWalletInput.value);
-                    const other = active.find(w => w.id !== txToWalletInput.value && getWalletCurrency(w.id) === fromCurr);
-                    if (other) {
-                        txWalletInput.value = other.id;
-                        updateFormCurrencyUI();
-                    }
-                }
-            }
+            updateSaveButtonState();
         });
     }
 

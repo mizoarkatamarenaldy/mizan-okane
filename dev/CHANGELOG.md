@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Dompet dipilih manual di form transaksi dan transfer
+- Ditambah: Pengaturan status tombol Simpan (`updateSaveButtonState`) yang otomatis nonaktif selama ada dompet yang belum dipilih pada form tambah transaksi (pemasukan/pengeluaran) maupun transfer antar dompet (`js/app.js`, `index.html`, `css/style.css`).
+- Diubah: Pemilihan dompet pada form tambah transaksi dan transfer kini wajib dipilih manual oleh pengguna: kolom dompet (dan ke dompet pada transfer) awalnya kosong dengan teks petunjuk "Pilih dompet", tidak lagi mengingat pilihan dari transaksi/sesi sebelumnya atau filter Riwayat, dan kembali kosong setelah disimpan (`js/app.js`, `index.html`).
+- Diubah: Pada form tambah transaksi, jika pengguna hanya memiliki satu dompet aktif, dompet tersebut langsung otomatis terpilih (`js/app.js`).
+- Diubah: Pada form transfer, pemilihan otomatis dompet dihilangkan sehingga dompet asal dan tujuan harus dipilih manual secara mandiri dengan aturan validasi antar dompet yang sama tetap terjaga (`js/app.js`).
+- Diubah: Pada form edit transaksi dan edit transfer lama, dompet aslinya tetap ditampilkan dan tidak dapat dikosongkan (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v57` (`sw.js`).
+- Diubah: Mencentang item "Dompet dipilih manual di form transaksi dan transfer" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Tentang Pengembang
 - Ditambah: Baris menu baru "Tentang Pengembang" di Pengaturan pada kartu Tentang yang mengarahkan ke web portofolio pembuat aplikasi `https://mizoarkatamarenaldy.github.io` (`index.html`).
 - Ditambah: Penanganan navigasi portofolio pengembang `openDeveloperPortfolio` di `js/app.js` yang membuka URL di tab baru dengan `rel="noopener"` pada web browser, serta memanfaatkan plugin Capacitor `@capacitor/app-launcher` (dengan fallback `@capacitor/browser` dan browser sistem) agar terbuka di browser bawaan HP di luar aplikasi pada mode APK Android.
