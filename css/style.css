@@ -1401,6 +1401,13 @@ p {
     border-bottom: 1px solid var(--border);
 }
 
+.list-header-title-wrap {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+}
+
 .list-header h2 {
     margin: 0;
     font-size: var(--font-size-card-title, 16px);
@@ -1408,9 +1415,44 @@ p {
     color: var(--text);
 }
 
+.riwayat-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.riwayat-summary.is-multiline {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.riwayat-summary-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.riwayat-summary-income {
+    color: var(--income);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+.riwayat-summary-expense {
+    color: var(--expense);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
 .list-filter {
     display: flex;
     align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .filter-select {
@@ -1422,6 +1464,7 @@ p {
     color: var(--text);
     min-height: 44px;
     width: auto;
+    max-width: 100%;
 }
 
 .tx-list {

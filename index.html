@@ -165,8 +165,18 @@
         <main id="page-riwayat" class="page-view hidden" role="tabpanel" aria-label="Riwayat Transaksi">
             <section class="list-section">
                 <div class="list-header">
-                    <h2>Riwayat Transaksi</h2>
+                    <div class="list-header-title-wrap">
+                        <h2>Riwayat Transaksi</h2>
+                        <div id="riwayat-summary" class="riwayat-summary" aria-label="Ringkasan pemasukan dan pengeluaran">
+                            <span class="riwayat-summary-income tabular-nums">+Rp 0</span>
+                            <span class="riwayat-summary-expense tabular-nums">−Rp 0</span>
+                        </div>
+                    </div>
                     <div class="list-filter">
+                        <label for="filter-month" class="sr-only">Filter Bulan</label>
+                        <select id="filter-month" class="filter-select" aria-label="Filter bulan">
+                            <option value="all">Semua bulan</option>
+                        </select>
                         <label for="filter-wallet" class="sr-only">Filter Dompet</label>
                         <select id="filter-wallet" class="filter-select" aria-label="Filter dompet">
                             <option value="all">Semua Dompet</option>

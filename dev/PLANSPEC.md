@@ -417,3 +417,27 @@ Data:
 Cek manual:
 - Klik kartu Cash: riwayat hanya transaksi Cash. Klik lagi: semua dompet.
 - Lakukan transfer Cash ke Bank: transaksi muncul di riwayat Cash dan Bank.
+
+## Filter bulan di Riwayat
+
+Tujuan: melihat riwayat per bulan, dengan ringkasan pemasukan dan pengeluaran bulan itu.
+
+Tempat dan tampilan:
+- Dropdown bulan di sebelah dropdown "Semua Dompet" di Riwayat Transaksi, dengan opsi "Semua bulan".
+- Ringkasan Pemasukan (hijau) dan Pengeluaran (merah) di samping judul Riwayat Transaksi.
+
+Aturan:
+- Bulan dipakai bersama dengan navigasi bulan di kartu saldo Beranda: mengganti bulan di salah satu tempat mengubah yang lain. Default bulan yang sedang aktif.
+- Opsi "Semua bulan" hanya berlaku di Riwayat. Memilihnya tidak mengubah apa pun di Beranda, karena Beranda hanya dashboard. Bulan di kartu saldo Beranda tetap bulan terakhir yang dipilih.
+- Ringkasan mengikuti filter bulan dan filter dompet sekaligus.
+- Jika lebih dari satu mata uang, ringkasan ditampilkan per mata uang.
+- Transfer tidak dihitung sebagai pemasukan atau pengeluaran.
+- Angka ringkasan harus sama dengan angka di kartu saldo untuk bulan dan dompet yang sama.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Pilihan filter tidak disimpan.
+
+Cek manual:
+- Pilih Oktober 2026: hanya transaksi Oktober tampil, ringkasan sama dengan kartu saldo Oktober.
+- Pilih "Semua bulan": semua transaksi tampil.
+- Pilih "Semua bulan" lalu buka Beranda: kartu saldo tetap menampilkan bulan sebelumnya dan tidak berubah.

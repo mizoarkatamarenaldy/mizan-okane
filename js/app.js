@@ -50,6 +50,8 @@ const btnFormBack = document.getElementById('btn-form-back');
 const settingsSyncStatusEl = document.getElementById('settings-sync-status');
 
 const filterWalletSelect = document.getElementById('filter-wallet');
+const filterMonthSelect = document.getElementById('filter-month');
+const riwayatSummaryContainer = document.getElementById('riwayat-summary');
 const berandaMonthLabel = document.getElementById('beranda-month-label');
 const btnBerandaPrevMonth = document.getElementById('btn-beranda-prev-month');
 const btnBerandaNextMonth = document.getElementById('btn-beranda-next-month');
@@ -162,6 +164,7 @@ let pendingSubcategoryDelete = null;
 let editingBudgetCategory = null;
 let editingWalletId = null;
 let currentWalletFilter = 'all';
+let currentHistoryMonthFilter = '';
 const LAST_WALLET_KEY = 'mizan-okane:last-wallet-id';
 let currentTimeFormat = DEFAULT_TIME_FORMAT;
 let currentChartType = 'expense';
@@ -3022,6 +3025,194 @@ export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurre
     };
 }
 
+export function getRiwayatMonthSummary(transactions, monthFilter, walletFilter = 'all', activeCurrencies = ['IDR'], wallets = currentWallets) {
+    const incomeByCurrency = new Map();
+    const expenseByCurrency = new Map();
+
+    for (const c of activeCurrencies) {
+        incomeByCurrency.set(c, 0);
+        expenseByCurrency.set(c, 0);
+    }
+
+    const walletList = Array.isArray(wallets) ? wallets : (currentWallets || []);
+    const walletMap = new Map();
+    for (const w of walletList) {
+        if (w && typeof w.id === 'string') {
+            walletMap.set(w.id, w);
+        }
+    }
+
+    let targetCurrencies = [];
+    if (walletFilter !== 'all') {
+        const targetWallet = walletMap.get(walletFilter);
+        const wCurr = (targetWallet && targetWallet.currency) || 'IDR';
+        targetCurrencies = [wCurr];
+        if (!incomeByCurrency.has(wCurr)) {
+            incomeByCurrency.set(wCurr, 0);
+            expenseByCurrency.set(wCurr, 0);
+        }
+    } else {
+        targetCurrencies = [...activeCurrencies];
+    }
+
+    for (const tx of transactions || []) {
+        if (tx.deleted || !(tx.amount > 0) || !tx.date) continue;
+        if (tx.type !== 'income' && tx.type !== 'expense') continue;
+
+        if (walletFilter !== 'all') {
+            const wId = tx.walletId || DEFAULT_WALLET_ID;
+            if (wId !== walletFilter) continue;
+        }
+
+        if (monthFilter && monthFilter !== 'all') {
+            const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
+            if (!match) continue;
+            const txMonth = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+            if (txMonth !== monthFilter) continue;
+        }
+
+        const curr = getTransactionCurrency(tx);
+        if (!targetCurrencies.includes(curr) && walletFilter === 'all') {
+            targetCurrencies.push(curr);
+        }
+
+        if (tx.type === 'income') {
+            incomeByCurrency.set(curr, (incomeByCurrency.get(curr) || 0) + tx.amount);
+        } else if (tx.type === 'expense') {
+            expenseByCurrency.set(curr, (expenseByCurrency.get(curr) || 0) + tx.amount);
+        }
+    }
+
+    for (const [c, val] of incomeByCurrency.entries()) {
+        incomeByCurrency.set(c, c === 'USD' ? Math.round(val * 100) / 100 : Math.round(val));
+    }
+    for (const [c, val] of expenseByCurrency.entries()) {
+        expenseByCurrency.set(c, c === 'USD' ? Math.round(val * 100) / 100 : Math.round(val));
+    }
+
+    return {
+        targetCurrencies,
+        incomeByCurrency,
+        expenseByCurrency
+    };
+}
+
+export function populateMonthFilterOptions() {
+    if (!filterMonthSelect) return;
+    if (!selectedBerandaMonth) {
+        selectedBerandaMonth = getLocalYearMonthString();
+    }
+    if (!currentHistoryMonthFilter) {
+        currentHistoryMonthFilter = selectedBerandaMonth;
+    }
+
+    const currentMonthStr = getLocalYearMonthString();
+    let minMonth = selectedBerandaMonth < currentMonthStr ? selectedBerandaMonth : currentMonthStr;
+    let maxMonth = selectedBerandaMonth > currentMonthStr ? selectedBerandaMonth : currentMonthStr;
+
+    // Minimal sediakan 12 bulan terakhir (11 bulan ke belakang dari bulan ini)
+    const [curY, curM] = currentMonthStr.split('-').map(Number);
+    let defaultMinY = curY;
+    let defaultMinM = curM - 11;
+    while (defaultMinM < 1) {
+        defaultMinM += 12;
+        defaultMinY--;
+    }
+    const defaultMinMonthStr = `${defaultMinY}-${String(defaultMinM).padStart(2, '0')}`;
+    if (defaultMinMonthStr < minMonth) {
+        minMonth = defaultMinMonthStr;
+    }
+
+    for (const tx of currentTransactions || []) {
+        if (tx.deleted || !tx.date) continue;
+        const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
+        if (!match) continue;
+        const txMonth = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+        if (txMonth < minMonth) minMonth = txMonth;
+        if (txMonth > maxMonth) maxMonth = txMonth;
+    }
+
+    const [minY, minM] = minMonth.split('-').map(Number);
+    const [maxY, maxM] = maxMonth.split('-').map(Number);
+
+    let html = `<option value="all">Semua bulan</option>`;
+
+    let currY = maxY;
+    let currM = maxM;
+    while (currY > minY || (currY === minY && currM >= minM)) {
+        const val = `${currY}-${String(currM).padStart(2, '0')}`;
+        const monthName = INDO_MONTHS_FULL[currM - 1] || '';
+        const label = `${monthName} ${currY}`;
+        html += `<option value="${val}">${escapeHTML(label)}</option>`;
+        currM--;
+        if (currM < 1) {
+            currM = 12;
+            currY--;
+        }
+    }
+
+    if (filterMonthSelect.innerHTML !== html) {
+        filterMonthSelect.innerHTML = html;
+    }
+
+    filterMonthSelect.value = currentHistoryMonthFilter;
+    if (filterMonthSelect.value !== currentHistoryMonthFilter) {
+        filterMonthSelect.value = 'all';
+        currentHistoryMonthFilter = 'all';
+    }
+}
+
+export function renderRiwayatSummary() {
+    if (!riwayatSummaryContainer) return;
+
+    const activeWallets = getActiveWallets();
+    const activeCurrencies = [];
+    if (activeWallets.some(w => (w.currency || 'IDR') === 'IDR')) activeCurrencies.push('IDR');
+    if (activeWallets.some(w => w.currency === 'JPY')) activeCurrencies.push('JPY');
+    if (activeWallets.some(w => w.currency === 'USD')) activeCurrencies.push('USD');
+    if (activeCurrencies.length === 0) activeCurrencies.push('IDR');
+
+    const { targetCurrencies, incomeByCurrency, expenseByCurrency } =
+        getRiwayatMonthSummary(currentTransactions, currentHistoryMonthFilter, currentWalletFilter, activeCurrencies, currentWallets);
+
+    if (targetCurrencies.length <= 1) {
+        const c = targetCurrencies[0] || 'IDR';
+        let inc = incomeByCurrency.get(c) || 0;
+        let exp = expenseByCurrency.get(c) || 0;
+        if (c === 'USD') {
+            inc = Math.round(inc * 100) / 100;
+            exp = Math.round(exp * 100) / 100;
+        } else {
+            inc = Math.round(inc);
+            exp = Math.round(exp);
+        }
+        riwayatSummaryContainer.className = 'riwayat-summary';
+        riwayatSummaryContainer.innerHTML = `
+            <span class="riwayat-summary-income tabular-nums" aria-label="Pemasukan +${escapeHTML(currencyFormatter.format(inc, c))}">+${escapeHTML(currencyFormatter.format(inc, c))}</span>
+            <span class="riwayat-summary-expense tabular-nums" aria-label="Pengeluaran −${escapeHTML(currencyFormatter.format(exp, c))}">−${escapeHTML(currencyFormatter.format(exp, c))}</span>
+        `;
+    } else {
+        riwayatSummaryContainer.className = 'riwayat-summary is-multiline';
+        riwayatSummaryContainer.innerHTML = targetCurrencies.map(c => {
+            let inc = incomeByCurrency.get(c) || 0;
+            let exp = expenseByCurrency.get(c) || 0;
+            if (c === 'USD') {
+                inc = Math.round(inc * 100) / 100;
+                exp = Math.round(exp * 100) / 100;
+            } else {
+                inc = Math.round(inc);
+                exp = Math.round(exp);
+            }
+            return `
+                <div class="riwayat-summary-row">
+                    <span class="riwayat-summary-income tabular-nums" aria-label="Pemasukan +${escapeHTML(currencyFormatter.format(inc, c))}">+${escapeHTML(currencyFormatter.format(inc, c))}</span>
+                    <span class="riwayat-summary-expense tabular-nums" aria-label="Pengeluaran −${escapeHTML(currencyFormatter.format(exp, c))}">−${escapeHTML(currencyFormatter.format(exp, c))}</span>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
 function shiftBerandaMonth(delta) {
     if (!selectedBerandaMonth) {
         selectedBerandaMonth = getLocalYearMonthString();
@@ -3046,7 +3237,8 @@ function shiftBerandaMonth(delta) {
     } else {
         selectedBerandaMonth = nextMonthStr;
     }
-    renderSummaryCard();
+    currentHistoryMonthFilter = selectedBerandaMonth;
+    render();
 }
 
 function renderSummaryCard() {
@@ -3178,7 +3370,15 @@ function render() {
         }
     }
 
+    populateMonthFilterOptions();
+
     const filteredTx = currentTransactions.filter(tx => {
+        if (currentHistoryMonthFilter && currentHistoryMonthFilter !== 'all') {
+            const match = tx.date ? tx.date.match(/^(\d{4})-(\d{1,2})/) : null;
+            if (!match) return false;
+            const txMonth = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+            if (txMonth !== currentHistoryMonthFilter) return false;
+        }
         if (currentWalletFilter === 'all') return true;
         if (tx.type === 'transfer') {
             return (tx.walletId || DEFAULT_WALLET_ID) === currentWalletFilter || tx.toWalletId === currentWalletFilter;
@@ -3281,6 +3481,8 @@ function render() {
             }
         }
     }
+
+    renderRiwayatSummary();
 
     if (recentTxListContainer) {
         recentTxListContainer.innerHTML = '';
@@ -5522,6 +5724,7 @@ export async function performFillDummy() {
         await activateSampleData();
         try { localStorage.removeItem(LAST_WALLET_KEY); } catch (e) {}
         currentWalletFilter = 'all';
+        currentHistoryMonthFilter = '';
         selectedBerandaMonth = '';
         selectedDonutMonth = '';
         activeDonutCategory = null;
@@ -5541,6 +5744,7 @@ export async function performExitDummy() {
         await clearSampleData();
         try { localStorage.removeItem(LAST_WALLET_KEY); } catch (e) {}
         currentWalletFilter = 'all';
+        currentHistoryMonthFilter = '';
         selectedBerandaMonth = '';
         selectedDonutMonth = '';
         activeDonutCategory = null;
@@ -5649,6 +5853,7 @@ export async function performDeleteAllData() {
         applyTimeFormatUI(currentTimeFormat);
         applyThemeUI('system');
         currentWalletFilter = 'all';
+        currentHistoryMonthFilter = '';
         currentChartType = 'expense';
         currentDonutType = 'expense';
         selectedBerandaMonth = '';
@@ -5778,6 +5983,7 @@ async function init() {
         selectedBudgetMonth = getLocalYearMonthString();
         selectedDonutMonth = getLocalYearMonthString();
         selectedTimbanganMonth = getLocalYearMonthString();
+        currentHistoryMonthFilter = selectedBerandaMonth;
         initDateSelectOptions();
         init24TimeSelectOptions();
         resetForm(); // Set default date, kategori, dan dompet
@@ -5898,6 +6104,17 @@ async function init() {
     if (filterWalletSelect) {
         filterWalletSelect.addEventListener('change', () => {
             currentWalletFilter = filterWalletSelect.value;
+            render();
+        });
+    }
+
+    if (filterMonthSelect) {
+        filterMonthSelect.addEventListener('change', () => {
+            const val = filterMonthSelect.value;
+            currentHistoryMonthFilter = val;
+            if (val !== 'all') {
+                selectedBerandaMonth = val;
+            }
             render();
         });
     }

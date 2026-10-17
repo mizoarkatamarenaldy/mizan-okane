@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Filter bulan di Riwayat
+- Ditambah: Dropdown filter bulan (`filter-month`) di samping dropdown dompet pada halaman Riwayat Transaksi dengan opsi "Semua bulan" dan daftar bulan berurutan menurun (`index.html`, `js/app.js`).
+- Ditambah: Ringkasan pemasukan (warna hijau) dan pengeluaran (warna merah) di samping judul Riwayat Transaksi (`riwayat-summary`) yang mendukung tampilan per mata uang (`index.html`, `js/app.js`, `css/style.css`).
+- Ditambah: Fungsi `getRiwayatMonthSummary`, `populateMonthFilterOptions`, dan `renderRiwayatSummary` di `js/app.js` untuk menghitung dan menampilkan ringkasan riwayat berdasarkan filter bulan dan dompet sekaligus.
+- Diubah: Pemilihan bulan di Riwayat terhubung bersama navigasi bulan kartu saldo Beranda: mengubah bulan di salah satu tempat memperbarui tempat lainnya, sedangkan memilih opsi "Semua bulan" hanya berlaku di Riwayat tanpa mengubah dashboard Beranda (`js/app.js`).
+- Diubah: Penyaringan transaksi pada Riwayat di `render()` kini menerapkan filter bulan terpilih (`currentHistoryMonthFilter`) dan filter dompet (`currentWalletFilter`) (`js/app.js`).
+- Diubah: Penyesuaian tata letak dan tipografi header Riwayat pada `.list-header`, `.list-header-title-wrap`, `.riwayat-summary`, dan `.list-filter` sesuai aturan `dev/DESIGN.md` (`css/style.css`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v51` (`sw.js`).
+- Diubah: Mencentang item "Filter bulan di Riwayat" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Klik dompet untuk filter riwayat
 - Ditambah: Interaktivitas kartu dompet di Beranda yang dapat diklik untuk memfilter daftar transaksi di halaman Riwayat sesuai dompet yang dipilih (`js/app.js`, `css/style.css`).
 - Ditambah: Fungsi `handleWalletCardClick` di `js/app.js` untuk mengatur nilai dropdown `filter-wallet` di Riwayat, menyinkronkan status filter, dan berpindah ke tab Riwayat.
