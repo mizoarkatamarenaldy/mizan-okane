@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Budget per sub kategori
+- Ditambah: Dukungan pengaturan budget per sub kategori di formulir setel budget dan daftar budget Pengaturan, lengkap dengan pemformatan nominal, edit inline, dan konfirmasi hapus khusus sub kategori (`index.html`, `js/app.js`).
+- Ditambah: Penataan visual sub kategori ber-budget di Beranda dan Pengaturan yang tampil menjorok di bawah kategori induknya tanpa pegangan geser (`css/style.css`, `js/app.js`).
+- Ditambah: Struktur data `subcategories` pada skema budget di IndexedDB dan data contoh dengan validasi sanitasi, penanganan konflik yang terbaru menang, sinkronisasi Google Drive, serta ekspor/impor cadangan JSON yang kompatibel dengan versi terdahulu (`js/db.js`, `js/app.js`).
+- Diubah: Validasi penambahan, perubahan, dan penghapusan budget induk maupun sub kategori: sub kategori hanya bisa diberi budget bila induknya memiliki budget, dan total budget sub kategori tidak boleh melebihi budget induk (`js/app.js`).
+- Diubah: Perhitungan pengeluaran bulanan Beranda untuk menghitung transaksi sub kategori pada bar sub kategori dan bar induk secara akurat (`js/app.js`).
+- Diubah: Sinkronisasi otomatis penghapusan dan pengubahan nama sub kategori atau kategori dengan data budget terkait (`js/app.js`).
+- Diubah: Mencentang item "Budget per sub kategori" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Geser urutan budget
 - Ditambah: Pegangan geser berikon garis tiga (≡, `.btn-drag-handle`) pada setiap baris daftar budget per kategori di Pengaturan untuk mengatur urutan budget secara manual (`js/app.js`).
 - Ditambah: Mekanisme geser urutan budget menggunakan `enableListDragReorder` yang memperbarui urutan kategori pengeluaran pada IndexedDB, data demo, dan sinkronisasi Google Drive tanpa mengubah struktur data (`js/app.js`).

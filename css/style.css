@@ -1246,6 +1246,12 @@ p {
     border-bottom: 1px solid var(--border);
 }
 
+.budget-item.budget-item-subcategory {
+    margin-left: 14px;
+    padding-left: 10px;
+    border-left: 2px solid var(--border);
+}
+
 .budget-item:last-child {
     border-bottom: none;
     padding-bottom: 0;
@@ -3254,7 +3260,8 @@ p {
 
 .btn-edit-cat,
 .btn-edit-wallet,
-.btn-edit-budget {
+.btn-edit-budget,
+.btn-edit-sub-budget {
     background: transparent;
     color: var(--text-secondary);
     border: 1px solid var(--border);
@@ -3269,7 +3276,8 @@ p {
 
 .btn-edit-cat:hover,
 .btn-edit-wallet:hover,
-.btn-edit-budget:hover {
+.btn-edit-budget:hover,
+.btn-edit-sub-budget:hover {
     background: var(--surface);
     color: var(--text);
     border-color: var(--border-strong);
@@ -3278,6 +3286,7 @@ p {
 .btn-delete-cat,
 .btn-delete-wallet,
 .btn-delete-budget,
+.btn-delete-sub-budget,
 .btn-item-danger {
     background: transparent;
     color: var(--expense);
@@ -3294,6 +3303,7 @@ p {
 .btn-delete-cat:hover,
 .btn-delete-wallet:hover,
 .btn-delete-budget:hover,
+.btn-delete-sub-budget:hover,
 .btn-item-danger:hover {
     background: rgba(255, 69, 58, 0.12);
     border-color: var(--expense);

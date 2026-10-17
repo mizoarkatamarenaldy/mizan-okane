@@ -187,6 +187,12 @@ export const SAMPLE_BUDGETS = {
     'Belanja': 1500000,
     'Hiburan': 600000
   },
+  subcategories: {
+    'Makan': {
+      'Restoran': 1200000,
+      'Kopi & Camilan': 300000
+    }
+  },
   updatedAt: 1700000000000
 };
 
@@ -533,6 +539,7 @@ export function saveCategories(categories) {
 
 export const DEFAULT_BUDGETS = {
   items: {},
+  subcategories: {},
   updatedAt: 0
 };
 
@@ -543,10 +550,11 @@ export function getRealBudgets() {
     request.onsuccess = (event) => {
       const stored = event.target.result;
       if (stored && typeof stored === 'object' && stored.items && typeof stored.items === 'object' && !Array.isArray(stored.items)) {
-        resolve(stored);
+        resolve(sanitizeBudgets(stored));
       } else {
         const initial = {
           items: {},
+          subcategories: {},
           updatedAt: 0
         };
         const writeTx = db.transaction([META_STORE], 'readwrite');
@@ -567,9 +575,9 @@ export function getBudgets() {
       request.onsuccess = (event) => {
         const stored = event.target.result;
         if (stored && typeof stored === 'object' && stored.items && typeof stored.items === 'object') {
-          resolve(stored);
+          resolve(sanitizeBudgets(stored));
         } else {
-          resolve(JSON.parse(JSON.stringify(SAMPLE_BUDGETS)));
+          resolve(sanitizeBudgets(SAMPLE_BUDGETS));
         }
       };
       request.onerror = (event) => reject(event.target.error);
@@ -578,7 +586,7 @@ export function getBudgets() {
   return getRealBudgets();
 }
 
-function sanitizeBudgets(budgets) {
+export function sanitizeBudgets(budgets) {
   const cleanItems = {};
   if (budgets && typeof budgets.items === 'object' && !Array.isArray(budgets.items)) {
     for (const [k, v] of Object.entries(budgets.items)) {
@@ -588,8 +596,26 @@ function sanitizeBudgets(budgets) {
       }
     }
   }
+  const cleanSubcategories = {};
+  if (budgets && typeof budgets.subcategories === 'object' && !Array.isArray(budgets.subcategories)) {
+    for (const [cat, subs] of Object.entries(budgets.subcategories)) {
+      if (subs && typeof subs === 'object' && !Array.isArray(subs)) {
+        const cleanSubs = {};
+        for (const [subName, subVal] of Object.entries(subs)) {
+          const num = Number(subVal);
+          if (subName && Number.isFinite(num) && num > 0) {
+            cleanSubs[subName] = Math.round(num);
+          }
+        }
+        if (Object.keys(cleanSubs).length > 0) {
+          cleanSubcategories[cat] = cleanSubs;
+        }
+      }
+    }
+  }
   return {
     items: cleanItems,
+    subcategories: cleanSubcategories,
     updatedAt: typeof budgets?.updatedAt === 'number' ? budgets.updatedAt : Date.now()
   };
 }
@@ -812,6 +838,7 @@ export async function resetDatabase() {
   initialCategories.updatedAt = 0;
   const initialBudgets = {
     items: {},
+    subcategories: {},
     updatedAt: 0
   };
   const initialWallets = sanitizeWallets(DEFAULT_WALLETS).map(w => ({

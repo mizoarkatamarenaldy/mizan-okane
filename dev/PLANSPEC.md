@@ -976,3 +976,42 @@ Cek manual:
 - Kondisi awal: ada kategori tanpa budget di antara A dan B. Aksi: geser B ke atas A. Hasil: kategori tanpa budget tidak muncul di daftar budget dan tidak rusak.
 - Kondisi awal: urutan sudah digeser. Aksi: tutup lalu buka lagi aplikasi, atau sinkron di perangkat lain. Hasil: urutan tetap sama.
 - Aksi: geser lewat layar sentuh di HP, bukan hanya mouse. Hasil: geser berjalan lancar dan halaman tidak ikut tergulung.
+
+## Budget per sub kategori
+
+Tujuan: Pengguna bisa mengatur budget untuk sub kategori, sebagai bagian dari budget kategori induknya, supaya pengeluaran bisa dipantau lebih rinci.
+
+Tempat dan tampilan:
+- Pengaturan budget sub kategori ada di tempat yang sama dengan pengaturan budget kategori, dengan cara pengisian yang sama.
+- Di daftar budget, sub kategori yang punya budget tampil tepat di bawah kategori induknya, dengan sedikit menjorok ke dalam. Bentuk bar dan angka sama seperti budget kategori.
+- Sub kategori tidak punya pegangan geser. Urutan sub kategori memakai urutan yang sudah ada.
+- Pesan galat memakai gaya pesan galat yang sudah ada di aplikasi. Teks pesan:
+  - Kalau total budget sub kategori melebihi budget induk: "Total budget sub kategori tidak boleh melebihi budget kategori."
+  - Kalau kategori induk belum punya budget: "Atur budget kategori dulu."
+- Tampilan baru wajib mengikuti dev/DESIGN.md.
+
+Aturan:
+- Budget sub kategori bersifat opsional.
+- Sub kategori hanya bisa diberi budget kalau kategori induknya sudah punya budget.
+- Total budget semua sub kategori dalam satu induk tidak boleh melebihi budget induk. Aturan ini dicek saat menyimpan budget sub kategori, saat mengubah budget induk, dan saat menghapus budget induk.
+- Kalau pengguna menurunkan atau menghapus budget induk sampai di bawah total budget sub kategorinya, simpan ditolak dengan pesan galat di atas. Jangan ubah atau hapus budget sub kategori diam-diam.
+- Pengeluaran sub kategori tetap terhitung di budget induk. Budget sub kategori hanya menghitung transaksi yang memakai sub kategori itu. Transaksi induk tanpa sub kategori hanya terhitung di budget induk.
+- Kalau sub kategori dihapus, budget sub kategori itu ikut terhapus.
+- Perlakuan lain (berlaku sama tiap bulan, penanganan mata uang, transfer tidak dihitung) mengikuti budget kategori yang sudah ada.
+- Fitur ini sengaja TIDAK menambah rollover, tidak menambah fitur geser untuk sub kategori, dan tidak mengubah cara budget kategori dihitung.
+
+Data:
+- Ada tambahan data budget pada sub kategori. Ikuti cara budget kategori disimpan, termasuk aturan konflik "yang terbaru menang" dan penanda terhapus.
+- Data lama tanpa budget sub kategori harus tetap valid dan terbaca, tanpa migrasi paksa.
+- Budget sub kategori ikut sinkron Drive, ekspor JSON, impor JSON, backup lengkap, dan reset setelan pabrik, sama seperti budget kategori.
+- Impor JSON dari versi lama (tanpa budget sub kategori) tetap berhasil.
+
+Cek manual:
+- Kondisi awal: kategori Makan punya budget 1.000.000, sub kategori Kopi belum punya budget. Aksi: atur budget Kopi 200.000. Hasil: tersimpan, tampil di bawah Makan.
+- Kondisi awal: Makan 1.000.000, Kopi 600.000. Aksi: atur budget sub kategori lain (Snack) 500.000. Hasil: ditolak, muncul pesan "Total budget sub kategori tidak boleh melebihi budget kategori."
+- Kondisi awal: Makan 1.000.000, Kopi 200.000. Aksi: ubah budget Makan jadi 100.000. Hasil: ditolak dengan pesan galat, budget Kopi tidak berubah.
+- Kondisi awal: kategori Transport belum punya budget. Aksi: atur budget sub kategori di bawah Transport. Hasil: ditolak dengan pesan "Atur budget kategori dulu."
+- Kondisi awal: Makan punya budget, Kopi punya budget. Aksi: catat pengeluaran 50.000 di sub kategori Kopi. Hasil: terhitung di bar Kopi dan di bar Makan.
+- Aksi: catat pengeluaran di Makan tanpa sub kategori. Hasil: terhitung hanya di bar Makan.
+- Aksi: hapus sub kategori Kopi. Hasil: budget Kopi hilang dari daftar budget.
+- Aksi: ekspor JSON lalu impor lagi di aplikasi bersih. Hasil: budget sub kategori kembali utuh. Impor file JSON lama tanpa budget sub kategori tetap berhasil.

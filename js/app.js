@@ -194,6 +194,8 @@ let editingSubcategory = null;
 let addingSubcategoryFor = null;
 let pendingSubcategoryDelete = null;
 let editingBudgetCategory = null;
+let editingBudgetSubcategory = null;
+let pendingBudgetSubcategoryDelete = null;
 let editingWalletId = null;
 let currentWalletFilter = 'all';
 let currentHistoryMonthFilter = '';
@@ -271,6 +273,7 @@ const DONUT_INCOME_LIGHT = ['#24A574', '#4A9EFF', '#F5A623', '#FF453A', '#6B6D78
 let selectedBudgetMonth = '';
 let currentBudgets = {
     items: {},
+    subcategories: {},
     updatedAt: 0
 };
 let currentCategories = {
@@ -5124,6 +5127,25 @@ async function handleSaveCategoryName(type, oldName, newName) {
         currentCategories.updatedAt = Date.now();
         try {
             await saveCategories(currentCategories);
+
+            if (type === 'expense' && currentBudgets) {
+                let budgetChanged = false;
+                if (currentBudgets.items && currentBudgets.items[oldName] !== undefined) {
+                    currentBudgets.items[newName] = currentBudgets.items[oldName];
+                    delete currentBudgets.items[oldName];
+                    budgetChanged = true;
+                }
+                if (currentBudgets.subcategories && currentBudgets.subcategories[oldName]) {
+                    currentBudgets.subcategories[newName] = currentBudgets.subcategories[oldName];
+                    delete currentBudgets.subcategories[oldName];
+                    budgetChanged = true;
+                }
+                if (budgetChanged) {
+                    currentBudgets.updatedAt = Date.now();
+                    await saveBudgets(currentBudgets);
+                }
+            }
+
             editingCategory = null;
             renderCategorySettings();
             renderBudgetSettings();
@@ -5207,6 +5229,23 @@ async function performDeleteCategory(type, name) {
 
     try {
         await saveCategories(currentCategories);
+
+        if (type === 'expense' && currentBudgets) {
+            let budgetChanged = false;
+            if (currentBudgets.items && currentBudgets.items[name] !== undefined) {
+                delete currentBudgets.items[name];
+                budgetChanged = true;
+            }
+            if (currentBudgets.subcategories && currentBudgets.subcategories[name]) {
+                delete currentBudgets.subcategories[name];
+                budgetChanged = true;
+            }
+            if (budgetChanged) {
+                currentBudgets.updatedAt = Date.now();
+                await saveBudgets(currentBudgets);
+            }
+        }
+
         renderCategorySettings();
         renderBudgetSettings();
         renderBudgetSection();
@@ -5301,6 +5340,14 @@ async function handleSaveSubcategoryName(type, cat, oldName, newName) {
 
         try {
             await saveCategories(currentCategories);
+
+            if (type === 'expense' && currentBudgets?.subcategories?.[cat]?.[oldName] !== undefined) {
+                currentBudgets.subcategories[cat][name] = currentBudgets.subcategories[cat][oldName];
+                delete currentBudgets.subcategories[cat][oldName];
+                currentBudgets.updatedAt = Date.now();
+                await saveBudgets(currentBudgets);
+            }
+
             let txChanged = false;
             const now = Date.now();
             for (const tx of currentTransactions) {
@@ -5314,6 +5361,8 @@ async function handleSaveSubcategoryName(type, cat, oldName, newName) {
 
             editingSubcategory = null;
             renderCategorySettings();
+            renderBudgetSettings();
+            renderBudgetSection();
             if (txChanged) {
                 render();
             }
@@ -5334,6 +5383,7 @@ function handleDeleteSubcategoryPrompt(type, cat, subName) {
     pendingCategoryDelete = null;
     pendingSubcategoryDelete = { type, cat, name: subName };
     pendingBudgetDelete = null;
+    pendingBudgetSubcategoryDelete = null;
     pendingWalletDelete = null;
     pendingLogout = false;
     pendingFillDummy = false;
@@ -5360,6 +5410,15 @@ async function performDeleteSubcategory(type, cat, subName) {
     try {
         await saveCategories(currentCategories);
 
+        if (type === 'expense' && currentBudgets?.subcategories?.[cat]?.[subName] !== undefined) {
+            delete currentBudgets.subcategories[cat][subName];
+            if (Object.keys(currentBudgets.subcategories[cat]).length === 0) {
+                delete currentBudgets.subcategories[cat];
+            }
+            currentBudgets.updatedAt = Date.now();
+            await saveBudgets(currentBudgets);
+        }
+
         let txChanged = false;
         const now = Date.now();
         for (const tx of currentTransactions) {
@@ -5372,6 +5431,8 @@ async function performDeleteSubcategory(type, cat, subName) {
         }
 
         renderCategorySettings();
+        renderBudgetSettings();
+        renderBudgetSection();
         if (txChanged) {
             render();
         }
@@ -5660,6 +5721,7 @@ function getLocalYearMonthString(d = new Date()) {
 
 export function getActiveMonthlyExpenses(transactions, targetMonthKey, currency = 'IDR') {
     const categoryTotals = new Map();
+    const subcategoryTotals = new Map();
     let totalExpense = 0;
     for (const tx of transactions || []) {
         if (tx.type !== 'expense' || tx.deleted || !(tx.amount > 0) || !tx.date) continue;
@@ -5672,14 +5734,22 @@ export function getActiveMonthlyExpenses(transactions, targetMonthKey, currency 
         if (key === targetMonthKey) {
             const cat = tx.category || 'Lainnya';
             categoryTotals.set(cat, (categoryTotals.get(cat) || 0) + tx.amount);
+            if (tx.subcategory && typeof tx.subcategory === 'string' && tx.subcategory.trim()) {
+                const sub = tx.subcategory.trim();
+                const subKey = `${cat}|||${sub}`;
+                subcategoryTotals.set(subKey, (subcategoryTotals.get(subKey) || 0) + tx.amount);
+            }
             totalExpense += tx.amount;
         }
     }
     for (const [cat, val] of categoryTotals.entries()) {
         categoryTotals.set(cat, currency === 'USD' ? Math.round(val * 100) / 100 : Math.round(val));
     }
+    for (const [subKey, val] of subcategoryTotals.entries()) {
+        subcategoryTotals.set(subKey, currency === 'USD' ? Math.round(val * 100) / 100 : Math.round(val));
+    }
     totalExpense = currency === 'USD' ? Math.round(totalExpense * 100) / 100 : Math.round(totalExpense);
-    return { categoryTotals, totalExpense };
+    return { categoryTotals, subcategoryTotals, totalExpense };
 }
 
 function renderBudgetSection() {
@@ -5747,7 +5817,7 @@ function renderBudgetSection() {
     const orphanCats = budgetedCats.filter(cat => !activeExpenseList.includes(cat)).sort();
     orderedCats.push(...orphanCats);
 
-    const { categoryTotals } = getActiveMonthlyExpenses(currentTransactions, selectedBudgetMonth, 'IDR');
+    const { categoryTotals, subcategoryTotals } = getActiveMonthlyExpenses(currentTransactions, selectedBudgetMonth, 'IDR');
 
     let totalBudget = 0;
     let totalTerpakai = 0;
@@ -5793,6 +5863,56 @@ function renderBudgetSection() {
                 </div>
             </div>
         `;
+
+        const definedSubs = getSubcategoriesFor('expense', cat);
+        const subBudgetMap = (currentBudgets && currentBudgets.subcategories && currentBudgets.subcategories[cat]) ? currentBudgets.subcategories[cat] : {};
+        const budgetedSubNames = Object.keys(subBudgetMap).filter(s => typeof subBudgetMap[s] === 'number' && subBudgetMap[s] > 0);
+        const orderedSubs = [];
+        for (const s of definedSubs) {
+            if (budgetedSubNames.includes(s)) orderedSubs.push(s);
+        }
+        for (const s of budgetedSubNames) {
+            if (!orderedSubs.includes(s)) orderedSubs.push(s);
+        }
+
+        for (const sub of orderedSubs) {
+            const subBudgetAmount = subBudgetMap[sub];
+            const subTerpakai = subcategoryTotals.get(`${cat}|||${sub}`) || 0;
+            const subPercent = subBudgetAmount > 0 ? (subTerpakai / subBudgetAmount) * 100 : 0;
+            const subPercentClamped = Math.min(100, Math.max(0, subPercent));
+            const subIsOver = subTerpakai > subBudgetAmount;
+            const subSisa = Math.max(0, subBudgetAmount - subTerpakai);
+            const subLebih = subIsOver ? (subTerpakai - subBudgetAmount) : 0;
+
+            let subToneClass = 'tone-normal';
+            if (subIsOver) {
+                subToneClass = 'tone-danger';
+            } else if (subPercent >= 80) {
+                subToneClass = 'tone-warn';
+            }
+
+            const formattedSubBudget = currencyFormatter.format(subBudgetAmount);
+            const formattedSubTerpakai = currencyFormatter.format(subTerpakai);
+            const subStatusText = subIsOver
+                ? `Lewat ${currencyFormatter.format(subLebih)}`
+                : `Sisa ${currencyFormatter.format(subSisa)}`;
+
+            listHtml += `
+                <div class="budget-item budget-item-subcategory">
+                    <div class="budget-item-header">
+                        <span class="budget-category-name">${escapeHTML(sub)}</span>
+                        <span class="budget-spending tabular-nums">${formattedSubTerpakai} <span class="budget-spending-divider">dari</span> ${formattedSubBudget}</span>
+                    </div>
+                    <div class="budget-progress-track" role="progressbar" aria-valuenow="${Math.round(subPercent)}" aria-valuemin="0" aria-valuemax="100" aria-label="Progres budget sub kategori ${escapeHTML(sub)}: ${Math.round(subPercent)}%">
+                        <div class="budget-progress-fill ${subToneClass}" style="width: ${subPercentClamped}%;"></div>
+                    </div>
+                    <div class="budget-item-footer">
+                        <span class="budget-status-text ${subToneClass}">${subStatusText}</span>
+                        <span class="budget-percent tabular-nums ${subToneClass}">${Math.round(subPercent)}%</span>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     budgetListContainer.innerHTML = listHtml;
@@ -5847,16 +5967,38 @@ function shiftBudgetMonth(delta) {
     renderBudgetSection();
 }
 
+function getTotalSubcategoryBudget(cat, excludeSub = null) {
+    if (!currentBudgets || !currentBudgets.subcategories || !currentBudgets.subcategories[cat]) return 0;
+    const subs = currentBudgets.subcategories[cat];
+    let total = 0;
+    for (const [s, amount] of Object.entries(subs)) {
+        if (excludeSub && s === excludeSub) continue;
+        if (typeof amount === 'number' && amount > 0) {
+            total += amount;
+        }
+    }
+    return total;
+}
+
 function populateBudgetCategoryOptions() {
     if (!selectBudgetCat) return;
     const expenseList = getCategoryNames('expense');
     const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
+    const subBudgetMap = (currentBudgets && currentBudgets.subcategories) ? currentBudgets.subcategories : {};
 
-    let html = '<option value="" disabled selected>Pilih kategori pengeluaran</option>';
+    let html = '<option value="" disabled selected>Pilih kategori atau sub kategori</option>';
     for (const cat of expenseList) {
         const hasBudget = typeof budgetMap[cat] === 'number' && budgetMap[cat] > 0;
         const budgetLabel = hasBudget ? ` (Budget: ${currencyFormatter.format(budgetMap[cat])})` : '';
-        html += `<option value="${escapeHTML(cat)}">${escapeHTML(cat)}${escapeHTML(budgetLabel)}</option>`;
+        html += `<option value="cat:${escapeHTML(cat)}" data-type="cat" data-cat="${escapeHTML(cat)}">${escapeHTML(cat)}${escapeHTML(budgetLabel)}</option>`;
+
+        const subs = getSubcategoriesFor('expense', cat);
+        for (const sub of subs) {
+            const subAmount = subBudgetMap[cat]?.[sub];
+            const hasSubBudget = typeof subAmount === 'number' && subAmount > 0;
+            const subLabel = hasSubBudget ? ` (Budget: ${currencyFormatter.format(subAmount)})` : '';
+            html += `<option value="sub:${escapeHTML(cat)}:${escapeHTML(sub)}" data-type="sub" data-cat="${escapeHTML(cat)}" data-sub="${escapeHTML(sub)}">&nbsp;&nbsp;&nbsp;&nbsp;↳ ${escapeHTML(sub)}${escapeHTML(subLabel)}</option>`;
+        }
     }
     selectBudgetCat.innerHTML = html;
 }
@@ -5888,16 +6030,20 @@ function renderBudgetSettings() {
     orderedCats.push(...orphanCats);
 
     orderedCats.forEach(cat => {
-        const li = document.createElement('li');
-        li.className = 'category-item';
-        li.setAttribute('data-name', cat);
+        const wrapperLi = document.createElement('li');
+        wrapperLi.className = 'category-item-wrapper';
+        wrapperLi.setAttribute('data-name', cat);
+
+        const catRow = document.createElement('div');
+        catRow.className = 'category-item';
+        catRow.setAttribute('data-name', cat);
         const amount = budgetMap[cat];
         const isOrphan = !activeExpenseList.includes(cat);
-        const isEditing = editingBudgetCategory === cat;
+        const isEditingCat = editingBudgetCategory === cat;
 
-        if (isEditing) {
-            li.classList.add('editing');
-            li.innerHTML = `
+        if (isEditingCat) {
+            catRow.classList.add('editing');
+            catRow.innerHTML = `
                 <form class="category-inline-edit-form">
                     <input type="text" inputmode="numeric" class="category-edit-input" value="${formatNumber(amount)}" required autocomplete="off" aria-label="Ubah budget kategori ${escapeHTML(cat)}">
                     <div class="category-item-actions">
@@ -5907,9 +6053,9 @@ function renderBudgetSettings() {
                 </form>
             `;
 
-            const editForm = li.querySelector('.category-inline-edit-form');
-            const editInput = li.querySelector('.category-edit-input');
-            const btnCancelEdit = li.querySelector('.btn-cancel-cat');
+            const editForm = catRow.querySelector('.category-inline-edit-form');
+            const editInput = catRow.querySelector('.category-edit-input');
+            const btnCancelEdit = catRow.querySelector('.btn-cancel-cat');
             attachAmountInputFormatting(editInput);
 
             editForm.addEventListener('submit', async (e) => {
@@ -5930,14 +6076,14 @@ function renderBudgetSettings() {
                 }
             });
 
-            budgetSettingsList.appendChild(li);
+            wrapperLi.appendChild(catRow);
             requestAnimationFrame(() => {
                 editInput.focus();
                 editInput.select();
             });
         } else {
             const orphanBadge = isOrphan ? `<span class="budget-orphan-badge">(tidak ada di daftar kategori)</span>` : '';
-            li.innerHTML = `
+            catRow.innerHTML = `
                 <div>
                     <span class="category-name">${escapeHTML(cat)}</span>${orphanBadge}
                     <span class="budget-item-amount">&bull; ${currencyFormatter.format(amount)} / bulan</span>
@@ -5949,23 +6095,119 @@ function renderBudgetSettings() {
                 </div>
             `;
 
-            li.querySelector('.btn-edit-budget').addEventListener('click', () => {
+            catRow.querySelector('.btn-edit-budget').addEventListener('click', () => {
                 editingBudgetCategory = cat;
+                editingBudgetSubcategory = null;
                 renderBudgetSettings();
             });
 
-            li.querySelector('.btn-delete-budget').addEventListener('click', () => {
+            catRow.querySelector('.btn-delete-budget').addEventListener('click', () => {
                 handleDeleteBudgetPrompt(cat);
             });
 
-            budgetSettingsList.appendChild(li);
+            wrapperLi.appendChild(catRow);
         }
+
+        const definedSubs = getSubcategoriesFor('expense', cat);
+        const subBudgetMap = (currentBudgets && currentBudgets.subcategories && currentBudgets.subcategories[cat]) ? currentBudgets.subcategories[cat] : {};
+        const budgetedSubNames = Object.keys(subBudgetMap).filter(s => typeof subBudgetMap[s] === 'number' && subBudgetMap[s] > 0);
+        const orderedSubs = [];
+        for (const s of definedSubs) {
+            if (budgetedSubNames.includes(s)) orderedSubs.push(s);
+        }
+        for (const s of budgetedSubNames) {
+            if (!orderedSubs.includes(s)) orderedSubs.push(s);
+        }
+
+        if (orderedSubs.length > 0) {
+            const subUl = document.createElement('ul');
+            subUl.className = 'subcategory-items';
+            subUl.setAttribute('aria-label', `Daftar budget sub kategori ${escapeHTML(cat)}`);
+
+            orderedSubs.forEach(sub => {
+                const subLi = document.createElement('li');
+                subLi.className = 'subcategory-item';
+                subLi.setAttribute('data-parent', cat);
+                subLi.setAttribute('data-name', sub);
+                const subAmount = subBudgetMap[sub];
+                const isEditingSub = editingBudgetSubcategory && editingBudgetSubcategory.cat === cat && editingBudgetSubcategory.sub === sub;
+
+                if (isEditingSub) {
+                    subLi.classList.add('editing');
+                    subLi.innerHTML = `
+                        <form class="category-inline-edit-form">
+                            <input type="text" inputmode="numeric" class="category-edit-input" value="${formatNumber(subAmount)}" required autocomplete="off" aria-label="Ubah budget sub kategori ${escapeHTML(sub)}">
+                            <div class="category-item-actions">
+                                <button type="submit" class="btn-icon btn-save-cat">Simpan</button>
+                                <button type="button" class="btn-icon btn-cancel-cat">Batal</button>
+                            </div>
+                        </form>
+                    `;
+
+                    const editForm = subLi.querySelector('.category-inline-edit-form');
+                    const editInput = subLi.querySelector('.category-edit-input');
+                    const btnCancel = subLi.querySelector('.btn-cancel-cat');
+                    attachAmountInputFormatting(editInput);
+
+                    editForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const newSubAmount = parseAmount(editInput.value);
+                        await handleSaveSubcategoryBudgetAmount(cat, sub, newSubAmount);
+                    });
+
+                    btnCancel.addEventListener('click', () => {
+                        editingBudgetSubcategory = null;
+                        renderBudgetSettings();
+                    });
+
+                    editInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') {
+                            editingBudgetSubcategory = null;
+                            renderBudgetSettings();
+                        }
+                    });
+
+                    subUl.appendChild(subLi);
+                    requestAnimationFrame(() => {
+                        editInput.focus();
+                        editInput.select();
+                    });
+                } else {
+                    subLi.innerHTML = `
+                        <div>
+                            <span class="subcategory-name">${escapeHTML(sub)}</span>
+                            <span class="budget-item-amount">&bull; ${currencyFormatter.format(subAmount)} / bulan</span>
+                        </div>
+                        <div class="category-item-actions">
+                            <button type="button" class="btn-icon btn-edit-sub-budget" data-cat="${escapeHTML(cat)}" data-sub="${escapeHTML(sub)}" aria-label="Ubah budget ${escapeHTML(sub)}">Ubah</button>
+                            <button type="button" class="btn-icon btn-delete-sub-budget" data-cat="${escapeHTML(cat)}" data-sub="${escapeHTML(sub)}" aria-label="Hapus budget ${escapeHTML(sub)}">Hapus</button>
+                        </div>
+                    `;
+
+                    subLi.querySelector('.btn-edit-sub-budget').addEventListener('click', () => {
+                        editingBudgetSubcategory = { cat, sub };
+                        editingBudgetCategory = null;
+                        renderBudgetSettings();
+                    });
+
+                    subLi.querySelector('.btn-delete-sub-budget').addEventListener('click', () => {
+                        handleDeleteSubcategoryBudgetPrompt(cat, sub);
+                    });
+
+                    subUl.appendChild(subLi);
+                }
+            });
+
+            wrapperLi.appendChild(subUl);
+        }
+
+        budgetSettingsList.appendChild(wrapperLi);
     });
 
     enableListDragReorder({
         container: budgetSettingsList,
-        itemSelector: '.category-item[data-name]',
-        handleSelector: '.btn-drag-handle',
+        itemSelector: ':scope > .category-item-wrapper[data-name]',
+        handleSelector: ':scope > .category-item .btn-drag-handle',
         onReorder: async (newOrderBudgetCatNames) => {
             const rawExpenseList = (currentCategories && Array.isArray(currentCategories.expense)) ? currentCategories.expense : [];
             const sortedExpenseList = [...rawExpenseList].sort((a, b) => (typeof a?.order === 'number' ? a.order : 0) - (typeof b?.order === 'number' ? b.order : 0));
@@ -6018,6 +6260,12 @@ async function handleSaveBudgetAmount(cat, newAmount) {
         return;
     }
 
+    const totalSubs = getTotalSubcategoryBudget(cat);
+    if (newAmount < totalSubs) {
+        showNotification('Total budget sub kategori tidak boleh melebihi budget kategori.', 'warn');
+        return;
+    }
+
     ensureToken();
 
     if (!currentBudgets.items) {
@@ -6038,13 +6286,57 @@ async function handleSaveBudgetAmount(cat, newAmount) {
     }
 }
 
+async function handleSaveSubcategoryBudgetAmount(cat, sub, newAmount) {
+    if (isNaN(newAmount) || newAmount <= 0) {
+        showNotification('Jumlah budget harus berupa angka lebih dari 0.', 'warn');
+        return;
+    }
+
+    const parentBudget = (currentBudgets && currentBudgets.items) ? currentBudgets.items[cat] : 0;
+    if (!parentBudget || parentBudget <= 0) {
+        showNotification('Atur budget kategori dulu.', 'warn');
+        return;
+    }
+
+    const otherSubs = getTotalSubcategoryBudget(cat, sub);
+    if (otherSubs + Math.round(newAmount) > parentBudget) {
+        showNotification('Total budget sub kategori tidak boleh melebihi budget kategori.', 'warn');
+        return;
+    }
+
+    ensureToken();
+
+    if (!currentBudgets.subcategories) {
+        currentBudgets.subcategories = {};
+    }
+    if (!currentBudgets.subcategories[cat]) {
+        currentBudgets.subcategories[cat] = {};
+    }
+    currentBudgets.subcategories[cat][sub] = Math.round(newAmount);
+    currentBudgets.updatedAt = Date.now();
+
+    try {
+        await saveBudgets(currentBudgets);
+        editingBudgetSubcategory = null;
+        renderBudgetSettings();
+        renderBudgetSection();
+        markDirty().catch(err => console.error("Gagal menandai perubahan budget sub kategori untuk sinkron", err));
+    } catch (error) {
+        console.error("Gagal mengubah budget sub kategori", error);
+        showNotification("Terjadi kesalahan saat menyimpan budget sub kategori.", "error");
+    }
+}
+
 async function handleSetBudgetSubmit(e) {
     e.preventDefault();
-    const cat = selectBudgetCat ? selectBudgetCat.value.trim() : '';
+    const selectedOption = selectBudgetCat ? selectBudgetCat.selectedOptions[0] : null;
+    const itemType = selectedOption ? selectedOption.dataset.type : '';
+    const cat = selectedOption ? selectedOption.dataset.cat : '';
+    const sub = selectedOption ? selectedOption.dataset.sub : '';
     const amount = inputBudgetAmount ? parseAmount(inputBudgetAmount.value) : 0;
 
-    if (!cat) {
-        showNotification('Pilih kategori pengeluaran.', 'warn');
+    if (!itemType || !cat) {
+        showNotification('Pilih kategori atau sub kategori pengeluaran.', 'warn');
         return;
     }
     if (isNaN(amount) || amount <= 0) {
@@ -6054,29 +6346,78 @@ async function handleSetBudgetSubmit(e) {
 
     ensureToken();
 
-    if (!currentBudgets.items) {
-        currentBudgets.items = {};
-    }
-    currentBudgets.items[cat] = Math.round(amount);
-    currentBudgets.updatedAt = Date.now();
+    if (itemType === 'cat') {
+        const totalSubs = getTotalSubcategoryBudget(cat);
+        if (amount < totalSubs) {
+            showNotification('Total budget sub kategori tidak boleh melebihi budget kategori.', 'warn');
+            return;
+        }
 
-    try {
-        await saveBudgets(currentBudgets);
-        if (inputBudgetAmount) inputBudgetAmount.value = '';
-        if (selectBudgetCat) selectBudgetCat.value = '';
-        renderBudgetSettings();
-        renderBudgetSection();
-        markDirty().catch(err => console.error("Gagal menyimpan budget untuk sinkron", err));
-    } catch (error) {
-        console.error("Gagal menyimpan budget", error);
-        showNotification("Terjadi kesalahan saat menyimpan budget.", "error");
+        if (!currentBudgets.items) {
+            currentBudgets.items = {};
+        }
+        currentBudgets.items[cat] = Math.round(amount);
+        currentBudgets.updatedAt = Date.now();
+
+        try {
+            await saveBudgets(currentBudgets);
+            if (inputBudgetAmount) inputBudgetAmount.value = '';
+            if (selectBudgetCat) selectBudgetCat.value = '';
+            renderBudgetSettings();
+            renderBudgetSection();
+            markDirty().catch(err => console.error("Gagal menyimpan budget untuk sinkron", err));
+        } catch (error) {
+            console.error("Gagal menyimpan budget", error);
+            showNotification("Terjadi kesalahan saat menyimpan budget.", "error");
+        }
+    } else if (itemType === 'sub') {
+        const parentBudget = (currentBudgets && currentBudgets.items) ? currentBudgets.items[cat] : 0;
+        if (!parentBudget || parentBudget <= 0) {
+            showNotification('Atur budget kategori dulu.', 'warn');
+            return;
+        }
+
+        const otherSubs = getTotalSubcategoryBudget(cat, sub);
+        if (otherSubs + Math.round(amount) > parentBudget) {
+            showNotification('Total budget sub kategori tidak boleh melebihi budget kategori.', 'warn');
+            return;
+        }
+
+        if (!currentBudgets.subcategories) {
+            currentBudgets.subcategories = {};
+        }
+        if (!currentBudgets.subcategories[cat]) {
+            currentBudgets.subcategories[cat] = {};
+        }
+        currentBudgets.subcategories[cat][sub] = Math.round(amount);
+        currentBudgets.updatedAt = Date.now();
+
+        try {
+            await saveBudgets(currentBudgets);
+            if (inputBudgetAmount) inputBudgetAmount.value = '';
+            if (selectBudgetCat) selectBudgetCat.value = '';
+            renderBudgetSettings();
+            renderBudgetSection();
+            markDirty().catch(err => console.error("Gagal menyimpan budget sub kategori untuk sinkron", err));
+        } catch (error) {
+            console.error("Gagal menyimpan budget sub kategori", error);
+            showNotification("Terjadi kesalahan saat menyimpan budget sub kategori.", "error");
+        }
     }
 }
 
 function handleDeleteBudgetPrompt(cat) {
+    const totalSubs = getTotalSubcategoryBudget(cat);
+    if (totalSubs > 0) {
+        showNotification('Total budget sub kategori tidak boleh melebihi budget kategori.', 'warn');
+        return;
+    }
+
     pendingDeleteId = null;
     pendingCategoryDelete = null;
+    pendingSubcategoryDelete = null;
     pendingBudgetDelete = cat;
+    pendingBudgetSubcategoryDelete = null;
     pendingWalletDelete = null;
     pendingLogout = false;
     if (confirmDialogTitle) {
@@ -6093,6 +6434,12 @@ function handleDeleteBudgetPrompt(cat) {
 async function performDeleteBudget(cat) {
     ensureToken();
 
+    const totalSubs = getTotalSubcategoryBudget(cat);
+    if (totalSubs > 0) {
+        showNotification('Total budget sub kategori tidak boleh melebihi budget kategori.', 'warn');
+        return;
+    }
+
     if (currentBudgets && currentBudgets.items && currentBudgets.items[cat] !== undefined) {
         delete currentBudgets.items[cat];
         currentBudgets.updatedAt = Date.now();
@@ -6105,6 +6452,48 @@ async function performDeleteBudget(cat) {
         } catch (error) {
             console.error("Gagal menghapus budget", error);
             showNotification("Terjadi kesalahan saat menghapus budget.", "error");
+        }
+    }
+}
+
+function handleDeleteSubcategoryBudgetPrompt(cat, sub) {
+    pendingDeleteId = null;
+    pendingCategoryDelete = null;
+    pendingSubcategoryDelete = null;
+    pendingBudgetDelete = null;
+    pendingBudgetSubcategoryDelete = { cat, sub };
+    pendingWalletDelete = null;
+    pendingLogout = false;
+    if (confirmDialogTitle) {
+        confirmDialogTitle.textContent = `Hapus budget untuk sub kategori "${sub}"?`;
+    }
+    if (btnConfirmDelete) {
+        btnConfirmDelete.textContent = 'Hapus';
+    }
+    if (confirmDialog && typeof confirmDialog.showModal === 'function') {
+        confirmDialog.showModal();
+    }
+}
+
+async function performDeleteSubcategoryBudget(cat, sub) {
+    ensureToken();
+
+    if (currentBudgets && currentBudgets.subcategories && currentBudgets.subcategories[cat] && currentBudgets.subcategories[cat][sub] !== undefined) {
+        delete currentBudgets.subcategories[cat][sub];
+        if (Object.keys(currentBudgets.subcategories[cat]).length === 0) {
+            delete currentBudgets.subcategories[cat];
+        }
+        currentBudgets.updatedAt = Date.now();
+
+        try {
+            await saveBudgets(currentBudgets);
+            renderBudgetSettings();
+            renderBudgetSection();
+            markDirty().catch(err => console.error("Gagal menandai penghapusan budget sub kategori untuk sinkron", err));
+            showNotification(`Budget sub kategori "${sub}" berhasil dihapus.`, 'success');
+        } catch (error) {
+            console.error("Gagal menghapus budget sub kategori", error);
+            showNotification("Terjadi kesalahan saat menghapus budget sub kategori.", "error");
         }
     }
 }
@@ -6391,12 +6780,13 @@ if (confirmDialog) {
         const catDelete = pendingCategoryDelete;
         const subcatDelete = pendingSubcategoryDelete;
         const bgtDelete = pendingBudgetDelete;
+        const subBgtDelete = pendingBudgetSubcategoryDelete;
         const wltDelete = pendingWalletDelete;
         const isLogout = pendingLogout;
         const isFillDummy = pendingFillDummy;
         const isClearDummy = pendingClearDummy;
 
-        if (!txId && !catDelete && !subcatDelete && !bgtDelete && !wltDelete && !isLogout && !isFillDummy && !isClearDummy) {
+        if (!txId && !catDelete && !subcatDelete && !bgtDelete && !subBgtDelete && !wltDelete && !isLogout && !isFillDummy && !isClearDummy) {
             confirmDialog.close();
             return;
         }
@@ -6417,6 +6807,8 @@ if (confirmDialog) {
                 await performDeleteSubcategory(subcatDelete.type, subcatDelete.cat, subcatDelete.name);
             } else if (bgtDelete) {
                 await performDeleteBudget(bgtDelete);
+            } else if (subBgtDelete) {
+                await performDeleteSubcategoryBudget(subBgtDelete.cat, subBgtDelete.sub);
             } else if (wltDelete) {
                 await performDeleteWallet(wltDelete);
             }
@@ -6431,6 +6823,7 @@ if (confirmDialog) {
         pendingCategoryDelete = null;
         pendingSubcategoryDelete = null;
         pendingBudgetDelete = null;
+        pendingBudgetSubcategoryDelete = null;
         pendingWalletDelete = null;
         pendingLogout = false;
         pendingFillDummy = false;
@@ -7007,7 +7400,9 @@ async function handleImportJson(file) {
             const localBudgets = await getBudgets();
             const remoteBudgetTime = typeof rawBudgets.updatedAt === 'number' ? rawBudgets.updatedAt : 0;
             const localBudgetTime = localBudgets.updatedAt || 0;
-            if (remoteBudgetTime > localBudgetTime || (localBudgetTime === 0 && Object.keys(rawBudgets.items).length > 0)) {
+            const hasRawItems = Object.keys(rawBudgets.items).length > 0;
+            const hasRawSubs = rawBudgets.subcategories && typeof rawBudgets.subcategories === 'object' && Object.keys(rawBudgets.subcategories).length > 0;
+            if (remoteBudgetTime > localBudgetTime || (localBudgetTime === 0 && (hasRawItems || hasRawSubs))) {
                 await saveBudgets(rawBudgets);
                 budgetsChanged = true;
             }
@@ -7940,10 +8335,26 @@ async function init() {
 
     if (selectBudgetCat && inputBudgetAmount) {
         selectBudgetCat.addEventListener('change', () => {
-            const cat = selectBudgetCat.value;
+            const selectedOption = selectBudgetCat.selectedOptions[0];
+            const itemType = selectedOption ? selectedOption.dataset.type : '';
+            const cat = selectedOption ? selectedOption.dataset.cat : '';
+            const sub = selectedOption ? selectedOption.dataset.sub : '';
             const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
-            if (cat && budgetMap[cat]) {
-                inputBudgetAmount.value = formatNumber(budgetMap[cat]);
+            const subBudgetMap = (currentBudgets && currentBudgets.subcategories) ? currentBudgets.subcategories : {};
+
+            if (itemType === 'sub' && cat && sub) {
+                const subAmount = subBudgetMap[cat]?.[sub];
+                if (typeof subAmount === 'number' && subAmount > 0) {
+                    inputBudgetAmount.value = formatNumber(subAmount);
+                } else {
+                    inputBudgetAmount.value = '';
+                }
+            } else if (itemType === 'cat' && cat) {
+                if (budgetMap[cat]) {
+                    inputBudgetAmount.value = formatNumber(budgetMap[cat]);
+                } else {
+                    inputBudgetAmount.value = '';
+                }
             } else {
                 inputBudgetAmount.value = '';
             }
