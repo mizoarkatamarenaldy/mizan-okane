@@ -9,6 +9,9 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diperbaiki: ...
 - Diubah: ...
 ```
+## 2026-10-17: Audit UI: temuan desain dan aksesibilitas
+- Ditambah: Spesifikasi item audit UI serta pelaksanaan pemeriksaan menyeluruh terhadap standar WCAG AA dan token `dev/DESIGN.md` pada 6 halaman aplikasi (Beranda, Riwayat, form tambah & edit transaksi, Timbangan, Statistik, Pengaturan) tanpa perubahan pada kode aplikasi (`dev/PLANSPEC.md`).
+- Diubah: Mencentang item "Audit UI: temuan desain dan aksesibilitas" di `dev/PLAN.md`.
 
 ## 2026-10-17: Perbaikan UI: tombol tambah, banner data contoh, header budget
 - Diperbaiki: Ruang kosong bawah pada kelima halaman (Beranda, Riwayat, Timbangan, Statistik, Pengaturan) ditingkatkan sehingga konten paling bawah dapat digulir sampai benar-benar di atas tombol tambah melayang (FAB) dan bar navigasi bawah (`css/style.css`).

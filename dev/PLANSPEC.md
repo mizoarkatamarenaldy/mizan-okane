@@ -675,5 +675,39 @@ Kriteria selesai
 - Header Budget rapi, tidak ada teks terpotong atau kata dobel.
 - Tampilan tetap sesuai token di dev/DESIGN.md.
 
+## Audit UI: temuan desain dan aksesibilitas
 
+Tujuan: menghasilkan daftar temuan masalah desain dan aksesibilitas di aplikasi, untuk disaring pemilik. Tidak ada perubahan kode aplikasi.
 
+Cara kerja
+- Gunakan skill "Design review" dan "Accessibility audit" untuk menyusun temuan. Skill "Redesign existing projects" hanya dipakai sebagai referensi cara menilai, bukan untuk menulis ulang tampilan.
+- Periksa sumber kode tampilan di repo (HTML, CSS, JS komponen). Jangan membaca atau menyentuh folder www/ dan android/.
+- Nilai terhadap dev/DESIGN.md sebagai standar resmi. Skill tidak boleh dijadikan alasan untuk menambah warna, font, bayangan, atau animasi di luar DESIGN.md.
+- Halaman yang diperiksa: Beranda, Riwayat, form tambah dan edit transaksi, Timbangan, Statistik, Pengaturan.
+
+Fokus pemeriksaan
+- Kontras teks (terutama teks abu-abu kecil di atas latar gelap) terhadap WCAG AA.
+- Ukuran area sentuh tombol dan ikon (target minimal 44 px).
+- Label dan nama aksesibel untuk tombol yang hanya berisi ikon (edit, hapus, navigasi bulan, tombol +).
+- Urutan fokus dan keterbacaan di layar sempit.
+- Ikon kategori: apakah tiap kategori bisa dibedakan.
+- Halaman Statistik: tampilan saat data sedikit, dan keberadaan legenda diagram donut.
+- Halaman Timbangan: kejelasan istilah, termasuk baris "Equilibrium".
+- Konsistensi antar halaman terhadap token di DESIGN.md.
+
+Format keluaran: ditulis LANGSUNG di balasan chat, BUKAN ke file di repo. Tabel dengan kolom:
+No | Halaman | Temuan | Tingkat (tinggi/sedang/rendah) | Bukti (nama file dan baris atau selector) | Usulan perbaikan | Bentrok dengan DESIGN.md? (ya/tidak, jelaskan singkat) | Perkiraan ukuran kerja (kecil/sedang/besar)
+- Maksimal 15 temuan, urut dari tingkat tertinggi.
+- Tulis hanya temuan yang punya bukti di kode, jangan menebak.
+- Di bawah tabel, tulis satu paragraf pendek: temuan mana yang menurutmu paling layak dikerjakan lebih dulu, dan temuan mana yang butuh keputusan pemilik karena menyentuh DESIGN.md.
+
+Larangan khusus tugas ini
+- Jangan mengubah file apa pun selain dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
+- Jangan membuat file laporan baru di repo.
+- Jangan memperbaiki temuan apa pun, sekecil apa pun.
+- Jangan menyarankan penggantian gaya visual total. Usulan harus berupa perbaikan terarah.
+
+Kriteria selesai
+- Tabel temuan sudah ada di balasan chat sesuai format di atas.
+- Tidak ada perubahan di file aplikasi.
+- git status --short hanya menampilkan dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
