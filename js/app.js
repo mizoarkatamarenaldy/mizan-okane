@@ -1379,6 +1379,8 @@ export function getCategoryIconSvg(categoryName, type) {
 
     const norm = String(categoryName || '').trim().toLowerCase();
     switch (norm) {
+        case 'makan':
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v17M4 4v3a3 3 0 1 0 6 0V4"></path><path d="M14 8a3 4 0 1 0 6 0a3 4 0 1 0-6 0"></path><path d="M17 12v9"></path></svg>`;
         case 'makanan':
         case 'makanan & minuman':
         case 'kuliner':

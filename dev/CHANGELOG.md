@@ -9,6 +9,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diperbaiki: ...
 - Diubah: ...
 ```
+
+## 2026-10-17: Perbaikan UI: polish kecil
+- Ditambah: Ikon kategori Makan baru berwujud sendok dan garpu pada fungsi `getCategoryIconSvg` sehingga kategori default Makan memiliki visual spesifik dan tidak lagi jatuh ke ikon default tag (`js/app.js`).
+- Ditambah: Subteks penjelas "Penyesuaian saldo bulan ini" di bawah label Equilibrium pada halaman Timbangan beserta penataan baris fleksibel responsif agar label, subteks, dan nominal tetap rapi dan tidak terpotong di layar sempit (`index.html`, `css/style.css`).
+- Diperbaiki: Efek redup kartu dompet bersaldo 0 (.wallet-balance-item.is-zero) diubah sehingga hanya berlaku pada angka saldo dan border kartu menggunakan token DESIGN.md (`var(--surface-raised)` dan `var(--text-secondary)`), sementara nama dompet mempertahankan warna dan opasitas normal agar kontras teks tetap terbaca sesuai standar WCAG AA (`css/style.css`).
+- Diubah: Mencentang item "Perbaikan UI: polish kecil" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Perbaikan UI: semantik dan keyboard
 - Diperbaiki: Atribut `role="listitem"` pada 8 tombol submenu Pengaturan (.settings-menu-row) dan atribut `role="list"` pada wadah pembungkusnya (.settings-menu-group) dihapus untuk memulihkan semantik alami tombol bagi pembaca layar (`index.html`).
 - Ditambah: Aturan fokus keyboard `:focus-visible` untuk tombol pemilihan tipe transaksi (.type-segment-btn) dan tombol chip kategori (.category-chip) di form transaksi menggunakan token aksen resmi `dev/DESIGN.md` (`css/style.css`).

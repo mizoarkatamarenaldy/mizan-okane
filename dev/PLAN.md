@@ -91,6 +91,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Audit UI: temuan desain dan aksesibilitas
   - [x] Perbaikan UI: target sentuh minimal 44 px
   - [x] Perbaikan UI: semantik dan keyboard
+  - [x] Perbaikan UI: polish kecil
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

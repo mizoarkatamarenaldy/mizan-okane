@@ -791,3 +791,43 @@ Kriteria selesai
 - Balasan chat berisi ringkasan singkat per item: file dan selector atau fungsi yang diubah, dan hasil pengecekan pada Item 1 (apakah wadah punya role="list") dan Item 5 (apakah legenda bisa difokus).
 - git status --short hanya menampilkan index.html, css/style.css, js/app.js, dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
 
+## Perbaikan UI: polish kecil
+
+Tujuan: mengerjakan 3 temuan audit UI yang sifatnya polish kecil: ikon kategori Makan, subteks di label Equilibrium, dan efek redup dompet bersaldo 0.
+
+Catatan umum
+- Nomor baris hanya perkiraan dan bisa bergeser. Cari ulang lewat nama fungsi, selector, atau teks label, jangan percaya nomor baris.
+- Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md. Pakai token dan class yang sudah ada.
+
+Item 1: ikon kategori Makan (js/app.js)
+- Cari fungsi getCategoryIconSvg() (sekitar L1381).
+- Tambahkan case 'makan' supaya ikon kategori Makan berbeda dari ikon Lainnya (default).
+- Ikuti pola ikon yang sudah ada di fungsi itu: viewBox, ketebalan garis, gaya garis, dan cara pewarnaan (currentColor atau token yang sama). Jangan membuat gaya ikon baru.
+- Bentuk ikon: sederhana dan mudah dikenali sebagai makanan (misalnya sendok dan garpu). Pilih satu bentuk saja.
+- Periksa cara fungsi mencocokkan nama kategori (huruf besar atau kecil, spasi). Pastikan case 'makan' benar-benar cocok dengan nama kategori Makan yang dipakai aplikasi. Jangan mengubah cara pencocokan untuk case lain.
+
+Item 2: subteks di label Equilibrium (index.html)
+- Cari label "Equilibrium" di halaman Timbangan (sekitar L306).
+- Label "Equilibrium" JANGAN diganti nama dan teksnya JANGAN diubah.
+- Tambahkan subteks kecil di bawah label dengan teks persis: Penyesuaian saldo bulan ini
+- Pakai class teks sekunder atau teks kecil yang sudah ada di css/style.css untuk subteks serupa di aplikasi. Kalau tidak ada yang cocok, buat satu class baru yang hanya memakai token warna dan ukuran font yang sudah ada di dev/DESIGN.md.
+- Pastikan tata letak baris tidak rusak di layar sempit (sekitar 360 px): tidak ada teks terpotong atau menumpuk.
+
+Item 3: efek redup dompet saldo 0 (css/style.css)
+- Cari aturan .wallet-balance-item.is-zero (sekitar L1047).
+- Ubah efek redupnya supaya hanya berlaku pada angka saldo dan border item. Teks nama dompet harus kembali ke warna dan opasitas normal sehingga kontrasnya tetap terbaca.
+- Kalau efek redup sekarang dipasang lewat opacity pada seluruh item, ganti dengan pewarnaan atau opasitas yang hanya mengenai elemen angka saldo dan border, memakai token yang sudah ada di dev/DESIGN.md.
+- Jangan ubah tampilan dompet yang saldonya tidak 0.
+
+Larangan khusus tugas ini
+- Jangan menyentuh temuan audit lain (target sentuh, semantik, fokus, grafik bulanan, kontras tema terang, focus trap). Itu sesi lain atau ditunda.
+- Jangan mengganti nama label atau teks lain yang terlihat pengguna selain subteks di Item 2.
+- Jangan membaca atau menyentuh folder www/ dan android/. Jangan build.
+- Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Kriteria selesai
+- Ketiga item sudah dikerjakan sesuai spek.
+- Balasan chat berisi ringkasan singkat per item: file dan fungsi atau selector yang diubah, bentuk ikon Makan yang dipilih, dan class yang dipakai untuk subteks Equilibrium.
+- git status --short hanya menampilkan index.html, css/style.css, js/app.js, dev/PLAN.md, dev/PLANSPEC.md, dan dev/CHANGELOG.md.
+
+
