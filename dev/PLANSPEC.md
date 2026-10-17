@@ -646,4 +646,34 @@ Cek manual:
 - Ekspor backup JSON, reset setelan pabrik, impor lagi: transaksi penyesuaian kembali dan saldo benar. Impor file backup lama tanpa penyesuaian: berhasil.
 - Login Google di dua perangkat, buat penyesuaian di satu perangkat, sinkron: perangkat lain menampilkan saldo dan transaksi yang sama.
 
+## Perbaikan UI: tombol tambah, banner data contoh, header budget
+
+Tujuan: merapikan tiga masalah layout di tampilan HP. Ini perbaikan tampilan saja, tidak mengubah logika, data, atau fitur.
+
+Bagian 1: Tombol + tidak menutupi konten
+- Masalah: tombol + mengambang menutupi teks "Terpakai" di kartu Budget, tombol hapus di transaksi terakhir, dan baris paling bawah di Riwayat.
+- Perbaikan: beri ruang kosong di bawah isi semua halaman (Beranda, Riwayat, Timbangan, Statistik, Pengaturan) sehingga konten paling bawah bisa digulir sampai benar-benar di atas tombol + dan navigasi bawah.
+- Posisi dan ukuran tombol + tidak diubah.
+
+Bagian 2: Banner "Mode Data Contoh" jadi strip tipis
+- Masalah: banner memakai sekitar seperlima layar di setiap halaman.
+- Perbaikan: jadikan satu baris tipis dengan tinggi sekitar setengah dari sekarang. Tulisan "Mode Data Contoh" dan tombol "Keluar" tetap ada. Subteks "Data asli aman" boleh dipendekkan atau dihilangkan bila tidak muat dalam satu baris.
+- Fungsi tombol Keluar tidak berubah.
+
+Bagian 3: Header kartu Budget dirapikan
+- Masalah: judul Budget, pilihan mata uang (Rupiah, Yen, Dolar), dan navigasi bulan bertumpuk dan tidak rapi. Teks "Terpakai" terpotong. Ada tulisan dobel "Sisa: Sisa Rp ...".
+- Perbaikan: judul Budget dan pilihan mata uang dalam satu baris, navigasi bulan di baris berikutnya. Ubah "Sisa: Sisa Rp 4.100.000" menjadi "Sisa Rp 4.100.000". Pastikan "Total Budget", "Terpakai", dan "Sisa" terbaca penuh di layar sempit, tidak terpotong.
+
+Larangan khusus tugas ini
+- Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+- Jangan mengubah logika perhitungan, penyimpanan, sinkron, atau isi data.
+- Jangan menyentuh bagian tampilan lain di luar tiga bagian di atas.
+
+Kriteria selesai
+- Di layar HP, tidak ada teks atau tombol yang tertutup tombol + di kelima halaman.
+- Banner Mode Data Contoh satu baris.
+- Header Budget rapi, tidak ada teks terpotong atau kata dobel.
+- Tampilan tetap sesuai token di dev/DESIGN.md.
+
+
 

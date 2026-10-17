@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Perbaikan UI: tombol tambah, banner data contoh, header budget
+- Diperbaiki: Ruang kosong bawah pada kelima halaman (Beranda, Riwayat, Timbangan, Statistik, Pengaturan) ditingkatkan sehingga konten paling bawah dapat digulir sampai benar-benar di atas tombol tambah melayang (FAB) dan bar navigasi bawah (`css/style.css`).
+- Diperbaiki: Banner penanda "Mode Data Contoh" dirampingkan menjadi strip satu baris dengan ketinggian separuh dari sebelumnya, margin vertikal lebih ringkas, dan penyembunyian otomatis teks deskripsi sekunder pada layar sempit tanpa mengubah fungsionalitas tombol Keluar (`css/style.css`).
+- Diperbaiki: Tata letak header kartu Budget ditata ulang menjadi dua baris rapi (baris atas: judul Budget dan pilihan mata uang; baris bawah: navigasi bulan) sehingga tidak bertumpuk di layar HP (`index.html`, `css/style.css`).
+- Diperbaiki: Teks duplikasi "Sisa: Sisa Rp ..." pada ringkasan budget diperbaiki menjadi "Sisa Rp ...", titik dua pada label dihilangkan, serta diterapkan aturan pencegahan pemotongan teks agar label dan nominal ("Total Budget", "Terpakai", "Sisa") terbaca penuh di layar sempit (`js/app.js`, `css/style.css`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v60` (`sw.js`).
+- Diubah: Mencentang item "Perbaikan UI: tombol tambah, banner data contoh, header budget" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Penyesuaian saldo di Timbangan
 - Ditambah: Bagian "Sesuaikan Saldo" pada halaman Timbangan yang menampilkan daftar dompet aktif, saldo di aplikasi, dan tombol "Sesuaikan" untuk menyamakan saldo aplikasi dengan saldo riil fisik atau rekening bank (`index.html`, `js/app.js`, `css/style.css`).
 - Ditambah: Dialog "Sesuaikan Saldo" dengan pertanyaan "Berapa saldo riil sekarang?", tampilan saldo aplikasi sebagai pembanding, kolom input nominal dengan pemformatan mata uang, perhitungan selisih otomatis (plus/minus), pesan "Saldo sudah sama", serta pilihan kategori (Bunga, Cashback, Koreksi) ketika selisih positif atau otomatis Koreksi ketika negatif (`index.html`, `js/app.js`, `css/style.css`).

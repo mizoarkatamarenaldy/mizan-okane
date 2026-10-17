@@ -5210,23 +5210,26 @@ function renderBudgetSection() {
     if (budgetSummaryBanner) {
         const totalSisa = totalBudget - totalTerpakai;
         const totalOver = totalTerpakai > totalBudget;
-        const summaryStatus = totalOver
-            ? `Lewat ${currencyFormatter.format(totalTerpakai - totalBudget)}`
-            : `Sisa ${currencyFormatter.format(Math.max(0, totalSisa))}`;
+        const formattedTotalBudget = currencyFormatter.format(totalBudget);
+        const formattedTotalTerpakai = currencyFormatter.format(totalTerpakai);
+        const diffAmount = totalOver
+            ? currencyFormatter.format(totalTerpakai - totalBudget)
+            : currencyFormatter.format(Math.max(0, totalSisa));
+        const diffLabel = totalOver ? 'Lewat' : 'Sisa';
         const summaryTone = totalOver ? 'tone-danger' : (totalBudget > 0 && totalTerpakai / totalBudget >= 0.8 ? 'tone-warn' : 'tone-normal');
 
         budgetSummaryBanner.innerHTML = `
             <div class="budget-summary-banner-item">
-                <span>Total Budget:</span>
-                <strong class="tabular-nums">${currencyFormatter.format(totalBudget)}</strong>
+                <span>Total Budget</span>
+                <strong class="tabular-nums">${formattedTotalBudget}</strong>
             </div>
             <div class="budget-summary-banner-item">
-                <span>Terpakai:</span>
-                <strong class="tabular-nums">${currencyFormatter.format(totalTerpakai)}</strong>
+                <span>Terpakai</span>
+                <strong class="tabular-nums">${formattedTotalTerpakai}</strong>
             </div>
             <div class="budget-summary-banner-item">
-                <span>${totalOver ? 'Kelebihan:' : 'Sisa:'}</span>
-                <strong class="budget-detail-value tabular-nums ${summaryTone}">${summaryStatus}</strong>
+                <span>${diffLabel}</span>
+                <strong class="budget-detail-value tabular-nums ${summaryTone}">${diffAmount}</strong>
             </div>
         `;
         budgetSummaryBanner.classList.remove('hidden');

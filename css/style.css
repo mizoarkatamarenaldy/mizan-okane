@@ -417,7 +417,7 @@ body {
     padding-top: calc(8px + env(safe-area-inset-top, 0px));
     padding-left: calc(16px + env(safe-area-inset-left, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
-    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(156px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 768px) {
@@ -425,7 +425,7 @@ body {
         padding-top: calc(12px + env(safe-area-inset-top, 0px));
         padding-left: calc(20px + env(safe-area-inset-left, 0px));
         padding-right: calc(20px + env(safe-area-inset-right, 0px));
-        padding-bottom: 40px;
+        padding-bottom: 100px;
     }
 }
 
@@ -669,12 +669,14 @@ p {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 8px 14px;
+    gap: 8px;
+    padding: 4px 10px;
     background: rgba(245, 166, 35, 0.12);
     border: 1px solid rgba(245, 166, 35, 0.32);
     border-radius: var(--radius-card, 8px);
-    margin: -8px 0 20px;
+    margin: -4px 0 12px;
+    min-height: 32px;
+    box-sizing: border-box;
 }
 
 .demo-mode-indicator.hidden {
@@ -684,19 +686,21 @@ p {
 .demo-mode-indicator-content {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
     flex: 1;
+    overflow: hidden;
 }
 
 .demo-mode-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--budget-warn);
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .demo-mode-badge svg {
@@ -704,20 +708,26 @@ p {
 }
 
 .demo-mode-desc {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+@media (max-width: 380px) {
+    .demo-mode-desc {
+        display: none;
+    }
+}
+
 .btn-demo-banner-exit {
-    padding: 6px 12px;
-    min-height: 44px;
+    padding: 2px 8px;
+    min-height: 24px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     font-family: inherit;
     color: var(--text);
@@ -726,6 +736,16 @@ p {
     border-radius: var(--radius-input, 6px);
     cursor: pointer;
     flex-shrink: 0;
+    position: relative;
+}
+
+.btn-demo-banner-exit::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: -8px;
+    right: -8px;
 }
 
 .btn-demo-banner-exit:hover {
@@ -1067,26 +1087,26 @@ p {
 
 .budget-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    gap: 10px;
     margin-bottom: 14px;
 }
 
+.budget-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
 .budget-header h2,
+.budget-header-top h2,
 .card-title {
     margin: 0;
     font-size: var(--font-size-card-title, 16px);
     font-weight: var(--font-weight-card-title, 600);
     color: var(--text);
-}
-
-.budget-controls-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
 }
 
 .budget-currency-control {
@@ -1108,6 +1128,14 @@ p {
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+.budget-section .budget-month-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    width: 100%;
 }
 
 .btn-month-nav {
@@ -1152,7 +1180,7 @@ p {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px 16px;
+    gap: 8px 14px;
     padding-bottom: 12px;
     margin-bottom: 12px;
     border-bottom: 1px solid var(--border);
@@ -1162,19 +1190,23 @@ p {
 }
 
 .budget-summary-banner-item {
-    display: flex;
-    gap: 4px;
+    display: inline-flex;
+    gap: 5px;
     align-items: baseline;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .budget-summary-banner-item span {
     color: var(--text-secondary);
+    white-space: nowrap;
 }
 
 .budget-summary-banner-item strong {
     font-weight: 600;
     color: var(--text);
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
 .budget-list {

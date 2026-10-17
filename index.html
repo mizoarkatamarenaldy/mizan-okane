@@ -125,22 +125,22 @@
             <!-- Budget Ringkas per Kategori -->
             <section class="budget-section hidden" id="budget-section" aria-labelledby="budget-section-title">
                 <div class="budget-header">
-                    <h2 id="budget-section-title" class="card-title">Budget</h2>
-                    <div class="budget-controls-wrapper">
+                    <div class="budget-header-top">
+                        <h2 id="budget-section-title" class="card-title">Budget</h2>
                         <div id="budget-currency-control" class="type-segmented-control budget-currency-control" role="radiogroup" aria-label="Pilihan mata uang budget">
                             <button type="button" id="btn-budget-currency-idr" class="chart-toggle-btn is-active" data-currency="IDR" aria-pressed="true">Rupiah</button>
                             <button type="button" id="btn-budget-currency-jpy" class="chart-toggle-btn" data-currency="JPY" aria-pressed="false">Yen</button>
                             <button type="button" id="btn-budget-currency-usd" class="chart-toggle-btn" data-currency="USD" aria-pressed="false">Dolar</button>
                         </div>
-                        <div class="budget-month-controls" role="group" aria-label="Pilih bulan budget">
-                            <button type="button" id="btn-budget-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                            </button>
-                            <span id="budget-month-label" class="budget-month-label" aria-live="polite">Okt 2026</span>
-                            <button type="button" id="btn-budget-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="budget-month-controls" role="group" aria-label="Pilih bulan budget">
+                        <button type="button" id="btn-budget-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <span id="budget-month-label" class="budget-month-label" aria-live="polite">Okt 2026</span>
+                        <button type="button" id="btn-budget-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
                     </div>
                 </div>
                 <div id="budget-summary-banner" class="budget-summary-banner hidden" aria-live="polite"></div>

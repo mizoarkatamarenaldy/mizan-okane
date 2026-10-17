@@ -87,6 +87,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Dompet dipilih manual di form transaksi dan transfer
   - [x] Geser urutan dompet dan kategori
   - [x] Penyesuaian saldo di Timbangan
+  - [x] Perbaikan UI: tombol tambah, banner data contoh, header budget
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri
