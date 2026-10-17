@@ -95,6 +95,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Perbaikan UI: grafik bulanan Statistik
   - [x] Ikon neraca di header
   - [x] Statistik: satu bulan terpilih
+  - [x] Statistik: tab Harian, Bulanan, Tahunan
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

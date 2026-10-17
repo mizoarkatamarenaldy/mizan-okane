@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Statistik: tab Harian, Bulanan, Tahunan
+- Ditambah: Tiga tab skala waktu ("Harian", "Bulanan", "Tahunan") di bagian atas halaman Statistik dengan role tablist, tab, tabpanel, aria-selected, dukungan navigasi keyboard (panah kiri/kanan, Home, End, Enter/Spasi), dan target sentuh minimal 44 px sesuai spesifikasi (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Tampilan skala Harian dengan batang per tanggal dari tanggal 1 sampai tanggal terakhir bulan terpilih, hari kosong bernilai nol, serta ringkasan dan diagram donut yang sinkron dengan total bulan terpilih (`js/app.js`, `css/style.css`).
+- Ditambah: Tampilan skala Tahunan dengan navigasi per tahun, batang per tahun dari tahun data paling awal sampai tahun berjalan dengan penanda tahun terpilih, serta diagram donut dan ringkasan kategori untuk tahun terpilih (`js/app.js`, `css/style.css`).
+- Ditambah: State bersama bulan dan tahun yang mempertahankan bulan terpilih saat berpindah ke tab Tahunan dan menggeser tahun, sehingga saat kembali ke Bulanan/Harian bulan tetap sama pada tahun pilihan terakhir (`js/app.js`).
+- Diubah: Navigasi periode bersama otomatis menyesuaikan label dan batasan (tidak bisa melewati bulan berjalan pada Harian/Bulanan atau tahun berjalan pada Tahunan) (`js/app.js`).
+- Diubah: Membuka kembali halaman Statistik dari halaman lain otomatis mengatur ulang tab ke Bulanan pada bulan berjalan (`js/app.js`).
+- Diubah: Mencentang item "Statistik: tab Harian, Bulanan, Tahunan" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Statistik: satu bulan terpilih
 - Ditambah: Navigasi bulan bersama di bagian atas halaman Statistik (`.stats-month-bar`) menggunakan pola navigasi kartu saldo Beranda (`#btn-stats-prev-month`, `#stats-month-label`, `#btn-stats-next-month`) yang mengendalikan grafik pemasukan, grafik pengeluaran, dan diagram donut sekaligus (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Penanda visual yang jelas pada grafik batang bulanan di mana batang untuk bulan yang dipilih ditampilkan dengan warna penuh (`opacity: 1`), label nilai di atas batang dan label bulan menjadi tebal (`font-weight: 700`, `var(--text)`), sementara batang bulan lainnya tampil lebih pudar (`opacity: 0.35`, `var(--text-secondary)`) sesuai token `dev/DESIGN.md` pada tema gelap dan terang (`css/style.css`, `js/app.js`).

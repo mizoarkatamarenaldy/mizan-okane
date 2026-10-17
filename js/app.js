@@ -78,6 +78,11 @@ const inputConfirmDeleteAll = document.getElementById('input-confirm-delete-all'
 const btnDeleteAllCancel = document.getElementById('btn-delete-all-cancel');
 const btnDeleteAllConfirm = document.getElementById('btn-delete-all-confirm');
 
+const tabStatsDaily = document.getElementById('tab-stats-daily');
+const tabStatsMonthly = document.getElementById('tab-stats-monthly');
+const tabStatsYearly = document.getElementById('tab-stats-yearly');
+const statsTabpanel = document.getElementById('stats-tabpanel');
+
 const chartSectionTitle = document.getElementById('chart-section-title');
 const btnChartExpense = document.getElementById('btn-chart-expense');
 const btnChartIncome = document.getElementById('btn-chart-income');
@@ -197,6 +202,7 @@ const LAST_WALLET_KEY = 'mizan-okane:last-wallet-id';
 let currentTimeFormat = DEFAULT_TIME_FORMAT;
 let currentChartType = 'expense';
 let currentDonutType = 'expense';
+let currentStatsScale = 'monthly'; // 'daily' | 'monthly' | 'yearly'
 let selectedBerandaMonth = '';
 let selectedStatsMonth = '';
 let selectedDonutMonth = '';
@@ -324,14 +330,16 @@ function switchTab(tabId) {
     }
 
     if (tabId === 'statistik') {
+        currentStatsScale = 'monthly';
         selectedStatsMonth = getLocalYearMonthString();
         selectedDonutMonth = selectedStatsMonth;
         activeDonutCategory = null;
         statsChartWindowStart = null;
         statsChartWindowEnd = null;
+        updateStatsScaleUI();
         updateStatsMonthNavUI();
         updateStatsCurrencyUI();
-        renderMonthlyChart(currentTransactions);
+        renderStatsChart(currentTransactions);
         renderDonutChart(currentTransactions);
     }
 
@@ -1809,7 +1817,10 @@ function updateChartTypeUI() {
         btnChartIncome.setAttribute('aria-pressed', String(isIncome));
     }
     if (chartSectionTitle) {
-        chartSectionTitle.textContent = isIncome ? 'Grafik Pemasukan Bulanan' : 'Grafik Pengeluaran Bulanan';
+        let scaleWord = 'Bulanan';
+        if (currentStatsScale === 'daily') scaleWord = 'Harian';
+        else if (currentStatsScale === 'yearly') scaleWord = 'Tahunan';
+        chartSectionTitle.textContent = isIncome ? `Grafik Pemasukan ${scaleWord}` : `Grafik Pengeluaran ${scaleWord}`;
     }
 }
 
@@ -2078,8 +2089,476 @@ function renderMonthlyChart(transactions) {
     }
 }
 
+function renderDailyChart(transactions) {
+    if (!chartContainer) return;
+
+    updateChartTypeUI();
+    updateStatsCurrencyUI();
+
+    const isIncome = currentChartType === 'income';
+    const typeLabel = isIncome ? 'pemasukan' : 'pengeluaran';
+
+    if (!selectedStatsMonth) {
+        selectedStatsMonth = getLocalYearMonthString();
+    }
+    selectedDonutMonth = selectedStatsMonth;
+
+    const [activeYStr, activeMStr] = selectedStatsMonth.split('-');
+    const activeY = parseInt(activeYStr, 10);
+    const activeM = parseInt(activeMStr, 10);
+    const fullMonthLabel = `${INDO_MONTHS_FULL[activeM - 1]} ${activeY}`;
+
+    // Filter transaksi aktif untuk tipe dan mata uang
+    const chartTx = (transactions || []).filter(tx => 
+        tx.type === currentChartType && 
+        tx.type !== 'transfer' && 
+        !tx.deleted && 
+        tx.amount > 0 &&
+        getTransactionCurrency(tx) === currentStatsCurrency &&
+        tx.date
+    );
+
+    if (chartTx.length === 0) {
+        chartContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada transaksi ${typeLabel}.</p>
+                <button type="button" class="btn-action-outline" id="btn-empty-chart-tx">Tambah Transaksi</button>
+            </div>
+        `;
+        if (chartSummaryText) chartSummaryText.textContent = '';
+        if (chartDetail) {
+            chartDetail.textContent = '';
+            chartDetail.classList.add('hidden');
+        }
+        const btnEmptyChart = document.getElementById('btn-empty-chart-tx');
+        if (btnEmptyChart) {
+            btnEmptyChart.addEventListener('click', () => {
+                resetForm();
+                openFormScreen();
+            });
+        }
+        return;
+    }
+
+    if (chartDetail) {
+        chartDetail.classList.remove('hidden');
+    }
+
+    // Hitung jumlah hari dalam bulan terpilih
+    const daysInMonth = new Date(activeY, activeM, 0).getDate();
+    const dayData = new Map();
+    for (let d = 1; d <= daysInMonth; d++) {
+        dayData.set(d, { total: 0, count: 0 });
+    }
+
+    const targetMonthTx = chartTx.filter(tx => {
+        const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
+        if (!match) return false;
+        const year = match[1];
+        const month = String(parseInt(match[2], 10)).padStart(2, '0');
+        return `${year}-${month}` === selectedStatsMonth;
+    });
+
+    for (const tx of targetMonthTx) {
+        const match = tx.date.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (!match) continue;
+        const d = parseInt(match[3], 10);
+        if (dayData.has(d)) {
+            const item = dayData.get(d);
+            item.total += tx.amount;
+            if (currentStatsCurrency === 'USD') {
+                item.total = Math.round(item.total * 100) / 100;
+            } else {
+                item.total = Math.round(item.total);
+            }
+            item.count += 1;
+        }
+    }
+
+    let totalAmountMonth = 0;
+    let maxDayAmount = 0;
+    let daysWithAmount = 0;
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const item = dayData.get(d);
+        totalAmountMonth += item.total;
+        if (item.total > maxDayAmount) {
+            maxDayAmount = item.total;
+        }
+        if (item.total > 0) {
+            daysWithAmount++;
+        }
+    }
+
+    totalAmountMonth = currentStatsCurrency === 'USD' ? Math.round(totalAmountMonth * 100) / 100 : Math.round(totalAmountMonth);
+    const avgAmount = daysWithAmount > 0
+        ? (currentStatsCurrency === 'USD' ? Math.round((totalAmountMonth / daysWithAmount) * 100) / 100 : Math.round(totalAmountMonth / daysWithAmount))
+        : 0;
+
+    if (chartSummaryText) {
+        chartSummaryText.textContent = `Rata-rata: ${currencyFormatter.format(avgAmount, currentStatsCurrency)} / hari`;
+    }
+
+    const amountClass = isIncome ? 'chart-detail-amount income' : 'chart-detail-amount';
+    const emptyLabel = isIncome ? '(tidak ada pemasukan)' : '(tidak ada pengeluaran)';
+    chartDetail.innerHTML = `
+        <span class="chart-detail-month">${fullMonthLabel}:</span>
+        <strong class="${amountClass} tabular-nums">${currencyFormatter.format(totalAmountMonth, currentStatsCurrency)}</strong>
+        <span class="chart-detail-count">${targetMonthTx.length > 0 ? `(${targetMonthTx.length} transaksi)` : emptyLabel}</span>
+    `;
+
+    const ceiling = getNiceCeiling(maxDayAmount);
+    const midCeiling = ceiling / 2;
+
+    const svgHeight = 220;
+    const paddingTop = 26;
+    const paddingBottom = 34;
+    const paddingLeft = 56;
+    const paddingRight = 16;
+    const plotHeight = svgHeight - paddingTop - paddingBottom;
+    const baselineY = paddingTop + plotHeight;
+
+    const n = daysInMonth;
+    const slotWidth = 32;
+    const svgWidth = paddingLeft + paddingRight + n * slotWidth;
+
+    const chartSvgClass = isIncome ? 'expense-chart daily-chart is-income' : 'expense-chart daily-chart is-expense';
+    const chartAriaLabel = `Grafik total ${typeLabel} per tanggal`;
+
+    let svgHtml = `
+        <svg class="${chartSvgClass}"
+             viewBox="0 0 ${svgWidth} ${svgHeight}"
+             width="${svgWidth}px"
+             height="${svgHeight}px"
+             role="img"
+             aria-label="${chartAriaLabel}">
+            <line class="chart-grid-line" x1="${paddingLeft}" y1="${paddingTop}" x2="${svgWidth - paddingRight}" y2="${paddingTop}" />
+            <text class="chart-axis-label" x="${paddingLeft - 8}" y="${paddingTop + 4}" text-anchor="end">${formatCompactCurrency(ceiling)}</text>
+
+            <line class="chart-grid-line" x1="${paddingLeft}" y1="${paddingTop + plotHeight / 2}" x2="${svgWidth - paddingRight}" y2="${paddingTop + plotHeight / 2}" />
+            <text class="chart-axis-label" x="${paddingLeft - 8}" y="${paddingTop + plotHeight / 2 + 4}" text-anchor="end">${formatCompactCurrency(midCeiling)}</text>
+
+            <line class="chart-axis-line" x1="${paddingLeft}" y1="${baselineY}" x2="${svgWidth - paddingRight}" y2="${baselineY}" />
+            <text class="chart-axis-label" x="${paddingLeft - 8}" y="${baselineY + 4}" text-anchor="end">0</text>
+    `;
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const cx = paddingLeft + (d - 1 + 0.5) * slotWidth;
+        const barWidth = 16;
+        const barX = cx - barWidth / 2;
+        const item = dayData.get(d);
+        const amount = item ? item.total : 0;
+        const rawBarHeight = ceiling > 0 ? (amount / ceiling) * plotHeight : 0;
+        const barHeight = amount > 0 ? Math.max(3, rawBarHeight) : 0;
+        const barY = baselineY - barHeight;
+
+        const labelY = Math.max(16, barY - 6);
+        const topLabel = amount > 0 ? formatCompactCurrency(amount) : '';
+
+        svgHtml += `
+            <g class="chart-bar-group"
+               data-day="${d}"
+               aria-label="${d} ${fullMonthLabel}: ${currencyFormatter.format(amount, currentStatsCurrency)}">
+                <rect class="chart-hit-area" x="${paddingLeft + (d - 1) * slotWidth}" y="0" width="${slotWidth}" height="${svgHeight}" fill="transparent" />
+                <rect class="chart-bar" x="${barX}" y="${barY}" width="${barWidth}" height="${barHeight}" rx="3" ry="3" />
+                ${topLabel ? `<text class="chart-bar-value" x="${cx}" y="${labelY}" text-anchor="middle">${topLabel}</text>` : ''}
+                <text class="chart-month-label" x="${cx}" y="${baselineY + 18}" text-anchor="middle">${d}</text>
+            </g>
+        `;
+    }
+
+    svgHtml += `</svg>`;
+    chartContainer.innerHTML = svgHtml;
+
+    requestAnimationFrame(() => {
+        if (selectedStatsMonth === getLocalYearMonthString()) {
+            const today = new Date().getDate();
+            const targetScroll = Math.max(0, paddingLeft + (today - 1) * slotWidth - (chartContainer.clientWidth / 2));
+            chartContainer.scrollLeft = targetScroll;
+        } else {
+            chartContainer.scrollLeft = 0;
+        }
+    });
+}
+
+function renderYearlyChart(transactions) {
+    if (!chartContainer) return;
+
+    updateChartTypeUI();
+    updateStatsCurrencyUI();
+
+    const isIncome = currentChartType === 'income';
+    const typeLabel = isIncome ? 'pemasukan' : 'pengeluaran';
+
+    if (!selectedStatsMonth) {
+        selectedStatsMonth = getLocalYearMonthString();
+    }
+    const [selectedYStr] = selectedStatsMonth.split('-');
+    const selectedYear = parseInt(selectedYStr, 10);
+
+    const currMonthStr = getLocalYearMonthString();
+    const currYear = parseInt(currMonthStr.split('-')[0], 10);
+
+    // Filter transaksi aktif untuk tipe dan mata uang
+    const chartTx = (transactions || []).filter(tx => 
+        tx.type === currentChartType && 
+        tx.type !== 'transfer' && 
+        !tx.deleted && 
+        tx.amount > 0 &&
+        getTransactionCurrency(tx) === currentStatsCurrency &&
+        tx.date
+    );
+
+    if (chartTx.length === 0) {
+        chartContainer.innerHTML = `
+            <div class="empty-state">
+                <p class="empty-state-text">Belum ada transaksi ${typeLabel}.</p>
+                <button type="button" class="btn-action-outline" id="btn-empty-chart-tx">Tambah Transaksi</button>
+            </div>
+        `;
+        if (chartSummaryText) chartSummaryText.textContent = '';
+        if (chartDetail) {
+            chartDetail.textContent = '';
+            chartDetail.classList.add('hidden');
+        }
+        const btnEmptyChart = document.getElementById('btn-empty-chart-tx');
+        if (btnEmptyChart) {
+            btnEmptyChart.addEventListener('click', () => {
+                resetForm();
+                openFormScreen();
+            });
+        }
+        return;
+    }
+
+    if (chartDetail) {
+        chartDetail.classList.remove('hidden');
+    }
+
+    let earliestYear = currYear;
+    for (const tx of chartTx) {
+        const match = tx.date.match(/^(\d{4})/);
+        if (match) {
+            const y = parseInt(match[1], 10);
+            if (y < earliestYear) {
+                earliestYear = y;
+            }
+        }
+    }
+
+    const startYear = Math.min(earliestYear, selectedYear);
+    const endYear = currYear;
+
+    const displayYears = [];
+    for (let y = startYear; y <= endYear; y++) {
+        displayYears.push(y);
+    }
+
+    const yearData = new Map();
+    for (const y of displayYears) {
+        yearData.set(y, { total: 0, count: 0 });
+    }
+
+    for (const tx of chartTx) {
+        const match = tx.date.match(/^(\d{4})/);
+        if (!match) continue;
+        const y = parseInt(match[1], 10);
+        if (yearData.has(y)) {
+            const item = yearData.get(y);
+            item.total += tx.amount;
+            if (currentStatsCurrency === 'USD') {
+                item.total = Math.round(item.total * 100) / 100;
+            } else {
+                item.total = Math.round(item.total);
+            }
+            item.count += 1;
+        }
+    }
+
+    let totalAmountAll = 0;
+    let maxYearAmount = 0;
+    let yearsWithAmount = 0;
+
+    for (const y of displayYears) {
+        const item = yearData.get(y);
+        totalAmountAll += item.total;
+        if (item.total > maxYearAmount) {
+            maxYearAmount = item.total;
+        }
+        if (item.total > 0) {
+            yearsWithAmount++;
+        }
+    }
+
+    totalAmountAll = currentStatsCurrency === 'USD' ? Math.round(totalAmountAll * 100) / 100 : Math.round(totalAmountAll);
+    const avgAmount = yearsWithAmount > 0
+        ? (currentStatsCurrency === 'USD' ? Math.round((totalAmountAll / yearsWithAmount) * 100) / 100 : Math.round(totalAmountAll / yearsWithAmount))
+        : 0;
+
+    if (chartSummaryText) {
+        chartSummaryText.textContent = `Rata-rata: ${currencyFormatter.format(avgAmount, currentStatsCurrency)} / tahun`;
+    }
+
+    const selectedYearItem = yearData.get(selectedYear) || { total: 0, count: 0 };
+    const amountClass = isIncome ? 'chart-detail-amount income' : 'chart-detail-amount';
+    const emptyLabel = isIncome ? '(tidak ada pemasukan)' : '(tidak ada pengeluaran)';
+    chartDetail.innerHTML = `
+        <span class="chart-detail-month">${selectedYear}:</span>
+        <strong class="${amountClass} tabular-nums">${currencyFormatter.format(selectedYearItem.total, currentStatsCurrency)}</strong>
+        <span class="chart-detail-count">${selectedYearItem.count > 0 ? `(${selectedYearItem.count} transaksi)` : emptyLabel}</span>
+    `;
+
+    const ceiling = getNiceCeiling(maxYearAmount);
+    const midCeiling = ceiling / 2;
+
+    const svgHeight = 220;
+    const paddingTop = 26;
+    const paddingBottom = 34;
+    const paddingLeft = 56;
+    const paddingRight = 16;
+    const plotHeight = svgHeight - paddingTop - paddingBottom;
+    const baselineY = paddingTop + plotHeight;
+
+    const n = displayYears.length;
+    const isScrollable = n > 6;
+    const slotWidth = isScrollable ? 64 : (520 - paddingLeft - paddingRight) / Math.max(1, n);
+    const svgWidth = isScrollable ? (paddingLeft + paddingRight + n * slotWidth) : 520;
+
+    const chartSvgClass = isIncome ? 'expense-chart yearly-chart is-income' : 'expense-chart yearly-chart is-expense';
+    const chartAriaLabel = `Grafik total ${typeLabel} per tahun`;
+
+    let svgHtml = `
+        <svg class="${chartSvgClass}"
+             viewBox="0 0 ${svgWidth} ${svgHeight}"
+             width="${isScrollable ? svgWidth + 'px' : '100%'}"
+             height="${isScrollable ? svgHeight + 'px' : 'auto'}"
+             role="img"
+             aria-label="${chartAriaLabel}">
+            <line class="chart-grid-line" x1="${paddingLeft}" y1="${paddingTop}" x2="${svgWidth - paddingRight}" y2="${paddingTop}" />
+            <text class="chart-axis-label" x="${paddingLeft - 8}" y="${paddingTop + 4}" text-anchor="end">${formatCompactCurrency(ceiling)}</text>
+
+            <line class="chart-grid-line" x1="${paddingLeft}" y1="${paddingTop + plotHeight / 2}" x2="${svgWidth - paddingRight}" y2="${paddingTop + plotHeight / 2}" />
+            <text class="chart-axis-label" x="${paddingLeft - 8}" y="${paddingTop + plotHeight / 2 + 4}" text-anchor="end">${formatCompactCurrency(midCeiling)}</text>
+
+            <line class="chart-axis-line" x1="${paddingLeft}" y1="${baselineY}" x2="${svgWidth - paddingRight}" y2="${baselineY}" />
+            <text class="chart-axis-label" x="${paddingLeft - 8}" y="${baselineY + 4}" text-anchor="end">0</text>
+    `;
+
+    displayYears.forEach((y, index) => {
+        const cx = paddingLeft + (index + 0.5) * slotWidth;
+        const barWidth = Math.min(36, Math.max(16, slotWidth * 0.52));
+        const barX = cx - barWidth / 2;
+        const item = yearData.get(y);
+        const amount = item ? item.total : 0;
+        const rawBarHeight = ceiling > 0 ? (amount / ceiling) * plotHeight : 0;
+        const barHeight = amount > 0 ? Math.max(3, rawBarHeight) : 0;
+        const barY = baselineY - barHeight;
+        const isSelected = y === selectedYear;
+
+        const labelY = Math.max(16, barY - 6);
+        const topLabel = amount > 0 ? formatCompactCurrency(amount) : '';
+
+        svgHtml += `
+            <g class="chart-bar-group ${isSelected ? 'is-selected' : ''}"
+               data-year="${y}"
+               aria-label="${y}: ${currencyFormatter.format(amount, currentStatsCurrency)}">
+                <rect class="chart-hit-area" x="${paddingLeft + index * slotWidth}" y="0" width="${slotWidth}" height="${svgHeight}" fill="transparent" />
+                <rect class="chart-bar" x="${barX}" y="${barY}" width="${barWidth}" height="${barHeight}" rx="3" ry="3" />
+                ${topLabel ? `<text class="chart-bar-value" x="${cx}" y="${labelY}" text-anchor="middle">${topLabel}</text>` : ''}
+                <text class="chart-month-label" x="${cx}" y="${baselineY + 18}" text-anchor="middle">${y}</text>
+            </g>
+        `;
+    });
+
+    svgHtml += `</svg>`;
+    chartContainer.innerHTML = svgHtml;
+
+    if (isScrollable) {
+        requestAnimationFrame(() => {
+            chartContainer.scrollLeft = chartContainer.scrollWidth;
+        });
+    }
+}
+
+function renderStatsChart(transactions) {
+    if (currentStatsScale === 'daily') {
+        renderDailyChart(transactions);
+    } else if (currentStatsScale === 'yearly') {
+        renderYearlyChart(transactions);
+    } else {
+        renderMonthlyChart(transactions);
+    }
+}
+
 function renderExpenseChart(transactions) {
-    renderMonthlyChart(transactions);
+    renderStatsChart(transactions);
+}
+
+function updateStatsScaleUI() {
+    const tabs = [
+        { el: tabStatsDaily, scale: 'daily' },
+        { el: tabStatsMonthly, scale: 'monthly' },
+        { el: tabStatsYearly, scale: 'yearly' }
+    ];
+    tabs.forEach(({ el, scale }) => {
+        if (!el) return;
+        const isActive = currentStatsScale === scale;
+        el.classList.toggle('is-active', isActive);
+        el.setAttribute('aria-selected', String(isActive));
+        el.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+
+    if (statsTabpanel) {
+        let activeTabId = 'tab-stats-monthly';
+        if (currentStatsScale === 'daily') activeTabId = 'tab-stats-daily';
+        else if (currentStatsScale === 'yearly') activeTabId = 'tab-stats-yearly';
+        statsTabpanel.setAttribute('aria-labelledby', activeTabId);
+    }
+}
+
+function setStatsScale(scale) {
+    if (scale !== 'daily' && scale !== 'monthly' && scale !== 'yearly') return;
+    if (currentStatsScale === scale) return;
+    currentStatsScale = scale;
+    activeDonutCategory = null;
+    updateStatsScaleUI();
+    updateStatsMonthNavUI();
+    renderStatsChart(currentTransactions);
+    renderDonutChart(currentTransactions);
+}
+
+function initStatsScaleTabs() {
+    const tabs = [tabStatsDaily, tabStatsMonthly, tabStatsYearly].filter(Boolean);
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+            const scale = tab.dataset.scale;
+            if (scale) setStatsScale(scale);
+        });
+
+        tab.addEventListener('keydown', (e) => {
+            let nextIndex = null;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                nextIndex = (index + 1) % tabs.length;
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                nextIndex = (index - 1 + tabs.length) % tabs.length;
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                nextIndex = 0;
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                nextIndex = tabs.length - 1;
+            }
+
+            if (nextIndex !== null) {
+                const nextTab = tabs[nextIndex];
+                nextTab.focus();
+                const scale = nextTab.dataset.scale;
+                if (scale) setStatsScale(scale);
+            }
+        });
+    });
 }
 
 function updateStatsMonthNavUI() {
@@ -2087,19 +2566,55 @@ function updateStatsMonthNavUI() {
         selectedStatsMonth = getLocalYearMonthString();
     }
     const currentMonth = getLocalYearMonthString();
-    if (statsMonthLabel) {
-        const [yStr, mStr] = selectedStatsMonth.split('-');
-        const mNum = parseInt(mStr, 10);
-        const monthName = INDO_MONTHS_FULL[mNum - 1] || '';
-        statsMonthLabel.textContent = `${monthName} ${yStr}`;
-    }
-    if (btnStatsNextMonth) {
-        const isCurrentOrFuture = selectedStatsMonth >= currentMonth;
-        btnStatsNextMonth.disabled = isCurrentOrFuture;
-        if (isCurrentOrFuture) {
-            btnStatsNextMonth.setAttribute('aria-disabled', 'true');
-        } else {
-            btnStatsNextMonth.removeAttribute('aria-disabled');
+    const [currYStr, currMStr] = currentMonth.split('-');
+    const currY = parseInt(currYStr, 10);
+    const [yStr, mStr] = selectedStatsMonth.split('-');
+    const mNum = parseInt(mStr, 10);
+    const yNum = parseInt(yStr, 10);
+
+    const statsMonthControls = document.querySelector('.stats-month-controls');
+
+    if (currentStatsScale === 'yearly') {
+        if (statsMonthLabel) {
+            statsMonthLabel.textContent = `${yStr}`;
+        }
+        if (statsMonthControls) {
+            statsMonthControls.setAttribute('aria-label', 'Pilih tahun statistik');
+        }
+        if (btnStatsPrevMonth) {
+            btnStatsPrevMonth.setAttribute('aria-label', 'Tahun sebelumnya');
+        }
+        if (btnStatsNextMonth) {
+            btnStatsNextMonth.setAttribute('aria-label', 'Tahun berikutnya');
+            const isCurrentOrFuture = yNum >= currY;
+            btnStatsNextMonth.disabled = isCurrentOrFuture;
+            if (isCurrentOrFuture) {
+                btnStatsNextMonth.setAttribute('aria-disabled', 'true');
+            } else {
+                btnStatsNextMonth.removeAttribute('aria-disabled');
+            }
+        }
+    } else {
+        // daily or monthly
+        if (statsMonthLabel) {
+            const monthName = INDO_MONTHS_FULL[mNum - 1] || '';
+            statsMonthLabel.textContent = `${monthName} ${yStr}`;
+        }
+        if (statsMonthControls) {
+            statsMonthControls.setAttribute('aria-label', 'Pilih bulan statistik');
+        }
+        if (btnStatsPrevMonth) {
+            btnStatsPrevMonth.setAttribute('aria-label', 'Bulan sebelumnya');
+        }
+        if (btnStatsNextMonth) {
+            btnStatsNextMonth.setAttribute('aria-label', 'Bulan berikutnya');
+            const isCurrentOrFuture = selectedStatsMonth >= currentMonth;
+            btnStatsNextMonth.disabled = isCurrentOrFuture;
+            if (isCurrentOrFuture) {
+                btnStatsNextMonth.setAttribute('aria-disabled', 'true');
+            } else {
+                btnStatsNextMonth.removeAttribute('aria-disabled');
+            }
         }
     }
 }
@@ -2109,29 +2624,51 @@ function shiftStatsMonth(delta) {
         selectedStatsMonth = getLocalYearMonthString();
     }
     const currentMonth = getLocalYearMonthString();
-    if (delta > 0 && selectedStatsMonth >= currentMonth) {
-        return;
-    }
+    const [currYStr, currMStr] = currentMonth.split('-');
+    const currY = parseInt(currYStr, 10);
+    const currM = parseInt(currMStr, 10);
+
     const [yStr, mStr] = selectedStatsMonth.split('-');
     let y = parseInt(yStr, 10);
-    let m = parseInt(mStr, 10) + delta;
-    if (m < 1) {
-        m = 12;
-        y--;
-    } else if (m > 12) {
-        m = 1;
-        y++;
-    }
-    const nextMonthStr = `${y}-${String(m).padStart(2, '0')}`;
-    if (delta > 0 && nextMonthStr > currentMonth) {
-        selectedStatsMonth = currentMonth;
+    let m = parseInt(mStr, 10);
+
+    if (currentStatsScale === 'yearly') {
+        if (delta > 0 && y >= currY) {
+            return;
+        }
+        y += delta;
+        if (delta > 0 && y > currY) {
+            y = currY;
+        }
+        if (y === currY && m > currM) {
+            m = currM;
+        }
+        selectedStatsMonth = `${y}-${String(m).padStart(2, '0')}`;
     } else {
-        selectedStatsMonth = nextMonthStr;
+        // daily or monthly
+        if (delta > 0 && selectedStatsMonth >= currentMonth) {
+            return;
+        }
+        m += delta;
+        if (m < 1) {
+            m = 12;
+            y--;
+        } else if (m > 12) {
+            m = 1;
+            y++;
+        }
+        const nextMonthStr = `${y}-${String(m).padStart(2, '0')}`;
+        if (delta > 0 && nextMonthStr > currentMonth) {
+            selectedStatsMonth = currentMonth;
+        } else {
+            selectedStatsMonth = nextMonthStr;
+        }
     }
+
     selectedDonutMonth = selectedStatsMonth;
     activeDonutCategory = null;
     updateStatsMonthNavUI();
-    renderMonthlyChart(currentTransactions);
+    renderStatsChart(currentTransactions);
     renderDonutChart(currentTransactions);
 }
 
@@ -2167,10 +2704,12 @@ function renderDonutChart(transactions) {
 
     const isIncome = currentDonutType === 'income';
     const typeLabel = isIncome ? 'pemasukan' : 'pengeluaran';
+    const periodLabel = currentStatsScale === 'yearly' ? 'tahun ini' : 'bulan ini';
+    const [selectedYStr] = selectedStatsMonth.split('-');
 
-    // Filter transaksi untuk bulan yang dipilih sesuai tipe (pengeluaran atau pemasukan),
+    // Filter transaksi untuk periode yang dipilih sesuai tipe (pengeluaran atau pemasukan),
     // transfer antar dompet tidak dihitung, tidak terhapus, jumlah > 0, dan mata uang sesuai pilihan statistik
-    const monthTx = (transactions || []).filter(tx => {
+    const periodTx = (transactions || []).filter(tx => {
         if (tx.type !== currentDonutType) return false;
         if (tx.type === 'transfer') return false;
         if (tx.deleted) return false;
@@ -2181,13 +2720,16 @@ function renderDonutChart(transactions) {
         if (!match) return false;
         const year = match[1];
         const month = String(parseInt(match[2], 10)).padStart(2, '0');
+        if (currentStatsScale === 'yearly') {
+            return year === selectedYStr;
+        }
         return `${year}-${month}` === selectedStatsMonth;
     });
 
-    if (monthTx.length === 0) {
+    if (periodTx.length === 0) {
         donutContainer.innerHTML = `
             <div class="empty-state">
-                <p class="empty-state-text">Belum ada transaksi ${typeLabel} pada bulan ini.</p>
+                <p class="empty-state-text">Belum ada transaksi ${typeLabel} pada ${periodLabel}.</p>
                 <button type="button" class="btn-action-outline" id="btn-empty-donut-tx">Tambah Transaksi</button>
             </div>
         `;
@@ -2209,7 +2751,7 @@ function renderDonutChart(transactions) {
     // Kelompokkan per kategori
     const categoryMap = new Map();
     let totalAmount = 0;
-    for (const tx of monthTx) {
+    for (const tx of periodTx) {
         const cat = (tx.category && tx.category.trim()) ? tx.category.trim() : 'Lainnya';
         const item = categoryMap.get(cat) || { amount: 0, count: 0 };
         item.amount += tx.amount;
@@ -2226,7 +2768,7 @@ function renderDonutChart(transactions) {
     if (totalAmount <= 0) {
         donutContainer.innerHTML = `
             <div class="empty-state">
-                <p class="empty-state-text">Belum ada transaksi ${typeLabel} pada bulan ini.</p>
+                <p class="empty-state-text">Belum ada transaksi ${typeLabel} pada ${periodLabel}.</p>
                 <button type="button" class="btn-action-outline" id="btn-empty-donut-tx">Tambah Transaksi</button>
             </div>
         `;
@@ -2280,10 +2822,10 @@ function renderDonutChart(transactions) {
             donutDetail.innerHTML = `
                 <span class="chart-detail-month">Total ${typeLabel}:</span>
                 <strong class="${amountClass} tabular-nums">${currencyFormatter.format(totalAmount, currentStatsCurrency)}</strong>
-                <span class="chart-detail-count">(${sortedCategories.length} kategori, ${monthTx.length} transaksi)</span>
+                <span class="chart-detail-count">(${sortedCategories.length} kategori, ${periodTx.length} transaksi)</span>
             `;
         } else {
-            const catTransactions = monthTx.filter(tx => ((tx.category && tx.category.trim()) ? tx.category.trim() : 'Lainnya') === catItem.category);
+            const catTransactions = periodTx.filter(tx => ((tx.category && tx.category.trim()) ? tx.category.trim() : 'Lainnya') === catItem.category);
             const subcatMap = new Map();
             let noSubAmount = 0;
             let noSubCount = 0;
@@ -4081,8 +4623,9 @@ function render() {
         }
     }
 
+    updateStatsScaleUI();
     updateStatsMonthNavUI();
-    renderMonthlyChart(currentTransactions);
+    renderStatsChart(currentTransactions);
     renderBudgetSection();
     renderDonutChart(currentTransactions);
     renderTimbangan();
@@ -6469,7 +7012,7 @@ async function handleImportJson(file) {
             await markDirty();
             render();
             if (currentTransactions && currentTransactions.length > 0) {
-                renderMonthlyChart(currentTransactions);
+                renderStatsChart(currentTransactions);
                 renderDonutChart(currentTransactions);
                 renderTimbangan();
             }
@@ -6638,6 +7181,7 @@ export async function performFillDummy() {
         currentWalletFilter = 'all';
         currentHistoryMonthFilter = '';
         selectedBerandaMonth = '';
+        currentStatsScale = 'monthly';
         selectedStatsMonth = '';
         selectedDonutMonth = '';
         statsChartWindowStart = null;
@@ -6661,6 +7205,7 @@ export async function performExitDummy() {
         currentWalletFilter = 'all';
         currentHistoryMonthFilter = '';
         selectedBerandaMonth = '';
+        currentStatsScale = 'monthly';
         selectedStatsMonth = '';
         selectedDonutMonth = '';
         statsChartWindowStart = null;
@@ -6774,6 +7319,7 @@ export async function performDeleteAllData() {
         currentHistoryMonthFilter = '';
         currentChartType = 'expense';
         currentDonutType = 'expense';
+        currentStatsScale = 'monthly';
         selectedBerandaMonth = '';
         selectedStatsMonth = '';
         selectedDonutMonth = '';
@@ -7293,7 +7839,7 @@ async function init() {
             if (currentStatsCurrency !== 'IDR') {
                 currentStatsCurrency = 'IDR';
                 updateStatsCurrencyUI();
-                renderMonthlyChart(currentTransactions);
+                renderStatsChart(currentTransactions);
                 renderDonutChart(currentTransactions);
             }
         });
@@ -7305,7 +7851,7 @@ async function init() {
             if (currentStatsCurrency !== 'JPY') {
                 currentStatsCurrency = 'JPY';
                 updateStatsCurrencyUI();
-                renderMonthlyChart(currentTransactions);
+                renderStatsChart(currentTransactions);
                 renderDonutChart(currentTransactions);
             }
         });
@@ -7317,7 +7863,7 @@ async function init() {
             if (currentStatsCurrency !== 'USD') {
                 currentStatsCurrency = 'USD';
                 updateStatsCurrencyUI();
-                renderMonthlyChart(currentTransactions);
+                renderStatsChart(currentTransactions);
                 renderDonutChart(currentTransactions);
             }
         });
@@ -7374,7 +7920,7 @@ async function init() {
         btnChartExpense.addEventListener('click', () => {
             if (currentChartType !== 'expense') {
                 currentChartType = 'expense';
-                renderMonthlyChart(currentTransactions);
+                renderStatsChart(currentTransactions);
             }
         });
     }
@@ -7383,7 +7929,7 @@ async function init() {
         btnChartIncome.addEventListener('click', () => {
             if (currentChartType !== 'income') {
                 currentChartType = 'income';
-                renderMonthlyChart(currentTransactions);
+                renderStatsChart(currentTransactions);
             }
         });
     }
@@ -7395,6 +7941,8 @@ async function init() {
     if (btnStatsNextMonth) {
         btnStatsNextMonth.addEventListener('click', () => shiftStatsMonth(1));
     }
+
+    initStatsScaleTabs();
 
     if (btnDonutExpense) {
         btnDonutExpense.addEventListener('click', () => {
@@ -7540,7 +8088,7 @@ async function init() {
                     }
                     applyThemeUI(newTheme);
                     if (currentTransactions && currentTransactions.length > 0) {
-                        renderMonthlyChart(currentTransactions);
+                        renderStatsChart(currentTransactions);
                         renderDonutChart(currentTransactions);
                         renderTimbangan();
                     }
@@ -7561,7 +8109,7 @@ async function init() {
             if (getStoredTheme() === 'system') {
                 applyTheme('system');
                 if (currentTransactions && currentTransactions.length > 0) {
-                    renderMonthlyChart(currentTransactions);
+                    renderStatsChart(currentTransactions);
                     renderDonutChart(currentTransactions);
                     renderTimbangan();
                 }

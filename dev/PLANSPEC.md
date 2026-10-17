@@ -916,3 +916,39 @@ Cek manual:
 - Pilih bulan yang jauh ke belakang (di luar rentang grafik awal): rentang grafik bergeser dan batang bulan itu tetap terlihat dengan penanda.
 - Pindah ke halaman lain lalu kembali ke Statistik: bulan awal kembali ke bulan berjalan, tidak error.
 - Mode gelap: penanda batang tetap jelas dan teks tetap terbaca.
+
+## Statistik: tab Harian, Bulanan, Tahunan
+
+Tujuan: Pengguna bisa melihat statistik pemasukan dan pengeluaran dalam tiga skala waktu: per hari, per bulan, dan per tahun. Item ini melanjutkan "Statistik: satu bulan terpilih", jadi buka bagian itu di dev/PLANSPEC.md untuk melihat perilaku navigasi bulan bersama yang sudah ada.
+
+Tempat dan tampilan:
+- Halaman Statistik. Tiga tab di bagian atas halaman: "Harian", "Bulanan", "Tahunan". Tab "Bulanan" aktif saat halaman dibuka.
+- Di bawah tab ada navigasi periode (tombol sebelumnya, label periode, tombol berikutnya) memakai komponen navigasi bulan yang sudah ada.
+- Tab Bulanan: persis perilaku sekarang (navigasi bulan, grafik batang pemasukan dan pengeluaran per bulan dengan penanda bulan terpilih, donut untuk bulan terpilih). Tidak ada perubahan di tab ini.
+- Tab Harian: navigasi bulan. Grafik batang pemasukan dan grafik batang pengeluaran menampilkan satu batang per tanggal, dari tanggal 1 sampai tanggal terakhir bulan terpilih. Hari tanpa transaksi tampil sebagai batang nol. Donut dan ringkasan kategori menampilkan bulan terpilih.
+- Tab Tahunan: navigasi tahun (label hanya tahun, misalnya "2026"). Grafik batang pemasukan dan pengeluaran menampilkan satu batang per tahun, mulai dari tahun transaksi paling awal sampai tahun berjalan, dengan penanda pada tahun terpilih. Donut dan ringkasan kategori menampilkan tahun terpilih.
+- Tab memakai semantik tab yang benar (role tablist, tab, tabpanel, aria-selected) dan bisa dipakai dengan keyboard sesuai perbaikan semantik yang sudah ada. Target sentuh tiap tab minimal 44 px.
+
+Aturan:
+- Bulan dan tahun terpilih disimpan dalam satu state bersama. Pindah dari Bulanan atau Harian ke Tahunan memakai tahun dari bulan terpilih. Mengganti tahun di tab Tahunan menggeser tahun pada state itu dan bulannya tetap. Pindah kembali ke Bulanan atau Harian memakai bulan yang sama dengan tahun hasil pilihan terakhir.
+- Saat halaman Statistik dibuka kembali setelah pindah halaman, tab kembali ke Bulanan dan periode kembali ke bulan berjalan.
+- Tombol berikutnya tidak bisa melewati bulan berjalan (tab Bulanan dan Harian) atau tahun berjalan (tab Tahunan).
+- Tanggal transaksi dibaca dengan cara yang sama seperti fitur lain di aplikasi (tanggal lokal), supaya total harian cocok dengan Riwayat.
+- Perilaku per mata uang tetap seperti sekarang, tidak ada konversi nilai antar mata uang.
+- Transfer antar dompet tetap tidak dihitung sebagai pemasukan atau pengeluaran.
+- Total donut harus sama dengan jumlah semua batang pada periode yang sama di grafik.
+- Tidak ada kustomisasi rentang tanggal bebas, tidak ada ekspor grafik, dan batang tidak bisa diklik. Hal itu sengaja TIDAK dilakukan di item ini.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Statistik: tab Bulanan aktif dan tampilan sama seperti sebelum item ini.
+- Pindah ke tab Harian pada bulan yang punya transaksi: batang muncul per tanggal, hari kosong bernilai nol, dan jumlah semua batang pengeluaran sama dengan total pengeluaran bulan itu di donut dan di ringkasan Riwayat bulan itu.
+- Di tab Harian, tekan tombol sebelumnya: bulan berganti dan jumlah batang menyesuaikan panjang bulan (misalnya 28 atau 29 untuk Februari, 30 atau 31 untuk bulan lain).
+- Pindah ke tab Tahunan: label periode berupa tahun, batang per tahun muncul dengan penanda pada tahun terpilih, donut menampilkan total setahun. Tombol berikutnya tidak bisa melewati tahun berjalan.
+- Di tab Tahunan, pindah ke tahun sebelumnya lalu kembali ke tab Bulanan: bulan yang tampil adalah bulan yang sama di tahun hasil pilihan terakhir.
+- Pindah ke halaman lain lalu kembali ke Statistik: tab kembali ke Bulanan pada bulan berjalan.
+- Tes dengan data contoh lengkap dan dengan data kosong: tidak ada error, grafik kosong tampil sebagai nol atau keadaan kosong yang sudah ada.
+- Mode gelap: semua tab terbaca jelas, penanda batang tetap terlihat.
+
