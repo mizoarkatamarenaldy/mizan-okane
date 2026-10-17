@@ -84,6 +84,7 @@ export const SAMPLE_WALLETS = [
     id: 'wallet_sample_kas',
     name: 'Kas Tunai',
     currency: 'IDR',
+    order: 0,
     createdAt: 1700000000000,
     updatedAt: 1700000000000,
     deleted: false
@@ -92,6 +93,7 @@ export const SAMPLE_WALLETS = [
     id: 'wallet_sample_bank',
     name: 'Rekening Bank',
     currency: 'IDR',
+    order: 1,
     createdAt: 1700000000000,
     updatedAt: 1700000000000,
     deleted: false
@@ -100,6 +102,7 @@ export const SAMPLE_WALLETS = [
     id: 'wallet_sample_jpy',
     name: 'Dompet Yen',
     currency: 'JPY',
+    order: 2,
     createdAt: 1700000000000,
     updatedAt: 1700000000000,
     deleted: false
@@ -108,6 +111,7 @@ export const SAMPLE_WALLETS = [
     id: 'wallet_sample_usd',
     name: 'Akun USD',
     currency: 'USD',
+    order: 3,
     createdAt: 1700000000000,
     updatedAt: 1700000000000,
     deleted: false
@@ -115,20 +119,61 @@ export const SAMPLE_WALLETS = [
 ];
 
 export const SAMPLE_CATEGORIES = {
-  income: ['Gaji', 'Bonus', 'Investasi', 'Lainnya'],
-  expense: ['Makan', 'Transport', 'Tagihan', 'Belanja', 'Hiburan', 'Lainnya'],
+  income: [
+    { name: 'Gaji', order: 0 },
+    { name: 'Bonus', order: 1 },
+    { name: 'Investasi', order: 2 },
+    { name: 'Lainnya', order: 3 }
+  ],
+  expense: [
+    { name: 'Makan', order: 0 },
+    { name: 'Transport', order: 1 },
+    { name: 'Tagihan', order: 2 },
+    { name: 'Belanja', order: 3 },
+    { name: 'Hiburan', order: 4 },
+    { name: 'Lainnya', order: 5 }
+  ],
   subcategories: {
     income: {
-      'Gaji': ['Gaji Pokok', 'Tunjangan'],
-      'Bonus': ['Bonus Tahunan', 'Komisi'],
-      'Investasi': ['Dividen', 'Bunga']
+      'Gaji': [
+        { name: 'Gaji Pokok', order: 0 },
+        { name: 'Tunjangan', order: 1 }
+      ],
+      'Bonus': [
+        { name: 'Bonus Tahunan', order: 0 },
+        { name: 'Komisi', order: 1 }
+      ],
+      'Investasi': [
+        { name: 'Dividen', order: 0 },
+        { name: 'Bunga', order: 1 }
+      ]
     },
     expense: {
-      'Makan': ['Restoran', 'Belanja Bahan', 'Kopi & Camilan'],
-      'Transport': ['Bensin', 'Parkir', 'Transportasi Umum'],
-      'Tagihan': ['Listrik', 'Air & IPL', 'Internet'],
-      'Belanja': ['Kebutuhan Rumah', 'Pakaian', 'Elektronik'],
-      'Hiburan': ['Streaming', 'Hobi', 'Liburan']
+      'Makan': [
+        { name: 'Restoran', order: 0 },
+        { name: 'Belanja Bahan', order: 1 },
+        { name: 'Kopi & Camilan', order: 2 }
+      ],
+      'Transport': [
+        { name: 'Bensin', order: 0 },
+        { name: 'Parkir', order: 1 },
+        { name: 'Transportasi Umum', order: 2 }
+      ],
+      'Tagihan': [
+        { name: 'Listrik', order: 0 },
+        { name: 'Air & IPL', order: 1 },
+        { name: 'Internet', order: 2 }
+      ],
+      'Belanja': [
+        { name: 'Kebutuhan Rumah', order: 0 },
+        { name: 'Pakaian', order: 1 },
+        { name: 'Elektronik', order: 2 }
+      ],
+      'Hiburan': [
+        { name: 'Streaming', order: 0 },
+        { name: 'Hobi', order: 1 },
+        { name: 'Liburan', order: 2 }
+      ]
     }
   },
   updatedAt: 1700000000000
@@ -329,14 +374,99 @@ export function replaceAllTransactions(list) {
 }
 
 export const DEFAULT_CATEGORIES = {
-  income: ['Gaji', 'Bonus', 'Hadiah', 'Lainnya'],
-  expense: ['Makan', 'Transport', 'Hiburan', 'Belanja', 'Tagihan', 'Lainnya'],
+  income: [
+    { name: 'Gaji', order: 0 },
+    { name: 'Bonus', order: 1 },
+    { name: 'Hadiah', order: 2 },
+    { name: 'Lainnya', order: 3 }
+  ],
+  expense: [
+    { name: 'Makan', order: 0 },
+    { name: 'Transport', order: 1 },
+    { name: 'Hiburan', order: 2 },
+    { name: 'Belanja', order: 3 },
+    { name: 'Tagihan', order: 4 },
+    { name: 'Lainnya', order: 5 }
+  ],
   subcategories: {
     income: {},
     expense: {}
   },
   updatedAt: 0
 };
+
+export function sanitizeCategoryItem(item, defaultOrder = 0) {
+  if (typeof item === 'string') {
+    const trimmed = item.trim();
+    return trimmed ? { name: trimmed, order: defaultOrder } : null;
+  }
+  if (item && typeof item === 'object') {
+    const name = String(item.name || '').trim();
+    if (!name) return null;
+    const order = typeof item.order === 'number'
+      ? item.order
+      : (typeof item.urutan === 'number' ? item.urutan : defaultOrder);
+    return { name, order };
+  }
+  return null;
+}
+
+export function sanitizeCategoryList(list, defaultList = []) {
+  if (!Array.isArray(list)) {
+    return defaultList.map((item, idx) => sanitizeCategoryItem(item, idx)).filter(Boolean);
+  }
+  const result = [];
+  const seen = new Set();
+  list.forEach((item, idx) => {
+    const cat = sanitizeCategoryItem(item, idx);
+    if (cat && !seen.has(cat.name.toLowerCase())) {
+      seen.add(cat.name.toLowerCase());
+      result.push(cat);
+    }
+  });
+  result.sort((a, b) => a.order - b.order);
+  return result;
+}
+
+export function sanitizeSubcategoryList(list) {
+  if (!Array.isArray(list)) return [];
+  const result = [];
+  const seen = new Set();
+  list.forEach((item, idx) => {
+    const sub = sanitizeCategoryItem(item, idx);
+    if (sub && !seen.has(sub.name.toLowerCase())) {
+      seen.add(sub.name.toLowerCase());
+      result.push(sub);
+    }
+  });
+  result.sort((a, b) => a.order - b.order);
+  return result;
+}
+
+export function sanitizeCategories(categories) {
+  const cleanSubcategories = {
+    income: {},
+    expense: {}
+  };
+  if (categories && typeof categories.subcategories === 'object' && categories.subcategories !== null) {
+    if (typeof categories.subcategories.income === 'object' && categories.subcategories.income !== null) {
+      for (const [cat, subs] of Object.entries(categories.subcategories.income)) {
+        cleanSubcategories.income[cat] = sanitizeSubcategoryList(subs);
+      }
+    }
+    if (typeof categories.subcategories.expense === 'object' && categories.subcategories.expense !== null) {
+      for (const [cat, subs] of Object.entries(categories.subcategories.expense)) {
+        cleanSubcategories.expense[cat] = sanitizeSubcategoryList(subs);
+      }
+    }
+  }
+  return {
+    income: sanitizeCategoryList(categories?.income, DEFAULT_CATEGORIES.income),
+    expense: sanitizeCategoryList(categories?.expense, DEFAULT_CATEGORIES.expense),
+    subcategories: cleanSubcategories,
+    updatedAt: typeof categories?.updatedAt === 'number' ? categories.updatedAt : Date.now()
+  };
+}
 
 export function getRealCategories() {
   return new Promise((resolve, reject) => {
@@ -345,24 +475,10 @@ export function getRealCategories() {
     request.onsuccess = (event) => {
       const stored = event.target.result;
       if (stored && Array.isArray(stored.income) && Array.isArray(stored.expense)) {
-        if (!stored.subcategories || typeof stored.subcategories !== 'object') {
-          stored.subcategories = { income: {}, expense: {} };
-        } else {
-          if (!stored.subcategories.income || typeof stored.subcategories.income !== 'object') {
-            stored.subcategories.income = {};
-          }
-          if (!stored.subcategories.expense || typeof stored.subcategories.expense !== 'object') {
-            stored.subcategories.expense = {};
-          }
-        }
-        resolve(stored);
+        resolve(sanitizeCategories(stored));
       } else {
-        const initial = {
-          income: [...DEFAULT_CATEGORIES.income],
-          expense: [...DEFAULT_CATEGORIES.expense],
-          subcategories: { income: {}, expense: {} },
-          updatedAt: 0
-        };
+        const initial = sanitizeCategories(DEFAULT_CATEGORIES);
+        initial.updatedAt = 0;
         const writeTx = db.transaction([META_STORE], 'readwrite');
         writeTx.objectStore(META_STORE).put(initial, 'categories');
         writeTx.oncomplete = () => resolve(initial);
@@ -381,44 +497,15 @@ export function getCategories() {
       request.onsuccess = (event) => {
         const stored = event.target.result;
         if (stored && Array.isArray(stored.income) && Array.isArray(stored.expense)) {
-          resolve(stored);
+          resolve(sanitizeCategories(stored));
         } else {
-          resolve(JSON.parse(JSON.stringify(SAMPLE_CATEGORIES)));
+          resolve(sanitizeCategories(SAMPLE_CATEGORIES));
         }
       };
       request.onerror = (event) => reject(event.target.error);
     });
   }
   return getRealCategories();
-}
-
-function sanitizeCategories(categories) {
-  const cleanSubcategories = {
-    income: {},
-    expense: {}
-  };
-  if (categories && typeof categories.subcategories === 'object' && categories.subcategories !== null) {
-    if (typeof categories.subcategories.income === 'object' && categories.subcategories.income !== null) {
-      for (const [cat, subs] of Object.entries(categories.subcategories.income)) {
-        if (Array.isArray(subs)) {
-          cleanSubcategories.income[cat] = subs.map(s => String(s).trim()).filter(Boolean);
-        }
-      }
-    }
-    if (typeof categories.subcategories.expense === 'object' && categories.subcategories.expense !== null) {
-      for (const [cat, subs] of Object.entries(categories.subcategories.expense)) {
-        if (Array.isArray(subs)) {
-          cleanSubcategories.expense[cat] = subs.map(s => String(s).trim()).filter(Boolean);
-        }
-      }
-    }
-  }
-  return {
-    income: Array.isArray(categories?.income) ? categories.income : [...DEFAULT_CATEGORIES.income],
-    expense: Array.isArray(categories?.expense) ? categories.expense : [...DEFAULT_CATEGORIES.expense],
-    subcategories: cleanSubcategories,
-    updatedAt: typeof categories?.updatedAt === 'number' ? categories.updatedAt : Date.now()
-  };
 }
 
 export function saveRealCategories(categories) {
@@ -538,11 +625,27 @@ export const DEFAULT_WALLETS = [
     id: DEFAULT_WALLET_ID,
     name: DEFAULT_WALLET_NAME,
     currency: 'IDR',
+    order: 0,
     createdAt: 0,
     updatedAt: 0,
     deleted: false
   }
 ];
+
+export function sanitizeWallets(wallets) {
+  const list = Array.isArray(wallets) ? wallets : [];
+  const cleaned = list.map((w, idx) => ({
+    id: String(w.id),
+    name: String(w.name).trim(),
+    currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
+    order: typeof w.order === 'number' ? w.order : (typeof w.urutan === 'number' ? w.urutan : idx),
+    createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
+    updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : Date.now(),
+    deleted: !!w.deleted
+  }));
+  cleaned.sort((a, b) => a.order - b.order);
+  return cleaned;
+}
 
 export function getRealWallets() {
   return new Promise((resolve, reject) => {
@@ -551,31 +654,16 @@ export function getRealWallets() {
     request.onsuccess = (event) => {
       const stored = event.target.result;
       if (Array.isArray(stored) && stored.length > 0) {
-        const clean = stored
-          .filter(w => w && typeof w.id === 'string' && typeof w.name === 'string')
-          .map(w => ({
-            id: String(w.id),
-            name: String(w.name).trim(),
-            currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
-            createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
-            updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
-            deleted: !!w.deleted
-          }));
+        const clean = sanitizeWallets(stored);
         if (clean.length > 0) {
           resolve(clean);
           return;
         }
       }
-      const initial = [
-        {
-          id: DEFAULT_WALLET_ID,
-          name: DEFAULT_WALLET_NAME,
-          currency: 'IDR',
-          createdAt: Date.now(),
-          updatedAt: 0,
-          deleted: false
-        }
-      ];
+      const initial = sanitizeWallets(DEFAULT_WALLETS).map(w => ({
+        ...w,
+        createdAt: Date.now()
+      }));
       const writeTx = db.transaction([META_STORE], 'readwrite');
       writeTx.objectStore(META_STORE).put(initial, 'wallets');
       writeTx.oncomplete = () => resolve(initial);
@@ -593,27 +681,15 @@ export function getWallets() {
       request.onsuccess = (event) => {
         const stored = event.target.result;
         if (Array.isArray(stored) && stored.length > 0) {
-          resolve(stored);
+          resolve(sanitizeWallets(stored));
         } else {
-          resolve([...SAMPLE_WALLETS]);
+          resolve(sanitizeWallets(SAMPLE_WALLETS));
         }
       };
       request.onerror = (event) => reject(event.target.error);
     });
   }
   return getRealWallets();
-}
-
-function sanitizeWallets(wallets) {
-  const list = Array.isArray(wallets) ? wallets : [];
-  return list.map(w => ({
-    id: String(w.id),
-    name: String(w.name).trim(),
-    currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
-    createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
-    updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : Date.now(),
-    deleted: !!w.deleted
-  }));
 }
 
 export function saveRealWallets(wallets) {
@@ -732,26 +808,17 @@ export function saveSettings(settings) {
 }
 
 export async function resetDatabase() {
-  const initialCategories = {
-    income: [...DEFAULT_CATEGORIES.income],
-    expense: [...DEFAULT_CATEGORIES.expense],
-    subcategories: { income: {}, expense: {} },
-    updatedAt: 0
-  };
+  const initialCategories = sanitizeCategories(DEFAULT_CATEGORIES);
+  initialCategories.updatedAt = 0;
   const initialBudgets = {
     items: {},
     updatedAt: 0
   };
-  const initialWallets = [
-    {
-      id: DEFAULT_WALLET_ID,
-      name: DEFAULT_WALLET_NAME,
-      currency: 'IDR',
-      createdAt: Date.now(),
-      updatedAt: 0,
-      deleted: false
-    }
-  ];
+  const initialWallets = sanitizeWallets(DEFAULT_WALLETS).map(w => ({
+    ...w,
+    createdAt: Date.now(),
+    updatedAt: 0
+  }));
   const initialSettings = {
     theme: 'system',
     timeFormat: DEFAULT_TIME_FORMAT,

@@ -3198,6 +3198,66 @@ p {
     font-size: 12.5px;
 }
 
+/* Geser urutan dompet dan kategori */
+.btn-drag-handle {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    border-radius: var(--radius-input, 6px);
+    padding: 0 8px;
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    flex-shrink: 0;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-drag-handle:hover {
+    color: var(--text);
+    background: var(--surface);
+}
+
+.btn-drag-handle:active,
+.btn-drag-handle.is-active {
+    cursor: grabbing;
+    color: var(--text);
+    background: var(--surface);
+}
+
+.category-item.is-dragging,
+.subcategory-item.is-dragging,
+.category-item-wrapper.is-dragging {
+    background: var(--surface-raised);
+    border-color: var(--accent);
+    opacity: 0.85;
+}
+
+.category-item-wrapper.is-dragging > .category-item {
+    background: var(--surface-raised);
+    border-color: var(--accent);
+}
+
+.drag-placeholder {
+    border: 1px dashed var(--accent);
+    background: var(--surface);
+    border-radius: var(--radius-input, 6px);
+    box-sizing: border-box;
+    list-style: none;
+    pointer-events: none;
+}
+
+.drag-placeholder-sub {
+    margin: 2px 0;
+}
+
 .category-add-form {
     display: flex;
     gap: 8px;

@@ -230,12 +230,14 @@ async function downloadRemote(fileId) {
 function mergeWallets(localWallets, remoteWallets) {
     const merged = new Map();
     if (Array.isArray(remoteWallets)) {
-        for (const w of remoteWallets) {
+        for (let i = 0; i < remoteWallets.length; i++) {
+            const w = remoteWallets[i];
             if (w && typeof w.id === 'string') {
                 merged.set(w.id, {
                     id: String(w.id),
                     name: String(w.name || ''),
                     currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
+                    order: typeof w.order === 'number' ? w.order : (typeof w.urutan === 'number' ? w.urutan : i),
                     createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                     updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
                     deleted: !!w.deleted
@@ -244,7 +246,8 @@ function mergeWallets(localWallets, remoteWallets) {
         }
     }
     if (Array.isArray(localWallets)) {
-        for (const w of localWallets) {
+        for (let i = 0; i < localWallets.length; i++) {
+            const w = localWallets[i];
             if (w && typeof w.id === 'string') {
                 const existing = merged.get(w.id);
                 if (!existing || (w.updatedAt || 0) > (existing.updatedAt || 0)) {
@@ -252,6 +255,7 @@ function mergeWallets(localWallets, remoteWallets) {
                         id: String(w.id),
                         name: String(w.name || ''),
                         currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
+                        order: typeof w.order === 'number' ? w.order : (typeof w.urutan === 'number' ? w.urutan : (existing ? existing.order : i)),
                         createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                         updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
                         deleted: !!w.deleted
@@ -260,7 +264,9 @@ function mergeWallets(localWallets, remoteWallets) {
             }
         }
     }
-    return Array.from(merged.values());
+    const result = Array.from(merged.values());
+    result.sort((a, b) => a.order - b.order);
+    return result;
 }
 
 function buildPayload(transactions, categories, budgets, wallets, settings) {
@@ -709,6 +715,7 @@ export async function clearRemoteData() {
         id: DEFAULT_WALLET_ID,
         name: DEFAULT_WALLET_NAME,
         currency: 'IDR',
+        order: 0,
         createdAt: Date.now(),
         updatedAt: 0,
         deleted: false

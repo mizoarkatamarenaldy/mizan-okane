@@ -447,12 +447,29 @@ function getSelectedType() {
     return 'expense';
 }
 
+function getCatName(item) {
+    if (!item) return '';
+    return typeof item === 'string' ? item : (item.name || '');
+}
+
+function getCategoryNames(type) {
+    const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
+    return [...list]
+        .sort((a, b) => (typeof a?.order === 'number' ? a.order : 0) - (typeof b?.order === 'number' ? b.order : 0))
+        .map(c => getCatName(c))
+        .filter(Boolean);
+}
+
 export function getSubcategoriesFor(type, categoryName) {
     if (!currentCategories || !currentCategories.subcategories || !categoryName) return [];
     const group = currentCategories.subcategories[type];
     if (!group || typeof group !== 'object') return [];
     const subs = group[categoryName];
-    return Array.isArray(subs) ? subs : [];
+    if (!Array.isArray(subs)) return [];
+    return [...subs]
+        .sort((a, b) => (typeof a?.order === 'number' ? a.order : 0) - (typeof b?.order === 'number' ? b.order : 0))
+        .map(s => getCatName(s))
+        .filter(Boolean);
 }
 
 export function getTxSubcategory(tx) {
@@ -521,7 +538,7 @@ export function populateSubcategoryOptions(categoryName, selectedSub = null) {
 function populateCategoryOptions(selectedVal = null, oldCustomCategory = null, selectedSub = null) {
     if (!txCategoryInput) return;
     const type = getSelectedType();
-    const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
+    const list = getCategoryNames(type);
 
     let html = '';
     if (oldCustomCategory && !list.includes(oldCustomCategory)) {
@@ -658,7 +675,9 @@ function updateTypeUI(type) {
 }
 
 function getActiveWallets() {
-    return (currentWallets || []).filter(w => !w.deleted);
+    return (currentWallets || [])
+        .filter(w => !w.deleted)
+        .sort((a, b) => (typeof a?.order === 'number' ? a.order : 0) - (typeof b?.order === 'number' ? b.order : 0));
 }
 
 function isWalletDeleted(walletId) {
@@ -2747,7 +2766,7 @@ function populateTimbanganCalcOptions() {
     }
 
     if (calcCategorySelect) {
-        const expenseCats = (currentCategories && currentCategories.expense) ? currentCategories.expense : [];
+        const expenseCats = getCategoryNames('expense');
         const prevCatVal = calcCategorySelect.value;
         if (expenseCats.length === 0) {
             calcCategorySelect.innerHTML = '<option value="" disabled selected>Belum ada kategori</option>';
@@ -3798,10 +3817,158 @@ function renderCategorySettings() {
     renderCategoryGroup('income', incomeCategoryList);
 }
 
+function enableListDragReorder({ container, itemSelector, handleSelector, onReorder }) {
+    if (!container) return;
+    container._dragReorderOnReorder = onReorder;
+    if (container._dragReorderInitialized) return;
+    container._dragReorderInitialized = true;
+
+    let activePointerId = null;
+    let draggedItem = null;
+    let placeholder = null;
+    let isDragging = false;
+    let startY = 0;
+    let activeHandle = null;
+
+    const onPointerMove = (moveEvent) => {
+        if (moveEvent.pointerId !== activePointerId || !draggedItem) return;
+
+        if (!isDragging) {
+            if (Math.abs(moveEvent.clientY - startY) < 4) return;
+            isDragging = true;
+            draggedItem.classList.add('is-dragging');
+            if (activeHandle) activeHandle.classList.add('is-active');
+
+            placeholder = document.createElement(draggedItem.tagName);
+            placeholder.className = 'drag-placeholder' + (container.classList.contains('subcategory-items') ? ' drag-placeholder-sub' : '');
+            placeholder.style.height = `${draggedItem.offsetHeight}px`;
+            container.insertBefore(placeholder, draggedItem.nextSibling);
+        }
+
+        if (moveEvent.clientY < 70) {
+            window.scrollBy(0, -6);
+        } else if (moveEvent.clientY > window.innerHeight - 70) {
+            window.scrollBy(0, 6);
+        }
+
+        const items = Array.from(container.children).filter(el => el !== draggedItem && el !== placeholder && el.matches(itemSelector));
+        let targetSibling = null;
+        for (const sibling of items) {
+            const rect = sibling.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            if (moveEvent.clientY < midY) {
+                targetSibling = sibling;
+                break;
+            }
+        }
+
+        if (targetSibling) {
+            container.insertBefore(placeholder, targetSibling);
+        } else {
+            container.appendChild(placeholder);
+        }
+    };
+
+    const cleanup = () => {
+        if (activeHandle) {
+            try {
+                if (activeHandle.hasPointerCapture(activePointerId)) {
+                    activeHandle.releasePointerCapture(activePointerId);
+                }
+            } catch (err) {}
+            activeHandle.removeEventListener('pointermove', onPointerMove);
+            activeHandle.removeEventListener('pointerup', onPointerUp);
+            activeHandle.removeEventListener('pointercancel', onPointerCancel);
+            activeHandle.classList.remove('is-active');
+            activeHandle = null;
+        }
+        activePointerId = null;
+    };
+
+    const onPointerUp = async (upEvent) => {
+        if (upEvent.pointerId !== activePointerId) return;
+
+        const wasDragging = isDragging;
+        const currentDragged = draggedItem;
+        const currentPlaceholder = placeholder;
+
+        cleanup();
+
+        if (wasDragging && currentDragged && currentPlaceholder) {
+            container.insertBefore(currentDragged, currentPlaceholder);
+            currentPlaceholder.remove();
+            placeholder = null;
+            currentDragged.classList.remove('is-dragging');
+            draggedItem = null;
+
+            const newItems = Array.from(container.children).filter(el => el.matches(itemSelector));
+            const newKeys = newItems.map(el => el.getAttribute('data-id') || el.getAttribute('data-name')).filter(Boolean);
+
+            if (typeof container._dragReorderOnReorder === 'function') {
+                await container._dragReorderOnReorder(newKeys);
+            }
+        } else {
+            if (currentPlaceholder) {
+                currentPlaceholder.remove();
+                placeholder = null;
+            }
+            if (currentDragged) {
+                currentDragged.classList.remove('is-dragging');
+                draggedItem = null;
+            }
+        }
+        isDragging = false;
+    };
+
+    const onPointerCancel = () => {
+        const currentDragged = draggedItem;
+        const currentPlaceholder = placeholder;
+
+        cleanup();
+
+        if (currentPlaceholder) {
+            currentPlaceholder.remove();
+            placeholder = null;
+        }
+        if (currentDragged) {
+            currentDragged.classList.remove('is-dragging');
+            draggedItem = null;
+        }
+        isDragging = false;
+    };
+
+    container.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        const handle = e.target.closest(handleSelector);
+        if (!handle || !container.contains(handle)) return;
+
+        const item = handle.closest(itemSelector);
+        if (!item || item.parentElement !== container) return;
+
+        if (item.classList.contains('editing') || item.querySelector('input:focus')) return;
+
+        e.preventDefault();
+        draggedItem = item;
+        activePointerId = e.pointerId;
+        startY = e.clientY;
+        isDragging = false;
+        activeHandle = handle;
+
+        try {
+            handle.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
+        handle.addEventListener('pointermove', onPointerMove);
+        handle.addEventListener('pointerup', onPointerUp);
+        handle.addEventListener('pointercancel', onPointerCancel);
+    });
+}
+
 function renderCategoryGroup(type, container) {
     if (!container) return;
     container.innerHTML = '';
-    const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
+    const rawList = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
+    const list = [...rawList].sort((a, b) => (typeof a?.order === 'number' ? a.order : 0) - (typeof b?.order === 'number' ? b.order : 0));
 
     if (list.length === 0) {
         const emptyLi = document.createElement('li');
@@ -3811,9 +3978,11 @@ function renderCategoryGroup(type, container) {
         return;
     }
 
-    list.forEach(cat => {
+    list.forEach(catItem => {
+        const cat = getCatName(catItem);
         const wrapperLi = document.createElement('li');
         wrapperLi.className = 'category-item-wrapper';
+        wrapperLi.setAttribute('data-name', cat);
 
         const isEditing = editingCategory && editingCategory.type === type && editingCategory.name === cat;
 
@@ -3863,6 +4032,7 @@ function renderCategoryGroup(type, container) {
                     <button type="button" class="btn-icon btn-add-subcat" data-type="${type}" data-cat="${escapeHTML(cat)}" aria-label="Tambah sub kategori untuk ${escapeHTML(cat)}">+ Sub</button>
                     <button type="button" class="btn-icon btn-edit-cat" data-type="${type}" data-name="${escapeHTML(cat)}" aria-label="Ubah nama kategori ${escapeHTML(cat)}">Ubah</button>
                     <button type="button" class="btn-icon btn-delete-cat" data-type="${type}" data-name="${escapeHTML(cat)}" aria-label="Hapus kategori ${escapeHTML(cat)}">Hapus</button>
+                    <button type="button" class="btn-icon btn-drag-handle" data-type="${type}" data-name="${escapeHTML(cat)}" aria-label="Geser urutan kategori ${escapeHTML(cat)}" title="Geser urutan">≡</button>
                 </div>
             `;
 
@@ -3891,10 +4061,12 @@ function renderCategoryGroup(type, container) {
         if (subList.length > 0) {
             const subUl = document.createElement('ul');
             subUl.className = 'subcategory-items';
+            subUl.setAttribute('data-cat', cat);
             subUl.setAttribute('aria-label', `Daftar sub kategori ${escapeHTML(cat)}`);
 
             subList.forEach(sub => {
                 const subLi = document.createElement('li');
+                subLi.setAttribute('data-name', sub);
                 const isSubEditing = editingSubcategory && editingSubcategory.type === type && editingSubcategory.cat === cat && editingSubcategory.name === sub;
 
                 if (isSubEditing) {
@@ -3941,6 +4113,7 @@ function renderCategoryGroup(type, container) {
                         <div class="subcategory-item-actions">
                             <button type="button" class="btn-icon btn-edit-subcat" data-type="${type}" data-cat="${escapeHTML(cat)}" data-name="${escapeHTML(sub)}" aria-label="Ubah nama sub kategori ${escapeHTML(sub)}">Ubah</button>
                             <button type="button" class="btn-icon btn-delete-subcat" data-type="${type}" data-cat="${escapeHTML(cat)}" data-name="${escapeHTML(sub)}" aria-label="Hapus sub kategori ${escapeHTML(sub)}">Hapus</button>
+                            <button type="button" class="btn-icon btn-drag-handle" data-type="${type}" data-cat="${escapeHTML(cat)}" data-name="${escapeHTML(sub)}" aria-label="Geser urutan sub kategori ${escapeHTML(sub)}" title="Geser urutan">≡</button>
                         </div>
                     `;
 
@@ -3957,6 +4130,42 @@ function renderCategoryGroup(type, container) {
                 }
 
                 subUl.appendChild(subLi);
+            });
+
+            enableListDragReorder({
+                container: subUl,
+                itemSelector: '.subcategory-item[data-name]',
+                handleSelector: '.btn-drag-handle',
+                onReorder: async (newOrderSubNames) => {
+                    let changed = false;
+                    if (!currentCategories.subcategories) currentCategories.subcategories = { income: {}, expense: {} };
+                    if (!currentCategories.subcategories[type]) currentCategories.subcategories[type] = {};
+                    const rawSubs = currentCategories.subcategories[type][cat] || [];
+                    for (let i = 0; i < newOrderSubNames.length; i++) {
+                        const subName = newOrderSubNames[i];
+                        const item = rawSubs.find(s => getCatName(s) === subName);
+                        if (item) {
+                            if (item.order !== i) {
+                                item.order = i;
+                                changed = true;
+                            }
+                        } else {
+                            rawSubs.push({ name: subName, order: i });
+                            changed = true;
+                        }
+                    }
+                    if (changed) {
+                        rawSubs.sort((a, b) => (typeof a.order === 'number' ? a.order : 0) - (typeof b.order === 'number' ? b.order : 0));
+                        currentCategories.subcategories[type][cat] = rawSubs;
+                        currentCategories.updatedAt = Date.now();
+                        await saveCategories(currentCategories);
+                        renderCategorySettings();
+                        if (txCategoryInput.value === cat) {
+                            populateSubcategoryOptions(cat, txSubcategoryInput ? txSubcategoryInput.value : null);
+                        }
+                        markDirty().catch(err => console.error("Gagal menandai perubahan sub kategori untuk sinkron", err));
+                    }
+                }
             });
 
             wrapperLi.appendChild(subUl);
@@ -4000,6 +4209,40 @@ function renderCategoryGroup(type, container) {
 
         container.appendChild(wrapperLi);
     });
+
+    enableListDragReorder({
+        container,
+        itemSelector: ':scope > .category-item-wrapper[data-name]',
+        handleSelector: ':scope > .category-item .btn-drag-handle',
+        onReorder: async (newOrderNames) => {
+            let changed = false;
+            const rawList = currentCategories[type] || [];
+            for (let i = 0; i < newOrderNames.length; i++) {
+                const name = newOrderNames[i];
+                const item = rawList.find(c => getCatName(c) === name);
+                if (item) {
+                    if (item.order !== i) {
+                        item.order = i;
+                        changed = true;
+                    }
+                } else {
+                    rawList.push({ name, order: i });
+                    changed = true;
+                }
+            }
+            if (changed) {
+                rawList.sort((a, b) => (typeof a.order === 'number' ? a.order : 0) - (typeof b.order === 'number' ? b.order : 0));
+                currentCategories[type] = rawList;
+                currentCategories.updatedAt = Date.now();
+                await saveCategories(currentCategories);
+                renderCategorySettings();
+                renderBudgetSettings();
+                renderBudgetSection();
+                populateCategoryOptions(txCategoryInput ? txCategoryInput.value : null);
+                markDirty().catch(err => console.error("Gagal menandai perubahan kategori untuk sinkron", err));
+            }
+        }
+    });
 }
 
 async function handleSaveCategoryName(type, oldName, newName) {
@@ -4014,7 +4257,7 @@ async function handleSaveCategoryName(type, oldName, newName) {
     }
 
     const list = currentCategories[type] || [];
-    const exists = list.some(c => c !== oldName && c.toLowerCase() === newName.toLowerCase());
+    const exists = list.some(c => getCatName(c) !== oldName && getCatName(c).toLowerCase() === newName.toLowerCase());
     if (exists) {
         showNotification(`Kategori "${newName}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`, 'warn');
         return;
@@ -4022,9 +4265,14 @@ async function handleSaveCategoryName(type, oldName, newName) {
 
     ensureToken();
 
-    const idx = list.indexOf(oldName);
-    if (idx !== -1) {
-        list[idx] = newName;
+    const catItem = list.find(c => getCatName(c) === oldName);
+    if (catItem) {
+        if (typeof catItem === 'object') {
+            catItem.name = newName;
+        } else {
+            const idx = list.indexOf(catItem);
+            list[idx] = { name: newName, order: idx };
+        }
         if (currentCategories.subcategories && currentCategories.subcategories[type] && currentCategories.subcategories[type][oldName]) {
             currentCategories.subcategories[type][newName] = currentCategories.subcategories[type][oldName];
             delete currentCategories.subcategories[type][oldName];
@@ -4058,7 +4306,7 @@ async function handleAddCategory(type, inputEl) {
     }
 
     const list = currentCategories[type] || [];
-    const exists = list.some(c => c.toLowerCase() === name.toLowerCase());
+    const exists = list.some(c => getCatName(c).toLowerCase() === name.toLowerCase());
     if (exists) {
         showNotification(`Kategori "${name}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`, 'warn');
         return;
@@ -4066,7 +4314,8 @@ async function handleAddCategory(type, inputEl) {
 
     ensureToken();
 
-    list.push(name);
+    const maxOrder = list.length > 0 ? Math.max(...list.map(c => typeof c.order === 'number' ? c.order : 0)) : -1;
+    list.push({ name, order: maxOrder + 1 });
     currentCategories[type] = list;
     currentCategories.updatedAt = Date.now();
 
@@ -4107,7 +4356,7 @@ async function performDeleteCategory(type, name) {
     ensureToken();
 
     const list = currentCategories[type] || [];
-    currentCategories[type] = list.filter(c => c !== name);
+    currentCategories[type] = list.filter(c => getCatName(c) !== name);
     if (currentCategories.subcategories && currentCategories.subcategories[type]) {
         delete currentCategories.subcategories[type][name];
     }
@@ -4148,7 +4397,7 @@ async function handleAddSubcategory(type, cat, subName) {
     }
 
     const list = currentCategories.subcategories[type][cat];
-    const exists = list.some(s => s.toLowerCase() === name.toLowerCase());
+    const exists = list.some(s => getCatName(s).toLowerCase() === name.toLowerCase());
     if (exists) {
         showNotification(`Sub kategori "${name}" sudah ada di kategori "${cat}".`, 'warn');
         return;
@@ -4156,7 +4405,8 @@ async function handleAddSubcategory(type, cat, subName) {
 
     ensureToken();
 
-    list.push(name);
+    const maxOrder = list.length > 0 ? Math.max(...list.map(s => typeof s.order === 'number' ? s.order : 0)) : -1;
+    list.push({ name, order: maxOrder + 1 });
     currentCategories.updatedAt = Date.now();
 
     try {
@@ -4186,8 +4436,8 @@ async function handleSaveSubcategoryName(type, cat, oldName, newName) {
         return;
     }
 
-    const list = getSubcategoriesFor(type, cat);
-    const exists = list.some(s => s !== oldName && s.toLowerCase() === name.toLowerCase());
+    const list = currentCategories.subcategories[type][cat] || [];
+    const exists = list.some(s => getCatName(s) !== oldName && getCatName(s).toLowerCase() === name.toLowerCase());
     if (exists) {
         showNotification(`Sub kategori "${name}" sudah ada di kategori "${cat}".`, 'warn');
         return;
@@ -4195,9 +4445,14 @@ async function handleSaveSubcategoryName(type, cat, oldName, newName) {
 
     ensureToken();
 
-    const idx = list.indexOf(oldName);
-    if (idx !== -1) {
-        list[idx] = name;
+    const subItem = list.find(s => getCatName(s) === oldName);
+    if (subItem) {
+        if (typeof subItem === 'object') {
+            subItem.name = name;
+        } else {
+            const idx = list.indexOf(subItem);
+            list[idx] = { name, order: idx };
+        }
         currentCategories.subcategories[type][cat] = list;
         currentCategories.updatedAt = Date.now();
 
@@ -4255,7 +4510,7 @@ async function performDeleteSubcategory(type, cat, subName) {
     ensureToken();
     if (currentCategories && currentCategories.subcategories && currentCategories.subcategories[type]) {
         const list = currentCategories.subcategories[type][cat] || [];
-        currentCategories.subcategories[type][cat] = list.filter(s => s !== subName);
+        currentCategories.subcategories[type][cat] = list.filter(s => getCatName(s) !== subName);
         currentCategories.updatedAt = Date.now();
     }
 
@@ -4304,6 +4559,7 @@ function renderWalletSettings() {
     active.forEach(w => {
         const li = document.createElement('li');
         li.className = 'category-item';
+        li.setAttribute('data-id', w.id);
 
         const isEditing = editingWalletId === w.id;
 
@@ -4355,6 +4611,7 @@ function renderWalletSettings() {
                 <div class="category-item-actions">
                     <button type="button" class="btn-icon btn-edit-wallet" data-id="${escapeHTML(w.id)}" aria-label="Ubah nama dompet ${escapeHTML(w.name)}">Ubah</button>
                     <button type="button" class="btn-icon btn-delete-wallet" data-id="${escapeHTML(w.id)}" aria-label="Hapus dompet ${escapeHTML(w.name)}">Hapus</button>
+                    <button type="button" class="btn-icon btn-drag-handle" data-id="${escapeHTML(w.id)}" aria-label="Geser urutan dompet ${escapeHTML(w.name)}" title="Geser urutan">≡</button>
                 </div>
             `;
 
@@ -4368,6 +4625,34 @@ function renderWalletSettings() {
             });
 
             walletSettingsList.appendChild(li);
+        }
+    });
+
+    enableListDragReorder({
+        container: walletSettingsList,
+        itemSelector: '.category-item[data-id]',
+        handleSelector: '.btn-drag-handle',
+        onReorder: async (newOrderIds) => {
+            let changed = false;
+            const now = Date.now();
+            for (let i = 0; i < newOrderIds.length; i++) {
+                const id = newOrderIds[i];
+                const w = currentWallets.find(item => item.id === id);
+                if (w && w.order !== i) {
+                    w.order = i;
+                    w.updatedAt = now;
+                    changed = true;
+                }
+            }
+            if (changed) {
+                currentWallets.sort((a, b) => (typeof a.order === 'number' ? a.order : 0) - (typeof b.order === 'number' ? b.order : 0));
+                await saveWallets(currentWallets);
+                renderWalletSettings();
+                populateWalletOptions(txWalletInput ? txWalletInput.value : null);
+                populateWalletFilterOptions();
+                render();
+                markDirty().catch(err => console.error("Gagal menandai perubahan urutan dompet untuk sinkron", err));
+            }
         }
     });
 }
@@ -4428,10 +4713,12 @@ async function handleAddWallet(inputEl) {
 
     const selectedCurrency = selectAddWalletCurrency && ['JPY', 'USD'].includes(selectAddWalletCurrency.value) ? selectAddWalletCurrency.value : 'IDR';
     const now = Date.now();
+    const maxOrder = currentWallets.length > 0 ? Math.max(...currentWallets.map(w => typeof w.order === 'number' ? w.order : 0)) : -1;
     const newWallet = {
         id: crypto.randomUUID(),
         name,
         currency: selectedCurrency,
+        order: maxOrder + 1,
         createdAt: now,
         updatedAt: now,
         deleted: false
@@ -4607,7 +4894,7 @@ function renderBudgetSection() {
         return;
     }
 
-    const activeExpenseList = (currentCategories && currentCategories.expense) ? currentCategories.expense : [];
+    const activeExpenseList = getCategoryNames('expense');
     const orderedCats = [];
     for (const cat of activeExpenseList) {
         if (budgetedCats.includes(cat)) {
@@ -4716,7 +5003,7 @@ function shiftBudgetMonth(delta) {
 
 function populateBudgetCategoryOptions() {
     if (!selectBudgetCat) return;
-    const expenseList = (currentCategories && currentCategories.expense) ? currentCategories.expense : [];
+    const expenseList = getCategoryNames('expense');
     const budgetMap = (currentBudgets && currentBudgets.items) ? currentBudgets.items : {};
 
     let html = '<option value="" disabled selected>Pilih kategori pengeluaran</option>';
@@ -4744,7 +5031,7 @@ function renderBudgetSettings() {
         return;
     }
 
-    const activeExpenseList = (currentCategories && currentCategories.expense) ? currentCategories.expense : [];
+    const activeExpenseList = getCategoryNames('expense');
     const orderedCats = [];
     for (const cat of activeExpenseList) {
         if (budgetedCats.includes(cat)) {
@@ -5634,7 +5921,8 @@ function sanitizeImportedTx(item) {
 function mergeWalletsList(localWallets, importedWallets) {
     const map = new Map();
     if (Array.isArray(importedWallets)) {
-        for (const w of importedWallets) {
+        for (let i = 0; i < importedWallets.length; i++) {
+            const w = importedWallets[i];
             if (w && typeof w.id === 'string') {
                 map.set(w.id, {
                     id: String(w.id),
@@ -5642,13 +5930,15 @@ function mergeWalletsList(localWallets, importedWallets) {
                     currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
                     createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                     updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
-                    deleted: !!w.deleted
+                    deleted: !!w.deleted,
+                    order: typeof w.order === 'number' ? w.order : (typeof w.urutan === 'number' ? w.urutan : i)
                 });
             }
         }
     }
     if (Array.isArray(localWallets)) {
-        for (const w of localWallets) {
+        for (let i = 0; i < localWallets.length; i++) {
+            const w = localWallets[i];
             if (w && typeof w.id === 'string') {
                 const existing = map.get(w.id);
                 if (!existing || (w.updatedAt || 0) >= (existing.updatedAt || 0)) {
@@ -5658,7 +5948,8 @@ function mergeWalletsList(localWallets, importedWallets) {
                         currency: (w.currency === 'JPY' || w.currency === 'USD') ? w.currency : 'IDR',
                         createdAt: typeof w.createdAt === 'number' ? w.createdAt : 0,
                         updatedAt: typeof w.updatedAt === 'number' ? w.updatedAt : 0,
-                        deleted: !!w.deleted
+                        deleted: !!w.deleted,
+                        order: typeof w.order === 'number' ? w.order : (typeof w.urutan === 'number' ? w.urutan : (existing && typeof existing.order === 'number' ? existing.order : i))
                     });
                 }
             }
@@ -5671,10 +5962,13 @@ function mergeWalletsList(localWallets, importedWallets) {
             currency: 'IDR',
             createdAt: 0,
             updatedAt: 0,
-            deleted: false
+            deleted: false,
+            order: 0
         });
     }
-    return Array.from(map.values());
+    const result = Array.from(map.values());
+    result.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    return result;
 }
 
 function walletsDiffer(w1, w2) {
@@ -5683,7 +5977,7 @@ function walletsDiffer(w1, w2) {
     for (const item of w2) {
         const exist = m1.get(item.id);
         if (!exist) return true;
-        if (exist.name !== item.name || exist.currency !== item.currency || exist.deleted !== item.deleted || exist.updatedAt !== item.updatedAt) {
+        if (exist.name !== item.name || exist.currency !== item.currency || exist.deleted !== item.deleted || exist.updatedAt !== item.updatedAt || exist.order !== item.order) {
             return true;
         }
     }

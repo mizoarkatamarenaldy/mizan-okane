@@ -10,6 +10,18 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Geser urutan dompet dan kategori
+- Ditambah: Pegangan geser berikon garis tiga (`≡`, `.btn-drag-handle`) pada setiap baris daftar dompet, daftar kategori pemasukan, daftar kategori pengeluaran, dan daftar sub kategori di Pengaturan untuk mengatur urutan secara manual (`css/style.css`, `js/app.js`).
+- Ditambah: Mekanisme geser urutan berbasis pointer events (`enableListDragReorder`) yang mendukung interaksi sentuh (layar HP/APK) dan mouse (PC) tanpa mengganggu kemampuan scroll halaman ketika menyentuh area baris di luar ikon pegangan (`js/app.js`, `css/style.css`).
+- Ditambah: Gaya visual baris terangkat saat digeser (`.is-dragging`, `var(--surface-raised)`, `border: 1px dashed var(--accent)`) dan penanda tempat tujuan (`.drag-placeholder`) yang sepenuhnya mematuhi token dan panduan `dev/DESIGN.md` tanpa warna, bayangan, atau animasi tambahan (`css/style.css`).
+- Ditambah: Properti `order` pada data dompet, kategori, dan sub kategori yang otomatis disimpan ke IndexedDB saat baris dilepas, dipertahankan pada data demo, serta disinkronkan ke Google Drive, ekspor/impor JSON, dan backup lengkap (`js/db.js`, `js/sync.js`, `js/app.js`).
+- Ditambah: Logika kompatibilitas mundur (`sanitizeCategories`, `sanitizeWallets`) yang otomatis memberikan urutan berurutan pada data lama tanpa field urutan berdasarkan urutan kemunculannya di penyimpanan atau file cadangan (`js/db.js`, `js/sync.js`, `js/app.js`).
+- Diubah: Urutan dompet dan kategori yang telah disesuaikan kini tercermin di seluruh bagian aplikasi: kartu dompet Beranda, pilihan dompet form transaksi & transfer, pilihan kategori form, daftar budget, dan daftar Pengaturan (`js/app.js`).
+- Diubah: Kategori baru dan dompet baru secara otomatis ditambahkan pada urutan paling bawah (`js/app.js`).
+- Diubah: Reset setelan pabrik mengembalikan urutan kategori dan dompet ke urutan bawaan (`js/db.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v58` (`sw.js`).
+- Diubah: Mencentang item "Geser urutan dompet dan kategori" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Dompet dipilih manual di form transaksi dan transfer
 - Ditambah: Pengaturan status tombol Simpan (`updateSaveButtonState`) yang otomatis nonaktif selama ada dompet yang belum dipilih pada form tambah transaksi (pemasukan/pengeluaran) maupun transfer antar dompet (`js/app.js`, `index.html`, `css/style.css`).
 - Diubah: Pemilihan dompet pada form tambah transaksi dan transfer kini wajib dipilih manual oleh pengguna: kolom dompet (dan ke dompet pada transfer) awalnya kosong dengan teks petunjuk "Pilih dompet", tidak lagi mengingat pilihan dari transaksi/sesi sebelumnya atau filter Riwayat, dan kembali kosong setelah disimpan (`js/app.js`, `index.html`).

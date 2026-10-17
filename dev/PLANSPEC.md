@@ -566,3 +566,41 @@ Cek manual:
 - Punya satu dompet saja. Buka form tambah transaksi: dompet itu sudah terpilih dan Simpan bisa dipakai setelah field lain terisi.
 - Edit transaksi dan edit transfer lama: dompet aslinya tampil dan tidak bisa dikosongkan.
 
+## Geser urutan dompet dan kategori
+
+Tujuan: Pengguna bisa mengatur sendiri urutan dompet, kategori, dan sub kategori dengan menggeser, misalnya memindah dompet B ke atas dompet A atau sebaliknya.
+
+Tempat dan tampilan:
+- Di daftar dompet, daftar kategori pemasukan, daftar kategori pengeluaran, dan daftar sub kategori di Pengaturan, setiap baris punya ikon garis tiga (≡) di sisi kanan sebagai pegangan geser.
+- Baris hanya bisa digeser lewat ikon ≡. Menyentuh bagian lain baris tidak menggeser, supaya tidak bentrok dengan scroll.
+- Saat digeser, baris yang dipegang tampil terangkat dan tempat tujuannya terlihat jelas. Pakai warna dan gaya yang sudah ada di dev/DESIGN.md, tanpa warna, bayangan, atau animasi baru.
+- Harus jalan dengan sentuhan (HP dan APK) dan dengan mouse (PC).
+
+Aturan:
+- Urutan baru langsung tersimpan setelah baris dilepas.
+- Urutan dipakai di semua tempat yang menampilkan daftar itu: kartu dompet di Beranda, pilihan dompet di form, daftar kategori di form, daftar budget, dan Pengaturan.
+- Sub kategori hanya bisa digeser di dalam kategori induknya, tidak bisa pindah ke kategori lain.
+- Kategori pemasukan dan kategori pengeluaran punya urutan sendiri-sendiri.
+- Dompet, kategori, atau sub kategori baru masuk di urutan paling bawah.
+- Data lama yang belum punya urutan memakai urutan yang berlaku sekarang, tanpa berubah tampilannya sampai pengguna menggeser.
+- Menghapus dompet atau kategori tidak mengacak urutan sisanya.
+- Fitur ini sengaja tidak menambah tombol naik/turun atau pengurutan otomatis (abjad, saldo, dll).
+- Di mode data contoh, geser urutan boleh dicoba dan hanya berlaku di data contoh, tidak menyentuh data asli.
+
+Data:
+- Dompet, kategori, dan sub kategori mendapat field urutan. Field ini ikut disimpan di IndexedDB, ikut sinkron Drive memakai aturan sinkron yang sudah ada (tanpa aturan konflik baru), ikut ekspor dan impor JSON, dan ikut backup lengkap.
+- Impor JSON dari backup lama yang tidak punya field urutan tetap berhasil, dengan urutan mengikuti urutan data di file.
+- Reset setelan pabrik mengembalikan urutan ke bawaan.
+- Ekspor CSV tidak berubah.
+
+Cek manual:
+- Punya dompet A dan B. Geser B ke atas A lewat ikon ≡: urutan di Pengaturan berubah, kartu Beranda dan pilihan dompet di form tambah transaksi ikut berubah. Tutup dan buka lagi app: urutan tetap.
+- Geser A kembali ke atas B: urutan kembali seperti semula.
+- Di daftar kategori pengeluaran, geser satu kategori ke urutan paling atas: daftar kategori di form dan di budget ikut berubah. Daftar kategori pemasukan tidak terpengaruh.
+- Di kategori yang punya sub kategori, geser sub kategori di dalam kategori itu: urutan berubah. Sub kategori kategori lain tidak terpengaruh dan tidak bisa dipindah antar kategori.
+- Di HP, scroll daftar dengan menyentuh bagian baris selain ≡: daftar hanya scroll, tidak ada baris yang bergeser.
+- Tambah dompet baru: muncul di paling bawah.
+- Ekspor backup JSON, reset setelan pabrik, impor lagi: urutan hasil geser kembali seperti sebelum reset.
+- Impor file backup lama tanpa field urutan: impor berhasil dan urutan sesuai urutan di file.
+- Login Google di dua perangkat, geser urutan di satu perangkat, sinkron: perangkat lain menampilkan urutan yang sama.
+
