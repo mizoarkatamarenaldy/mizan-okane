@@ -1732,7 +1732,8 @@ p {
 .tx-item-main {
     display: flex;
     align-items: baseline;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 8px;
     min-width: 0;
 }
 
@@ -1743,14 +1744,8 @@ p {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex-shrink: 0;
-    max-width: 140px;
-}
-
-@media (min-width: 480px) {
-    .tx-item-category {
-        max-width: 200px;
-    }
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .tx-transfer-badge {
@@ -1766,12 +1761,51 @@ p {
     vertical-align: middle;
 }
 
+.tx-item-note-row {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .tx-item-note {
+    display: inline-block;
     font-size: 13px;
     color: var(--text-secondary);
     white-space: nowrap;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+.tx-item-note.is-scrolling {
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    animation: txNoteScroll var(--tx-note-duration, 8s) ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+@keyframes txNoteScroll {
+    0%, 15% {
+        transform: translateX(0);
+    }
+    85%, 100% {
+        transform: translateX(calc(-1 * var(--tx-note-scroll-dist, 0px)));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tx-item-note,
+    .tx-item-note.is-scrolling {
+        animation: none !important;
+        transform: none !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
 }
 
 .tx-item-sub {

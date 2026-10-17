@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Catatan di bawah angka
+- Ditambah: Tampilan baris catatan tersendiri (`.tx-item-note-row`) pada item transaksi di bawah baris kategori dan nominal (`js/app.js`, `css/style.css`).
+- Ditambah: Animasi geser teks pelan (`@keyframes txNoteScroll`, `.tx-item-note.is-scrolling`) pada catatan transaksi yang melebihi lebar kontainer agar terbaca penuh, dengan dukungan pengaturan kurangi animasi (`prefers-reduced-motion`) di mana teks terpotong rapi dengan "..." tanpa bergerak (`css/style.css`).
+- Ditambah: Fungsi pembantu `updateSingleNoteMarquee` dan `checkTxNoteMarquees` dengan pengamatan otomatis via `ResizeObserver` serta pendengar event resize jendela dan perubahan preferensi gerakan layar (`js/app.js`).
+- Diubah: Tata letak baris pertama transaksi (`.tx-item-main`) kini menampung kategori di sisi kiri dan kolom nominal (`.tx-item-amount-col`) di sisi kanan secara fleksibel (`js/app.js`, `css/style.css`).
+- Diubah: Dokumentasi panduan desain `dev/DESIGN.md` diperbarui dengan menambahkan aturan animasi geser catatan transaksi (`dev/DESIGN.md`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v54` (`sw.js`).
+- Diubah: Mencentang item "Catatan di bawah angka" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Pencarian riwayat
 - Ditambah: Tombol toggle pencarian (`btn-toggle-search`) di area filter Riwayat Transaksi untuk membuka/menutup kolom pencarian (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Kolom pencarian riwayat (`history-search-bar`, `history-search-input`) dengan ikon pencarian dan tombol bersihkan cepat (`btn-clear-search`) serta navigasi keyboard (Escape untuk membersihkan/menutup) (`index.html`, `css/style.css`, `js/app.js`).

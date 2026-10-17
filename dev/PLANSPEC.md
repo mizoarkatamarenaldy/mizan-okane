@@ -477,3 +477,23 @@ Data:
 Cek manual:
 - Cari "dapur": hanya transaksi dengan kata itu di catatan atau kategori tampil.
 - Cari saat filter dompet Cash aktif: hanya hasil dari Cash.
+
+## Catatan di bawah angka
+
+Tujuan: catatan transaksi tampil lebih lega dan terbaca penuh walau panjang.
+
+Tempat dan tampilan:
+- Di baris transaksi, catatan tampil di baris sendiri di bawah baris yang berisi kategori dan nominal.
+- Jika catatan lebih panjang dari lebar yang tersedia, teks bergeser pelan agar bisa dibaca seluruhnya.
+
+Aturan:
+- Jika pengguna mengaktifkan pengaturan kurangi animasi di perangkat (prefers-reduced-motion), teks tidak bergeser, tetapi dipotong dengan "...".
+- Catatan pendek tidak bergeser.
+- Izin dari pemilik: boleh menambah satu animasi geser teks ini di luar dev/DESIGN.md, dan boleh menambahkan satu baris tentangnya di dev/DESIGN.md. Tidak boleh menambah animasi, warna, font, atau bayangan lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Transaksi dengan catatan pendek: tampil statis di bawah baris kategori dan nominal.
+- Transaksi dengan catatan sangat panjang: teks bergeser. Dengan kurangi animasi aktif: teks terpotong "...".

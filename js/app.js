@@ -306,6 +306,11 @@ function switchTab(tabId) {
     }
 
     window.scrollTo({ top: 0, behavior: 'instant' });
+    if (typeof requestAnimationFrame !== 'undefined') {
+        requestAnimationFrame(() => {
+            checkTxNoteMarquees();
+        });
+    }
 }
 
 let activeSettingsSubmenu = null;
@@ -2905,6 +2910,8 @@ function createTxItemElement(tx, filterWallet) {
     const timeFormatted = tx.time ? formatTimeDisplay(tx.time, currentTimeFormat) : '';
     const iconSvg = getCategoryIconSvg(tx.category, tx.type);
 
+    const hasNote = tx.note && tx.note.trim() !== '';
+
     txEl.innerHTML = `
         <div class="tx-item-icon ${tx.type}" aria-hidden="true">
             ${iconSvg}
@@ -2912,15 +2919,18 @@ function createTxItemElement(tx, filterWallet) {
         <div class="tx-item-content">
             <div class="tx-item-main">
                 <span class="tx-item-category">${categoryText}${isTransfer ? ' <span class="tx-transfer-badge">Transfer</span>' : ''}</span>
-                ${tx.note ? `<span class="tx-item-note">&bull; ${escapeHTML(tx.note)}</span>` : ''}
+                <div class="tx-item-amount-col">
+                    <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(tx.amount, getTransactionCurrency(tx))}</span>
+                </div>
             </div>
+            ${hasNote ? `
+            <div class="tx-item-note-row">
+                <span class="tx-item-note">${escapeHTML(tx.note.trim())}</span>
+            </div>` : ''}
             <div class="tx-item-sub">
                 <span class="tx-item-wallet">${walletText}</span>
                 ${timeFormatted ? `<span class="tx-item-time">&bull; ${escapeHTML(timeFormatted)}</span>` : ''}
             </div>
-        </div>
-        <div class="tx-item-amount-col">
-            <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(tx.amount, getTransactionCurrency(tx))}</span>
         </div>
         <div class="tx-actions">
             <button type="button" class="btn-icon btn-edit" data-id="${tx.id}" aria-label="Ubah transaksi" title="Ubah">
@@ -2949,6 +2959,63 @@ function createTxItemElement(tx, filterWallet) {
     });
 
     return txEl;
+}
+
+let txNoteResizeObserver = null;
+
+export function updateSingleNoteMarquee(row) {
+    if (!row || !row.isConnected) return;
+    const noteEl = row.querySelector('.tx-item-note');
+    if (!noteEl) return;
+
+    const isReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (isReducedMotion) {
+        noteEl.classList.remove('is-scrolling');
+        noteEl.style.removeProperty('--tx-note-scroll-dist');
+        noteEl.style.removeProperty('--tx-note-duration');
+        return;
+    }
+
+    const containerWidth = row.clientWidth;
+    if (containerWidth <= 0) return;
+
+    const wasScrolling = noteEl.classList.contains('is-scrolling');
+    if (wasScrolling) {
+        noteEl.classList.remove('is-scrolling');
+    }
+    noteEl.style.maxWidth = 'none';
+    const textWidth = noteEl.scrollWidth;
+    noteEl.style.removeProperty('max-width');
+
+    const diff = textWidth - containerWidth;
+    if (diff > 2) {
+        noteEl.style.setProperty('--tx-note-scroll-dist', `${Math.ceil(diff)}px`);
+        const duration = Math.max(6, Math.min(25, Math.round(diff / 25) + 4));
+        noteEl.style.setProperty('--tx-note-duration', `${duration}s`);
+        noteEl.classList.add('is-scrolling');
+    } else {
+        noteEl.classList.remove('is-scrolling');
+        noteEl.style.removeProperty('--tx-note-scroll-dist');
+        noteEl.style.removeProperty('--tx-note-duration');
+    }
+}
+
+export function checkTxNoteMarquees(container = document) {
+    if (!txNoteResizeObserver && typeof ResizeObserver !== 'undefined') {
+        txNoteResizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                updateSingleNoteMarquee(entry.target);
+            }
+        });
+    }
+
+    const rows = container.querySelectorAll('.tx-item-note-row');
+    rows.forEach(row => {
+        if (txNoteResizeObserver) {
+            txNoteResizeObserver.observe(row);
+        }
+        updateSingleNoteMarquee(row);
+    });
 }
 
 export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurrencies = ['IDR'], wallets = currentWallets) {
@@ -3682,6 +3749,15 @@ function render() {
             handleDelete(btn.dataset.id);
         });
     });
+
+    if (txNoteResizeObserver) {
+        txNoteResizeObserver.disconnect();
+    }
+    if (typeof requestAnimationFrame !== 'undefined') {
+        requestAnimationFrame(() => {
+            checkTxNoteMarquees();
+        });
+    }
 }
 
 function renderCategorySettings() {
@@ -6220,6 +6296,24 @@ async function init() {
             }
         }
     });
+
+    let marqueeResizeTimeout = null;
+    window.addEventListener('resize', () => {
+        if (marqueeResizeTimeout) clearTimeout(marqueeResizeTimeout);
+        marqueeResizeTimeout = setTimeout(() => {
+            checkTxNoteMarquees();
+        }, 150);
+    });
+
+    if (window.matchMedia) {
+        const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const handleMotionChange = () => checkTxNoteMarquees();
+        if (motionMediaQuery.addEventListener) {
+            motionMediaQuery.addEventListener('change', handleMotionChange);
+        } else if (motionMediaQuery.addListener) {
+            motionMediaQuery.addListener(handleMotionChange);
+        }
+    }
 
     const headerSyncBtn = document.getElementById('header-sync-btn');
     const headerSyncPopover = document.getElementById('header-sync-popover');

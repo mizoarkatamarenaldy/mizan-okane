@@ -81,6 +81,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Filter bulan di Riwayat
   - [x] Warna kartu saldo multi mata uang
   - [x] Pencarian riwayat
+  - [x] Catatan di bawah angka
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri
