@@ -397,3 +397,23 @@ Data:
 Cek manual:
 - Aktifkan data contoh saat login Google: tidak ada yang masuk ke Drive, data asli utuh setelah keluar dari mode data contoh.
 - Aktifkan dua kali: isinya identik.
+
+## Klik dompet untuk filter riwayat
+
+Tujuan: kartu dompet di Beranda bisa diklik untuk melihat riwayat dompet itu saja.
+
+Tempat dan tampilan:
+- Kartu dompet di Beranda menjadi bisa diklik. Kartu terpilih ditandai dengan gaya yang sudah ada di dev/DESIGN.md.
+
+Aturan:
+- Klik kartu dompet mengatur dropdown dompet di Riwayat ke dompet itu. Jika Riwayat ada di halaman terpisah, pindah ke halaman Riwayat dengan filter terpasang.
+- Klik kartu yang sama lagi mengembalikan ke "Semua Dompet".
+- Transfer muncul di kedua dompet (keluar di asal, masuk di tujuan).
+- Tidak ada logika filter baru, hanya memakai dropdown dompet yang ada.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Klik kartu Cash: riwayat hanya transaksi Cash. Klik lagi: semua dompet.
+- Lakukan transfer Cash ke Bank: transaksi muncul di riwayat Cash dan Bank.

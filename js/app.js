@@ -797,6 +797,21 @@ function populateWalletFilterOptions() {
     }
 }
 
+export function handleWalletCardClick(walletId) {
+    if (!walletId) return;
+    const targetVal = (currentWalletFilter === walletId) ? 'all' : walletId;
+    if (filterWalletSelect) {
+        filterWalletSelect.value = targetVal;
+        currentWalletFilter = filterWalletSelect.value;
+    } else {
+        currentWalletFilter = targetVal;
+    }
+    render();
+    recordTabNavigation('riwayat');
+    window.location.hash = 'riwayat';
+    switchTab('riwayat');
+}
+
 // Formatter angka dan uang (titik pemisah ribuan)
 export function formatNumber(val) {
     if (val === null || val === undefined || val === '') return '';
@@ -3151,11 +3166,12 @@ function render() {
                 const curr = getWalletCurrency(w.id);
                 const bal = curr === 'USD' ? Math.round(rawBal * 100) / 100 : Math.round(rawBal);
                 const isZero = bal === 0;
+                const isSelected = currentWalletFilter === w.id;
                 balancesHtml += `
-                    <div class="wallet-balance-item${isZero ? ' is-zero' : ''}">
+                    <button type="button" class="wallet-balance-item${isZero ? ' is-zero' : ''}${isSelected ? ' is-selected' : ''}" data-wallet-id="${escapeHTML(w.id)}" aria-pressed="${isSelected ? 'true' : 'false'}" aria-label="Dompet ${escapeHTML(w.name)}, saldo ${escapeHTML(currencyFormatter.format(bal, curr))}">
                         <span class="wallet-balance-name">${escapeHTML(w.name)}</span>
                         <strong class="wallet-balance-amount tabular-nums">${currencyFormatter.format(bal, curr)}</strong>
-                    </div>
+                    </button>
                 `;
             }
             walletBalancesContainer.innerHTML = balancesHtml;
@@ -5883,6 +5899,16 @@ async function init() {
         filterWalletSelect.addEventListener('change', () => {
             currentWalletFilter = filterWalletSelect.value;
             render();
+        });
+    }
+
+    if (walletBalancesContainer) {
+        walletBalancesContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.wallet-balance-item');
+            if (!btn) return;
+            const walletId = btn.dataset.walletId;
+            if (!walletId) return;
+            handleWalletCardClick(walletId);
         });
     }
 

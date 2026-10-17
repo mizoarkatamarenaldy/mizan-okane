@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Klik dompet untuk filter riwayat
+- Ditambah: Interaktivitas kartu dompet di Beranda yang dapat diklik untuk memfilter daftar transaksi di halaman Riwayat sesuai dompet yang dipilih (`js/app.js`, `css/style.css`).
+- Ditambah: Fungsi `handleWalletCardClick` di `js/app.js` untuk mengatur nilai dropdown `filter-wallet` di Riwayat, menyinkronkan status filter, dan berpindah ke tab Riwayat.
+- Ditambah: Penanda visual kartu terpilih (`is-selected`) pada kartu dompet di Beranda dengan warna border aksen dan latar surface-raised sesuai `dev/DESIGN.md` (`css/style.css`).
+- Diubah: Perilaku klik pada kartu dompet yang sedang aktif terpilih akan mengembalikan pilihan filter ke "Semua Dompet" (`all`) dan menampilkan seluruh transaksi di halaman Riwayat (`js/app.js`).
+- Diubah: Elemen kartu dompet dirender sebagai elemen interaktif bertipe tombol (`button`) dengan atribut aksesibilitas `aria-pressed`, `aria-label`, serta indikator fokus `:focus-visible` (`js/app.js`, `css/style.css`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v50` (`sw.js`).
+- Diubah: Mencentang item "Klik dompet untuk filter riwayat" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Data contoh lengkap
 - Ditambah: Generator data contoh satu set tetap (`getSampleTransactions`, `SAMPLE_WALLETS`, `SAMPLE_CATEGORIES`, `SAMPLE_BUDGETS`) di `js/db.js` dengan data lengkap mencakup dompet IDR, JPY, USD, kategori dan sub kategori, budget dengan indikator aman dan peringatan, transaksi pemasukan, pengeluaran, serta transfer antar dompet satu mata uang.
 - Ditambah: Pemisahan penyimpanan data contoh di `META_STORE` (`demo_transactions`, `demo_wallets`, `demo_categories`, `demo_budgets`) serta fungsi pengelola mode contoh (`isDemoMode`, `activateSampleData`, `clearSampleData`) di `js/db.js` sehingga data asli pengguna aman dan tidak tertimpa.
