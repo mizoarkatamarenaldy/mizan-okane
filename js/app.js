@@ -51,6 +51,10 @@ const settingsSyncStatusEl = document.getElementById('settings-sync-status');
 
 const filterWalletSelect = document.getElementById('filter-wallet');
 const filterMonthSelect = document.getElementById('filter-month');
+const btnToggleSearch = document.getElementById('btn-toggle-search');
+const historySearchBar = document.getElementById('history-search-bar');
+const historySearchInput = document.getElementById('history-search-input');
+const btnClearSearch = document.getElementById('btn-clear-search');
 const riwayatSummaryContainer = document.getElementById('riwayat-summary');
 const berandaMonthLabel = document.getElementById('beranda-month-label');
 const btnBerandaPrevMonth = document.getElementById('btn-beranda-prev-month');
@@ -165,6 +169,7 @@ let editingBudgetCategory = null;
 let editingWalletId = null;
 let currentWalletFilter = 'all';
 let currentHistoryMonthFilter = '';
+let currentHistorySearchQuery = '';
 const LAST_WALLET_KEY = 'mizan-okane:last-wallet-id';
 let currentTimeFormat = DEFAULT_TIME_FORMAT;
 let currentChartType = 'expense';
@@ -3025,7 +3030,102 @@ export function getBerandaMonthSummary(transactions, targetMonthKey, activeCurre
     };
 }
 
-export function getRiwayatMonthSummary(transactions, monthFilter, walletFilter = 'all', activeCurrencies = ['IDR'], wallets = currentWallets) {
+export function matchesHistorySearch(tx, query, wallets = currentWallets) {
+    if (!tx || tx.deleted) return false;
+    if (!query) return true;
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+
+    // 1. Catatan
+    if (typeof tx.note === 'string' && tx.note.toLowerCase().includes(q)) {
+        return true;
+    }
+
+    // 2. Kategori
+    if (tx.type === 'transfer') {
+        if ('transfer'.includes(q)) return true;
+        if (typeof tx.category === 'string' && tx.category.toLowerCase().includes(q)) return true;
+    } else if (typeof tx.category === 'string' && tx.category.toLowerCase().includes(q)) {
+        return true;
+    }
+
+    // Teks tampilan kategori gabungan (misal: "Makanan > Snack")
+    const displayCat = getTxCategoryDisplayText(tx);
+    if (displayCat && displayCat.toLowerCase().includes(q)) {
+        return true;
+    }
+
+    // 3. Sub kategori
+    if (typeof tx.subcategory === 'string' && tx.subcategory.toLowerCase().includes(q)) {
+        return true;
+    }
+    const sub = getTxSubcategory(tx);
+    if (sub && sub.toLowerCase().includes(q)) {
+        return true;
+    }
+
+    // 4. Nama dompet
+    const walletList = Array.isArray(wallets) ? wallets : (currentWallets || []);
+    const walletMap = new Map();
+    for (const w of walletList) {
+        if (w && typeof w.id === 'string') {
+            walletMap.set(w.id, w.name || '');
+        }
+    }
+
+    const fromWalletName = walletMap.get(tx.walletId || DEFAULT_WALLET_ID) || getWalletName(tx.walletId);
+    if (fromWalletName && fromWalletName.toLowerCase().includes(q)) {
+        return true;
+    }
+
+    if (tx.type === 'transfer' && tx.toWalletId) {
+        const toWalletName = walletMap.get(tx.toWalletId) || getWalletName(tx.toWalletId);
+        if (toWalletName && toWalletName.toLowerCase().includes(q)) {
+            return true;
+        }
+    }
+
+    // 5. Nominal
+    const numAmount = Number(tx.amount);
+    if (!isNaN(numAmount) && typeof tx.amount !== 'undefined' && tx.amount !== null) {
+        const rawAmountStr = String(tx.amount);
+        if (rawAmountStr.includes(q)) {
+            return true;
+        }
+
+        const curr = getTransactionCurrency(tx);
+        const formattedWithDots = formatNumber(Math.round(numAmount));
+        if (formattedWithDots.toLowerCase().includes(q)) {
+            return true;
+        }
+
+        const formattedInput = formatAmountForInput(numAmount, curr);
+        if (formattedInput.toLowerCase().includes(q)) {
+            return true;
+        }
+
+        const formattedCurrency = currencyFormatter.format(numAmount, curr);
+        if (formattedCurrency.toLowerCase().includes(q)) {
+            return true;
+        }
+
+        if (curr === 'USD') {
+            const usdDot = (Math.round(numAmount * 100) / 100).toFixed(2);
+            if (usdDot.includes(q)) return true;
+        }
+
+        const cleanQueryDigits = q.replace(/[^0-9]/g, '');
+        if (cleanQueryDigits.length > 0 && /^[\d.,\sRp¥$]+$/i.test(q)) {
+            if (rawAmountStr.includes(cleanQueryDigits)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+export function getRiwayatMonthSummary(transactions, monthFilter, walletFilter = 'all', activeCurrencies = ['IDR'], wallets = currentWallets, searchQuery = '') {
     const incomeByCurrency = new Map();
     const expenseByCurrency = new Map();
 
@@ -3069,6 +3169,10 @@ export function getRiwayatMonthSummary(transactions, monthFilter, walletFilter =
             if (!match) continue;
             const txMonth = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
             if (txMonth !== monthFilter) continue;
+        }
+
+        if (searchQuery && !matchesHistorySearch(tx, searchQuery, wallets)) {
+            continue;
         }
 
         const curr = getTransactionCurrency(tx);
@@ -3162,6 +3266,41 @@ export function populateMonthFilterOptions() {
     }
 }
 
+export function openHistorySearch() {
+    if (!historySearchBar) return;
+    historySearchBar.classList.remove('hidden');
+    if (btnToggleSearch) {
+        btnToggleSearch.classList.add('is-active');
+        btnToggleSearch.setAttribute('aria-expanded', 'true');
+        btnToggleSearch.setAttribute('aria-label', 'Tutup pencarian');
+        btnToggleSearch.setAttribute('title', 'Tutup pencarian');
+    }
+    if (historySearchInput) {
+        historySearchInput.focus();
+    }
+}
+
+export function closeHistorySearch() {
+    if (!historySearchBar) return;
+    historySearchBar.classList.add('hidden');
+    if (btnToggleSearch) {
+        btnToggleSearch.classList.remove('is-active');
+        btnToggleSearch.setAttribute('aria-expanded', 'false');
+        btnToggleSearch.setAttribute('aria-label', 'Cari transaksi');
+        btnToggleSearch.setAttribute('title', 'Cari transaksi');
+    }
+    if (historySearchInput) {
+        historySearchInput.value = '';
+    }
+    if (btnClearSearch) {
+        btnClearSearch.classList.add('hidden');
+    }
+    if (currentHistorySearchQuery) {
+        currentHistorySearchQuery = '';
+        render();
+    }
+}
+
 export function renderRiwayatSummary() {
     if (!riwayatSummaryContainer) return;
 
@@ -3173,7 +3312,7 @@ export function renderRiwayatSummary() {
     if (activeCurrencies.length === 0) activeCurrencies.push('IDR');
 
     const { targetCurrencies, incomeByCurrency, expenseByCurrency } =
-        getRiwayatMonthSummary(currentTransactions, currentHistoryMonthFilter, currentWalletFilter, activeCurrencies, currentWallets);
+        getRiwayatMonthSummary(currentTransactions, currentHistoryMonthFilter, currentWalletFilter, activeCurrencies, currentWallets, currentHistorySearchQuery);
 
     if (targetCurrencies.length <= 1) {
         const c = targetCurrencies[0] || 'IDR';
@@ -3379,28 +3518,44 @@ function render() {
             const txMonth = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
             if (txMonth !== currentHistoryMonthFilter) return false;
         }
-        if (currentWalletFilter === 'all') return true;
-        if (tx.type === 'transfer') {
-            return (tx.walletId || DEFAULT_WALLET_ID) === currentWalletFilter || tx.toWalletId === currentWalletFilter;
+        if (currentWalletFilter !== 'all') {
+            if (tx.type === 'transfer') {
+                if ((tx.walletId || DEFAULT_WALLET_ID) !== currentWalletFilter && tx.toWalletId !== currentWalletFilter) {
+                    return false;
+                }
+            } else if ((tx.walletId || DEFAULT_WALLET_ID) !== currentWalletFilter) {
+                return false;
+            }
         }
-        return (tx.walletId || DEFAULT_WALLET_ID) === currentWalletFilter;
+        if (currentHistorySearchQuery && !matchesHistorySearch(tx, currentHistorySearchQuery, currentWallets)) {
+            return false;
+        }
+        return true;
     });
 
     if (txListContainer) {
         txListContainer.innerHTML = '';
         if (filteredTx.length === 0) {
-            txListContainer.innerHTML = `
-                <div class="empty-state">
-                    <p class="empty-state-text">Belum ada transaksi.</p>
-                    <button type="button" class="btn-action-outline" id="btn-empty-riwayat-add">Tambah Transaksi</button>
-                </div>
-            `;
-            const btnEmptyRiwayat = document.getElementById('btn-empty-riwayat-add');
-            if (btnEmptyRiwayat) {
-                btnEmptyRiwayat.addEventListener('click', () => {
-                    resetForm();
-                    openFormScreen();
-                });
+            if (currentHistorySearchQuery) {
+                txListContainer.innerHTML = `
+                    <div class="empty-state">
+                        <p class="empty-state-text">Tidak ada transaksi yang cocok.</p>
+                    </div>
+                `;
+            } else {
+                txListContainer.innerHTML = `
+                    <div class="empty-state">
+                        <p class="empty-state-text">Belum ada transaksi.</p>
+                        <button type="button" class="btn-action-outline" id="btn-empty-riwayat-add">Tambah Transaksi</button>
+                    </div>
+                `;
+                const btnEmptyRiwayat = document.getElementById('btn-empty-riwayat-add');
+                if (btnEmptyRiwayat) {
+                    btnEmptyRiwayat.addEventListener('click', () => {
+                        resetForm();
+                        openFormScreen();
+                    });
+                }
             }
         } else {
             // Kelompokkan transaksi berdasarkan tanggal (YYYY-MM-DD)
@@ -6116,6 +6271,62 @@ async function init() {
                 selectedBerandaMonth = val;
             }
             render();
+        });
+    }
+
+    if (btnToggleSearch) {
+        btnToggleSearch.addEventListener('click', () => {
+            if (!historySearchBar) return;
+            const isHidden = historySearchBar.classList.contains('hidden');
+            if (isHidden) {
+                openHistorySearch();
+            } else {
+                closeHistorySearch();
+            }
+        });
+    }
+
+    if (historySearchInput) {
+        historySearchInput.addEventListener('input', () => {
+            const query = historySearchInput.value;
+            currentHistorySearchQuery = query.trim();
+            if (btnClearSearch) {
+                if (query.length > 0) {
+                    btnClearSearch.classList.remove('hidden');
+                } else {
+                    btnClearSearch.classList.add('hidden');
+                }
+            }
+            render();
+        });
+
+        historySearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                if (historySearchInput.value.length > 0) {
+                    historySearchInput.value = '';
+                    currentHistorySearchQuery = '';
+                    if (btnClearSearch) btnClearSearch.classList.add('hidden');
+                    render();
+                } else {
+                    closeHistorySearch();
+                    if (btnToggleSearch) btnToggleSearch.focus();
+                }
+            }
+        });
+    }
+
+    if (btnClearSearch) {
+        btnClearSearch.addEventListener('click', () => {
+            if (historySearchInput) {
+                historySearchInput.value = '';
+                historySearchInput.focus();
+            }
+            btnClearSearch.classList.add('hidden');
+            if (currentHistorySearchQuery) {
+                currentHistorySearchQuery = '';
+                render();
+            }
         });
     }
 

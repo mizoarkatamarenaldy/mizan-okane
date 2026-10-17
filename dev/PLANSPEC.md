@@ -457,3 +457,23 @@ Data:
 
 Cek manual:
 - Aktifkan Rupiah, Yen, dan USD: semua baris Total Saldo putih, Pemasukan hijau, Pengeluaran merah, sama seperti tampilan satu mata uang.
+
+## Pencarian riwayat
+
+Tujuan: mencari transaksi dengan cepat, terutama untuk data hasil impor yang banyak.
+
+Tempat dan tampilan:
+- Tombol search di Riwayat Transaksi yang membuka kolom pencarian.
+
+Aturan:
+- Mencari di catatan, nama kategori, nama sub kategori, nominal, dan nama dompet.
+- Bekerja bersama filter dompet dan filter bulan, dan ringkasan pemasukan dan pengeluaran mengikuti hasil pencarian.
+- Pencarian tidak membedakan huruf besar kecil.
+- Riwayat pencarian tidak disimpan.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Cari "dapur": hanya transaksi dengan kata itu di catatan atau kategori tampil.
+- Cari saat filter dompet Cash aktif: hanya hasil dari Cash.

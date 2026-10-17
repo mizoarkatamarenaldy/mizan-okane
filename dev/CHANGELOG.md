@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Pencarian riwayat
+- Ditambah: Tombol toggle pencarian (`btn-toggle-search`) di area filter Riwayat Transaksi untuk membuka/menutup kolom pencarian (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Kolom pencarian riwayat (`history-search-bar`, `history-search-input`) dengan ikon pencarian dan tombol bersihkan cepat (`btn-clear-search`) serta navigasi keyboard (Escape untuk membersihkan/menutup) (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Fungsi pencarian `matchesHistorySearch`, `openHistorySearch`, dan `closeHistorySearch` di `js/app.js` untuk mencari transaksi berdasarkan catatan, nama kategori, nama sub kategori, nominal (mentah dan terformat), serta nama dompet (asal dan tujuan transfer) tanpa membedakan huruf besar kecil (case-insensitive).
+- Diubah: Penyaringan transaksi pada Riwayat di `render()` kini bekerja bersama filter dompet, filter bulan, dan kata kunci pencarian aktif (`js/app.js`).
+- Diubah: Ringkasan pemasukan dan pengeluaran Riwayat (`riwayat-summary`) kini secara dinamis menghitung transaksi yang sesuai dengan hasil pencarian lewat pembaruan parameter pada `getRiwayatMonthSummary` dan `renderRiwayatSummary` (`js/app.js`).
+- Diubah: Tampilan keadaan kosong di Riwayat menampilkan pesan "Tidak ada transaksi yang cocok." saat pencarian tidak menghasilkan data (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v53` (`sw.js`).
+- Diubah: Mencentang item "Pencarian riwayat" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Warna kartu saldo multi mata uang
 - Diperbaiki: Penyelarasan warna teks baris kartu saldo Beranda saat terdapat lebih dari satu mata uang aktif sehingga konsisten dengan tampilan satu mata uang: Total Saldo putih (`var(--text)`), Pemasukan hijau (`var(--income)`), dan Pengeluaran merah (`var(--expense)`) untuk setiap baris mata uang (`css/style.css`, `js/app.js`).
 - Diubah: Penambahan class pendukung `.summary-income-line` dan `.summary-expense-line` pada baris multi mata uang kartu saldo Beranda (`js/app.js`).
