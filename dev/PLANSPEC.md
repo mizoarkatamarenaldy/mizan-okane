@@ -441,3 +441,19 @@ Cek manual:
 - Pilih Oktober 2026: hanya transaksi Oktober tampil, ringkasan sama dengan kartu saldo Oktober.
 - Pilih "Semua bulan": semua transaksi tampil.
 - Pilih "Semua bulan" lalu buka Beranda: kartu saldo tetap menampilkan bulan sebelumnya dan tidak berubah.
+
+## Warna kartu saldo multi mata uang
+
+Tujuan: menyamakan warna kartu saldo Beranda saat ada lebih dari satu mata uang dengan saat satu mata uang.
+
+Tempat dan tampilan:
+- Kartu saldo di Beranda: Total Saldo putih, Pemasukan hijau, Pengeluaran merah, untuk setiap baris mata uang. Susunan baris per mata uang tetap.
+
+Aturan:
+- Hanya mengubah warna, memakai warna yang sudah ada di dev/DESIGN.md. Jangan tambah warna baru.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Aktifkan Rupiah, Yen, dan USD: semua baris Total Saldo putih, Pemasukan hijau, Pengeluaran merah, sama seperti tampilan satu mata uang.

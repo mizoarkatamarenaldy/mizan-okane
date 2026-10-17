@@ -10,6 +10,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-17: Warna kartu saldo multi mata uang
+- Diperbaiki: Penyelarasan warna teks baris kartu saldo Beranda saat terdapat lebih dari satu mata uang aktif sehingga konsisten dengan tampilan satu mata uang: Total Saldo putih (`var(--text)`), Pemasukan hijau (`var(--income)`), dan Pengeluaran merah (`var(--expense)`) untuk setiap baris mata uang (`css/style.css`, `js/app.js`).
+- Diubah: Penambahan class pendukung `.summary-income-line` dan `.summary-expense-line` pada baris multi mata uang kartu saldo Beranda (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v52` (`sw.js`).
+- Diubah: Mencentang item "Warna kartu saldo multi mata uang" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-17: Filter bulan di Riwayat
 - Ditambah: Dropdown filter bulan (`filter-month`) di samping dropdown dompet pada halaman Riwayat Transaksi dengan opsi "Semua bulan" dan daftar bulan berurutan menurun (`index.html`, `js/app.js`).
 - Ditambah: Ringkasan pemasukan (warna hijau) dan pengeluaran (warna merah) di samping judul Riwayat Transaksi (`riwayat-summary`) yang mendukung tampilan per mata uang (`index.html`, `js/app.js`, `css/style.css`).

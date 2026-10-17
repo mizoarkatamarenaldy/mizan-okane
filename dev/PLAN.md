@@ -79,6 +79,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Data contoh lengkap
   - [x] Klik dompet untuk filter riwayat
   - [x] Filter bulan di Riwayat
+  - [x] Warna kartu saldo multi mata uang
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

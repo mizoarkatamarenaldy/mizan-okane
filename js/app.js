@@ -3302,13 +3302,13 @@ function renderSummaryCard() {
         totalIncomeEl.innerHTML = activeCurrencies.map(c => {
             let inc = incomeByCurrency.get(c) || 0;
             if (c === 'USD') inc = Math.round(inc * 100) / 100;
-            return `<span class="summary-item-line">+${escapeHTML(currencyFormatter.format(inc, c))}</span>`;
+            return `<span class="summary-item-line summary-income-line">+${escapeHTML(currencyFormatter.format(inc, c))}</span>`;
         }).join('');
 
         totalExpenseEl.innerHTML = activeCurrencies.map(c => {
             let exp = expenseByCurrency.get(c) || 0;
             if (c === 'USD') exp = Math.round(exp * 100) / 100;
-            return `<span class="summary-item-line">−${escapeHTML(currencyFormatter.format(exp, c))}</span>`;
+            return `<span class="summary-item-line summary-expense-line">−${escapeHTML(currencyFormatter.format(exp, c))}</span>`;
         }).join('');
     }
 }

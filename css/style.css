@@ -829,14 +829,32 @@ p {
     }
 }
 
-.summary-balance-line {
+.summary-balance-line,
+.summary-balance .summary-balance-line,
+.summary-item.balance .summary-balance-line,
+#total-balance .summary-balance-line {
     display: block;
     line-height: 1.2;
+    color: var(--text);
 }
 
 .summary-item-line {
     display: block;
     line-height: 1.25;
+}
+
+.summary-item-income .summary-item-line,
+.summary-row .summary-item.income .summary-item-line,
+.summary-income-line,
+#total-income .summary-item-line {
+    color: var(--income);
+}
+
+.summary-item-expense .summary-item-line,
+.summary-row .summary-item.expense .summary-item-line,
+.summary-expense-line,
+#total-expense .summary-item-line {
+    color: var(--expense);
 }
 
 .summary-row {
