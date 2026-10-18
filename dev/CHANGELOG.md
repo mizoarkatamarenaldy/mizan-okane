@@ -10,13 +10,6 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
-## 2026-10-19: Perbaikan UI PC 13: Dropdown Dompet Transfer
-- Ditambah: Dropdown "Dari" dan "Ke" khusus tampilan PC (@media min-width: 1024px) pada form Tambah/Edit Transaksi untuk tab Transfer memakai komponen dan kelas CSS yang sama persis dengan dropdown Dompet PC 12 (tinggi baris, font, panel, hover, baris terpilih, teks dompet tanpa ikon, dan teks "Pilih dompet" sebagai placeholder saat belum dipilih) serta navigasi keyboard penuh (Enter/Spasi untuk membuka, Panah Atas/Bawah untuk navigasi, Enter untuk memilih, Escape untuk menutup) (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
-- Diperbaiki: Sinkronisasi nilai pilihan dropdown "Dari" dan "Ke" ke elemen select bawaan yang disembunyikan secara visual di PC dengan memicu event change sehingga seluruh logika validasi transfer, filter mata uang yang sama, dan pengecualian dompet asal tetap berjalan tanpa diubah (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
-- Diubah: Tampilan mobile di bawah breakpoint PC tetap mempertahankan elemen select bawaan untuk "Dari" dan "Ke" tanpa perubahan (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
-- Diubah: Menaikkan versi cache service worker ke `mizan-v76` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
-- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 13: Dropdown Dompet Transfer" di `dev/PLAN.md`.
-
 ## 2026-10-19: Perbaikan UI PC 12: Dropdown Dompet
 - Ditambah: Dropdown Dompet khusus tampilan PC (@media min-width: 1024px) pada form Tambah/Edit Transaksi untuk tab Pengeluaran dan Pemasukan dengan gaya tampilan, tinggi baris, panel, hover, dan status terpilih yang identik dengan dropdown Kategori PC 11, serta navigasi keyboard penuh (Enter/Spasi untuk membuka, Panah Atas/Bawah untuk navigasi, Enter untuk memilih, Escape untuk menutup) (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
 - Diperbaiki: Sinkronisasi nilai pilihan dompet ke elemen select bawaan yang disembunyikan secara visual di PC sehingga seluruh alur validasi, pemilihan manual, format angka, dan mata uang tetap berjalan tanpa mengubah logika form (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
