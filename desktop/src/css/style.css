@@ -5233,8 +5233,6 @@ body.modal-open {
         overflow-x: hidden;
         scrollbar-width: thin;
         scrollbar-color: var(--border) transparent;
-        padding-bottom: 88px;
-        box-sizing: border-box;
     }
 
     #page-beranda .summary {
@@ -5498,12 +5496,6 @@ body.modal-open {
     }
 
     /* 5. Statistik: Grafik Disusun 2 Kolom, Tab Waktu Tetap di Atas */
-    #page-statistik {
-        overflow-y: auto;
-        padding-bottom: 88px;
-        box-sizing: border-box;
-    }
-
     #page-statistik .stats-scale-bar {
         margin-bottom: 16px;
     }
@@ -5530,9 +5522,6 @@ body.modal-open {
     .stats-charts-grid .chart-section,
     .stats-charts-grid .donut-section {
         margin-bottom: 0;
-        height: auto;
-        min-height: auto;
-        overflow: visible;
     }
 
     #page-statistik:has(.donut-section.hidden) .chart-section {
@@ -5600,24 +5589,11 @@ body.modal-open {
         display: none !important;
     }
 
-    .timbangan-dashboard-grid {
-        display: grid;
-        grid-template-columns: 1fr 1.2fr 1fr;
-        grid-template-rows: auto minmax(0, 1fr);
-        gap: 16px;
-        height: 100%;
-        min-height: 0;
-        flex: 1 1 0%;
-        align-items: stretch;
-    }
-
     .timbangan-top-controls {
-        grid-column: 1 / -1;
-        grid-row: 1;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0;
+        margin-bottom: 16px;
         flex: 0 0 auto;
         gap: 16px;
     }
@@ -5631,6 +5607,16 @@ body.modal-open {
         padding: 6px 12px;
     }
 
+    .timbangan-dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr 1fr;
+        gap: 16px;
+        height: 100%;
+        min-height: 0;
+        flex: 1 1 0%;
+        align-items: stretch;
+    }
+
     .timbangan-col {
         display: flex;
         flex-direction: column;
@@ -5641,60 +5627,25 @@ body.modal-open {
         overflow-x: hidden;
         scrollbar-width: thin;
         scrollbar-color: var(--border) transparent;
-        padding-bottom: 88px;
-        box-sizing: border-box;
     }
 
     .timbangan-col-left {
         grid-column: 1;
-        grid-row: 2;
     }
 
     .timbangan-col-center {
         grid-column: 2;
-        grid-row: 2;
     }
 
     .timbangan-col-right {
         grid-column: 3;
-        grid-row: 2;
     }
 
     #page-timbangan .timbangan-section,
     #page-timbangan .timbangan-calc-section {
-        margin-top: 0;
         margin-bottom: 0;
-        min-height: auto;
-        height: auto;
-        overflow: visible;
+        min-height: 100%;
         box-sizing: border-box;
-    }
-
-    #page-timbangan .timbangan-scale-container {
-        width: 100%;
-    }
-
-    #page-timbangan .timbangan-svg-wrap {
-        max-width: 440px;
-        width: 100%;
-        margin: 6px auto 10px;
-    }
-
-    #page-timbangan .timbangan-svg {
-        width: 100%;
-        height: auto;
-        max-height: none;
-        display: block;
-    }
-
-    #page-timbangan .timbangan-pan-amounts {
-        max-width: 440px;
-        width: 100%;
-    }
-
-    #page-timbangan .timbangan-verdict-box {
-        max-width: 440px;
-        width: 100%;
     }
 
     /* Kebijakan Privasi, Syarat dan Ketentuan: max-width 800px di Tengah */
@@ -5753,9 +5704,7 @@ body.modal-open {
     .tx-item,
     .settings-menu-row,
     .wallet-balance-item,
-    .settings-about-link,
-    .donut-legend-item,
-    .donut-segment {
+    .settings-about-link {
         transition: none !important;
     }
 
@@ -5772,8 +5721,7 @@ body.modal-open {
     .wallet-balance-item:hover:not(.is-selected),
     .settings-about-link:hover,
     .category-item:hover,
-    .subcategory-item:hover,
-    .donut-legend-item:hover:not(.is-active) {
+    .subcategory-item:hover {
         background-color: var(--surface-raised) !important;
     }
 }

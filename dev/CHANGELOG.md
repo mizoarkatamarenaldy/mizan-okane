@@ -10,16 +10,6 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
-## 2026-10-18: Perbaikan UI PC 2: Timbangan dan Diagram
-- Diperbaiki: Tata letak grid Timbangan pada layar PC (@media min-width: 1024px) dengan header satu baris penuh di atas (grid-column: 1 / -1), tiga kolom sejajar tepat di baris yang sama di bawahnya (kiri: Timbang Sebelum Beli, tengah: Timbangan Bulan Ini, kanan: Sesuaikan Saldo) mulai dari atas dan setinggi sisa layar, tanpa kartu jatuh ke baris berbeda (`desktop/src/index.html`, `desktop/src/css/style.css`).
-- Diperbaiki: Scroll pada halaman Timbangan dipindahkan ke level kolom mandiri (`overflow-y: auto`), kartu di dalam kolom mengikuti tinggi isi tanpa scrollbar tersendiri dan tanpa pembatasan tinggi (`min-height: auto`), serta gambar timbangan tampil utuh, tidak terpotong, dan ukurannya fleksibel menyesuaikan lebar kolom tengah (`desktop/src/css/style.css`).
-- Diperbaiki: Detail kategori dan kotak rincian sub kategori pada diagram donut Statistik tidak lagi terbuka hanya karena kursor mouse lewat; detail hanya terbuka saat irisan donut atau baris kategori diklik (atau ditekan Enter/Spasi saat fokus keyboard), dan klik kategori yang sama menutup kembali detail (`desktop/src/js/app.js`).
-- Diperbaiki: Tata letak Statistik saat detail kategori terbuka menempatkan kotak detail di atas diagram donut dan daftar kategori selebar kartu dengan tinggi kartu bertambah mengikuti isi tanpa saling menimpa atau bertabrakan, kartu tidak memiliki scrollbar sendiri melainkan seluruh halaman Statistik yang scroll (`desktop/src/css/style.css`).
-- Ditambah: Padding-bawah sebesar 88 px di dalam setiap kolom yang bisa di-scroll pada layar PC (kolom Timbangan, kolom Beranda, area Statistik) agar konten paling bawah dapat digulir bebas ke atas tombol melayang tambah (+) (`desktop/src/css/style.css`).
-- Ditambah: Efek hover pada baris kategori Statistik instan beralih ke token warna surface-raised tanpa animasi, dan baris kategori dapat difokus keyboard dengan indikator fokus (:focus-visible) yang sudah ada (`desktop/src/css/style.css`).
-- Diubah: Menaikkan versi cache service worker ke `mizan-v64` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
-- Diubah: Mencentang item "Perbaikan UI PC 2: Timbangan dan Diagram" di `dev/PLAN.md` dan menambahkan spesifikasinya di `dev/PLANSPEC.md`.
-
 ## 2026-10-18: Perbaikan UI PC: Riwayat dan Timbangan
 - Ditambah: Tampilan Riwayat di layar PC dengan baris transaksi satu lapis (tinggi 52px), kolom berurutan dengan lebar tetap (ikon 36px, kategori 180px, catatan 1fr terpotong elipsis, dompet 140px, waktu 80px, jumlah 150px rata kanan, tombol aksi 96px dengan ruang tersisa saat tanpa tombol edit), pemisah garis tipis token border tanpa kartu bersarang, serta blok ringkasan total tersusun rapi satu mata uang per baris (`desktop/src/css/style.css`).
 - Ditambah: Tata letak dashboard 3 kolom pada halaman Timbangan di layar PC (@media min-width: 1024px) dengan lebar kolom berbanding 1 : 1,2 : 1 (kiri: Timbang Sebelum Beli, tengah: Timbangan Bulan Ini & Equilibrium, kanan: Sesuaikan Saldo), scroll independen per kolom (overflow-y auto), tinggi pas sisa layar tanpa scroll panjang halaman, dan pembatasan lebar konten maksimal 1600px di tengah (`desktop/src/index.html`, `desktop/src/css/style.css`).
