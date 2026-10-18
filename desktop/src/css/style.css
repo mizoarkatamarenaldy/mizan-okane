@@ -5136,7 +5136,10 @@ body.modal-open {
 .beranda-col,
 .list-controls-row,
 .stats-controls-row,
-.stats-charts-grid {
+.stats-charts-grid,
+.timbangan-top-controls,
+.timbangan-dashboard-grid,
+.timbangan-col {
     display: contents;
 }
 
@@ -5294,6 +5297,33 @@ body.modal-open {
         padding-bottom: 16px;
     }
 
+    #page-riwayat .list-header-title-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    #page-riwayat .riwayat-summary {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+    }
+
+    #page-riwayat .riwayat-summary.is-multiline {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    #page-riwayat .riwayat-summary-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
     #page-riwayat .list-controls-row {
         display: flex;
         align-items: center;
@@ -5305,6 +5335,10 @@ body.modal-open {
         display: block !important;
         margin: 0;
         width: 320px;
+    }
+
+    #page-riwayat .history-search-input {
+        padding-left: 44px;
     }
 
     #page-riwayat #btn-toggle-search {
@@ -5319,23 +5353,43 @@ body.modal-open {
     }
 
     /* Baris Tabel Lebar Riwayat */
+    #page-riwayat .tx-date-group {
+        margin-bottom: 20px;
+    }
+
+    #page-riwayat .tx-date-group:last-child {
+        margin-bottom: 0;
+    }
+
+    #page-riwayat .tx-date-group-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 12px 8px;
+        border-bottom: 1px solid var(--border);
+    }
+
     #page-riwayat .tx-date-group-items {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 0;
     }
 
     #page-riwayat .tx-item {
         display: grid;
-        grid-template-columns: 36px minmax(140px, 1.2fr) minmax(180px, 2fr) minmax(110px, 0.8fr) minmax(75px, 0.5fr) minmax(130px, 1fr) auto;
+        grid-template-columns: 36px 180px minmax(0, 1fr) 140px 80px 150px 96px;
         align-items: center;
         column-gap: 16px;
         row-gap: 0;
-        padding: 10px 16px;
-        border-radius: var(--radius-card, 8px);
-        border: 1px solid var(--border);
-        background: var(--surface);
+        min-height: 52px;
+        height: 52px;
+        padding: 0 12px;
+        border: none;
+        border-bottom: 1px solid var(--border);
+        background: transparent;
+        border-radius: 0;
         margin-bottom: 0;
+        box-sizing: border-box;
     }
 
     #page-riwayat .tx-item-content,
@@ -5345,6 +5399,7 @@ body.modal-open {
 
     #page-riwayat .tx-item-icon {
         grid-column: 1;
+        grid-row: 1;
         width: 36px;
         height: 36px;
         min-width: 36px;
@@ -5353,22 +5408,36 @@ body.modal-open {
 
     #page-riwayat .tx-item-category {
         grid-column: 2;
+        grid-row: 1;
         font-size: 14px;
         font-weight: 500;
         color: var(--text);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        min-width: 0;
     }
 
     #page-riwayat .tx-item-note-row {
         grid-column: 3;
+        grid-row: 1;
         margin: 0;
         color: var(--text-secondary);
         font-size: 13.5px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        min-width: 0;
+    }
+
+    #page-riwayat .tx-item-note {
+        animation: none !important;
+        transform: none !important;
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     #page-riwayat .tx-item-sub {
@@ -5377,23 +5446,28 @@ body.modal-open {
 
     #page-riwayat .tx-item-wallet {
         grid-column: 4;
+        grid-row: 1;
         color: var(--text-secondary);
         font-size: 13px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        min-width: 0;
     }
 
     #page-riwayat .tx-item-time {
         grid-column: 5;
+        grid-row: 1;
         color: var(--text-secondary);
         font-size: 13px;
         white-space: nowrap;
         margin: 0;
+        min-width: 0;
     }
 
     #page-riwayat .tx-item-amount-col {
         grid-column: 6;
+        grid-row: 1;
         text-align: right;
         white-space: nowrap;
     }
@@ -5405,9 +5479,20 @@ body.modal-open {
 
     #page-riwayat .tx-actions {
         grid-column: 7;
+        grid-row: 1;
         margin-left: 0;
         display: flex;
-        gap: 6px;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        width: 96px;
+        flex: 0 0 96px;
+    }
+
+    #page-riwayat .tx-actions .btn-icon {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
     }
 
     /* 5. Statistik: Grafik Disusun 2 Kolom, Tab Waktu Tetap di Atas */
@@ -5488,12 +5573,82 @@ body.modal-open {
         border-color: var(--accent);
     }
 
-    /* 7. Timbangan, Kebijakan Privasi, Syarat dan Ketentuan: max-width 800px di Tengah */
+    /* 7. Timbangan: 3 Kolom Dashboard (1 : 1.2 : 1), Pas Sisa Layar */
     #page-timbangan {
-        max-width: 800px;
+        max-width: 1600px;
         margin: 0 auto;
         width: 100%;
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
+
+    #page-timbangan.hidden {
+        display: none !important;
+    }
+
+    .timbangan-top-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        flex: 0 0 auto;
+        gap: 16px;
+    }
+
+    #page-timbangan .timbangan-header-bar {
+        margin-bottom: 0;
+    }
+
+    #page-timbangan #timbangan-currency-bar {
+        margin-bottom: 0;
+        padding: 6px 12px;
+    }
+
+    .timbangan-dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr 1fr;
+        gap: 16px;
+        height: 100%;
+        min-height: 0;
+        flex: 1 1 0%;
+        align-items: stretch;
+    }
+
+    .timbangan-col {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+
+    .timbangan-col-left {
+        grid-column: 1;
+    }
+
+    .timbangan-col-center {
+        grid-column: 2;
+    }
+
+    .timbangan-col-right {
+        grid-column: 3;
+    }
+
+    #page-timbangan .timbangan-section,
+    #page-timbangan .timbangan-calc-section {
+        margin-bottom: 0;
+        min-height: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Kebijakan Privasi, Syarat dan Ketentuan: max-width 800px di Tengah */
 
     .privacy-card,
     .privacy-nav-top {

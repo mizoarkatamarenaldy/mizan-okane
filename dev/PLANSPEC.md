@@ -1275,4 +1275,50 @@ Data:
 Cek manual:
 - Belum ditentukan. Ditulis saat spek rinci dibuat.
 
+## Perbaikan UI PC: Riwayat dan Timbangan
+
+Tujuan: Setelah Revisi UI PC, Riwayat di layar PC masih terlihat janggal dan Timbangan masih harus di-scroll. Rapikan keduanya. Tampilan HP dan APK tidak boleh berubah sama sekali.
+
+Izin dari pemilik:
+- Bagian ini menggantikan aturan "Timbangan max-width 800px" di spek "Revisi UI PC", hanya untuk Timbangan. Jangan ubah isi bagian "Revisi UI PC" di dev/PLANSPEC.md.
+- Boleh menaikkan nomor versi cache di desktop/src/sw.js. Tidak ada perubahan lain di sw.js.
+
+Titik pindah:
+- Semua perubahan hanya aktif lewat @media (min-width: 1024px). Di bawah 1024 px tampilan harus sama persis seperti sekarang. Wrapper HTML baru memakai display: contents di bawah 1024 px, seperti pola di Revisi UI PC.
+
+Tempat dan tampilan:
+- Riwayat, kotak pencarian: ikon kaca pembesar tidak boleh menimpa teks. Beri padding kiri kolom input cukup besar.
+- Riwayat, baris transaksi: satu baris tunggal per transaksi, tingginya sekitar 48 sampai 56 px, bukan dua lapis. Kolom dengan lebar tetap yang sama di semua baris, berurutan dari kiri: ikon kategori, nama kategori (dan sub kategori), catatan (mengisi sisa lebar, terpotong "..." bila panjang), dompet, waktu, jumlah (rata kanan, dengan tanda + atau −, warna sesuai DESIGN.md), tombol aksi (edit dan hapus, lebar tetap di kanan; kalau transaksi tidak punya tombol edit, ruangnya tetap disisakan agar kolom tetap lurus).
+- Riwayat, tanpa kartu di dalam kartu: baris tidak punya kotak, border, atau latar sendiri. Pemisah antar baris berupa garis tipis token border. Hover baris: ganti latar ke token surface-raised.
+- Riwayat, header grup tanggal: tetap seperti sekarang (tanggal di kiri, total harian di kanan), dengan jarak yang rapi dari baris.
+- Riwayat, ringkasan total di atas: susun rapi dalam satu blok, satu mata uang per baris, tidak melebar menumpuk di pojok.
+- Timbangan, 3 kolom, tinggi isi pas dengan sisa tinggi layar, halaman tidak scroll panjang:
+  - Kolom kiri: kartu "Timbang Sebelum Beli".
+  - Kolom tengah: gambar timbangan, Pemasukan dan Pengeluaran, kotak Surplus atau Defisit, dan baris Equilibrium.
+  - Kolom kanan: kartu "Sesuaikan Saldo".
+  - Lebar kolom sekitar 1 : 1,2 : 1.
+  - Tiap kolom punya scroll sendiri (overflow-y auto) kalau isinya melebihi tinggi kolom.
+  - Lebar isi dibatasi max-width 1600px di tengah, sama seperti halaman lain.
+
+Aturan:
+- Hanya CSS dan penyusunan HTML. Tidak ada perubahan logika, nama fungsi, nama kunci data, atau alur sinkron.
+- Warna, font, ukuran teks, radius, dan tanpa bayangan tetap mengikuti dev/DESIGN.md. Tidak ada warna, font, bayangan, atau animasi baru.
+- Target sentuh minimal 44 px dan indikator fokus keyboard tetap ada. Mode terang dan gelap sama-sama harus benar.
+- Sengaja TIDAK dilakukan: perubahan halaman lain (Beranda, Statistik, Pengaturan, form), fitur baru, perubahan tampilan HP.
+- Dilarang menjalankan build. Hanya ubah desktop/ dan dev/PLAN.md, dev/CHANGELOG.md, dev/PLANSPEC.md.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. dev/SCHEMA.md tidak berubah.
+
+Cek manual (dilakukan pemilik):
+- Browser PC 1280x720, buka Riwayat: tiap transaksi satu baris, kolom catatan, dompet, waktu, jumlah lurus di semua baris dan semua grup tanggal. Tidak ada kotak di dalam kartu. Ikon pencarian tidak menimpa teks.
+- Riwayat: baris dengan catatan panjang terpotong "..." dan tidak merusak kolom lain. Baris tanpa tombol edit (misalnya Penyesuaian) tetap lurus dengan baris lain.
+- Riwayat: pencarian, filter bulan, filter dompet, edit, dan hapus masih jalan.
+- Browser PC 1280x720, buka Timbangan: 3 kolom (Timbang Sebelum Beli di kiri, timbangan di tengah, Sesuaikan Saldo di kanan), halaman tidak scroll panjang, kolom yang isinya banyak scroll sendiri.
+- Timbangan: timbang sebelum beli dan sesuaikan saldo bekerja seperti biasa.
+- Di 1920x1080: Riwayat dan Timbangan rapi, isi tidak melebar lewat 1600 px.
+- Perkecil jendela ke bawah 1024 px: Riwayat dan Timbangan kembali sama persis dengan tampilan HP sekarang.
+- Ganti mode terang dan gelap: keduanya terbaca jelas.
+
+
 

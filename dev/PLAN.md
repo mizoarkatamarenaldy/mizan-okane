@@ -103,6 +103,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
 Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh prompt dengan klausa "Izin dari pemilik".
 - [x] Pemisahan folder
 - [x] Revisi UI PC
+- [x] Perbaikan UI PC: Riwayat dan Timbangan
 - [ ] Konversi Tauri
 - [ ] Konversi Kotlin
 - [ ] APK rilis

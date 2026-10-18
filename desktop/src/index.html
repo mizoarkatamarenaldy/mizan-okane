@@ -284,133 +284,146 @@
 
         <!-- 4. Halaman Timbangan (Mizan) -->
         <main id="page-timbangan" class="page-view hidden" role="tabpanel" aria-label="Timbangan">
-            <!-- Header Halaman Timbangan -->
-            <div class="timbangan-header-bar">
-                <button type="button" id="btn-timbangan-back" class="btn-icon btn-timbangan-back" aria-label="Kembali ke Beranda" title="Kembali ke Beranda">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
-                <div class="timbangan-title-wrap">
-                    <h2 class="timbangan-main-title card-title">Timbangan</h2>
-                    <span class="timbangan-sub-title">Keseimbangan keuangan dan simulasi belanja</span>
+            <div class="timbangan-top-controls">
+                <!-- Header Halaman Timbangan -->
+                <div class="timbangan-header-bar">
+                    <button type="button" id="btn-timbangan-back" class="btn-icon btn-timbangan-back" aria-label="Kembali ke Beranda" title="Kembali ke Beranda">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <div class="timbangan-title-wrap">
+                        <h2 class="timbangan-main-title card-title">Timbangan</h2>
+                        <span class="timbangan-sub-title">Keseimbangan keuangan dan simulasi belanja</span>
+                    </div>
+                </div>
+
+                <!-- Pilihan Mata Uang -->
+                <div id="timbangan-currency-bar" class="stats-currency-bar">
+                    <span class="stats-currency-label">Mata Uang</span>
+                    <div class="type-segmented-control timbangan-currency-control" role="radiogroup" aria-label="Pilihan mata uang timbangan">
+                        <button type="button" id="btn-timbangan-currency-idr" class="chart-toggle-btn is-active" data-currency="IDR" aria-pressed="true">Rupiah</button>
+                        <button type="button" id="btn-timbangan-currency-jpy" class="chart-toggle-btn" data-currency="JPY" aria-pressed="false">Yen</button>
+                        <button type="button" id="btn-timbangan-currency-usd" class="chart-toggle-btn" data-currency="USD" aria-pressed="false">Dolar</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Pilihan Mata Uang -->
-            <div id="timbangan-currency-bar" class="stats-currency-bar">
-                <span class="stats-currency-label">Mata Uang</span>
-                <div class="type-segmented-control timbangan-currency-control" role="radiogroup" aria-label="Pilihan mata uang timbangan">
-                    <button type="button" id="btn-timbangan-currency-idr" class="chart-toggle-btn is-active" data-currency="IDR" aria-pressed="true">Rupiah</button>
-                    <button type="button" id="btn-timbangan-currency-jpy" class="chart-toggle-btn" data-currency="JPY" aria-pressed="false">Yen</button>
-                    <button type="button" id="btn-timbangan-currency-usd" class="chart-toggle-btn" data-currency="USD" aria-pressed="false">Dolar</button>
+            <div class="timbangan-dashboard-grid">
+                <!-- Kolom tengah: Timbangan Bulan Ini (DOM order 1 untuk mobile) -->
+                <div class="timbangan-col timbangan-col-center">
+                    <!-- Bagian 1: Timbangan Bulan Ini -->
+                    <section class="timbangan-section" aria-labelledby="timbangan-month-title">
+                        <div class="chart-header">
+                            <div class="chart-header-title">
+                                <h3 id="timbangan-month-title" class="card-title">Timbangan Bulan Ini</h3>
+                            </div>
+                            <div class="budget-month-controls" role="group" aria-label="Pilih bulan timbangan">
+                                <button type="button" id="btn-timbangan-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                </button>
+                                <span id="timbangan-month-label" class="budget-month-label" aria-live="polite">Okt 2026</span>
+                                <button type="button" id="btn-timbangan-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="timbangan-scale-container" class="timbangan-scale-container">
+                            <!-- Outline Scale SVG & Verdict diisi secara reaktif via JS -->
+                        </div>
+
+                        <!-- Baris terpisah bernama "Equilibrium" di bawah timbangan bulan ini -->
+                        <div id="timbangan-equilibrium-row" class="timbangan-equilibrium-row">
+                            <div class="timbangan-equilibrium-info">
+                                <span class="timbangan-equilibrium-label">Equilibrium</span>
+                                <span class="timbangan-equilibrium-subtext">Penyesuaian saldo bulan ini</span>
+                            </div>
+                            <div id="timbangan-equilibrium-values" class="timbangan-equilibrium-values tabular-nums">
+                                <span class="timbangan-equilibrium-val is-zero">Rp 0</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Kolom kiri: Timbang Sebelum Beli (DOM order 2 untuk mobile) -->
+                <div class="timbangan-col timbangan-col-left">
+                    <!-- Bagian 2: Kalkulator "Timbang Sebelum Beli" -->
+                    <section class="timbangan-calc-section" aria-labelledby="timbangan-calc-title">
+                        <div class="settings-card-header">
+                            <h3 id="timbangan-calc-title" class="card-title">Timbang Sebelum Beli</h3>
+                            <p class="settings-card-desc">Simulasi dampak pengeluaran terhadap saldo dompet, budget, dan timbangan bulan ini.</p>
+                        </div>
+
+                        <div class="timbangan-calc-form">
+                            <!-- Input Harga -->
+                            <div class="form-group form-group-amount">
+                                <label for="calc-price-input" class="form-label" id="calc-price-label">Harga Barang (Rp)</label>
+                                <div class="amount-input-wrapper">
+                                    <span class="amount-currency-prefix" id="calc-price-prefix" aria-hidden="true">Rp</span>
+                                    <input type="text" inputmode="numeric" id="calc-price-input" class="tx-amount-large tabular-nums" placeholder="0" autocomplete="off" aria-label="Harga barang yang akan dibeli">
+                                </div>
+                            </div>
+
+                            <!-- Pilihan Kategori Pengeluaran -->
+                            <div class="form-group">
+                                <label for="calc-category-select" class="form-label">Kategori Pengeluaran</label>
+                                <select id="calc-category-select" class="calc-select" aria-label="Pilih kategori pengeluaran">
+                                    <!-- Diisi via JS -->
+                                </select>
+                            </div>
+
+                            <!-- Pilihan Dompet -->
+                            <div class="form-group">
+                                <label for="calc-wallet-select" class="form-label">Dompet Sumber Dana</label>
+                                <select id="calc-wallet-select" class="calc-select" aria-label="Pilih dompet sumber dana">
+                                    <!-- Diisi via JS -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Hasil Kalkulasi -->
+                        <div class="timbangan-calc-results" id="timbangan-calc-results" aria-live="polite">
+                            <!-- Status Banner (Aman / Pas / Berat) -->
+                            <div id="calc-status-banner" class="calc-status-banner status-aman">
+                                <div class="calc-status-head">
+                                    <span class="calc-status-label-prefix">Status:</span>
+                                    <strong id="calc-status-badge" class="calc-status-badge">Aman</strong>
+                                </div>
+                                <p id="calc-status-desc" class="calc-status-desc">Sisa budget dan saldo dompet mencukupi.</p>
+                            </div>
+
+                            <!-- Rincian Hasil -->
+                            <div class="calc-results-list">
+                                <div class="calc-result-row">
+                                    <span class="calc-result-label">Saldo dompet setelah beli:</span>
+                                    <strong id="calc-result-wallet" class="calc-result-val tabular-nums">Rp 0</strong>
+                                </div>
+                                <div class="calc-result-row" id="calc-result-budget-row">
+                                    <span class="calc-result-label">Sisa budget kategori:</span>
+                                    <strong id="calc-result-budget" class="calc-result-val tabular-nums">Rp 0</strong>
+                                </div>
+                                <div class="calc-result-row">
+                                    <span class="calc-result-label">Timbangan bulan ini setelah beli:</span>
+                                    <strong id="calc-result-monthly-scale" class="calc-result-val tabular-nums">Surplus Rp 0</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Kolom kanan: Sesuaikan Saldo (DOM order 3 untuk mobile) -->
+                <div class="timbangan-col timbangan-col-right">
+                    <!-- Bagian 3: Sesuaikan Saldo -->
+                    <section class="timbangan-section timbangan-adjust-section" aria-labelledby="timbangan-adjust-title">
+                        <div class="settings-card-header">
+                            <h3 id="timbangan-adjust-title" class="card-title">Sesuaikan Saldo</h3>
+                            <p class="settings-card-desc">Samakan saldo dompet di aplikasi dengan saldo riil saat ada selisih.</p>
+                        </div>
+                        <div id="timbangan-adjust-wallet-list" class="timbangan-adjust-wallet-list">
+                            <!-- Diisi via JS: nama dompet, saldo di app, dan tombol Sesuaikan -->
+                        </div>
+                    </section>
                 </div>
             </div>
-
-            <!-- Bagian 1: Timbangan Bulan Ini -->
-            <section class="timbangan-section" aria-labelledby="timbangan-month-title">
-                <div class="chart-header">
-                    <div class="chart-header-title">
-                        <h3 id="timbangan-month-title" class="card-title">Timbangan Bulan Ini</h3>
-                    </div>
-                    <div class="budget-month-controls" role="group" aria-label="Pilih bulan timbangan">
-                        <button type="button" id="btn-timbangan-prev-month" class="btn-icon btn-month-nav" aria-label="Bulan sebelumnya">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        </button>
-                        <span id="timbangan-month-label" class="budget-month-label" aria-live="polite">Okt 2026</span>
-                        <button type="button" id="btn-timbangan-next-month" class="btn-icon btn-month-nav" aria-label="Bulan berikutnya">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="timbangan-scale-container" class="timbangan-scale-container">
-                    <!-- Outline Scale SVG & Verdict diisi secara reaktif via JS -->
-                </div>
-
-                <!-- Baris terpisah bernama "Equilibrium" di bawah timbangan bulan ini -->
-                <div id="timbangan-equilibrium-row" class="timbangan-equilibrium-row">
-                    <div class="timbangan-equilibrium-info">
-                        <span class="timbangan-equilibrium-label">Equilibrium</span>
-                        <span class="timbangan-equilibrium-subtext">Penyesuaian saldo bulan ini</span>
-                    </div>
-                    <div id="timbangan-equilibrium-values" class="timbangan-equilibrium-values tabular-nums">
-                        <span class="timbangan-equilibrium-val is-zero">Rp 0</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Bagian 2: Kalkulator "Timbang Sebelum Beli" -->
-            <section class="timbangan-calc-section" aria-labelledby="timbangan-calc-title">
-                <div class="settings-card-header">
-                    <h3 id="timbangan-calc-title" class="card-title">Timbang Sebelum Beli</h3>
-                    <p class="settings-card-desc">Simulasi dampak pengeluaran terhadap saldo dompet, budget, dan timbangan bulan ini.</p>
-                </div>
-
-                <div class="timbangan-calc-form">
-                    <!-- Input Harga -->
-                    <div class="form-group form-group-amount">
-                        <label for="calc-price-input" class="form-label" id="calc-price-label">Harga Barang (Rp)</label>
-                        <div class="amount-input-wrapper">
-                            <span class="amount-currency-prefix" id="calc-price-prefix" aria-hidden="true">Rp</span>
-                            <input type="text" inputmode="numeric" id="calc-price-input" class="tx-amount-large tabular-nums" placeholder="0" autocomplete="off" aria-label="Harga barang yang akan dibeli">
-                        </div>
-                    </div>
-
-                    <!-- Pilihan Kategori Pengeluaran -->
-                    <div class="form-group">
-                        <label for="calc-category-select" class="form-label">Kategori Pengeluaran</label>
-                        <select id="calc-category-select" class="calc-select" aria-label="Pilih kategori pengeluaran">
-                            <!-- Diisi via JS -->
-                        </select>
-                    </div>
-
-                    <!-- Pilihan Dompet -->
-                    <div class="form-group">
-                        <label for="calc-wallet-select" class="form-label">Dompet Sumber Dana</label>
-                        <select id="calc-wallet-select" class="calc-select" aria-label="Pilih dompet sumber dana">
-                            <!-- Diisi via JS -->
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Hasil Kalkulasi -->
-                <div class="timbangan-calc-results" id="timbangan-calc-results" aria-live="polite">
-                    <!-- Status Banner (Aman / Pas / Berat) -->
-                    <div id="calc-status-banner" class="calc-status-banner status-aman">
-                        <div class="calc-status-head">
-                            <span class="calc-status-label-prefix">Status:</span>
-                            <strong id="calc-status-badge" class="calc-status-badge">Aman</strong>
-                        </div>
-                        <p id="calc-status-desc" class="calc-status-desc">Sisa budget dan saldo dompet mencukupi.</p>
-                    </div>
-
-                    <!-- Rincian Hasil -->
-                    <div class="calc-results-list">
-                        <div class="calc-result-row">
-                            <span class="calc-result-label">Saldo dompet setelah beli:</span>
-                            <strong id="calc-result-wallet" class="calc-result-val tabular-nums">Rp 0</strong>
-                        </div>
-                        <div class="calc-result-row" id="calc-result-budget-row">
-                            <span class="calc-result-label">Sisa budget kategori:</span>
-                            <strong id="calc-result-budget" class="calc-result-val tabular-nums">Rp 0</strong>
-                        </div>
-                        <div class="calc-result-row">
-                            <span class="calc-result-label">Timbangan bulan ini setelah beli:</span>
-                            <strong id="calc-result-monthly-scale" class="calc-result-val tabular-nums">Surplus Rp 0</strong>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Bagian 3: Sesuaikan Saldo -->
-            <section class="timbangan-section timbangan-adjust-section" aria-labelledby="timbangan-adjust-title">
-                <div class="settings-card-header">
-                    <h3 id="timbangan-adjust-title" class="card-title">Sesuaikan Saldo</h3>
-                    <p class="settings-card-desc">Samakan saldo dompet di aplikasi dengan saldo riil saat ada selisih.</p>
-                </div>
-                <div id="timbangan-adjust-wallet-list" class="timbangan-adjust-wallet-list">
-                    <!-- Diisi via JS: nama dompet, saldo di app, dan tombol Sesuaikan -->
-                </div>
-            </section>
         </main>
 
         <!-- 5. Halaman Pengaturan -->

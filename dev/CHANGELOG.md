@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC: Riwayat dan Timbangan
+- Ditambah: Tampilan Riwayat di layar PC dengan baris transaksi satu lapis (tinggi 52px), kolom berurutan dengan lebar tetap (ikon 36px, kategori 180px, catatan 1fr terpotong elipsis, dompet 140px, waktu 80px, jumlah 150px rata kanan, tombol aksi 96px dengan ruang tersisa saat tanpa tombol edit), pemisah garis tipis token border tanpa kartu bersarang, serta blok ringkasan total tersusun rapi satu mata uang per baris (`desktop/src/css/style.css`).
+- Ditambah: Tata letak dashboard 3 kolom pada halaman Timbangan di layar PC (@media min-width: 1024px) dengan lebar kolom berbanding 1 : 1,2 : 1 (kiri: Timbang Sebelum Beli, tengah: Timbangan Bulan Ini & Equilibrium, kanan: Sesuaikan Saldo), scroll independen per kolom (overflow-y auto), tinggi pas sisa layar tanpa scroll panjang halaman, dan pembatasan lebar konten maksimal 1600px di tengah (`desktop/src/index.html`, `desktop/src/css/style.css`).
+- Diperbaiki: Kotak pencarian Riwayat diberi padding kiri 44px agar ikon kaca pembesar tidak menimpa teks pencarian di layar PC (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v63` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Mencentang item "Perbaikan UI PC: Riwayat dan Timbangan" di `dev/PLAN.md` dan menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Revisi UI PC
 - Ditambah: Tata letak dashboard layar lebar (@media min-width: 1024px) dengan lebar konten maksimal 1600px di tengah, tinggi konten pas satu layar tanpa scroll panjang, serta Beranda 3 kolom (kolom kiri: saldo dan dompet; kolom tengah: budget; kolom kanan: transaksi terakhir) dengan overflow scroll mandiri per kolom (`desktop/src/index.html`, `desktop/src/css/style.css`).
 - Ditambah: Tampilan Riwayat di layar PC dengan pencarian dan filter bulan pada satu baris atas, serta baris transaksi melebar seperti tabel terstruktur (ikon dan kategori, catatan, dompet, waktu, jumlah rata kanan dengan tanda, tombol aksi) (`desktop/src/index.html`, `desktop/src/css/style.css`).
