@@ -4,7 +4,7 @@
 - Di awal sesi, baca dev/RULES.md dan dev/PLAN.md. Lalu baca dev/PLANSPEC.md hanya di bagian item yang dikerjakan, jangan seluruh file.
 - Spek fitur baru WAJIB ditulis di dev/PLANSPEC.md dengan judul sama seperti item di dev/PLAN.md. Di dev/PLAN.md hanya boleh ada satu baris checkbox plus judul singkat, tanpa kurung penjelasan dan tanpa sub-poin.
 - Saat mengerjakan item, ikuti spek di dev/PLANSPEC.md. Kalau spek dan PLAN.md berbeda, spek yang berlaku.
-- Kerjakan SATU tahap per sesi. Khusus Tahap 5, kerjakan SATU fitur per sesi. Jangan lompat ke tahap atau fitur lain.
+- Kerjakan SATU tahap per sesi. Khusus Tahap 5 dan item di "Rencana setelah Tahap 5", kerjakan SATU fitur atau item per sesi. Jangan lompat ke tahap, fitur, atau item lain.
 - Jangan ubah file di luar tahap yang sedang dikerjakan.
 - Dilarang menjalankan `npm run build`, `npx cap sync`, `npx cap copy`, atau perintah build apa pun. Folder www/ dan android/ hanya dibangun oleh pemilik. Dilarang `git add` pada kedua folder itu. Kalau keduanya muncul di `git status --short`, berhenti dan laporkan.
 - Bagian "Keputusan terkunci" tidak boleh diubah tanpa izin pemilik.
@@ -27,3 +27,13 @@ Setelah tahap selesai:
 5. Jalankan `git push` ke branch yang sedang aktif. Dilarang force push, dilarang membuat atau menghapus branch, dilarang mengubah git config.
 6. Kalau commit atau push gagal, jangan coba cara lain. Berhenti dan laporkan error-nya ke pemilik.
 7. Di akhir, kabari file apa saja yang diubah dan hash commit-nya.
+
+## Aturan setelah pemisahan folder
+Bagian ini hanya berlaku setelah item "Pemisahan folder" tercentang di dev/PLAN.md. Sebelum itu, abaikan.
+
+- Setiap prompt menyebut satu folder kerja: desktop/, mobile/, atau dev/. Hanya ubah folder itu. Kalau perlu mengubah folder lain, berhenti dan laporkan.
+- Tulis semua path dari root repo, jangan path relatif.
+- Memindahkan file wajib pakai `git mv`, agar riwayat commit tidak hilang. Satu pemindahan per commit, dan path di dev/RULES.md diperbarui di commit yang sama.
+- Format data (JSON backup dan file di Google Drive appDataFolder) dicatat di dev/SCHEMA.md. Perubahan format hanya boleh dengan "Izin dari pemilik" dan harus dikerjakan di desktop/ dan mobile/ sekaligus.
+- Fitur baru dibekukan. Perubahan logika di luar tampilan hanya boleh dengan "Izin dari pemilik".
+- Larangan build untuk www/ dan android/ tetap berlaku pada folder penggantinya di mobile/ dan desktop/. Pemilik yang membangun.

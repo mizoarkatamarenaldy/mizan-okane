@@ -23,7 +23,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
 - [x] **Tahap 2: Jadi PWA**
 - [x] **Tahap 3: Login Google dan sinkron Drive**
 - [x] **Tahap 4: Aturan konflik data**
-- [ ] **Tahap 5: Fitur tambahan**
+- [x] **Tahap 5: Fitur tambahan**
   - [x] Ekspor CSV
   - [x] Jam:menit pada transaksi
   - [x] Perbaikan: login Google lebih mulus
@@ -32,7 +32,6 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Budget per kategori
   - [x] Grafik pengeluaran bulanan
   - [x] Beberapa dompet
-  - [ ] Rollover budget
   - [x] Transfer antar dompet
   - [x] Ganti label "Jam (opsional)" jadi "Waktu"
   - [x] Pilihan format jam 12 jam (AM/PM) atau 24 jam
@@ -58,13 +57,10 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
     - [x] v2.3: Riwayat dikelompokkan per tanggal dan form tambah/edit transaksi
     - [x] v2.4: Statistik, Pengaturan, Kebijakan Privasi, Syarat dan Ketentuan
     - [x] v2.5: Cek akhir
-  - [ ] APK rilis: unggah APK ke GitHub Releases
-  - [ ] APK Item A: login Google native untuk APK
   - [x] Mata uang per dompet, tahap 1: Rupiah dan Yen
   - [x] Mata uang per dompet, tahap 2: tambah USD dengan desimal
   - [x] Sub kategori
   - [x] Timbangan
-  - [ ] Persiapan rilis publik
   - [x] Data contoh (dummy)
   - [x] Hapus semua data
   - [x] Pengaturan per kategori
@@ -104,6 +100,15 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Kategori Equilibrium
 
 ## Rencana setelah Tahap 5
+Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh prompt dengan klausa "Izin dari pemilik".
+- [ ] Pemisahan folder
+- [ ] Revisi UI PC
 - [ ] Konversi Tauri
 - [ ] Konversi Kotlin
-- [ ] Pemisahan folder
+- [ ] APK rilis
+- [ ] APK Item A: login Google native
+- [ ] Persiapan rilis publik
+
+## Ditunda
+Tidak dikerjakan sampai pemilik memintanya.
+- [ ] Rollover budget
