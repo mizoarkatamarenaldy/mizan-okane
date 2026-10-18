@@ -6256,7 +6256,7 @@ body.modal-open {
         scrollbar-color: var(--border) transparent;
     }
 
-    /* 8. Form Dialog di Tengah Layar: lebar sekitar 480px dengan latar gelap */
+    /* 8. Form Dialog di Tengah Layar: persegi panjang horizontal 2 kolom tanpa scroll */
     .form-screen {
         align-items: center;
         justify-content: center;
@@ -6270,17 +6270,117 @@ body.modal-open {
     }
 
     .form-screen-container {
-        max-width: 480px;
+        max-width: 820px;
         width: 100%;
         border-radius: var(--radius-card, 8px);
         border: 1px solid var(--border);
         box-shadow: none;
-        max-height: 88vh;
-        padding: 20px 24px 24px;
+        max-height: 90vh;
+        padding: 20px 24px 20px;
+        overflow-y: auto;
     }
 
     .form-screen-sheet-handle {
         display: none;
+    }
+
+    .form-rows-list {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        column-gap: 28px;
+        row-gap: 0;
+        margin-bottom: 14px;
+    }
+
+    .form-row-label {
+        flex: 0 0 110px;
+        width: 110px;
+    }
+
+    .form-row-datetime-val {
+        gap: 6px;
+    }
+
+    .compact-date-inputs {
+        gap: 3px;
+        flex-shrink: 0;
+    }
+
+    .compact-date-inputs .date-select-day {
+        flex: 0 0 46px;
+    }
+
+    .compact-date-inputs .date-select-month {
+        flex: 0 0 70px;
+    }
+
+    .compact-date-inputs .date-select-year {
+        flex: 0 0 60px;
+    }
+
+    .compact-time-inputs {
+        gap: 2px;
+        flex-shrink: 0;
+    }
+
+    .compact-time-inputs .time-select {
+        flex: 0 0 46px;
+    }
+
+    .compact-time-inputs .time-select-ampm {
+        flex: 0 0 58px;
+    }
+
+    /* Posisi Grid di Layar PC: Pengeluaran / Pemasukan */
+    #form-row-datetime {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    #form-row-amount {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    #form-row-category {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    #form-row-wallet {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    #form-row-note {
+        grid-column: 1 / -1;
+        grid-row: 3;
+    }
+
+    /* Posisi Grid di Layar PC: Transfer */
+    .tx-form.is-transfer #form-row-datetime {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .tx-form.is-transfer #form-row-amount {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .tx-form.is-transfer #form-row-wallet {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .tx-form.is-transfer #form-row-to-wallet {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .tx-form.is-transfer #form-row-note {
+        grid-column: 1 / -1;
+        grid-row: 3;
     }
 
     /* 9. Efek Hover: hanya ganti warna latar ke token surface-raised, tanpa animasi */

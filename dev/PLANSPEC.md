@@ -1539,3 +1539,41 @@ Cek manual:
 - Edit transaksi lama: form terisi dengan data transaksinya dan tampil dengan tata letak yang sama.
 - Buka halaman lain (Beranda, Riwayat, Timbangan, Statistik, Pengaturan): tampilannya tidak berubah.
 
+## Perbaikan UI PC 9: Form Transaksi Lanjutan
+
+Tujuan: Lanjutan dari "Perbaikan UI PC 8". Tombol kategori cepat di bawah form dihapus karena mengganggu dan memenuhi form. Di tampilan PC, dialog dibuat persegi panjang horizontal supaya seluruh isinya terlihat tanpa scroll.
+
+Buka hanya bagian "Perbaikan UI PC 8: Form Tambah Transaksi" di dev/PLANSPEC.md sebagai acuan. Semua aturannya tetap berlaku kecuali yang diubah di bawah ini.
+
+Tempat dan tampilan:
+- Dialog tambah transaksi dan dialog edit transaksi (satu komponen yang sama).
+- Semua ukuran layar: hapus deretan tombol kategori cepat (Makan, Transport, Tagihan, Belanja, Hiburan, Lainnya) yang tampil di bawah baris Catatan dan di atas tombol simpan. Pemilihan kategori hanya lewat baris Kategori yang membuka panel dua kolom, seperti sekarang.
+- Layar lebar (PC): dialog dilebarkan jadi persegi panjang horizontal, dengan tinggi yang cukup sehingga tanpa scroll di dalam dialog pada ukuran jendela PC yang normal. Tata letak isi dua kolom:
+  - Baris paling atas: tiga tab jenis (Pengeluaran, Pemasukan, Transfer) selebar dialog.
+  - Kolom kiri: Tanggal & Waktu (tanggal dan jam bersebelahan dalam satu baris bila muat) dan Total.
+  - Kolom kanan: Kategori dan Dompet.
+  - Baris di bawahnya selebar dialog: Catatan.
+  - Paling bawah: tombol simpan.
+  - Tab Transfer: kolom kiri Tanggal & Waktu dan Total, kolom kanan Dari dan Ke, lalu Catatan selebar dialog.
+- Layar sempit (mobile): tata letak vertikal satu kolom tetap seperti sekarang, hanya tombol kategori cepat yang hilang.
+- Panel pilihan Kategori (dua kolom) dan daftar pilihan dompet tidak diubah.
+
+Aturan:
+- Hanya mengubah tampilan: menghapus tombol kategori cepat dan mengatur ulang tata letak dialog di layar lebar lewat CSS (media query), tanpa mengubah logika.
+- Semua field, validasi, dan aturan yang sudah ada tidak berubah: Waktu wajib diisi, format jam 12 atau 24 jam, titik pemisah ribuan, desimal USD, dompet harus dipilih manual, aturan sub kategori.
+- Perilaku simpan, edit, dan transfer tidak berubah.
+- Sengaja TIDAK menambah fitur baru dan tidak mengubah halaman lain.
+- Tidak menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka dialog tambah transaksi di PC dengan jendela normal: bentuk horizontal, dua kolom, tanpa scroll di dalam dialog, tombol kategori cepat tidak ada.
+- Pilih kategori lewat baris Kategori: panel dua kolom berfungsi seperti sebelumnya.
+- Tambah pengeluaran, pemasukan, dan transfer: data tersimpan sama seperti sebelum perubahan.
+- Kosongkan Waktu atau Dompet lalu simpan: tetap ditolak seperti sebelumnya.
+- Edit transaksi lama: dialog terisi dan tampil dengan tata letak yang sama.
+- Perkecil jendela ke ukuran HP: tata letak kembali vertikal satu kolom, tanpa tombol kategori cepat.
+- Buka halaman lain (Beranda, Riwayat, Timbangan, Statistik, Pengaturan): tampilannya tidak berubah.
+

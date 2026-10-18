@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 9: Form Transaksi Lanjutan
+- Diperbaiki: Dialog form tambah dan edit transaksi di layar PC (@media min-width: 1024px) dilebarkan menjadi persegi panjang horizontal (max-width 820px) dengan tata letak isi dua kolom menggunakan CSS Grid sehingga seluruh isinya tampil penuh tanpa scroll di dalam dialog pada ukuran jendela PC normal (`desktop/src/css/style.css`).
+- Diubah: Tata letak form transaksi di PC ditata rapi dua kolom: baris paling atas tiga tab jenis (Pengeluaran, Pemasukan, Transfer) selebar dialog; kolom kiri berisi Tanggal & Waktu (tanggal dan jam bersebelahan dalam satu baris) serta Total; kolom kanan berisi Kategori dan Dompet (atau Dari dan Ke pada tab Transfer); baris di bawah kedua kolom selebar dialog berisi Catatan; dan paling bawah tombol Simpan selebar dialog (`desktop/src/css/style.css`).
+- Diubah: Menghapus deretan tombol kategori cepat di bawah baris Catatan dan di atas tombol Simpan untuk semua ukuran layar (pemilihan kategori sepenuhnya lewat baris Kategori yang membuka panel dialog dua kolom) (`desktop/src/index.html`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v72` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 9: Form Transaksi Lanjutan" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 8: Form Tambah Transaksi
 - Ditambah: Dialog pilihan kategori dua kolom (`#category-picker-dialog`) dengan kolom kiri daftar kategori (tanda panah untuk yang memiliki sub kategori) dan kolom kanan daftar sub kategori (beserta opsi memilih kategori saja tanpa sub kategori); menyorot atau mengklik kategori menampilkan sub kategorinya di kanan, dan memilih kategori tanpa sub kategori langsung menutup dialog dan mengisi baris Kategori (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
 - Diperbaiki: Tata letak form tambah dan edit transaksi di tampilan PC diubah menjadi baris-baris ringkas dengan label tetap di kiri (115px), nilai/input di kanan, pemisah garis tipis di bawah baris, tanpa kotak input besar yang berbingkai, serta muat di layar normal tanpa scroll berlebih (`desktop/src/index.html`, `desktop/src/css/style.css`).
