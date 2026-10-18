@@ -1684,3 +1684,41 @@ Cek manual:
 - Tes keyboard: Tab ke kotak Dompet, buka dengan Enter, pilih dengan panah dan Enter, tutup dengan Escape.
 - Tab Transfer: field dompetnya tidak berubah.
 - Perkecil jendela sampai di bawah breakpoint PC: Dompet kembali memakai select bawaan dan tetap berfungsi.
+
+## Perbaikan UI PC 13: Dropdown Dompet Transfer
+
+Tujuan: Di tampilan PC, field "Dari" dan "Ke" di tab Transfer pada form Tambah/Edit Transaksi memakai dropdown yang sama persis dengan field Dompet di tab Pengeluaran dan Pemasukan (item PC 12), supaya semua kotak dompet sinkron.
+
+Cakupan:
+- Hanya tampilan PC, yaitu layar selebar breakpoint PC yang sudah dipakai item PC 9, PC 11, dan PC 12. Gunakan breakpoint yang sama.
+- Tampilan di bawah breakpoint itu (mobile) TIDAK diubah. Di sana "Dari" dan "Ke" tetap select bawaan.
+- Hanya field "Dari" dan "Ke" di tab Transfer. Tab Pengeluaran dan Pemasukan tidak diubah.
+
+Tempat dan tampilan (tampilan PC):
+- Kotak "Dari" dan "Ke" memakai komponen dan kelas CSS yang sama dengan dropdown Dompet dari PC 12. Pakai ulang, jangan menyalin gaya baru. Tidak ada warna, font, atau bayangan baru.
+- Keadaan tertutup: font, ketebalan font, tinggi, lebar, padding, garis, radius, dan panah sama dengan kotak Dompet dan Kategori. Kotak "Dari" dan "Ke" sejajar dengan garis baris masing-masing dan tidak miring terhadap garis baris.
+- Keadaan terbuka: daftar di bawah kotak dengan gaya yang sama dengan daftar Dompet PC 12 (latar panel, garis, radius, tinggi baris, font, sorotan hover, baris terpilih). Lebar daftar sama dengan lebar kotak.
+- Satu baris per dompet, teks seperti sekarang (contoh "Kas Tunai (IDR)"), tanpa ikon. Pilihan kosong "Pilih dompet" tidak muncul sebagai baris, kotak tertutup menampilkan "Pilih dompet" dengan warna placeholder selama belum dipilih.
+- Setelah memilih, kotak menampilkan nama dompet dan daftar menutup. Daftar juga menutup saat klik di luar atau tekan Escape.
+- Hanya satu daftar terbuka dalam satu waktu: membuka "Ke" menutup "Dari", dan sebaliknya.
+
+Aturan:
+- Select "Dari" dan "Ke" yang sudah ada tetap menjadi sumber nilai. Di tampilan PC keduanya disembunyikan secara visual tapi tetap ada. Dropdown baru mengisi nilai select lalu memicu event change, supaya seluruh logika transfer yang sudah ada berjalan tanpa diubah.
+- Aturan apa pun yang sekarang mempengaruhi isi pilihan di select (misalnya opsi yang dinonaktifkan, disembunyikan, atau difilter menurut pilihan di field lain atau mata uang) tetap berlaku. Karena itu daftar dropdown dibangun dari opsi select yang aktif setiap kali daftar dibuka, dan opsi yang nonaktif tidak bisa dipilih. Jangan menambah, menghapus, atau mengubah aturan itu.
+- Dua field tetap kosong secara bawaan dan harus dipilih manual, validasi sama seperti sekarang. Urutan dompet mengikuti urutan di Pengaturan.
+- Keyboard: Enter atau Spasi membuka daftar, panah atas/bawah pindah baris, Enter memilih, Escape menutup.
+- Yang sengaja TIDAK dilakukan: mengubah tampilan mobile, mengubah logika transfer, mengubah tab Pengeluaran dan Pemasukan, menambah ikon dompet, mengubah halaman lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Tambah Transaksi di PC, tab Transfer: kotak "Dari" dan "Ke" identik dengan kotak Dompet di tab Pengeluaran (font, tinggi, panah, posisi) dan sejajar dengan garis baris.
+- Buka daftar "Dari" lalu "Ke": panel daftarnya sama dengan daftar Dompet di tab Pengeluaran, dan membuka satu menutup yang lain.
+- Pilih "Kas Tunai (IDR)" di "Dari" dan "Rekening Bank (IDR)" di "Ke": transfer tersimpan dan saldo kedua dompet berubah seperti sebelum item ini.
+- Coba pilih dompet yang sama atau beda mata uang di "Ke" (sesuai aturan yang sudah ada): perilakunya sama persis seperti sebelum item ini (opsi dinonaktifkan, ditolak, atau pesan yang sama).
+- Simpan tanpa memilih dompet: validasi muncul seperti sebelumnya.
+- Edit transfer lama: "Dari" dan "Ke" menampilkan dompet yang benar.
+- Tes keyboard di kedua kotak.
+- Tab Pengeluaran dan Pemasukan: tidak berubah.
+- Perkecil jendela sampai di bawah breakpoint PC: "Dari" dan "Ke" kembali ke select bawaan dan tetap berfungsi.

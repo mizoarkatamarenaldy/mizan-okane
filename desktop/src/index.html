@@ -1079,11 +1079,31 @@
 
                             <!-- 4b. Ke Dompet (khusus Transfer) -->
                             <div class="form-row form-row-to-wallet hidden" id="form-row-to-wallet">
-                                <label for="tx-to-wallet" class="form-row-label">Ke</label>
+                                <label for="tx-to-wallet" id="tx-to-wallet-label" class="form-row-label">Ke</label>
                                 <div class="form-row-value form-row-wallet-val">
                                     <select id="tx-to-wallet" class="compact-select">
                                         <option value="" disabled selected>Pilih dompet</option>
                                     </select>
+                                    <svg class="wallet-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+
+                                    <!-- Dropdown Ke Dompet PC (khusus Transfer di layar PC) -->
+                                    <div id="to-wallet-dropdown-pc" class="wallet-dropdown-pc category-dropdown-pc">
+                                        <button type="button" id="tx-to-wallet-dropdown-btn" class="category-dropdown-btn is-empty" aria-haspopup="true" aria-expanded="false" aria-labelledby="tx-to-wallet-label tx-to-wallet-dropdown-text">
+                                            <div class="category-row-btn-content">
+                                                <span id="tx-to-wallet-dropdown-text" class="category-display-text is-placeholder">Pilih dompet</span>
+                                            </div>
+                                            <svg class="category-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                        <div id="to-wallet-dropdown-menu" class="wallet-dropdown-menu category-dropdown-menu hidden" role="menu" aria-label="Pilihan Dompet Tujuan">
+                                            <div class="wallet-dropdown-col category-dropdown-primary-col" id="to-wallet-dropdown-col" role="none">
+                                                <!-- Diisi via JS: daftar dompet -->
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
