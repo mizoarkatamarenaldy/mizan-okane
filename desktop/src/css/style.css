@@ -4229,7 +4229,8 @@ button:disabled {
 
 /* Komponen Nilai: Kategori & Dompet */
 .category-row-btn,
-.compact-select {
+.compact-select,
+.category-dropdown-btn {
     width: 100%;
     height: 40px;
     min-height: 40px;
@@ -4239,13 +4240,15 @@ button:disabled {
     border-radius: var(--radius-input, 6px);
     color: var(--text);
     font-size: 14px;
+    font-weight: 400;
     font-family: inherit;
     box-sizing: border-box;
     cursor: pointer;
     outline: none;
 }
 
-.category-row-btn {
+.category-row-btn,
+.category-dropdown-btn {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -4253,15 +4256,149 @@ button:disabled {
 }
 
 .category-row-btn:hover,
-.compact-select:hover {
+.compact-select:hover,
+.category-dropdown-btn:hover {
     background-color: var(--surface-raised);
 }
 
 .category-row-btn:focus-visible,
-.compact-select:focus-visible {
+.compact-select:focus-visible,
+.category-dropdown-btn:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-color: var(--accent);
+}
+
+/* Dropdown Bertingkat Kategori PC (disembunyikan secara default di mobile) */
+.category-dropdown-pc {
+    display: none;
+    position: relative;
+    width: 100%;
+}
+
+.category-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 1050;
+    display: flex;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+.category-dropdown-menu.hidden {
+    display: none !important;
+}
+
+.category-dropdown-primary-col {
+    min-width: 190px;
+    max-width: 240px;
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.category-dropdown-sub-col {
+    min-width: 180px;
+    max-width: 240px;
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px;
+    border-left: 1px solid var(--border);
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.category-dropdown-sub-col.hidden {
+    display: none !important;
+}
+
+.category-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 36px;
+    padding: 6px 10px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-input, 6px);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 400;
+    cursor: pointer;
+    text-align: left;
+    box-sizing: border-box;
+    outline: none;
+    gap: 8px;
+}
+
+.category-dropdown-item:hover,
+.category-dropdown-item.is-highlighted {
+    background-color: var(--surface-raised);
+}
+
+.category-dropdown-item:focus-visible {
+    background-color: var(--surface-raised);
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.category-dropdown-item.is-selected {
+    background-color: var(--surface-raised);
+    color: var(--accent);
+}
+
+.category-dropdown-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.category-dropdown-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+.category-dropdown-item-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.category-dropdown-item-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    color: inherit;
+}
+
+.category-dropdown-item-arrow {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    margin-left: 6px;
+}
+
+/* Panah Dompet (disembunyikan di mobile, aktif di PC) */
+.wallet-row-chevron {
+    display: none !important;
 }
 
 .category-row-btn-content {
@@ -6279,7 +6416,7 @@ body.modal-open {
         box-shadow: none;
         max-height: 90vh;
         padding: 20px 24px 20px;
-        overflow-y: auto;
+        overflow: visible;
     }
 
     .form-screen-sheet-handle {
@@ -6355,6 +6492,42 @@ body.modal-open {
         grid-row: 2;
     }
 
+    /* Perbaikan UI PC 11: Dropdown Bertingkat Kategori & Simetri Kotak Dompet */
+    #btn-open-category-picker {
+        display: none !important;
+    }
+
+    .category-dropdown-pc {
+        display: block !important;
+    }
+
+    #form-row-wallet .form-row-wallet-val {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    #form-row-wallet .compact-select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 32px;
+        padding-left: 10px;
+    }
+
+    #form-row-wallet .wallet-row-chevron {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--text-secondary);
+        width: 16px;
+        height: 16px;
+        display: block !important;
+    }
+
     #form-row-note {
         grid-column: 1 / -1;
         grid-row: 3;
@@ -6417,7 +6590,9 @@ body.modal-open {
     .category-item:hover,
     .subcategory-item:hover,
     .cat-picker-item:hover,
-    .btn-cat-picker-close:hover {
+    .btn-cat-picker-close:hover,
+    .category-dropdown-btn:hover,
+    .category-dropdown-item:hover {
         background-color: var(--surface-raised) !important;
     }
 }

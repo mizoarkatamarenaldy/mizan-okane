@@ -1004,7 +1004,7 @@
                                 </div>
                             </div>
 
-                            <!-- 3. Kategori (dialog pilihan dua kolom) -->
+                            <!-- 3. Kategori (dialog pilihan dua kolom di mobile, dropdown bertingkat di PC) -->
                             <div class="form-row form-row-category" id="form-row-category">
                                 <span class="form-row-label" id="label-category-picker">Kategori</span>
                                 <div class="form-row-value form-row-category-val">
@@ -1012,6 +1012,8 @@
                                         <option value="" disabled selected>Pilih kategori</option>
                                     </select>
                                     <input type="hidden" id="tx-subcategory">
+
+                                    <!-- Tombol Kategori Mobile (membuka dialog pilihan dua kolom) -->
                                     <button type="button" id="btn-open-category-picker" class="category-row-btn is-empty" aria-haspopup="dialog" aria-labelledby="label-category-picker tx-category-display-text">
                                         <div class="category-row-btn-content">
                                             <span id="tx-category-display-icon" class="category-display-icon" aria-hidden="true" style="display: none;"></span>
@@ -1021,6 +1023,27 @@
                                             <polyline points="6 9 12 15 18 9"></polyline>
                                         </svg>
                                     </button>
+
+                                    <!-- Dropdown Bertingkat Kategori PC -->
+                                    <div id="category-dropdown-pc" class="category-dropdown-pc">
+                                        <button type="button" id="tx-category-dropdown-btn" class="category-dropdown-btn is-empty" aria-haspopup="true" aria-expanded="false" aria-labelledby="label-category-picker tx-category-dropdown-text">
+                                            <div class="category-row-btn-content">
+                                                <span id="tx-category-dropdown-icon" class="category-display-icon" aria-hidden="true" style="display: none;"></span>
+                                                <span id="tx-category-dropdown-text" class="category-display-text is-placeholder">Pilih kategori</span>
+                                            </div>
+                                            <svg class="category-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                        <div id="category-dropdown-menu" class="category-dropdown-menu hidden" role="menu" aria-label="Pilihan Kategori">
+                                            <div class="category-dropdown-primary-col" id="category-dropdown-primary-col" role="none">
+                                                <!-- Diisi via JS: daftar kategori -->
+                                            </div>
+                                            <div class="category-dropdown-sub-col hidden" id="category-dropdown-sub-col" role="none">
+                                                <!-- Diisi via JS: daftar sub kategori terbuka ke kanan -->
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1031,6 +1054,9 @@
                                     <select id="tx-wallet" class="compact-select" required>
                                         <option value="" disabled selected>Pilih dompet</option>
                                     </select>
+                                    <svg class="wallet-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
                                 </div>
                             </div>
 

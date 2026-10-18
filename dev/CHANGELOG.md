@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 11: Dropdown Kategori
+- Ditambah: Dropdown bertingkat Kategori pada form Tambah/Edit Transaksi di tampilan PC (@media min-width: 1024px) dengan daftar kategori induk berpanah ">" untuk yang memiliki sub kategori, membuka daftar sub kategori di sebelah kanannya saat kursor diarahkan, opsi "(tanpa sub kategori)" pada baris pertama daftar sub untuk memilih kategori induk saja, pemilihan langsung untuk kategori tanpa sub, scroll jika daftar panjang, dan navigasi keyboard penuh (Enter/Spasi, Panah Atas/Bawah/Kiri/Kanan, Escape) (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diperbaiki: Kotak Kategori dan kotak Dompet pada form transaksi di PC dibuat simetris dengan font, tinggi (40 px), border, radius (6 px), padding, dan bentuk serta posisi panah chevron yang sejajar dan seragam (`desktop/src/index.html`, `desktop/src/css/style.css`).
+- Diubah: Tombol Kategori dan dialog panel dua kolom disembunyikan khusus di tampilan PC dan tetap dipertahankan serta berfungsi penuh pada tampilan mobile di bawah breakpoint PC (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v74` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 11: Dropdown Kategori" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 10: Kolom Form Transaksi
 - Diperbaiki: Pilihan bulan pada komponen Tanggal & Waktu diperlebar menjadi 115 px (baik di tampilan dasar maupun layar PC) agar nama bulan terpanjang seperti "September" dan "November" tampil utuh tanpa terpotong (`desktop/src/css/style.css`).
 - Diubah: Tampilan baris Kategori diseragamkan dengan baris Dompet berupa kotak berbingkai tinggi 40 px, border 1 px, radius 6 px, padding 0 10px, background token surface, dan ikon panah bawah chevron (menggantikan tanda panah kanan yang lama), dengan teks "Pilih kategori" bergaya placeholder saat belum dipilih (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).

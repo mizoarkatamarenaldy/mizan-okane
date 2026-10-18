@@ -1611,4 +1611,40 @@ Cek manual:
 - Perkecil jendela ke ukuran HP: tata letak satu kolom tetap rapi, bulan tidak terpotong.
 - Buka halaman lain: tampilannya tidak berubah.
 
+## Perbaikan UI PC 11: Dropdown Kategori
 
+Tujuan: Di tampilan PC, kotak Kategori dan kotak Dompet di form Tambah/Edit Transaksi tampil simetris (font, ukuran, panah, posisi sama). Kategori di tampilan PC diganti dari tombol yang membuka panel dua kolom menjadi dropdown bertingkat.
+
+Cakupan:
+- Hanya tampilan PC, yaitu layar selebar breakpoint PC yang sudah dipakai item PC 9. Gunakan breakpoint yang sama, jangan buat yang baru.
+- Tampilan di bawah breakpoint itu (mobile) TIDAK diubah sama sekali. Tombol Kategori dan panel dua kolom untuk tampilan mobile tetap ada dan tetap berfungsi seperti sekarang. Jangan hapus kodenya, cukup sembunyikan di tampilan PC.
+
+Tempat dan tampilan (tampilan PC):
+- Di form Tambah dan Edit Transaksi, baris Kategori. Dialog panel dua kolom "Kategori" tidak lagi dipakai di PC.
+- Kotak Kategori dan kotak Dompet memakai satu set gaya CSS yang sama untuk keadaan tertutup: font, ketebalan font, tinggi, lebar, padding, garis, radius, dan panah. Panah Kategori dan panah Dompet sama bentuk dan sejajar. Dompet tetap elemen select bawaan, hanya gayanya yang disamakan (appearance none dan panah yang sama). Kedua kotak sejajar dengan garis baris masing-masing.
+- Klik kotak Kategori membuka daftar kategori di bawah kotak. Kategori yang punya sub kategori punya tanda ">" di kanan barisnya.
+- Mengarahkan kursor ke baris kategori bersub membuka daftar sub di sebelah kanannya. Baris kategori itu sendiri tidak langsung memilih kategori.
+- Baris pertama di daftar sub adalah "(tanpa sub kategori)", dipilih untuk memilih kategori induknya saja.
+- Kategori tanpa sub kategori (misalnya Lainnya) langsung terpilih saat diklik, tanpa tanda ">".
+- Tampilan nilai yang terpilih di kotak Kategori mengikuti yang sudah ada sekarang.
+- Daftar boleh discroll kalau panjang. Daftar ditutup saat klik di luar atau tekan Escape.
+
+Aturan:
+- Sub kategori tetap opsional, sama seperti sekarang.
+- Kategori dan sub kategori Equilibrium tetap tidak muncul di daftar, sama seperti sekarang.
+- Urutan kategori dan sub kategori mengikuti urutan yang sudah ada di Pengaturan. Ikon kategori dan sub kategori tetap tampil di barisnya.
+- Keyboard: Enter atau Spasi membuka daftar, panah atas/bawah pindah baris, panah kanan membuka daftar sub, panah kiri atau Escape menutupnya, Enter memilih.
+- Tidak ada perubahan logika penyimpanan, validasi, atau pengisian form saat edit transaksi. Dropdown PC dan tombol mobile mengisi nilai kategori dan sub kategori dengan cara yang sama.
+- Yang sengaja TIDAK dilakukan: mengubah tampilan mobile, mengubah Dompet menjadi dropdown buatan, mengubah form transfer, mengubah halaman lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Tambah Transaksi di PC: kotak Kategori dan Dompet punya font, tinggi, panah, dan posisi yang sama persis.
+- Klik Kategori, arahkan kursor ke Makan: daftar sub muncul di kanan. Pilih Restoran: kotak menampilkan pilihan itu dan transaksi tersimpan dengan sub kategori Restoran.
+- Pilih Makan lewat "(tanpa sub kategori)": transaksi tersimpan hanya dengan kategori Makan.
+- Pilih Lainnya: langsung terpilih tanpa daftar sub.
+- Edit transaksi lama yang punya sub kategori: kotak Kategori menampilkan pilihan lamanya dengan benar.
+- Tes keyboard: Tab ke kotak, buka, pilih dengan panah dan Enter.
+- Perkecil jendela sampai di bawah breakpoint PC: tampilan Kategori kembali seperti sebelum item ini (tombol dan panel dua kolom), dan tetap berfungsi.

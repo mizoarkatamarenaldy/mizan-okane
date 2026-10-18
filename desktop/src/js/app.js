@@ -47,6 +47,14 @@ const categoryPickerDialog = document.getElementById('category-picker-dialog');
 const btnCloseCatPicker = document.getElementById('btn-close-cat-picker');
 const catPickerCategories = document.getElementById('cat-picker-categories');
 const catPickerSubcategories = document.getElementById('cat-picker-subcategories');
+
+const categoryDropdownPc = document.getElementById('category-dropdown-pc');
+const txCategoryDropdownBtn = document.getElementById('tx-category-dropdown-btn');
+const txCategoryDropdownIcon = document.getElementById('tx-category-dropdown-icon');
+const txCategoryDropdownText = document.getElementById('tx-category-dropdown-text');
+const categoryDropdownMenu = document.getElementById('category-dropdown-menu');
+const categoryDropdownPrimaryCol = document.getElementById('category-dropdown-primary-col');
+const categoryDropdownSubCol = document.getElementById('category-dropdown-sub-col');
 const txDateDaySelect = document.getElementById('tx-date-day');
 const txDateMonthSelect = document.getElementById('tx-date-month');
 const txDateYearSelect = document.getElementById('tx-date-year');
@@ -497,6 +505,7 @@ function openFormScreen() {
 
 function closeFormScreen() {
     if (!formScreen) return;
+    closeCategoryPcDropdown();
     formScreen.classList.add('hidden');
     if (btnFabAdd) btnFabAdd.classList.remove('hidden');
     document.body.classList.remove('modal-open');
@@ -617,26 +626,36 @@ export function getTxStatsCategory(tx) {
 export function updateCategoryRowDisplay() {
     const cat = txCategoryInput ? txCategoryInput.value.trim() : '';
     const sub = txSubcategoryInput ? txSubcategoryInput.value.trim() : '';
-    if (!txCategoryDisplayText) return;
-    if (!cat) {
-        if (txCategoryDisplayIcon) {
-            txCategoryDisplayIcon.innerHTML = '';
-            txCategoryDisplayIcon.style.display = 'none';
-        }
-        txCategoryDisplayText.textContent = 'Pilih kategori';
-        txCategoryDisplayText.classList.add('is-placeholder');
-        if (btnOpenCategoryPicker) btnOpenCategoryPicker.classList.add('is-empty');
-        return;
-    }
     const type = getSelectedType();
-    const iconSvg = sub ? getSubcategoryIconSvg(cat, sub, type) : getCategoryIconSvg(cat, type);
+    const isPlaceholder = !cat;
+    const displayText = isPlaceholder ? 'Pilih kategori' : (sub ? `${cat} > ${sub}` : cat);
+    const iconSvg = isPlaceholder ? '' : (sub ? getSubcategoryIconSvg(cat, sub, type) : getCategoryIconSvg(cat, type));
+
+    // Perbarui Tombol Kategori Mobile
+    if (txCategoryDisplayText) {
+        txCategoryDisplayText.textContent = displayText;
+        txCategoryDisplayText.classList.toggle('is-placeholder', isPlaceholder);
+    }
     if (txCategoryDisplayIcon) {
         txCategoryDisplayIcon.innerHTML = iconSvg || '';
         txCategoryDisplayIcon.style.display = iconSvg ? 'inline-flex' : 'none';
     }
-    txCategoryDisplayText.textContent = sub ? `${cat} > ${sub}` : cat;
-    txCategoryDisplayText.classList.remove('is-placeholder');
-    if (btnOpenCategoryPicker) btnOpenCategoryPicker.classList.remove('is-empty');
+    if (btnOpenCategoryPicker) {
+        btnOpenCategoryPicker.classList.toggle('is-empty', isPlaceholder);
+    }
+
+    // Perbarui Kotak Dropdown Kategori PC
+    if (txCategoryDropdownText) {
+        txCategoryDropdownText.textContent = displayText;
+        txCategoryDropdownText.classList.toggle('is-placeholder', isPlaceholder);
+    }
+    if (txCategoryDropdownIcon) {
+        txCategoryDropdownIcon.innerHTML = iconSvg || '';
+        txCategoryDropdownIcon.style.display = iconSvg ? 'inline-flex' : 'none';
+    }
+    if (txCategoryDropdownBtn) {
+        txCategoryDropdownBtn.classList.toggle('is-empty', isPlaceholder);
+    }
 }
 
 let currentPickerHighlightedCategory = null;
@@ -720,6 +739,7 @@ export function closeCategoryPicker() {
 }
 
 export function openCategoryPicker() {
+    if (window.matchMedia('(min-width: 1024px)').matches) return;
     if (!categoryPickerDialog) return;
     const type = getSelectedType();
     if (type === 'transfer') return;
@@ -793,6 +813,204 @@ export function openCategoryPicker() {
             if (targetBtn) targetBtn.focus();
         }
     }, 50);
+}
+
+// Implementasi Dropdown Bertingkat Kategori PC
+let pcDropdownActiveCategory = null;
+
+export function selectCategoryFromPcDropdown(catName, subName = '') {
+    if (txCategoryInput) {
+        let opt = Array.from(txCategoryInput.options).find(o => o.value === catName);
+        if (!opt) {
+            opt = document.createElement('option');
+            opt.value = catName;
+            opt.textContent = catName;
+            txCategoryInput.appendChild(opt);
+        }
+        txCategoryInput.value = catName;
+    }
+    if (txSubcategoryInput) {
+        txSubcategoryInput.value = subName;
+    }
+    updateCategoryRowDisplay();
+    updateSaveButtonState();
+    closeCategoryPcDropdown();
+    if (txCategoryDropdownBtn) {
+        txCategoryDropdownBtn.focus();
+    }
+}
+
+export function closeCategoryPcDropdown() {
+    if (!categoryDropdownMenu) return;
+    categoryDropdownMenu.classList.add('hidden');
+    if (categoryDropdownSubCol) {
+        categoryDropdownSubCol.classList.add('hidden');
+        categoryDropdownSubCol.innerHTML = '';
+    }
+    if (txCategoryDropdownBtn) {
+        txCategoryDropdownBtn.setAttribute('aria-expanded', 'false');
+    }
+    pcDropdownActiveCategory = null;
+}
+
+export function renderCategoryPcDropdownSub(catName, currentCat, currentSub, type) {
+    if (!categoryDropdownSubCol) return;
+    const subs = getSubcategoriesFor(type, catName);
+    if (!subs || subs.length === 0) {
+        categoryDropdownSubCol.classList.add('hidden');
+        categoryDropdownSubCol.innerHTML = '';
+        return;
+    }
+
+    const isOnlyCatSelected = (currentCat === catName && !currentSub);
+    const catIconSvg = getCategoryIconSvg(catName, type);
+
+    let html = '';
+    // Baris pertama: "(tanpa sub kategori)"
+    html += `
+        <button type="button" class="category-dropdown-item category-dropdown-sub-item ${isOnlyCatSelected ? 'is-selected' : ''}" data-type="no-sub" role="menuitem">
+            <div class="category-dropdown-item-left">
+                <span class="category-dropdown-item-icon" aria-hidden="true">${catIconSvg}</span>
+                <span class="category-dropdown-item-text">(tanpa sub kategori)</span>
+            </div>
+        </button>
+    `;
+
+    for (const sub of subs) {
+        const isSubSelected = (currentCat === catName && currentSub === sub);
+        const subIconSvg = getSubcategoryIconSvg(catName, sub, type);
+        html += `
+            <button type="button" class="category-dropdown-item category-dropdown-sub-item ${isSubSelected ? 'is-selected' : ''}" data-type="sub" data-sub="${escapeHTML(sub)}" role="menuitem">
+                <div class="category-dropdown-item-left">
+                    <span class="category-dropdown-item-icon" aria-hidden="true">${subIconSvg}</span>
+                    <span class="category-dropdown-item-text">${escapeHTML(sub)}</span>
+                </div>
+            </button>
+        `;
+    }
+
+    categoryDropdownSubCol.innerHTML = html;
+    categoryDropdownSubCol.classList.remove('hidden');
+
+    categoryDropdownSubCol.querySelectorAll('.category-dropdown-sub-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const itemType = btn.dataset.type;
+            if (itemType === 'no-sub') {
+                selectCategoryFromPcDropdown(catName, '');
+            } else {
+                const subVal = btn.dataset.sub;
+                selectCategoryFromPcDropdown(catName, subVal);
+            }
+        });
+    });
+}
+
+export function openCategoryPcDropdown() {
+    if (!categoryDropdownMenu || !txCategoryDropdownBtn) return;
+    const type = getSelectedType();
+    if (type === 'transfer') return;
+
+    const list = getCategoryNames(type).filter(c => c !== 'Equilibrium');
+    const currentCat = txCategoryInput ? txCategoryInput.value.trim() : '';
+    const currentSub = txSubcategoryInput ? txSubcategoryInput.value.trim() : '';
+
+    let initialHighlight = list[0] || null;
+    if (currentCat && list.includes(currentCat)) {
+        initialHighlight = currentCat;
+    }
+    pcDropdownActiveCategory = initialHighlight;
+
+    if (categoryDropdownPrimaryCol) {
+        let leftHtml = '';
+        for (const cat of list) {
+            const subs = getSubcategoriesFor(type, cat);
+            const hasSubs = subs && subs.length > 0;
+            const isSelected = (cat === currentCat);
+            const isHighlighted = (cat === pcDropdownActiveCategory);
+            const iconSvg = getCategoryIconSvg(cat, type);
+
+            leftHtml += `
+                <button type="button" class="category-dropdown-item category-dropdown-primary-item ${isSelected ? 'is-selected' : ''} ${isHighlighted ? 'is-highlighted' : ''}" data-cat="${escapeHTML(cat)}" data-has-subs="${hasSubs}" role="menuitem" aria-haspopup="${hasSubs}">
+                    <div class="category-dropdown-item-left">
+                        <span class="category-dropdown-item-icon" aria-hidden="true">${iconSvg}</span>
+                        <span class="category-dropdown-item-text">${escapeHTML(cat)}</span>
+                    </div>
+                    ${hasSubs ? `
+                        <svg class="category-dropdown-item-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    ` : ''}
+                </button>
+            `;
+        }
+        categoryDropdownPrimaryCol.innerHTML = leftHtml;
+
+        categoryDropdownPrimaryCol.querySelectorAll('.category-dropdown-primary-item').forEach(btn => {
+            const cat = btn.dataset.cat;
+            const hasSubs = btn.dataset.hasSubs === 'true';
+
+            const showSubs = () => {
+                pcDropdownActiveCategory = cat;
+                categoryDropdownPrimaryCol.querySelectorAll('.category-dropdown-primary-item').forEach(b => {
+                    b.classList.toggle('is-highlighted', b.dataset.cat === cat);
+                });
+                if (hasSubs) {
+                    renderCategoryPcDropdownSub(cat, currentCat, currentSub, type);
+                } else {
+                    if (categoryDropdownSubCol) {
+                        categoryDropdownSubCol.classList.add('hidden');
+                        categoryDropdownSubCol.innerHTML = '';
+                    }
+                }
+            };
+
+            btn.addEventListener('mouseenter', showSubs);
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!hasSubs) {
+                    selectCategoryFromPcDropdown(cat, '');
+                } else {
+                    showSubs();
+                    if (categoryDropdownSubCol) {
+                        const firstSub = categoryDropdownSubCol.querySelector('.category-dropdown-sub-item');
+                        if (firstSub) firstSub.focus();
+                    }
+                }
+            });
+        });
+    }
+
+    if (initialHighlight) {
+        const subs = getSubcategoriesFor(type, initialHighlight);
+        if (subs && subs.length > 0) {
+            renderCategoryPcDropdownSub(initialHighlight, currentCat, currentSub, type);
+        } else {
+            if (categoryDropdownSubCol) {
+                categoryDropdownSubCol.classList.add('hidden');
+                categoryDropdownSubCol.innerHTML = '';
+            }
+        }
+    } else {
+        if (categoryDropdownSubCol) {
+            categoryDropdownSubCol.classList.add('hidden');
+            categoryDropdownSubCol.innerHTML = '';
+        }
+    }
+
+    categoryDropdownMenu.classList.remove('hidden');
+    txCategoryDropdownBtn.setAttribute('aria-expanded', 'true');
+}
+
+export function toggleCategoryPcDropdown() {
+    if (!categoryDropdownMenu) return;
+    const isOpen = !categoryDropdownMenu.classList.contains('hidden');
+    if (isOpen) {
+        closeCategoryPcDropdown();
+    } else {
+        openCategoryPcDropdown();
+    }
 }
 
 export function populateSubcategoryOptions(categoryName, selectedSub = null) {
@@ -7145,6 +7363,7 @@ async function performDeleteSubcategoryBudget(cat, sub) {
 
 
 function resetForm() {
+    closeCategoryPcDropdown();
     txForm.reset();
     txIdInput.value = '';
     if (txCategoryInput) {
@@ -7407,6 +7626,7 @@ attachAmountInputFormatting(inputBudgetAmount, () => 'IDR');
 
 txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {
+        closeCategoryPcDropdown();
         if (radio.value === 'transfer') {
             if (getActiveWallets().length < 2) {
                 showNotification('Transfer membutuhkan minimal 2 dompet. Silakan tambah dompet baru terlebih dahulu di Pengaturan Dompet.', 'warn');
@@ -7433,12 +7653,138 @@ if (btnOpenCategoryPicker) {
 }
 if (formRowCategory) {
     formRowCategory.addEventListener('click', (e) => {
+        if (window.matchMedia('(min-width: 1024px)').matches) {
+            if (e.target && e.target.closest('#category-dropdown-pc')) {
+                return;
+            }
+            toggleCategoryPcDropdown();
+            return;
+        }
         if (e.target && (e.target.closest('#btn-open-category-picker') || e.target.closest('.category-row-btn'))) {
             return;
         }
         openCategoryPicker();
     });
 }
+
+if (txCategoryDropdownBtn) {
+    txCategoryDropdownBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleCategoryPcDropdown();
+    });
+
+    txCategoryDropdownBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const isOpen = categoryDropdownMenu && !categoryDropdownMenu.classList.contains('hidden');
+            if (!isOpen) {
+                openCategoryPcDropdown();
+            }
+            setTimeout(() => {
+                if (categoryDropdownPrimaryCol) {
+                    const targetBtn = categoryDropdownPrimaryCol.querySelector('.category-dropdown-primary-item.is-highlighted') ||
+                                      categoryDropdownPrimaryCol.querySelector('.category-dropdown-primary-item.is-selected') ||
+                                      categoryDropdownPrimaryCol.querySelector('.category-dropdown-primary-item');
+                    if (targetBtn) targetBtn.focus();
+                }
+            }, 10);
+        } else if (e.key === 'Escape') {
+            closeCategoryPcDropdown();
+        }
+    });
+}
+
+if (categoryDropdownMenu) {
+    categoryDropdownMenu.addEventListener('keydown', (e) => {
+        const activeEl = document.activeElement;
+        const inPrimaryCol = categoryDropdownPrimaryCol && categoryDropdownPrimaryCol.contains(activeEl);
+        const inSubCol = categoryDropdownSubCol && categoryDropdownSubCol.contains(activeEl);
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeCategoryPcDropdown();
+            if (txCategoryDropdownBtn) txCategoryDropdownBtn.focus();
+            return;
+        }
+
+        if (inPrimaryCol) {
+            const items = Array.from(categoryDropdownPrimaryCol.querySelectorAll('.category-dropdown-primary-item'));
+            const idx = items.indexOf(activeEl);
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = items[idx + 1] || items[0];
+                if (next) {
+                    next.focus();
+                    next.dispatchEvent(new MouseEvent('mouseenter'));
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = items[idx - 1] || items[items.length - 1];
+                if (prev) {
+                    prev.focus();
+                    prev.dispatchEvent(new MouseEvent('mouseenter'));
+                }
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                const hasSubs = activeEl.dataset.hasSubs === 'true';
+                if (hasSubs && categoryDropdownSubCol && !categoryDropdownSubCol.classList.contains('hidden')) {
+                    const firstSub = categoryDropdownSubCol.querySelector('.category-dropdown-sub-item');
+                    if (firstSub) firstSub.focus();
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const hasSubs = activeEl.dataset.hasSubs === 'true';
+                if (!hasSubs) {
+                    activeEl.click();
+                } else {
+                    if (categoryDropdownSubCol && !categoryDropdownSubCol.classList.contains('hidden')) {
+                        const firstSub = categoryDropdownSubCol.querySelector('.category-dropdown-sub-item');
+                        if (firstSub) firstSub.focus();
+                    }
+                }
+            }
+        } else if (inSubCol) {
+            const subItems = Array.from(categoryDropdownSubCol.querySelectorAll('.category-dropdown-sub-item'));
+            const idx = subItems.indexOf(activeEl);
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = subItems[idx + 1] || subItems[0];
+                if (next) next.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = subItems[idx - 1] || subItems[subItems.length - 1];
+                if (prev) prev.focus();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (categoryDropdownPrimaryCol) {
+                    const parentBtn = categoryDropdownPrimaryCol.querySelector('.category-dropdown-primary-item.is-highlighted') ||
+                                      categoryDropdownPrimaryCol.querySelector('.category-dropdown-primary-item.is-selected');
+                    if (parentBtn) parentBtn.focus();
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                activeEl.click();
+            }
+        }
+    });
+}
+
+document.addEventListener('click', (e) => {
+    if (!categoryDropdownMenu || categoryDropdownMenu.classList.contains('hidden')) return;
+    if (categoryDropdownPc && !categoryDropdownPc.contains(e.target)) {
+        closeCategoryPcDropdown();
+    }
+});
+
+window.addEventListener('resize', () => {
+    if (!window.matchMedia('(min-width: 1024px)').matches) {
+        closeCategoryPcDropdown();
+    } else {
+        closeCategoryPicker();
+    }
+});
 if (btnCloseCatPicker) {
     btnCloseCatPicker.addEventListener('click', () => {
         closeCategoryPicker();
