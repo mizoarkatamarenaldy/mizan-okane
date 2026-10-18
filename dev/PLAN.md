@@ -101,7 +101,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
 
 ## Rencana setelah Tahap 5
 Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh prompt dengan klausa "Izin dari pemilik".
-- [ ] Pemisahan folder
+- [x] Pemisahan folder
 - [ ] Revisi UI PC
 - [ ] Konversi Tauri
 - [ ] Konversi Kotlin

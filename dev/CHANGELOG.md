@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Pemisahan folder
+- Ditambah: Pemisahan struktur repositori menjadi folder kerja `desktop/src/` (file web aplikasi: `index.html`, `privasi.html`, `syarat.html`, `sw.js`, `manifest.webmanifest`, `css/`, `js/`, `icons/`) dan `mobile/capacitor/` (proyek Capacitor: `android/`, `capacitor.config.json`, `package.json`, `package-lock.json`, `scripts/`, `assets/`) dengan riwayat git terjaga penuh.
+- Ditambah: Workflow GitHub Actions `.github/workflows/pages.yml` untuk memublikasikan isi `desktop/src/` sebagai artefak GitHub Pages saat push ke branch `main` atau dijalankan manual (`workflow_dispatch`), tanpa langkah build.
+- Ditambah: Dokumentasi skema data `dev/SCHEMA.md` yang mencatat struktur IndexedDB, format cadangan JSON, format payload Google Drive `appDataFolder`, aturan resolusi konflik data, dan nomor versi format.
+- Diubah: Skrip `mobile/capacitor/scripts/copy-www.js` membaca sumber berkas web dari `../../desktop/src` untuk disalin ke `mobile/capacitor/www`.
+- Diubah: Menyesuaikan aturan kerja dan larangan build pada `dev/RULES.md` dan `dev/PROMPT.md` untuk folder `mobile/capacitor/www/` dan `mobile/capacitor/android/` serta menambahkan aturan setelah pemisahan folder.
+- Diubah: Mencentang item "Pemisahan folder" di `dev/PLAN.md` dan memperbarui spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Spek item setelah Tahap 5
 - Ditambah: Spesifikasi empat item setelah Tahap 5 (Pemisahan folder, Revisi UI PC, Konversi Tauri, dan Konversi Kotlin) di bagian akhir dokumen (`dev/PLANSPEC.md`).
 - Diubah: Menambahkan catatan penundaan rilis hingga Konversi Kotlin selesai pada bagian "APK rilis" dan "APK Item A" (`dev/PLANSPEC.md`).

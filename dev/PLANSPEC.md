@@ -1152,21 +1152,46 @@ Cek manual:
 
 ## Pemisahan folder
 
-Tujuan: Memisahkan struktur folder repo menjadi dev/, mobile/ (Kotlin, khusus Android), dan desktop/ (Tauri, khusus Windows) dalam satu monorepo. Tujuannya supaya mobile dan desktop punya UI sendiri. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+Tujuan: Memisahkan repo menjadi tiga folder kerja (dev/, desktop/, mobile/) supaya UI PC dan mobile bisa dikerjakan sendiri-sendiri, tanpa mengubah perilaku aplikasi dan tanpa mengubah alamat situs GitHub Pages.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Peta folder (semua path dari root repo):
+- Pindah ke desktop/src/: index.html, privasi.html, syarat.html, sw.js, manifest.webmanifest, css/, js/, icons/
+- Pindah ke mobile/capacitor/: android/, capacitor.config.json, package.json, package-lock.json, scripts/, assets/
+- Tetap di root: .gitignore, LICENSE, README.md, dev/
+- Baru di root: .github/workflows/pages.yml
+- mobile/capacitor/ bersifat sementara: proyek Capacitor dibekukan dan hanya untuk tes pemilik. Folder ini diganti proyek Kotlin saat item "Konversi Kotlin". Jangan membuat proyek Kotlin atau Tauri sekarang.
 
 Aturan:
-- Item ini baru boleh dikerjakan setelah semua fitur Tahap 5 tercentang.
-- Item ini mengubah struktur repo, jadi wajib ada prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut folder mana yang boleh dipindah.
-- Sebelum dikerjakan, pemilik membuat tag git "pra-pisah-folder" sendiri.
-- Spek rinci wajib memuat pembuatan dev/SCHEMA.md, yang mencatat format JSON backup dan struktur file di Google Drive appDataFolder.
-- Setelah item ini selesai, fitur dibekukan. Perubahan logika bersama (bukan UI) hanya boleh dengan prompt "Izin dari pemilik" dan dikerjakan di desktop/ dan mobile/ sekaligus.
-- Spek rinci (folder apa dipisah jadi apa, dampak ke GitHub Pages, www/, android/, dan alur RULES.md) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+- Urutan commit, satu pemindahan per commit. Pesan commit berformat "pisah folder: nama singkat" lengkap dengan dua trailer Co-authored-by sesuai RULES.md. Push satu kali setelah ketiga commit selesai.
+  1. "pisah folder: web ke desktop/src": `git mv` semua file web, lalu tambah .github/workflows/pages.yml.
+  2. "pisah folder: Capacitor ke mobile/capacitor": `git mv` semua file Capacitor, ubah path di scripts/copy-www.js, perbarui dev/RULES.md dan dev/PROMPT.md di commit yang sama.
+  3. "pisah folder: SCHEMA dan dokumen": buat dev/SCHEMA.md, tambah entri CHANGELOG.md, centang item di PLAN.md.
+- Isi file web tidak berubah sama sekali. Setelah commit 1, `git diff --cached -M --stat` harus menunjukkan hanya rename dengan kemiripan 100%. Kalau ada file web yang isinya berubah, berhenti dan laporkan.
+- pages.yml: jalan saat push ke main dan bisa dijalankan manual (workflow_dispatch). Isinya mengunggah folder desktop/src sebagai artifact Pages lalu deploy, memakai action resmi GitHub, tanpa langkah build. Isi desktop/src menjadi akar situs, sehingga alamat tetap https://mizoarkatamarenaldy.github.io/mizan-okane/. Pemilik yang mengganti sumber Pages di Settings, bukan kamu.
+- mobile/capacitor/: capacitor.config.json tetap memakai webDir "www" (relatif ke folder itu). Di scripts/copy-www.js, ubah hanya path sumber supaya membaca dari ../../desktop/src (relatif ke mobile/capacitor) dan menulis ke mobile/capacitor/www. Baca file itu dulu. Kalau ia memakai daftar file, pertahankan daftar yang sama. Jangan menjalankannya.
+- Jangan ubah isi android/. Periksa android/build.gradle, android/app/build.gradle, android/capacitor.settings.gradle, dan android/gradle.properties. Referensi "../node_modules" tetap valid karena node_modules dibuat pemilik bersebelahan dengan android/. Kalau ada path lain yang rusak akibat pemindahan, laporkan ke pemilik, jangan diperbaiki sendiri.
+- .gitignore tidak diubah.
+- Perubahan dev/RULES.md, hanya ini:
+  - Di "Aturan kerja", pada baris larangan build, ganti penyebutan `www/` dan `android/` menjadi `mobile/capacitor/www/` dan `mobile/capacitor/android/`.
+  - Di "Aturan setelah pemisahan folder", ganti bullet terakhir dengan: "Larangan build berlaku untuk mobile/capacitor/www/, mobile/capacitor/android/, dan folder hasil build apa pun di desktop/ dan mobile/. Pemilik yang membangun. Sampai Konversi Kotlin selesai, mobile/capacitor/ dibekukan."
+  - Tambah bullet: "Alamat situs GitHub Pages, origin, dan OAuth Client ID tidak boleh berubah. Isi desktop/src adalah akar situs, dan semua path di dalamnya tetap relatif."
+  - Tambah bullet: "Setiap perubahan format data wajib memperbarui dev/SCHEMA.md di commit yang sama."
+- Perubahan dev/PROMPT.md, hanya satu baris di bagian "Catatan untuk Claude": ganti penyebutan folder www/ dan android/ menjadi mobile/capacitor/www/ dan mobile/capacitor/android/.
+- dev/SCHEMA.md dibuat baru, hanya dokumentasi. Baca desktop/src/js/db.js, desktop/src/js/sync.js, dan fungsi ekspor dan impor di desktop/src/js/app.js (hanya baca, jangan ubah). Isinya: (a) struktur database IndexedDB: nama database, object store, kunci; (b) format file JSON ekspor/backup: struktur, nama field, tipe, termasuk dompet, kategori, sub kategori, budget, pengaturan; (c) format file di Google Drive appDataFolder: nama file dan strukturnya; (d) aturan konflik: ID unik, waktu ubah, terbaru menang, penanda terhapus; (e) nomor versi format kalau ada. Tulis hanya yang benar-benar ada di kode. Kalau tidak jelas, tulis "tidak tercatat", jangan menebak. Contoh memakai data fiktif, jangan menaruh data transaksi asli.
+- Yang sengaja TIDAK dilakukan: mengubah isi file html, css, atau js; mengubah logika sinkron atau Client ID; menjalankan npm, build, atau cap; membuat folder src-tauri atau proyek Kotlin; mengubah README.md; mengubah "Keputusan terkunci"; menghapus folder lokal yang tidak dilacak git (node_modules, www).
 
 Data:
-- Belum ditentukan. Ditulis saat spek rinci dibuat.
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. dev/SCHEMA.md hanya mendokumentasikan format yang sudah ada.
 
 Cek manual:
-- Belum ditentukan. Ditulis saat spek rinci dibuat.
+- Setelah push, di GitHub Settings, Pages, pilih sumber "GitHub Actions", lalu jalankan workflow secara manual. Buka https://mizoarkatamarenaldy.github.io/mizan-okane/ : tampilan sama seperti sebelumnya, data lama masih ada, login Google berhasil dan sinkron Drive jalan tanpa mengubah Client ID. PWA yang sudah terpasang di HP dan PC tetap terbuka dan memuat versi baru setelah refresh.
+- `git log --follow desktop/src/js/app.js` menampilkan riwayat sebelum pemindahan. `git diff --stat -M pra-pisah-folder HEAD -- desktop/src` menunjukkan rename saja.
+- Di mobile/capacitor: hapus node_modules lama di root, jalankan `npm install`, `npm run build:www`, `npx cap sync`, buka mobile/capacitor/android di Android Studio, build APK. APK jalan seperti sebelumnya (offline, data awet, ekspor CSV dan JSON berfungsi).
+- Buka dev/SCHEMA.md dan cocokkan dengan satu file ekspor JSON asli: semua field di file ekspor tercatat di SCHEMA.md.
+
 
 ## Revisi UI PC
 
