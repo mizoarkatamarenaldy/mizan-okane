@@ -6512,19 +6512,22 @@ body.modal-open {
         display: block !important;
     }
 
-    #form-row-wallet .form-row-wallet-val {
+    #form-row-wallet .form-row-wallet-val,
+    #form-row-to-wallet .form-row-wallet-val {
         position: relative;
         display: flex;
         align-items: center;
         width: 100%;
     }
 
-    /* Tab Pengeluaran & Pemasukan di PC: Tampilkan dropdown dompet baru, sembunyikan select & chevron bawaan */
-    .tx-form:not(.is-transfer) #wallet-dropdown-pc {
+    /* Perbaikan UI PC 12 & 13: Dropdown Dompet PC (Pengeluaran, Pemasukan, & Transfer) */
+    #wallet-dropdown-pc,
+    #to-wallet-dropdown-pc {
         display: block !important;
     }
 
-    .tx-form:not(.is-transfer) #form-row-wallet #tx-wallet {
+    #form-row-wallet #tx-wallet,
+    #form-row-to-wallet #tx-to-wallet {
         position: absolute !important;
         width: 1px !important;
         height: 1px !important;
@@ -6538,33 +6541,9 @@ body.modal-open {
         pointer-events: none !important;
     }
 
-    .tx-form:not(.is-transfer) #form-row-wallet .wallet-row-chevron {
+    #form-row-wallet .wallet-row-chevron,
+    #form-row-to-wallet .wallet-row-chevron {
         display: none !important;
-    }
-
-    /* Tab Transfer di PC: Tetap pakai select bawaan seperti hasil PC 11 */
-    .tx-form.is-transfer #wallet-dropdown-pc {
-        display: none !important;
-    }
-
-    .tx-form.is-transfer #form-row-wallet .compact-select {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        padding-right: 32px;
-        padding-left: 10px;
-    }
-
-    .tx-form.is-transfer #form-row-wallet .wallet-row-chevron {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        color: var(--text-secondary);
-        width: 16px;
-        height: 16px;
-        display: block !important;
     }
 
     #form-row-note {

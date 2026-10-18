@@ -60,6 +60,11 @@ const txWalletDropdownBtn = document.getElementById('tx-wallet-dropdown-btn');
 const txWalletDropdownText = document.getElementById('tx-wallet-dropdown-text');
 const walletDropdownMenu = document.getElementById('wallet-dropdown-menu');
 const walletDropdownCol = document.getElementById('wallet-dropdown-col');
+const toWalletDropdownPc = document.getElementById('to-wallet-dropdown-pc');
+const txToWalletDropdownBtn = document.getElementById('tx-to-wallet-dropdown-btn');
+const txToWalletDropdownText = document.getElementById('tx-to-wallet-dropdown-text');
+const toWalletDropdownMenu = document.getElementById('to-wallet-dropdown-menu');
+const toWalletDropdownCol = document.getElementById('to-wallet-dropdown-col');
 const txDateDaySelect = document.getElementById('tx-date-day');
 const txDateMonthSelect = document.getElementById('tx-date-month');
 const txDateYearSelect = document.getElementById('tx-date-year');
@@ -513,6 +518,7 @@ function closeFormScreen() {
     if (!formScreen) return;
     closeCategoryPcDropdown();
     closeWalletPcDropdown();
+    closeToWalletPcDropdown();
     formScreen.classList.add('hidden');
     if (btnFabAdd) btnFabAdd.classList.remove('hidden');
     document.body.classList.remove('modal-open');
@@ -918,6 +924,7 @@ export function openCategoryPcDropdown() {
     const type = getSelectedType();
     if (type === 'transfer') return;
     closeWalletPcDropdown();
+    closeToWalletPcDropdown();
 
     const list = getCategoryNames(type).filter(c => c !== 'Equilibrium');
     const currentCat = txCategoryInput ? txCategoryInput.value.trim() : '';
@@ -1023,53 +1030,89 @@ export function toggleCategoryPcDropdown() {
 
 // Implementasi Dropdown Dompet PC
 export function updateWalletDropdownUI() {
-    if (!txWalletInput) return;
-    const selectedWalletId = txWalletInput.value;
-    const isPlaceholder = !selectedWalletId;
-    let displayText = 'Pilih dompet';
+    if (txWalletInput) {
+        const selectedWalletId = txWalletInput.value;
+        const isPlaceholder = !selectedWalletId;
+        let displayText = 'Pilih dompet';
 
-    if (!isPlaceholder) {
-        const opt = Array.from(txWalletInput.options).find(o => o.value === selectedWalletId);
-        if (opt) {
-            displayText = opt.textContent;
-        } else {
-            const wName = getWalletName(selectedWalletId);
-            const wCurr = getWalletCurrency(selectedWalletId);
-            displayText = `${wName} (${wCurr})`;
+        if (!isPlaceholder) {
+            const opt = Array.from(txWalletInput.options).find(o => o.value === selectedWalletId);
+            if (opt) {
+                displayText = opt.textContent;
+            } else {
+                const wName = getWalletName(selectedWalletId);
+                const wCurr = getWalletCurrency(selectedWalletId);
+                displayText = `${wName} (${wCurr})`;
+            }
+        }
+
+        if (txWalletDropdownText) {
+            txWalletDropdownText.textContent = displayText;
+            txWalletDropdownText.classList.toggle('is-placeholder', isPlaceholder);
+        }
+        if (txWalletDropdownBtn) {
+            txWalletDropdownBtn.classList.toggle('is-empty', isPlaceholder);
         }
     }
 
-    if (txWalletDropdownText) {
-        txWalletDropdownText.textContent = displayText;
-        txWalletDropdownText.classList.toggle('is-placeholder', isPlaceholder);
+    if (txToWalletInput) {
+        const selectedToWalletId = txToWalletInput.value;
+        const isToPlaceholder = !selectedToWalletId;
+        let toDisplayText = 'Pilih dompet';
+
+        if (!isToPlaceholder) {
+            const opt = Array.from(txToWalletInput.options).find(o => o.value === selectedToWalletId);
+            if (opt) {
+                toDisplayText = opt.textContent;
+            } else {
+                const wName = getWalletName(selectedToWalletId);
+                const wCurr = getWalletCurrency(selectedToWalletId);
+                toDisplayText = `${wName} (${wCurr})`;
+            }
+        }
+
+        if (txToWalletDropdownText) {
+            txToWalletDropdownText.textContent = toDisplayText;
+            txToWalletDropdownText.classList.toggle('is-placeholder', isToPlaceholder);
+        }
+        if (txToWalletDropdownBtn) {
+            txToWalletDropdownBtn.classList.toggle('is-empty', isToPlaceholder);
+        }
     }
-    if (txWalletDropdownBtn) {
-        txWalletDropdownBtn.classList.toggle('is-empty', isPlaceholder);
-    }
+
     syncWalletInputA11y();
 }
 
 export function syncWalletInputA11y() {
-    if (!txWalletInput) return;
     const isPc = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
-    const isTransfer = getSelectedType() === 'transfer';
-    if (isPc && !isTransfer) {
-        txWalletInput.setAttribute('tabindex', '-1');
-        txWalletInput.setAttribute('aria-hidden', 'true');
-    } else {
-        txWalletInput.removeAttribute('tabindex');
-        txWalletInput.removeAttribute('aria-hidden');
+    if (txWalletInput) {
+        if (isPc) {
+            txWalletInput.setAttribute('tabindex', '-1');
+            txWalletInput.setAttribute('aria-hidden', 'true');
+        } else {
+            txWalletInput.removeAttribute('tabindex');
+            txWalletInput.removeAttribute('aria-hidden');
+        }
+    }
+    if (txToWalletInput) {
+        if (isPc) {
+            txToWalletInput.setAttribute('tabindex', '-1');
+            txToWalletInput.setAttribute('aria-hidden', 'true');
+        } else {
+            txToWalletInput.removeAttribute('tabindex');
+            txToWalletInput.removeAttribute('aria-hidden');
+        }
     }
 }
 
 export function openWalletPcDropdown() {
     if (!walletDropdownMenu || !txWalletDropdownBtn) return;
-    if (getSelectedType() === 'transfer') return;
 
     closeCategoryPcDropdown();
+    closeToWalletPcDropdown();
 
     const selectedWalletId = txWalletInput ? txWalletInput.value : '';
-    const options = txWalletInput ? Array.from(txWalletInput.options).filter(o => o.value !== '') : [];
+    const options = txWalletInput ? Array.from(txWalletInput.options).filter(o => o.value !== '' && !o.disabled) : [];
 
     let html = '';
     for (const opt of options) {
@@ -1129,6 +1172,76 @@ export function selectWalletFromPcDropdown(walletId) {
     closeWalletPcDropdown();
     if (txWalletDropdownBtn) {
         txWalletDropdownBtn.focus();
+    }
+}
+
+export function openToWalletPcDropdown() {
+    if (!toWalletDropdownMenu || !txToWalletDropdownBtn) return;
+
+    closeCategoryPcDropdown();
+    closeWalletPcDropdown();
+
+    const selectedToWalletId = txToWalletInput ? txToWalletInput.value : '';
+    const options = txToWalletInput ? Array.from(txToWalletInput.options).filter(o => o.value !== '' && !o.disabled) : [];
+
+    let html = '';
+    for (const opt of options) {
+        const isSelected = (opt.value === selectedToWalletId);
+        html += `
+            <button type="button" class="category-dropdown-item to-wallet-dropdown-item ${isSelected ? 'is-selected' : ''}" data-wallet-id="${escapeHTML(opt.value)}" role="menuitem">
+                <span class="category-dropdown-item-text">${escapeHTML(opt.textContent)}</span>
+            </button>
+        `;
+    }
+
+    if (toWalletDropdownCol) {
+        toWalletDropdownCol.innerHTML = html;
+
+        toWalletDropdownCol.querySelectorAll('.to-wallet-dropdown-item').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                toWalletDropdownCol.querySelectorAll('.to-wallet-dropdown-item').forEach(b => {
+                    b.classList.toggle('is-highlighted', b === btn);
+                });
+            });
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectToWalletFromPcDropdown(btn.dataset.walletId);
+            });
+        });
+    }
+
+    toWalletDropdownMenu.classList.remove('hidden');
+    txToWalletDropdownBtn.setAttribute('aria-expanded', 'true');
+}
+
+export function closeToWalletPcDropdown() {
+    if (!toWalletDropdownMenu) return;
+    toWalletDropdownMenu.classList.add('hidden');
+    if (txToWalletDropdownBtn) {
+        txToWalletDropdownBtn.setAttribute('aria-expanded', 'false');
+    }
+}
+
+export function toggleToWalletPcDropdown() {
+    if (!toWalletDropdownMenu) return;
+    const isOpen = !toWalletDropdownMenu.classList.contains('hidden');
+    if (isOpen) {
+        closeToWalletPcDropdown();
+    } else {
+        openToWalletPcDropdown();
+    }
+}
+
+export function selectToWalletFromPcDropdown(walletId) {
+    if (txToWalletInput) {
+        txToWalletInput.value = walletId;
+        txToWalletInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    updateWalletDropdownUI();
+    closeToWalletPcDropdown();
+    if (txToWalletDropdownBtn) {
+        txToWalletDropdownBtn.focus();
     }
 }
 
@@ -1279,6 +1392,7 @@ export function updateSaveButtonState() {
 function updateTypeUI(type) {
     const isTransfer = type === 'transfer';
     closeWalletPcDropdown();
+    closeToWalletPcDropdown();
     syncWalletInputA11y();
     if (txWalletLabel) {
         txWalletLabel.textContent = isTransfer ? 'Dari' : 'Dompet';
@@ -7488,6 +7602,7 @@ async function performDeleteSubcategoryBudget(cat, sub) {
 function resetForm() {
     closeCategoryPcDropdown();
     closeWalletPcDropdown();
+    closeToWalletPcDropdown();
     txForm.reset();
     txIdInput.value = '';
     if (txCategoryInput) {
@@ -7752,6 +7867,7 @@ txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {
         closeCategoryPcDropdown();
         closeWalletPcDropdown();
+        closeToWalletPcDropdown();
         if (radio.value === 'transfer') {
             if (getActiveWallets().length < 2) {
                 showNotification('Transfer membutuhkan minimal 2 dompet. Silakan tambah dompet baru terlebih dahulu di Pengaturan Dompet.', 'warn');
@@ -7898,13 +8014,24 @@ if (categoryDropdownMenu) {
 
 if (formRowWallet) {
     formRowWallet.addEventListener('click', (e) => {
-        if (getSelectedType() === 'transfer') return;
         if (window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) {
             if (e.target && e.target.closest('#wallet-dropdown-pc')) {
                 return;
             }
             e.preventDefault();
             toggleWalletPcDropdown();
+        }
+    });
+}
+
+if (formRowToWallet) {
+    formRowToWallet.addEventListener('click', (e) => {
+        if (window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) {
+            if (e.target && e.target.closest('#to-wallet-dropdown-pc')) {
+                return;
+            }
+            e.preventDefault();
+            toggleToWalletPcDropdown();
         }
     });
 }
@@ -7933,6 +8060,34 @@ if (txWalletDropdownBtn) {
             e.preventDefault();
             e.stopPropagation();
             closeWalletPcDropdown();
+        }
+    });
+}
+
+if (txToWalletDropdownBtn) {
+    txToWalletDropdownBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleToWalletPcDropdown();
+    });
+
+    txToWalletDropdownBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const isOpen = toWalletDropdownMenu && !toWalletDropdownMenu.classList.contains('hidden');
+            if (!isOpen) {
+                openToWalletPcDropdown();
+            }
+            setTimeout(() => {
+                if (toWalletDropdownCol) {
+                    const targetBtn = toWalletDropdownCol.querySelector('.to-wallet-dropdown-item.is-selected') ||
+                                      toWalletDropdownCol.querySelector('.to-wallet-dropdown-item');
+                    if (targetBtn) targetBtn.focus();
+                }
+            }, 10);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            closeToWalletPcDropdown();
         }
     });
 }
@@ -7974,6 +8129,43 @@ if (walletDropdownMenu) {
     });
 }
 
+if (toWalletDropdownMenu) {
+    toWalletDropdownMenu.addEventListener('keydown', (e) => {
+        const activeEl = document.activeElement;
+        const items = Array.from(toWalletDropdownCol.querySelectorAll('.to-wallet-dropdown-item'));
+        const idx = items.indexOf(activeEl);
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            closeToWalletPcDropdown();
+            if (txToWalletDropdownBtn) txToWalletDropdownBtn.focus();
+            return;
+        }
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const next = items[idx + 1] || items[0];
+            if (next) {
+                next.focus();
+                next.dispatchEvent(new MouseEvent('mouseenter'));
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prev = items[idx - 1] || items[items.length - 1];
+            if (prev) {
+                prev.focus();
+                prev.dispatchEvent(new MouseEvent('mouseenter'));
+            }
+        } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (activeEl && activeEl.classList.contains('to-wallet-dropdown-item')) {
+                activeEl.click();
+            }
+        }
+    });
+}
+
 document.addEventListener('click', (e) => {
     if (categoryDropdownMenu && !categoryDropdownMenu.classList.contains('hidden')) {
         if (categoryDropdownPc && !categoryDropdownPc.contains(e.target)) {
@@ -7985,12 +8177,18 @@ document.addEventListener('click', (e) => {
             closeWalletPcDropdown();
         }
     }
+    if (toWalletDropdownMenu && !toWalletDropdownMenu.classList.contains('hidden')) {
+        if (toWalletDropdownPc && !toWalletDropdownPc.contains(e.target)) {
+            closeToWalletPcDropdown();
+        }
+    }
 });
 
 window.addEventListener('resize', () => {
     if (!window.matchMedia('(min-width: 1024px)').matches) {
         closeCategoryPcDropdown();
         closeWalletPcDropdown();
+        closeToWalletPcDropdown();
     } else {
         closeCategoryPicker();
     }
@@ -9391,6 +9589,10 @@ async function init() {
                 closeWalletPcDropdown();
                 return;
             }
+            if (toWalletDropdownMenu && !toWalletDropdownMenu.classList.contains('hidden')) {
+                closeToWalletPcDropdown();
+                return;
+            }
             if ((!confirmDialog || !confirmDialog.open) && (!deleteAllDialog || !deleteAllDialog.open)) {
                 resetForm();
                 closeFormScreen();
@@ -9549,6 +9751,7 @@ async function init() {
     if (txToWalletInput) {
         txToWalletInput.addEventListener('change', () => {
             updateSaveButtonState();
+            updateWalletDropdownUI();
         });
     }
 
