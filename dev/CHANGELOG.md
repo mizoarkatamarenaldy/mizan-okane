@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 8: Form Tambah Transaksi
+- Ditambah: Dialog pilihan kategori dua kolom (`#category-picker-dialog`) dengan kolom kiri daftar kategori (tanda panah untuk yang memiliki sub kategori) dan kolom kanan daftar sub kategori (beserta opsi memilih kategori saja tanpa sub kategori); menyorot atau mengklik kategori menampilkan sub kategorinya di kanan, dan memilih kategori tanpa sub kategori langsung menutup dialog dan mengisi baris Kategori (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diperbaiki: Tata letak form tambah dan edit transaksi di tampilan PC diubah menjadi baris-baris ringkas dengan label tetap di kiri (115px), nilai/input di kanan, pemisah garis tipis di bawah baris, tanpa kotak input besar yang berbingkai, serta muat di layar normal tanpa scroll berlebih (`desktop/src/index.html`, `desktop/src/css/style.css`).
+- Diubah: Urutan baris untuk Pemasukan dan Pengeluaran ditata menjadi Tanggal dan Waktu (satu baris bersebelahan), Total, Kategori, Dompet, dan Catatan; sedangkan untuk Transfer ditata menjadi Tanggal dan Waktu (satu baris), Dari, Ke, Total, dan Catatan (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diubah: Baris Kategori menampilkan nama kategori (dan sub kategori jika dipilih) beserta ikonnya atau kosong jika belum dipilih; mengklik baris membuka panel dialog pilihan kategori dua kolom (`desktop/src/index.html`, `desktop/src/js/app.js`).
+- Diubah: Pilihan jenis transaksi di atas form menampilkan tiga tombol sejajar dengan penanda warna jenis aktif sesuai DESIGN.md (hijau untuk Pemasukan, merah untuk Pengeluaran, netral untuk Transfer) (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v71` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 8: Form Tambah Transaksi" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 7: Timbangan
 - Diperbaiki: Tiga kartu halaman Timbangan di layar PC (@media min-width: 1024px) disamakan bentuknya (posisi atas, tinggi penuh 100%, radius 8px, border 1px, dan padding 12px 14px) sehingga berjajar sejajar di atas dan sama tinggi di bawah (`desktop/src/css/style.css`).
 - Diperbaiki: Seluruh isi kartu kiri "Timbang Sebelum Beli" tampil penuh tanpa scroll pada jendela PC ukuran normal (1366x768 dan 1920x1080) dengan memanfaatkan ruang yang dibebaskan, merapatkan jarak vertikal antar elemen, dan menjadikan scroll di dalam kartu sebagai cadangan saat jendela terlalu pendek (`desktop/src/css/style.css`).

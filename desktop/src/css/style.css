@@ -4008,52 +4008,9 @@ button:disabled {
 
 /* Urutan Komponen Form */
 
-/* 1. Jumlah (besar, keypad angka) */
-.form-group-amount {
-    margin-bottom: 14px;
-}
-
-.amount-input-wrapper {
-    display: flex;
-    align-items: center;
-    background-color: var(--surface-raised);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-input, 6px);
-    padding: 6px 14px;
-    min-height: 56px;
-    transition: border-color 0.15s ease;
-}
-
-.amount-input-wrapper:focus-within {
-    border-color: var(--accent);
-}
-
-.amount-currency-prefix {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    margin-right: 8px;
-    user-select: none;
-}
-
-.tx-amount-large {
-    border: none !important;
-    background: transparent !important;
-    padding: 0 !important;
-    font-size: 28px !important;
-    font-weight: 700 !important;
-    color: var(--text) !important;
-    min-height: 0 !important;
-    outline: none !important;
-    box-shadow: none !important;
-    width: 100%;
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
-}
-
-/* 2. Tipe (tombol geser: Pengeluaran / Pemasukan / Transfer) */
+/* 1. Tipe Transaksi di Atas Form (Pemasukan, Pengeluaran, Transfer) */
 .form-group-type {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .type-segmented-control {
@@ -4074,7 +4031,7 @@ button:disabled {
 
 .type-segment-btn {
     width: 100%;
-    min-height: 44px;
+    min-height: 40px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -4104,7 +4061,7 @@ button:disabled {
 }
 
 .type-segment-item input[value="transfer"]:checked + .type-segment-btn {
-    color: var(--transfer);
+    color: var(--text);
 }
 
 .type-segment-item input:focus-visible + .type-segment-btn,
@@ -4113,111 +4070,424 @@ button:disabled {
     outline-offset: 2px;
 }
 
-/* 3. Kategori (chip) */
-.category-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    max-height: 140px;
-    overflow-y: auto;
-    padding: 2px 0;
-}
-
-.category-chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    padding: 8px 14px;
-    border-radius: var(--radius-input, 6px);
-    border: 1px solid var(--border);
-    background-color: var(--surface-raised);
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.category-chip:hover {
-    border-color: var(--accent);
-}
-
-.category-chip:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
-
-.category-chip.is-selected {
-    background-color: var(--accent);
-    color: var(--btn-primary-text);
-    font-weight: 600;
-    border-color: var(--accent);
-}
-
-/* 4. Dompet */
-.form-group-wallets {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
-}
-
-.form-wallet-field {
+/* 2. Baris-Baris Ringkas Form (Label di kiri, nilai/input di kanan, garis pemisah) */
+.form-rows-list {
     display: flex;
     flex-direction: column;
+    margin-bottom: 16px;
 }
 
-/* 5. Tanggal dan Waktu */
-.form-group-datetime {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
-}
-
-@media (min-width: 480px) {
-    .form-group-datetime {
-        grid-template-columns: 1.15fr 0.85fr;
-    }
-}
-
-.custom-date-inputs {
+.form-row {
     display: flex;
-    gap: 6px;
+    align-items: center;
+    min-height: 44px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
 }
 
-.date-select-day {
+.form-row.hidden {
+    display: none !important;
+}
+
+.form-row-label {
+    flex: 0 0 115px;
+    width: 115px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    user-select: none;
+    margin: 0;
+    font-weight: 500;
+}
+
+.form-row-value {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text);
+}
+
+/* Urutan Baris Normal (Pemasukan / Pengeluaran): Tanggal dan Waktu, Total, Kategori, Dompet, Catatan */
+#form-row-datetime { order: 1; }
+#form-row-amount { order: 2; }
+#form-row-category { order: 3; }
+#form-row-wallet { order: 4; }
+#form-row-to-wallet { order: 5; }
+#form-row-note { order: 6; }
+
+/* Urutan Baris Transfer: Tanggal dan Waktu, Dari, Ke, Total, Catatan */
+.tx-form.is-transfer #form-row-datetime { order: 1; }
+.tx-form.is-transfer #form-row-wallet { order: 2; }
+.tx-form.is-transfer #form-row-to-wallet { order: 3; }
+.tx-form.is-transfer #form-row-amount { order: 4; }
+.tx-form.is-transfer #form-row-note { order: 5; }
+
+/* Komponen Nilai: Tanggal & Waktu */
+.form-row-datetime-val {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.compact-date-inputs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.compact-time-inputs {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 0;
+}
+
+.compact-date-inputs .date-select,
+.compact-time-inputs .time-select {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    font-size: 14px;
+    padding: 4px 4px;
+    border-radius: var(--radius-input, 6px);
+    cursor: pointer;
+    height: 34px;
+    min-height: 34px;
+    outline: none;
+}
+
+.compact-date-inputs .date-select:hover,
+.compact-time-inputs .time-select:hover {
+    background-color: var(--surface-raised);
+}
+
+.compact-date-inputs .date-select:focus,
+.compact-time-inputs .time-select:focus {
+    background-color: var(--surface-raised);
+    border-color: var(--accent);
+}
+
+.compact-date-inputs .date-select-day {
+    flex: 0 0 54px;
+}
+
+.compact-date-inputs .date-select-month {
+    flex: 0 0 88px;
+}
+
+.compact-date-inputs .date-select-year {
     flex: 0 0 68px;
 }
 
-.date-select-month {
-    flex: 1;
-    min-width: 0;
+.compact-time-inputs .time-select {
+    flex: 0 0 54px;
 }
 
-.date-select-year {
-    flex: 0 0 84px;
+.compact-time-inputs .time-select-ampm {
+    flex: 0 0 64px;
 }
 
-.time-input-row {
+.form-row-datetime-val .form-error-message {
+    flex-basis: 100%;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-size: 12px;
+}
+
+/* Komponen Nilai: Total */
+.form-row-amount-val {
     display: flex;
     align-items: center;
-    gap: 6px;
 }
 
-.time-select {
+.compact-prefix {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 6px;
+    user-select: none;
+}
+
+.compact-amount-input {
+    border: none !important;
+    background: transparent !important;
+    padding: 4px 0 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: var(--text) !important;
+    min-height: 36px !important;
+    outline: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+/* Komponen Nilai: Kategori */
+.category-row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 40px;
+    padding: 4px 0;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+    outline: none;
+}
+
+.category-row-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-input, 6px);
+}
+
+.category-row-btn-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex: 1;
     min-width: 0;
 }
 
-.time-select-ampm {
-    flex: 0 0 76px;
+.category-display-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--text);
 }
 
-/* 6. Catatan */
-.form-group-note {
-    margin-bottom: 16px;
+.category-display-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.category-display-text {
+    font-size: 14px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.category-row-chevron {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+/* Komponen Nilai: Dompet */
+.compact-select {
+    width: 100%;
+    min-height: 40px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    padding: 4px 0;
+}
+
+.compact-select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-input, 6px);
+}
+
+.compact-select option {
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+/* Komponen Nilai: Catatan */
+.compact-text-input {
+    width: 100%;
+    min-height: 40px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    padding: 4px 0;
+}
+
+.compact-text-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.compact-text-input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-input, 6px);
+}
+
+/* Panel Pilihan Kategori Dua Kolom */
+.category-picker-dialog {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card, 8px);
+    background-color: var(--surface);
+    padding: 0;
+    max-width: 500px;
+    width: 92%;
+    box-shadow: none;
+    color: var(--text);
+    overflow: hidden;
+}
+
+.category-picker-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+}
+
+.category-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.category-picker-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.btn-cat-picker-close {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    background: transparent;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btn-cat-picker-close:hover {
+    background-color: var(--surface-raised);
+    color: var(--text);
+}
+
+.category-picker-body {
+    display: flex;
+    min-height: 300px;
+    max-height: 380px;
+}
+
+.category-picker-col {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.category-picker-col-left {
+    border-right: 1px solid var(--border);
+}
+
+.category-picker-col-right {
+    background-color: var(--surface);
+}
+
+.cat-picker-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: var(--radius-input, 6px);
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 2px;
+}
+
+.cat-picker-item:hover,
+.cat-picker-item.is-highlighted {
+    background-color: var(--surface-raised);
+}
+
+.cat-picker-item.is-selected {
+    background-color: var(--surface-raised);
+    font-weight: 600;
+}
+
+.cat-picker-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.cat-picker-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.cat-picker-item-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.cat-picker-item-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.cat-picker-item-arrow {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+
+.cat-picker-sub-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.cat-picker-sub-item.is-selected {
+    color: var(--accent);
+}
+
+.cat-picker-empty-hint {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
 }
 
 /* 7. Tombol Aksi */
@@ -6042,7 +6312,9 @@ body.modal-open {
     .wallet-balance-item:hover:not(.is-selected),
     .settings-about-link:hover,
     .category-item:hover,
-    .subcategory-item:hover {
+    .subcategory-item:hover,
+    .cat-picker-item:hover,
+    .btn-cat-picker-close:hover {
         background-color: var(--surface-raised) !important;
     }
 }

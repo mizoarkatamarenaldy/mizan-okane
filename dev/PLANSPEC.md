@@ -1503,3 +1503,39 @@ Cek manual:
 - Ganti bulan di kartu tengah: angka berubah seperti biasa.
 - Buka halaman lain (Beranda, Riwayat, Statistik, Pengaturan): tampilannya tidak berubah.
 
+## Perbaikan UI PC 8: Form Tambah Transaksi
+
+Tujuan: Merampingkan form tambah dan edit transaksi di tampilan PC karena sekarang terlalu penuh. Tata letak diubah jadi baris ringkas (label di kiri, nilai di kanan), dan pilihan kategori pindah ke panel pilihan dua kolom.
+
+Tempat dan tampilan:
+- Form tambah transaksi dan form edit transaksi, tampilan PC (desktop/). Keduanya memakai tata letak yang sama.
+- Pilihan jenis di atas form (Pemasukan, Pengeluaran, Transfer) tetap ada, tampil sebagai tiga tombol sejajar, yang aktif diberi penanda warna jenisnya (hijau, merah, netral sesuai DESIGN.md).
+- Isi form berupa baris ringkas. Tiap baris: label di kiri dengan lebar tetap, nilai atau input di kanan, garis tipis pemisah di bawah baris. Tanpa kotak input besar yang berbingkai.
+- Urutan baris untuk Pemasukan dan Pengeluaran: Tanggal dan Waktu (satu baris, bersebelahan), Total, Kategori, Dompet, Catatan.
+- Urutan baris untuk Transfer: Tanggal dan Waktu (satu baris), Dari, Ke, Total, Catatan.
+- Baris Kategori menampilkan nama kategori (dan sub kategori bila dipilih) beserta ikonnya. Kalau belum dipilih, kosong. Klik baris itu membuka panel pilihan berupa dialog (bukan bottom sheet) dengan dua kolom: kolom kiri daftar kategori, kolom kanan daftar sub kategori dari kategori yang sedang disorot. Kategori yang punya sub kategori diberi tanda panah. Menyorot atau mengklik kategori menampilkan sub kategorinya di kanan. Memilih kategori tanpa sub kategori langsung menutup panel dan mengisi baris Kategori. Panel punya judul "Kategori" dan tombol tutup.
+- Baris Dompet (dan Dari, Ke di Transfer) menampilkan nama dompet beserta mata uangnya, sama seperti teks di pilihan dompet sekarang. Klik membuka daftar pilihan dompet seperti yang sudah ada, urutan dompet mengikuti urutan di Pengaturan.
+- Tombol simpan dan batal tetap di bawah form, memakai gaya yang sudah ada di DESIGN.md.
+- Form harus muat di layar PC normal dengan scroll seminimal mungkin.
+
+Aturan:
+- Hanya mengubah tata letak dan tampilan form. Semua field yang sudah ada tetap ada, dengan aturan yang sama: Waktu wajib diisi, format jam 12 atau 24 jam mengikuti pengaturan, angka uang memakai titik pemisah ribuan, desimal USD tetap berlaku, dompet kosong dan harus dipilih manual, validasi dan pesan error tidak berubah.
+- Aturan sub kategori (wajib atau opsional, kategori Equilibrium tidak muncul di form) tidak berubah, ikuti perilaku yang sudah ada.
+- Perilaku simpan, edit, dan transfer tidak berubah.
+- Sengaja TIDAK menambah fitur baru: tanpa Berulang/cicil, tanpa Menandai, tanpa Deskripsi terpisah, tanpa lampiran foto, tanpa tombol bintang.
+- Tidak mengubah halaman lain.
+- Tidak menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Tambah pengeluaran: isi Total, pilih kategori lewat panel dua kolom, pilih dompet, simpan. Transaksi muncul di Riwayat dengan data yang benar.
+- Pilih kategori yang punya sub kategori: sub kategori tampil di kolom kanan, setelah dipilih baris Kategori menampilkan keduanya.
+- Pilih kategori tanpa sub kategori: panel langsung menutup dan baris Kategori terisi.
+- Kosongkan Waktu lalu simpan: tetap ditolak seperti sebelumnya. Dompet kosong: tetap ditolak.
+- Tambah pemasukan dan transfer antar dompet: tata letak baris benar dan hasil tersimpan sama seperti sebelum perubahan.
+- Dompet berbeda mata uang (Yen, USD): angka dan desimal tetap benar.
+- Edit transaksi lama: form terisi dengan data transaksinya dan tampil dengan tata letak yang sama.
+- Buka halaman lain (Beranda, Riwayat, Timbangan, Statistik, Pengaturan): tampilannya tidak berubah.
+

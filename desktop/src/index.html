@@ -866,19 +866,10 @@
                     </button>
                 </div>
                 <div class="form-screen-body">
-                    <form id="tx-form">
+                    <form id="tx-form" class="tx-form">
                         <input type="hidden" id="tx-id">
 
-                        <!-- 1. Jumlah (besar, keypad angka) -->
-                        <div class="form-group form-group-amount">
-                            <label for="tx-amount" class="form-label" id="tx-amount-label">Jumlah (Rp)</label>
-                            <div class="amount-input-wrapper">
-                                <span class="amount-currency-prefix" id="tx-amount-prefix" aria-hidden="true">Rp</span>
-                                <input type="text" inputmode="numeric" id="tx-amount" class="tx-amount-large tabular-nums" placeholder="0" required autocomplete="off">
-                            </div>
-                        </div>
-
-                        <!-- 2. Tipe (tombol geser: Pengeluaran / Pemasukan / Transfer) -->
+                        <!-- Pilihan jenis di atas form (Pemasukan, Pengeluaran, Transfer) -->
                         <div class="form-group form-group-type">
                             <label class="sr-only">Tipe Transaksi</label>
                             <div class="type-segmented-control" role="radiogroup" aria-label="Tipe Transaksi">
@@ -897,162 +888,181 @@
                             </div>
                         </div>
 
-                        <!-- 3. Kategori (chip) -->
-                        <div class="form-group" id="form-group-category">
-                            <label for="tx-category" class="form-label">Kategori</label>
-                            <select id="tx-category" class="sr-only" required tabindex="-1" aria-hidden="true">
-                                <option value="" disabled selected>Pilih kategori</option>
-                            </select>
-                            <div id="category-chips" class="category-chips" role="radiogroup" aria-label="Pilih Kategori">
-                                <!-- Diisi secara dinamis lewat JS -->
-                            </div>
-                        </div>
-
-                        <!-- 3b. Sub Kategori (chip opsional) -->
-                        <div class="form-group hidden" id="form-group-subcategory">
-                            <label class="form-label" id="tx-subcategory-label">Sub Kategori (opsional)</label>
-                            <input type="hidden" id="tx-subcategory">
-                            <div id="subcategory-chips" class="category-chips" role="radiogroup" aria-labelledby="tx-subcategory-label">
-                                <!-- Diisi secara dinamis lewat JS setelah kategori dipilih -->
-                            </div>
-                        </div>
-
-                        <!-- 4. Dompet -->
-                        <div class="form-group form-group-wallets">
-                            <div class="form-wallet-field" id="form-group-wallet">
-                                <label for="tx-wallet" id="tx-wallet-label" class="form-label">Dompet</label>
-                                <select id="tx-wallet" required>
-                                    <option value="" disabled selected>Pilih dompet</option>
-                                </select>
-                            </div>
-                            <div class="form-wallet-field hidden" id="form-group-to-wallet">
-                                <label for="tx-to-wallet" class="form-label">Ke Dompet</label>
-                                <select id="tx-to-wallet">
-                                    <option value="" disabled selected>Pilih dompet</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- 5. Tanggal dan Waktu -->
-                        <div class="form-group form-group-datetime">
-                            <div class="datetime-col date-col">
-                                <label class="form-label">Tanggal</label>
-                                <input type="hidden" id="tx-date" required>
-                                <div class="custom-date-inputs">
-                                    <select id="tx-date-day" class="date-select date-select-day" aria-label="Tanggal"></select>
-                                    <select id="tx-date-month" class="date-select date-select-month" aria-label="Bulan"></select>
-                                    <select id="tx-date-year" class="date-select date-select-year" aria-label="Tahun"></select>
+                        <!-- Baris-baris ringkas form -->
+                        <div class="form-rows-list">
+                            <!-- 1. Tanggal dan Waktu (satu baris, bersebelahan) -->
+                            <div class="form-row form-row-datetime" id="form-row-datetime">
+                                <span class="form-row-label">Tanggal & Waktu</span>
+                                <div class="form-row-value form-row-datetime-val">
+                                    <input type="hidden" id="tx-date" required>
+                                    <div class="custom-date-inputs compact-date-inputs">
+                                        <select id="tx-date-day" class="date-select date-select-day" aria-label="Tanggal"></select>
+                                        <select id="tx-date-month" class="date-select date-select-month" aria-label="Bulan"></select>
+                                        <select id="tx-date-year" class="date-select date-select-year" aria-label="Tahun"></select>
+                                    </div>
+                                    <div id="time-input-24" class="time-input-24 time-input-row compact-time-inputs">
+                                        <select id="tx-time-hour-24" class="time-select" aria-label="Jam (00-23)"></select>
+                                        <span class="time-separator" aria-hidden="true">:</span>
+                                        <select id="tx-time-minute-24" class="time-select" aria-label="Menit (00-59)"></select>
+                                    </div>
+                                    <div id="time-input-12" class="time-input-12 time-input-row compact-time-inputs hidden">
+                                        <select id="tx-time-hour" class="time-select" aria-label="Jam (01-12)">
+                                            <option value="">Jam</option>
+                                            <option value="01">01</option>
+                                            <option value="02">02</option>
+                                            <option value="03">03</option>
+                                            <option value="04">04</option>
+                                            <option value="05">05</option>
+                                            <option value="06">06</option>
+                                            <option value="07">07</option>
+                                            <option value="08">08</option>
+                                            <option value="09">09</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                        </select>
+                                        <span class="time-separator" aria-hidden="true">:</span>
+                                        <select id="tx-time-minute" class="time-select" aria-label="Menit (00-59)">
+                                            <option value="">Menit</option>
+                                            <option value="00">00</option>
+                                            <option value="01">01</option>
+                                            <option value="02">02</option>
+                                            <option value="03">03</option>
+                                            <option value="04">04</option>
+                                            <option value="05">05</option>
+                                            <option value="06">06</option>
+                                            <option value="07">07</option>
+                                            <option value="08">08</option>
+                                            <option value="09">09</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                            <option value="13">13</option>
+                                            <option value="14">14</option>
+                                            <option value="15">15</option>
+                                            <option value="16">16</option>
+                                            <option value="17">17</option>
+                                            <option value="18">18</option>
+                                            <option value="19">19</option>
+                                            <option value="20">20</option>
+                                            <option value="21">21</option>
+                                            <option value="22">22</option>
+                                            <option value="23">23</option>
+                                            <option value="24">24</option>
+                                            <option value="25">25</option>
+                                            <option value="26">26</option>
+                                            <option value="27">27</option>
+                                            <option value="28">28</option>
+                                            <option value="29">29</option>
+                                            <option value="30">30</option>
+                                            <option value="31">31</option>
+                                            <option value="32">32</option>
+                                            <option value="33">33</option>
+                                            <option value="34">34</option>
+                                            <option value="35">35</option>
+                                            <option value="36">36</option>
+                                            <option value="37">37</option>
+                                            <option value="38">38</option>
+                                            <option value="39">39</option>
+                                            <option value="40">40</option>
+                                            <option value="41">41</option>
+                                            <option value="42">42</option>
+                                            <option value="43">43</option>
+                                            <option value="44">44</option>
+                                            <option value="45">45</option>
+                                            <option value="46">46</option>
+                                            <option value="47">47</option>
+                                            <option value="48">48</option>
+                                            <option value="49">49</option>
+                                            <option value="50">50</option>
+                                            <option value="51">51</option>
+                                            <option value="52">52</option>
+                                            <option value="53">53</option>
+                                            <option value="54">54</option>
+                                            <option value="55">55</option>
+                                            <option value="56">56</option>
+                                            <option value="57">57</option>
+                                            <option value="58">58</option>
+                                            <option value="59">59</option>
+                                        </select>
+                                        <select id="tx-time-ampm" class="time-select time-select-ampm" aria-label="AM atau PM">
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                        </select>
+                                    </div>
+                                    <input type="hidden" id="tx-time">
+                                    <div id="tx-time-error" class="form-error-message hidden" role="alert">Waktu wajib diisi</div>
                                 </div>
                             </div>
 
-                            <div class="datetime-col time-col" id="form-group-time">
-                                <label for="tx-time-hour-24" id="tx-time-label" class="form-label">Waktu</label>
-                                <input type="hidden" id="tx-time">
-
-                                <!-- Tampilan 24 Jam Bebas Widget Bawaan Bahasa Inggris -->
-                                <div id="time-input-24" class="time-input-24 time-input-row">
-                                    <select id="tx-time-hour-24" class="time-select" aria-label="Jam (00-23)"></select>
-                                    <span class="time-separator" aria-hidden="true">:</span>
-                                    <select id="tx-time-minute-24" class="time-select" aria-label="Menit (00-59)"></select>
+                            <!-- 2. Total -->
+                            <div class="form-row form-row-amount" id="form-row-amount">
+                                <label for="tx-amount" class="form-row-label" id="tx-amount-label">Total</label>
+                                <div class="form-row-value form-row-amount-val">
+                                    <span class="amount-currency-prefix compact-prefix" id="tx-amount-prefix" aria-hidden="true">Rp</span>
+                                    <input type="text" inputmode="numeric" id="tx-amount" class="compact-amount-input tabular-nums" placeholder="0" required autocomplete="off">
                                 </div>
+                            </div>
 
-                                <!-- Tampilan 12 Jam -->
-                                <div id="time-input-12" class="time-input-12 time-input-row hidden">
-                                    <select id="tx-time-hour" class="time-select" aria-label="Jam (01-12)">
-                                        <option value="">Jam</option>
-                                        <option value="01">01</option>
-                                        <option value="02">02</option>
-                                        <option value="03">03</option>
-                                        <option value="04">04</option>
-                                        <option value="05">05</option>
-                                        <option value="06">06</option>
-                                        <option value="07">07</option>
-                                        <option value="08">08</option>
-                                        <option value="09">09</option>
-                                        <option value="10">10</option>
-                                        <option value="11">11</option>
-                                        <option value="12">12</option>
+                            <!-- 3. Kategori (dialog pilihan dua kolom) -->
+                            <div class="form-row form-row-category" id="form-row-category">
+                                <span class="form-row-label" id="label-category-picker">Kategori</span>
+                                <div class="form-row-value form-row-category-val">
+                                    <select id="tx-category" class="sr-only" required tabindex="-1" aria-hidden="true">
+                                        <option value="" disabled selected>Pilih kategori</option>
                                     </select>
-                                    <span class="time-separator" aria-hidden="true">:</span>
-                                    <select id="tx-time-minute" class="time-select" aria-label="Menit (00-59)">
-                                        <option value="">Menit</option>
-                                        <option value="00">00</option>
-                                        <option value="01">01</option>
-                                        <option value="02">02</option>
-                                        <option value="03">03</option>
-                                        <option value="04">04</option>
-                                        <option value="05">05</option>
-                                        <option value="06">06</option>
-                                        <option value="07">07</option>
-                                        <option value="08">08</option>
-                                        <option value="09">09</option>
-                                        <option value="10">10</option>
-                                        <option value="11">11</option>
-                                        <option value="12">12</option>
-                                        <option value="13">13</option>
-                                        <option value="14">14</option>
-                                        <option value="15">15</option>
-                                        <option value="16">16</option>
-                                        <option value="17">17</option>
-                                        <option value="18">18</option>
-                                        <option value="19">19</option>
-                                        <option value="20">20</option>
-                                        <option value="21">21</option>
-                                        <option value="22">22</option>
-                                        <option value="23">23</option>
-                                        <option value="24">24</option>
-                                        <option value="25">25</option>
-                                        <option value="26">26</option>
-                                        <option value="27">27</option>
-                                        <option value="28">28</option>
-                                        <option value="29">29</option>
-                                        <option value="30">30</option>
-                                        <option value="31">31</option>
-                                        <option value="32">32</option>
-                                        <option value="33">33</option>
-                                        <option value="34">34</option>
-                                        <option value="35">35</option>
-                                        <option value="36">36</option>
-                                        <option value="37">37</option>
-                                        <option value="38">38</option>
-                                        <option value="39">39</option>
-                                        <option value="40">40</option>
-                                        <option value="41">41</option>
-                                        <option value="42">42</option>
-                                        <option value="43">43</option>
-                                        <option value="44">44</option>
-                                        <option value="45">45</option>
-                                        <option value="46">46</option>
-                                        <option value="47">47</option>
-                                        <option value="48">48</option>
-                                        <option value="49">49</option>
-                                        <option value="50">50</option>
-                                        <option value="51">51</option>
-                                        <option value="52">52</option>
-                                        <option value="53">53</option>
-                                        <option value="54">54</option>
-                                        <option value="55">55</option>
-                                        <option value="56">56</option>
-                                        <option value="57">57</option>
-                                        <option value="58">58</option>
-                                        <option value="59">59</option>
-                                    </select>
-                                    <select id="tx-time-ampm" class="time-select time-select-ampm" aria-label="AM atau PM">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
+                                    <input type="hidden" id="tx-subcategory">
+                                    <button type="button" id="btn-open-category-picker" class="category-row-btn" aria-haspopup="dialog" aria-labelledby="label-category-picker tx-category-display-text">
+                                        <div class="category-row-btn-content">
+                                            <span id="tx-category-display-icon" class="category-display-icon" aria-hidden="true"></span>
+                                            <span id="tx-category-display-text" class="category-display-text"></span>
+                                        </div>
+                                        <svg class="category-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 4. Dompet (atau Dari pada Transfer) -->
+                            <div class="form-row form-row-wallet" id="form-row-wallet">
+                                <label for="tx-wallet" id="tx-wallet-label" class="form-row-label">Dompet</label>
+                                <div class="form-row-value form-row-wallet-val">
+                                    <select id="tx-wallet" class="compact-select" required>
+                                        <option value="" disabled selected>Pilih dompet</option>
                                     </select>
                                 </div>
-                                <div id="tx-time-error" class="form-error-message hidden" role="alert">Waktu wajib diisi</div>
+                            </div>
+
+                            <!-- 4b. Ke Dompet (khusus Transfer) -->
+                            <div class="form-row form-row-to-wallet hidden" id="form-row-to-wallet">
+                                <label for="tx-to-wallet" class="form-row-label">Ke</label>
+                                <div class="form-row-value form-row-wallet-val">
+                                    <select id="tx-to-wallet" class="compact-select">
+                                        <option value="" disabled selected>Pilih dompet</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 5. Catatan -->
+                            <div class="form-row form-row-note" id="form-row-note">
+                                <label for="tx-note" class="form-row-label">Catatan</label>
+                                <div class="form-row-value form-row-note-val">
+                                    <input type="text" id="tx-note" class="compact-text-input" placeholder="Tulis catatan (opsional)..." autocomplete="off">
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 6. Catatan -->
-                        <div class="form-group form-group-note">
-                            <label for="tx-note" class="form-label">Catatan (opsional)</label>
-                            <input type="text" id="tx-note" placeholder="Tulis catatan transaksi..." autocomplete="off">
+                        <!-- Chip containers disembunyikan untuk kompatibilitas -->
+                        <div id="form-group-category" class="hidden" aria-hidden="true">
+                            <div id="category-chips" class="category-chips"></div>
                         </div>
+                        <div id="form-group-subcategory" class="hidden" aria-hidden="true">
+                            <div id="subcategory-chips" class="category-chips"></div>
+                        </div>
+                        <div id="form-group-to-wallet" class="hidden" aria-hidden="true"></div>
 
-                        <!-- 7. Tombol Simpan selebar form & tombol sekunder -->
+                        <!-- Tombol Simpan selebar form & tombol sekunder -->
                         <div class="form-actions">
                             <button type="submit" id="btn-save" class="btn-primary btn-save-full" disabled aria-disabled="true">Simpan</button>
                             <div class="form-actions-secondary">
@@ -1064,6 +1074,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Dialog Panel Pilihan Kategori Dua Kolom -->
+        <dialog id="category-picker-dialog" class="confirm-dialog category-picker-dialog" closedby="any" aria-labelledby="cat-picker-title">
+            <div class="category-picker-content">
+                <div class="category-picker-header">
+                    <h3 id="cat-picker-title" class="category-picker-title">Kategori</h3>
+                    <button type="button" id="btn-close-cat-picker" class="btn-icon btn-cat-picker-close" aria-label="Tutup" title="Tutup">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="category-picker-body">
+                    <div class="category-picker-col category-picker-col-left" id="cat-picker-categories" role="listbox" aria-label="Daftar Kategori">
+                        <!-- Diisi via JS: daftar kategori induk -->
+                    </div>
+                    <div class="category-picker-col category-picker-col-right" id="cat-picker-subcategories" role="listbox" aria-label="Daftar Sub Kategori">
+                        <!-- Diisi via JS: sub kategori dari kategori yang disorot -->
+                    </div>
+                </div>
+            </div>
+        </dialog>
 
         <!-- Dialog Konfirmasi Hapus -->
         <dialog id="confirm-dialog" class="confirm-dialog" closedby="any" aria-labelledby="confirm-dialog-title">

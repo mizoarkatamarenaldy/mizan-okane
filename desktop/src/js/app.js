@@ -37,6 +37,16 @@ const btnDeleteFromForm = document.getElementById('btn-delete-from-form');
 const formScreen = document.getElementById('form-screen');
 const formScreenBackdrop = document.getElementById('form-screen-backdrop');
 const categoryChipsContainer = document.getElementById('category-chips');
+const formRowCategory = document.getElementById('form-row-category');
+const formRowWallet = document.getElementById('form-row-wallet');
+const formRowToWallet = document.getElementById('form-row-to-wallet');
+const btnOpenCategoryPicker = document.getElementById('btn-open-category-picker');
+const txCategoryDisplayIcon = document.getElementById('tx-category-display-icon');
+const txCategoryDisplayText = document.getElementById('tx-category-display-text');
+const categoryPickerDialog = document.getElementById('category-picker-dialog');
+const btnCloseCatPicker = document.getElementById('btn-close-cat-picker');
+const catPickerCategories = document.getElementById('cat-picker-categories');
+const catPickerSubcategories = document.getElementById('cat-picker-subcategories');
 const txDateDaySelect = document.getElementById('tx-date-day');
 const txDateMonthSelect = document.getElementById('tx-date-month');
 const txDateYearSelect = document.getElementById('tx-date-year');
@@ -604,6 +614,179 @@ export function getTxStatsCategory(tx) {
     return (tx.category && tx.category.trim()) ? tx.category.trim() : 'Lainnya';
 }
 
+export function updateCategoryRowDisplay() {
+    const cat = txCategoryInput ? txCategoryInput.value.trim() : '';
+    const sub = txSubcategoryInput ? txSubcategoryInput.value.trim() : '';
+    if (!txCategoryDisplayText) return;
+    if (!cat) {
+        if (txCategoryDisplayIcon) txCategoryDisplayIcon.innerHTML = '';
+        txCategoryDisplayText.textContent = '';
+        return;
+    }
+    const type = getSelectedType();
+    const iconSvg = sub ? getSubcategoryIconSvg(cat, sub, type) : getCategoryIconSvg(cat, type);
+    if (txCategoryDisplayIcon) {
+        txCategoryDisplayIcon.innerHTML = iconSvg || '';
+    }
+    txCategoryDisplayText.textContent = sub ? `${cat} > ${sub}` : cat;
+}
+
+let currentPickerHighlightedCategory = null;
+
+export function renderCategoryPickerRightCol(catName, type) {
+    if (!catPickerSubcategories) return;
+    if (!catName) {
+        catPickerSubcategories.innerHTML = '<div class="cat-picker-empty-hint">Pilih kategori di sebelah kiri</div>';
+        return;
+    }
+    const subs = getSubcategoriesFor(type, catName);
+    if (!subs || subs.length === 0) {
+        catPickerSubcategories.innerHTML = '<div class="cat-picker-empty-hint">Tidak ada sub kategori</div>';
+        return;
+    }
+
+    const currentCat = txCategoryInput ? txCategoryInput.value.trim() : '';
+    const currentSub = txSubcategoryInput ? txSubcategoryInput.value.trim() : '';
+    const isOnlyCatSelected = (currentCat === catName && !currentSub);
+
+    let html = '';
+    const catIconSvg = getCategoryIconSvg(catName, type);
+    html += `
+        <button type="button" class="cat-picker-item cat-picker-sub-item ${isOnlyCatSelected ? 'is-selected' : ''}" data-type="no-sub" role="option" aria-selected="${isOnlyCatSelected}">
+            <span class="cat-picker-item-icon" aria-hidden="true">${catIconSvg}</span>
+            <span class="cat-picker-item-text">${escapeHTML(catName)} (tanpa sub kategori)</span>
+        </button>
+    `;
+
+    for (const sub of subs) {
+        const isSubSelected = (currentCat === catName && currentSub === sub);
+        const subIconSvg = getSubcategoryIconSvg(catName, sub, type);
+        html += `
+            <button type="button" class="cat-picker-item cat-picker-sub-item ${isSubSelected ? 'is-selected' : ''}" data-type="sub" data-sub="${escapeHTML(sub)}" role="option" aria-selected="${isSubSelected}">
+                <span class="cat-picker-item-icon" aria-hidden="true">${subIconSvg}</span>
+                <span class="cat-picker-item-text">${escapeHTML(sub)}</span>
+            </button>
+        `;
+    }
+    catPickerSubcategories.innerHTML = html;
+
+    catPickerSubcategories.querySelectorAll('.cat-picker-sub-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const itemType = btn.dataset.type;
+            if (itemType === 'no-sub') {
+                selectCategoryFromPicker(catName, '');
+            } else {
+                const subVal = btn.dataset.sub;
+                selectCategoryFromPicker(catName, subVal);
+            }
+        });
+    });
+}
+
+export function selectCategoryFromPicker(catName, subName = '') {
+    if (txCategoryInput) {
+        let opt = Array.from(txCategoryInput.options).find(o => o.value === catName);
+        if (!opt) {
+            opt = document.createElement('option');
+            opt.value = catName;
+            opt.textContent = catName;
+            txCategoryInput.appendChild(opt);
+        }
+        txCategoryInput.value = catName;
+    }
+    if (txSubcategoryInput) {
+        txSubcategoryInput.value = subName;
+    }
+    updateCategoryRowDisplay();
+    updateSaveButtonState();
+    closeCategoryPicker();
+    if (btnOpenCategoryPicker) {
+        btnOpenCategoryPicker.focus();
+    }
+}
+
+export function closeCategoryPicker() {
+    if (categoryPickerDialog && categoryPickerDialog.open) {
+        categoryPickerDialog.close();
+    }
+}
+
+export function openCategoryPicker() {
+    if (!categoryPickerDialog) return;
+    const type = getSelectedType();
+    if (type === 'transfer') return;
+
+    const list = getCategoryNames(type).filter(c => c !== 'Equilibrium');
+    const currentCat = txCategoryInput ? txCategoryInput.value.trim() : '';
+
+    let initialHighlight = list[0] || null;
+    if (currentCat && list.includes(currentCat)) {
+        initialHighlight = currentCat;
+    }
+    currentPickerHighlightedCategory = initialHighlight;
+
+    if (catPickerCategories) {
+        let leftHtml = '';
+        for (const cat of list) {
+            const subs = getSubcategoriesFor(type, cat);
+            const hasSubs = subs.length > 0;
+            const isHighlighted = (cat === currentPickerHighlightedCategory);
+            const isSelected = (cat === currentCat);
+            const iconSvg = getCategoryIconSvg(cat, type);
+
+            leftHtml += `
+                <button type="button" class="cat-picker-item cat-picker-cat-item ${isHighlighted ? 'is-highlighted' : ''} ${isSelected ? 'is-selected' : ''}" data-cat="${escapeHTML(cat)}" data-has-subs="${hasSubs}" role="option" aria-selected="${isSelected}">
+                    <div class="cat-picker-item-left">
+                        <span class="cat-picker-item-icon" aria-hidden="true">${iconSvg}</span>
+                        <span class="cat-picker-item-text">${escapeHTML(cat)}</span>
+                    </div>
+                    ${hasSubs ? `<svg class="cat-picker-item-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>` : ''}
+                </button>
+            `;
+        }
+        catPickerCategories.innerHTML = leftHtml;
+
+        catPickerCategories.querySelectorAll('.cat-picker-cat-item').forEach(btn => {
+            const cat = btn.dataset.cat;
+            const hasSubs = btn.dataset.hasSubs === 'true';
+
+            const highlightThis = () => {
+                currentPickerHighlightedCategory = cat;
+                catPickerCategories.querySelectorAll('.cat-picker-cat-item').forEach(b => {
+                    b.classList.toggle('is-highlighted', b.dataset.cat === cat);
+                });
+                renderCategoryPickerRightCol(cat, type);
+            };
+
+            btn.addEventListener('mouseenter', highlightThis);
+            btn.addEventListener('focus', highlightThis);
+
+            btn.addEventListener('click', () => {
+                if (!hasSubs) {
+                    selectCategoryFromPicker(cat, '');
+                } else {
+                    highlightThis();
+                }
+            });
+        });
+    }
+
+    renderCategoryPickerRightCol(currentPickerHighlightedCategory, type);
+
+    if (typeof categoryPickerDialog.showModal === 'function') {
+        categoryPickerDialog.showModal();
+    } else {
+        categoryPickerDialog.setAttribute('open', '');
+    }
+
+    setTimeout(() => {
+        if (catPickerCategories) {
+            const targetBtn = catPickerCategories.querySelector('.cat-picker-item.is-highlighted') || catPickerCategories.querySelector('.cat-picker-item');
+            if (targetBtn) targetBtn.focus();
+        }
+    }, 50);
+}
+
 export function populateSubcategoryOptions(categoryName, selectedSub = null) {
     if (!formGroupSubcategory || !subcategoryChipsContainer) return;
     const type = getSelectedType();
@@ -613,6 +796,7 @@ export function populateSubcategoryOptions(categoryName, selectedSub = null) {
         formGroupSubcategory.classList.add('hidden');
         if (txSubcategoryInput) txSubcategoryInput.value = '';
         subcategoryChipsContainer.innerHTML = '';
+        updateCategoryRowDisplay();
         return;
     }
 
@@ -649,8 +833,10 @@ export function populateSubcategoryOptions(categoryName, selectedSub = null) {
                     c.setAttribute('aria-checked', String(active));
                 });
             }
+            updateCategoryRowDisplay();
         });
     });
+    updateCategoryRowDisplay();
 }
 
 function populateCategoryOptions(selectedVal = null, oldCustomCategory = null, selectedSub = null) {
@@ -682,7 +868,16 @@ function populateCategoryOptions(selectedVal = null, oldCustomCategory = null, s
         txCategoryInput.value = '';
     }
 
-    // Render Chip Kategori
+    if (txSubcategoryInput) {
+        const subs = targetVal ? getSubcategoriesFor(type, targetVal) : [];
+        if (selectedSub && subs.includes(selectedSub)) {
+            txSubcategoryInput.value = selectedSub;
+        } else {
+            txSubcategoryInput.value = '';
+        }
+    }
+
+    // Render Chip Kategori jika kontainer masih ada
     if (categoryChipsContainer) {
         let chipsHtml = '';
         if (oldCustomCategory && !list.includes(oldCustomCategory)) {
@@ -707,11 +902,13 @@ function populateCategoryOptions(selectedVal = null, oldCustomCategory = null, s
                     c.setAttribute('aria-checked', String(active));
                 });
                 populateSubcategoryOptions(val, null);
+                updateCategoryRowDisplay();
             });
         });
     }
 
     populateSubcategoryOptions(targetVal, selectedSub);
+    updateCategoryRowDisplay();
 }
 
 export function updateSaveButtonState() {
@@ -737,10 +934,21 @@ export function updateSaveButtonState() {
 function updateTypeUI(type) {
     const isTransfer = type === 'transfer';
     if (txWalletLabel) {
-        txWalletLabel.textContent = isTransfer ? 'Dari Dompet' : 'Dompet';
+        txWalletLabel.textContent = isTransfer ? 'Dari' : 'Dompet';
     }
     if (formGroupToWallet) {
         formGroupToWallet.classList.toggle('hidden', !isTransfer);
+    }
+    const formRowToWallet = document.getElementById('form-row-to-wallet');
+    if (formRowToWallet) {
+        formRowToWallet.classList.toggle('hidden', !isTransfer);
+    }
+    const formRowCategory = document.getElementById('form-row-category');
+    if (formRowCategory) {
+        formRowCategory.classList.toggle('hidden', isTransfer);
+    }
+    if (txForm) {
+        txForm.classList.toggle('is-transfer', isTransfer);
     }
     if (txToWalletInput) {
         txToWalletInput.required = isTransfer;
@@ -791,6 +999,7 @@ function updateTypeUI(type) {
             }
         }
     }
+    updateCategoryRowDisplay();
     updateSaveButtonState();
 }
 
@@ -853,13 +1062,7 @@ function updateFormCurrencyUI() {
         }
     }
     if (txAmountLabel) {
-        if (curr === 'USD') {
-            txAmountLabel.textContent = 'Jumlah ($)';
-        } else if (curr === 'JPY') {
-            txAmountLabel.textContent = 'Jumlah (¥)';
-        } else {
-            txAmountLabel.textContent = 'Jumlah (Rp)';
-        }
+        txAmountLabel.textContent = 'Total';
     }
     if (txAmountInput) {
         txAmountInput.setAttribute('inputmode', curr === 'USD' ? 'decimal' : 'numeric');
@@ -6936,9 +7139,13 @@ async function performDeleteSubcategoryBudget(cat, sub) {
 function resetForm() {
     txForm.reset();
     txIdInput.value = '';
+    if (txCategoryInput) {
+        txCategoryInput.value = '';
+    }
     if (txSubcategoryInput) {
         txSubcategoryInput.value = '';
     }
+    updateCategoryRowDisplay();
     if (formGroupSubcategory) {
         formGroupSubcategory.classList.add('hidden');
     }
@@ -7203,6 +7410,83 @@ txTypeInputs.forEach(radio => {
         updateTypeUI(radio.value);
     });
 });
+
+if (btnOpenCategoryPicker) {
+    btnOpenCategoryPicker.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCategoryPicker();
+    });
+}
+if (formRowCategory) {
+    formRowCategory.addEventListener('click', (e) => {
+        if (e.target && (e.target.closest('#btn-open-category-picker') || e.target.closest('.category-row-btn'))) {
+            return;
+        }
+        openCategoryPicker();
+    });
+}
+if (btnCloseCatPicker) {
+    btnCloseCatPicker.addEventListener('click', () => {
+        closeCategoryPicker();
+    });
+}
+if (categoryPickerDialog) {
+    categoryPickerDialog.addEventListener('click', (e) => {
+        const rect = categoryPickerDialog.getBoundingClientRect();
+        const isInDialog = (
+            rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+            rect.left <= e.clientX && e.clientX <= rect.left + rect.width
+        );
+        if (!isInDialog) {
+            closeCategoryPicker();
+        }
+    });
+
+    categoryPickerDialog.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeCategoryPicker();
+            return;
+        }
+
+        const activeEl = document.activeElement;
+        const inLeftCol = catPickerCategories && catPickerCategories.contains(activeEl);
+        const inRightCol = catPickerSubcategories && catPickerSubcategories.contains(activeEl);
+
+        if (inLeftCol) {
+            const items = Array.from(catPickerCategories.querySelectorAll('.cat-picker-cat-item'));
+            const idx = items.indexOf(activeEl);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = items[idx + 1] || items[0];
+                if (next) next.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = items[idx - 1] || items[items.length - 1];
+                if (prev) prev.focus();
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                const firstSub = catPickerSubcategories ? catPickerSubcategories.querySelector('.cat-picker-sub-item') : null;
+                if (firstSub) firstSub.focus();
+            }
+        } else if (inRightCol) {
+            const subItems = Array.from(catPickerSubcategories.querySelectorAll('.cat-picker-sub-item'));
+            const idx = subItems.indexOf(activeEl);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = subItems[idx + 1] || subItems[0];
+                if (next) next.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = subItems[idx - 1] || subItems[subItems.length - 1];
+                if (prev) prev.focus();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const highlighted = catPickerCategories ? catPickerCategories.querySelector('.cat-picker-item.is-highlighted') : null;
+                if (highlighted) highlighted.focus();
+            }
+        }
+    });
+}
 
 if (confirmDialog) {
     btnConfirmCancel.addEventListener('click', () => {
