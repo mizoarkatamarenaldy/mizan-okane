@@ -6,7 +6,7 @@
 - Saat mengerjakan item, ikuti spek di dev/PLANSPEC.md. Kalau spek dan PLAN.md berbeda, spek yang berlaku.
 - Kerjakan SATU tahap per sesi. Khusus Tahap 5 dan item di "Rencana setelah Tahap 5", kerjakan SATU fitur atau item per sesi. Jangan lompat ke tahap, fitur, atau item lain.
 - Jangan ubah file di luar tahap yang sedang dikerjakan.
-- Dilarang menjalankan `npm run build`, `npx cap sync`, `npx cap copy`, atau perintah build apa pun. Folder www/ dan android/ hanya dibangun oleh pemilik. Dilarang `git add` pada kedua folder itu. Kalau keduanya muncul di `git status --short`, berhenti dan laporkan.
+- Dilarang menjalankan `npm run build`, `npx cap sync`, `npx cap copy`, atau perintah build apa pun. Folder mobile/capacitor/www/ dan mobile/capacitor/android/ hanya dibangun oleh pemilik. Dilarang `git add` pada kedua folder itu. Kalau keduanya muncul di `git status --short`, berhenti dan laporkan.
 - Bagian "Keputusan terkunci" tidak boleh diubah tanpa izin pemilik.
 - Jangan pernah menaruh data transaksi asli, token, kunci, atau file `.env` di repo. Repo ini publik, isinya hanya kode dan dokumen.
 - Di akhir tahap atau fitur, centang tahap atau fitur itu di dev/PLAN.md dan tambahkan satu entri di paling atas `dev/CHANGELOG.md` sesuai format di file itu. Tahap 5 baru dicentang setelah semua fiturnya tercentang. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
@@ -36,4 +36,6 @@ Bagian ini hanya berlaku setelah item "Pemisahan folder" tercentang di dev/PLAN.
 - Memindahkan file wajib pakai `git mv`, agar riwayat commit tidak hilang. Satu pemindahan per commit, dan path di dev/RULES.md diperbarui di commit yang sama.
 - Format data (JSON backup dan file di Google Drive appDataFolder) dicatat di dev/SCHEMA.md. Perubahan format hanya boleh dengan "Izin dari pemilik" dan harus dikerjakan di desktop/ dan mobile/ sekaligus.
 - Fitur baru dibekukan. Perubahan logika di luar tampilan hanya boleh dengan "Izin dari pemilik".
-- Larangan build untuk www/ dan android/ tetap berlaku pada folder penggantinya di mobile/ dan desktop/. Pemilik yang membangun.
+- Larangan build berlaku untuk mobile/capacitor/www/, mobile/capacitor/android/, dan folder hasil build apa pun di desktop/ dan mobile/. Pemilik yang membangun. Sampai Konversi Kotlin selesai, mobile/capacitor/ dibekukan.
+- Alamat situs GitHub Pages, origin, dan OAuth Client ID tidak boleh berubah. Isi desktop/src adalah akar situs, dan semua path di dalamnya tetap relatif.
+- Setiap perubahan format data wajib memperbarui dev/SCHEMA.md di commit yang sama.

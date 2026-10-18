@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const src = path.join('..', '..', 'desktop', 'src');
 const out = 'www';
 const items = [
   'index.html',
@@ -16,6 +17,6 @@ const items = [
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out);
 for (const item of items) {
-  fs.cpSync(item, path.join(out, item), { recursive: true });
+  fs.cpSync(path.join(src, item), path.join(out, item), { recursive: true });
 }
 console.log('Folder www siap.');

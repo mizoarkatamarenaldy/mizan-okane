@@ -40,4 +40,4 @@ Setelah selesai: centang item di dev/PLAN.md, tambah entri di paling atas dev/CH
 - Kalau fitur tidak mengubah tampilan, hapus bagian "Tempat dan tampilan" dan kalimat soal DESIGN.md, ganti dengan: "Tidak ada elemen tampilan baru."
 - Kalau fitur butuh membaca bagian PLANSPEC.md lain (misalnya fitur terkait), tulis eksplisit: "Buka hanya bagian [NAMA] di dev/PLANSPEC.md."
 - Kalau butuh mengubah sesuatu yang dilarang RULES.md (misalnya "Keputusan terkunci"), tambahkan klausa "Izin dari pemilik" yang menyebut persis apa yang boleh diubah.
-- Jangan minta Antigravity menjalankan build. Folder www/ dan android/ dibangun manual oleh pemilik.
+- Jangan minta Antigravity menjalankan build. Folder mobile/capacitor/www/ dan mobile/capacitor/android/ dibangun manual oleh pemilik.
