@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Ikon kategori kustom
+- Ditambah: Pemilih ikon kategori (`#icon-picker-dialog`) saat menambah dan mengedit kategori dengan set ikon bawaan berupa SVG inline yang dikelompokkan ke dalam 9 tema (Makanan, Transportasi, Belanja, Rumah, Kesehatan, Pendidikan, Hiburan, Keuangan, Lainnya), lengkap dengan target sentuh minimal 44 px dan label pembaca layar (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Tampilan ikon kategori di samping nama kategori pada seluruh antarmuka aplikasi: daftar kategori di Pengaturan, chip kategori formulir transaksi, riwayat transaksi, legenda & rincian statistik, serta daftar budget di Beranda dan Pengaturan (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Field `icon` pada skema kategori di IndexedDB yang ikut tersimpan, tersinkron Google Drive dengan aturan resolusi konflik yang terbaru menang, serta diekspor/diimpor pada cadangan JSON dengan fallback aman ke ikon netral (`js/db.js`, `js/app.js`).
+- Diubah: Daftar budget membaca ikon langsung dari kategori pengeluaran terkait sehingga penggantian ikon kategori otomatis memperbarui ikon pada budget tanpa perlu mengatur ulang budget (`js/app.js`).
+- Diubah: Sub kategori tetap tidak memiliki ikon sendiri dan tidak menampilkan ikon (`js/db.js`, `js/app.js`).
+- Diubah: Reset setelan pabrik mengembalikan kategori tanpa ikon pilihan, dan data contoh lengkap diberikan ikon kategori yang sesuai (`js/db.js`).
+- Diubah: Mencentang item "Ikon kategori kustom" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Budget per sub kategori
 - Ditambah: Dukungan pengaturan budget per sub kategori di formulir setel budget dan daftar budget Pengaturan, lengkap dengan pemformatan nominal, edit inline, dan konfirmasi hapus khusus sub kategori (`index.html`, `js/app.js`).
 - Ditambah: Penataan visual sub kategori ber-budget di Beranda dan Pengaturan yang tampil menjorok di bawah kategori induknya tanpa pegangan geser (`css/style.css`, `js/app.js`).

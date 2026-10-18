@@ -1015,3 +1015,39 @@ Cek manual:
 - Aksi: catat pengeluaran di Makan tanpa sub kategori. Hasil: terhitung hanya di bar Makan.
 - Aksi: hapus sub kategori Kopi. Hasil: budget Kopi hilang dari daftar budget.
 - Aksi: ekspor JSON lalu impor lagi di aplikasi bersih. Hasil: budget sub kategori kembali utuh. Impor file JSON lama tanpa budget sub kategori tetap berhasil.
+
+## Ikon kategori kustom
+
+Tujuan: Pengguna bisa memilih ikon untuk tiap kategori dari set ikon bawaan yang dikelompokkan sesuai tema, supaya kategori lebih mudah dikenali sekilas. Budget memakai ikon kategori yang sama.
+
+Tempat dan tampilan:
+- Di pengaturan kategori, saat menambah dan mengedit kategori, ada pemilih ikon. Ikon yang sedang dipilih tampil di samping field nama, dan menekannya membuka daftar ikon.
+- Daftar ikon dikelompokkan per tema, misalnya Makanan, Transportasi, Belanja, Rumah, Kesehatan, Pendidikan, Hiburan, Keuangan, dan Lainnya. Tiap kelompok diberi judul kecil.
+- Ikon kategori tampil di samping nama kategori di semua tempat nama kategori ditampilkan: daftar kategori, form tambah dan edit transaksi, Riwayat, Statistik, dan daftar budget.
+- Di daftar budget, ikon dibaca dari kategori, bukan disimpan sendiri di budget. Mengganti ikon kategori otomatis mengganti ikon di budget.
+- Sub kategori tidak punya ikon sendiri dan tidak menampilkan ikon.
+- Set ikon dibuat sebagai SVG inline di kode, tanpa library ikon baru dan tanpa memuat apa pun dari internet, supaya tetap jalan offline. Gaya ikon (ketebalan garis, ukuran) mengikuti ikon yang sudah ada dan dev/DESIGN.md.
+- Warna ikon memakai warna teks yang sudah ada di DESIGN.md. Target sentuh pemilih ikon minimal 44 px, dan tiap ikon di daftar punya label teks untuk pembaca layar.
+- Tampilan baru wajib mengikuti dev/DESIGN.md.
+
+Aturan:
+- Pilihan ikon bersifat opsional. Kategori tanpa ikon yang dipilih menampilkan satu ikon netral bawaan.
+- Kategori lama (yang dibuat sebelum fitur ini) otomatis tampil dengan ikon netral dan tetap valid tanpa migrasi paksa.
+- Kalau ID ikon pada data tidak dikenal (misalnya datang dari versi aplikasi lain), tampilkan ikon netral dan jangan error.
+- Ikon hanya mengubah tampilan. Nama, urutan, budget, dan perhitungan kategori tidak berubah.
+- Fitur ini sengaja TIDAK menyediakan unggah gambar sendiri, tidak mendukung emoji bebas, dan tidak menambah ikon untuk sub kategori atau dompet.
+
+Data:
+- Ada tambahan satu field ikon pada kategori, berisi ID ikon berupa teks (bukan gambar). Ikuti cara kategori disimpan, termasuk aturan konflik "yang terbaru menang".
+- Field ikon ikut sinkron Drive, ekspor JSON, impor JSON, dan backup lengkap. Reset setelan pabrik mengembalikan ke kondisi tanpa ikon pilihan.
+- Impor JSON dari versi lama (tanpa field ikon) tetap berhasil.
+- Kategori pada data contoh lengkap diberi ikon yang sesuai, dan data contoh tetap tidak ikut sinkron, ekspor, atau impor.
+
+Cek manual:
+- Kondisi awal: kategori Makan belum punya ikon pilihan. Aksi: buka pengaturan kategori, pilih ikon dari kelompok Makanan. Hasil: ikon tampil di daftar kategori, form transaksi, Riwayat, Statistik, dan daftar budget.
+- Kondisi awal: Makan punya budget dan ikon. Aksi: ganti ikon Makan. Hasil: ikon di daftar budget ikut berubah tanpa mengatur budget lagi.
+- Kondisi awal: kategori lama tanpa ikon pilihan. Hasil: tampil ikon netral dan tidak ada error.
+- Aksi: ekspor JSON, reset setelan pabrik, lalu impor lagi. Hasil: ikon kategori kembali sesuai pilihan.
+- Aksi: impor file JSON lama tanpa field ikon. Hasil: impor berhasil, kategori memakai ikon netral.
+- Aksi: sinkron ke perangkat lain. Hasil: ikon pilihan tampil sama di perangkat itu.
+- Aksi: buka di tema gelap dan terang, di HP. Hasil: ikon terbaca jelas dan pemilih ikon bisa digulir dengan nyaman.

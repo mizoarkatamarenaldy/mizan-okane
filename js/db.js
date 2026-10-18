@@ -120,18 +120,18 @@ export const SAMPLE_WALLETS = [
 
 export const SAMPLE_CATEGORIES = {
   income: [
-    { name: 'Gaji', order: 0 },
-    { name: 'Bonus', order: 1 },
-    { name: 'Investasi', order: 2 },
-    { name: 'Lainnya', order: 3 }
+    { name: 'Gaji', order: 0, icon: 'gaji' },
+    { name: 'Bonus', order: 1, icon: 'bonus' },
+    { name: 'Investasi', order: 2, icon: 'investasi' },
+    { name: 'Lainnya', order: 3, icon: 'titik_tiga' }
   ],
   expense: [
-    { name: 'Makan', order: 0 },
-    { name: 'Transport', order: 1 },
-    { name: 'Tagihan', order: 2 },
-    { name: 'Belanja', order: 3 },
-    { name: 'Hiburan', order: 4 },
-    { name: 'Lainnya', order: 5 }
+    { name: 'Makan', order: 0, icon: 'makan' },
+    { name: 'Transport', order: 1, icon: 'mobil' },
+    { name: 'Tagihan', order: 2, icon: 'tagihan' },
+    { name: 'Belanja', order: 3, icon: 'belanja' },
+    { name: 'Hiburan', order: 4, icon: 'game' },
+    { name: 'Lainnya', order: 5, icon: 'titik_tiga' }
   ],
   subcategories: {
     income: {
@@ -412,7 +412,11 @@ export function sanitizeCategoryItem(item, defaultOrder = 0) {
     const order = typeof item.order === 'number'
       ? item.order
       : (typeof item.urutan === 'number' ? item.urutan : defaultOrder);
-    return { name, order };
+    const result = { name, order };
+    if (typeof item.icon === 'string' && item.icon.trim()) {
+      result.icon = item.icon.trim();
+    }
+    return result;
   }
   return null;
 }
@@ -442,7 +446,7 @@ export function sanitizeSubcategoryList(list) {
     const sub = sanitizeCategoryItem(item, idx);
     if (sub && !seen.has(sub.name.toLowerCase())) {
       seen.add(sub.name.toLowerCase());
-      result.push(sub);
+      result.push({ name: sub.name, order: sub.order });
     }
   });
   result.sort((a, b) => a.order - b.order);

@@ -4613,6 +4613,246 @@ button:disabled {
 }
 
 /* ==========================================================================
+   Ikon Kategori Kustom & Dialog Pemilih Ikon
+   ========================================================================== */
+
+.category-item-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.category-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    flex-shrink: 0;
+}
+
+.category-item-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+}
+
+.btn-category-icon-picker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    background: var(--surface-raised);
+    color: var(--text);
+    cursor: pointer;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.btn-category-icon-picker:hover,
+.btn-category-icon-picker:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.btn-category-icon-picker svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    pointer-events: none;
+}
+
+.category-chip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.category-chip-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+.stats-category-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.stats-category-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+.budget-category-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.budget-category-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.budget-category-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+.budget-settings-cat-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.icon-picker-dialog {
+    max-width: 440px;
+    width: calc(100% - 32px);
+    max-height: 85vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.icon-picker-dialog-content {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(85vh - 40px);
+    overflow: hidden;
+}
+
+.icon-picker-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.icon-picker-dialog-header .confirm-dialog-title {
+    margin: 0;
+}
+
+.btn-icon-picker-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-input, 6px);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.btn-icon-picker-close:hover,
+.btn-icon-picker-close:focus-visible {
+    color: var(--text);
+    background: var(--surface-raised);
+    outline: none;
+}
+
+.icon-picker-dialog-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    padding-right: 4px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.icon-picker-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.icon-picker-group-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.icon-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: 8px;
+}
+
+.icon-picker-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    background: var(--surface-raised);
+    color: var(--text);
+    cursor: pointer;
+    padding: 0;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.icon-picker-item:hover {
+    border-color: var(--accent);
+    background: var(--surface);
+}
+
+.icon-picker-item:focus-visible {
+    border-color: var(--accent);
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.icon-picker-item.is-selected {
+    border-color: var(--accent);
+    background: var(--surface);
+    color: var(--accent);
+}
+
+.icon-picker-item svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
    Notifikasi Toast UI
    ========================================================================== */
 

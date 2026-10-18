@@ -117,6 +117,17 @@ const formAddExpenseCat = document.getElementById('form-add-expense-cat');
 const inputAddExpenseCat = document.getElementById('input-add-expense-cat');
 const formAddIncomeCat = document.getElementById('form-add-income-cat');
 const inputAddIncomeCat = document.getElementById('input-add-income-cat');
+const btnAddExpenseIcon = document.getElementById('btn-add-expense-icon');
+const btnAddIncomeIcon = document.getElementById('btn-add-income-icon');
+const iconPickerDialog = document.getElementById('icon-picker-dialog');
+const iconPickerBody = document.getElementById('icon-picker-dialog-body');
+const btnIconPickerClose = document.getElementById('btn-icon-picker-close');
+const btnIconPickerCancel = document.getElementById('btn-icon-picker-cancel');
+
+let selectedAddExpenseIcon = '';
+let selectedAddIncomeIcon = '';
+let activeIconPickerCallback = null;
+let currentIconPickerSelectedId = '';
 
 const btnStatsCurrencyIdr = document.getElementById('btn-stats-currency-idr');
 const btnStatsCurrencyJpy = document.getElementById('btn-stats-currency-jpy');
@@ -496,6 +507,11 @@ function getCatName(item) {
     return typeof item === 'string' ? item : (item.name || '');
 }
 
+export function getCatIcon(item) {
+    if (!item) return '';
+    return typeof item === 'object' && item.icon ? String(item.icon).trim() : '';
+}
+
 function getCategoryNames(type) {
     const list = (currentCategories && currentCategories[type]) ? currentCategories[type] : [];
     return [...list]
@@ -613,11 +629,13 @@ function populateCategoryOptions(selectedVal = null, oldCustomCategory = null, s
         let chipsHtml = '';
         if (oldCustomCategory && !list.includes(oldCustomCategory)) {
             const isSel = targetVal === oldCustomCategory;
-            chipsHtml += `<button type="button" class="category-chip ${isSel ? 'is-selected' : ''}" data-value="${escapeHTML(oldCustomCategory)}" role="radio" aria-checked="${String(isSel)}">${escapeHTML(oldCustomCategory)}</button>`;
+            const iconSvg = getCategoryIconSvg(oldCustomCategory, type);
+            chipsHtml += `<button type="button" class="category-chip ${isSel ? 'is-selected' : ''}" data-value="${escapeHTML(oldCustomCategory)}" role="radio" aria-checked="${String(isSel)}"><span class="category-chip-icon" aria-hidden="true">${iconSvg}</span>${escapeHTML(oldCustomCategory)}</button>`;
         }
         for (const cat of list) {
             const isSel = targetVal === cat;
-            chipsHtml += `<button type="button" class="category-chip ${isSel ? 'is-selected' : ''}" data-value="${escapeHTML(cat)}" role="radio" aria-checked="${String(isSel)}">${escapeHTML(cat)}</button>`;
+            const iconSvg = getCategoryIconSvg(cat, type);
+            chipsHtml += `<button type="button" class="category-chip ${isSel ? 'is-selected' : ''}" data-value="${escapeHTML(cat)}" role="radio" aria-checked="${String(isSel)}"><span class="category-chip-icon" aria-hidden="true">${iconSvg}</span>${escapeHTML(cat)}</button>`;
         }
         categoryChipsContainer.innerHTML = chipsHtml;
 
@@ -1394,60 +1412,226 @@ function init24TimeSelectOptions() {
     txTimeMinute24Select.addEventListener('change', on24SelectChange);
 }
 
-export function getCategoryIconSvg(categoryName, type) {
-    if (type === 'transfer') {
-        return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`;
-    }
-    if (type === 'penyesuaian') {
-        return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 7l9-4 9 4M3 7l3 7a4 4 0 0 0 6 0L6 7M21 7l-3 7a4 4 0 0 1-6 0l6-7M7 21h10"/></svg>`;
-    }
+const TRANSFER_ICON_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`;
 
-    const norm = String(categoryName || '').trim().toLowerCase();
-    switch (norm) {
-        case 'makan':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v17M4 4v3a3 3 0 1 0 6 0V4"></path><path d="M14 8a3 4 0 1 0 6 0a3 4 0 1 0-6 0"></path><path d="M17 12v9"></path></svg>`;
-        case 'makanan':
-        case 'makanan & minuman':
-        case 'kuliner':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>`;
-        case 'transportasi':
-        case 'transport':
-        case 'bensin':
-        case 'kendaraan':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="9" rx="2"></rect><circle cx="7.5" cy="16.5" r="1.5"></circle><circle cx="16.5" cy="16.5" r="1.5"></circle><path d="M5 11l2-5h10l2 5"></path></svg>`;
-        case 'belanja':
-        case 'belanjaan':
-        case 'shopping':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`;
-        case 'tagihan':
-        case 'listrik':
-        case 'air':
-        case 'pulsa':
-        case 'internet':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>`;
-        case 'hiburan':
-        case 'hobi':
-        case 'rekreasi':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>`;
-        case 'gaji':
-        case 'upah':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`;
-        case 'bonus':
-        case 'hadiah':
-        case 'thr':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>`;
-        case 'investasi':
-        case 'dividen':
-        case 'saham':
-        case 'reksadana':
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`;
-        default:
-            if (type === 'income') {
-                return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg>`;
-            }
-            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
+const PENYESUAIAN_ICON_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 7l9-4 9 4M3 7l3 7a4 4 0 0 0 6 0L6 7M21 7l-3 7a4 4 0 0 1-6 0l6-7M7 21h10"/></svg>`;
+
+export const NEUTRAL_CATEGORY_ICON_ID = 'netral';
+
+export const CATEGORY_ICON_THEMES = [
+    {
+        id: 'makanan',
+        label: 'Makanan',
+        icons: [
+            { id: 'makan', label: 'Makan', svg: `<path d="M7 4v17M4 4v3a3 3 0 1 0 6 0V4"></path><path d="M14 8a3 4 0 1 0 6 0a3 4 0 1 0-6 0"></path><path d="M17 12v9"></path>` },
+            { id: 'kopi', label: 'Kopi & Minuman', svg: `<path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line>` },
+            { id: 'burger', label: 'Cepat Saji', svg: `<path d="M4 11a8 8 0 0 1 16 0H4z"></path><path d="M3 15h18"></path><path d="M4 18h16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"></path>` },
+            { id: 'buah', label: 'Buah & Segar', svg: `<circle cx="12" cy="14" r="8"></circle><path d="M12 6c.5-2 2-3 4-3"></path><path d="M12 6a4 4 0 0 0-4-3"></path>` }
+        ]
+    },
+    {
+        id: 'transportasi',
+        label: 'Transportasi',
+        icons: [
+            { id: 'mobil', label: 'Mobil', svg: `<rect x="3" y="11" width="18" height="9" rx="2"></rect><circle cx="7.5" cy="16.5" r="1.5"></circle><circle cx="16.5" cy="16.5" r="1.5"></circle><path d="M5 11l2-5h10l2 5"></path>` },
+            { id: 'motor', label: 'Sepeda Motor', svg: `<circle cx="5.5" cy="17.5" r="3.5"></circle><circle cx="18.5" cy="17.5" r="3.5"></circle><polyline points="15 6 18.5 6 18.5 17.5"></polyline><path d="M9 17.5l3-8 3 8"></path><path d="M12 9.5H6.5"></path>` },
+            { id: 'bus', label: 'Bus', svg: `<rect x="4" y="3" width="16" height="16" rx="2"></rect><line x1="4" y1="9" x2="20" y2="9"></line><circle cx="8" cy="15" r="1"></circle><circle cx="16" cy="15" r="1"></circle><line x1="6" y1="19" x2="6" y2="21"></line><line x1="18" y1="19" x2="18" y2="21"></line>` },
+            { id: 'bensin', label: 'Bahan Bakar', svg: `<path d="M3 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><path d="M13 10h4a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0v-4l-3-3"></path><line x1="4" y1="8" x2="10" y2="8"></line>` },
+            { id: 'kereta', label: 'Kereta', svg: `<rect x="4" y="3" width="16" height="15" rx="2"></rect><line x1="4" y1="11" x2="20" y2="11"></line><circle cx="8" cy="15" r="1"></circle><circle cx="16" cy="15" r="1"></circle><line x1="7" y1="18" x2="4" y2="21"></line><line x1="17" y1="18" x2="20" y2="21"></line>` },
+            { id: 'pesawat', label: 'Pesawat', svg: `<path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5 5.3 6.7c-.8-.2-1.6.1-2.1.7l-.2.2 6.5 4.9L6 16l-2.5-.5L2 17l4 2 2 4 1.5-1.5-.5-2.5 3.5-3.5 4.9 6.5.2-.2c.6-.5.9-1.3.7-2.1z"></path>` }
+        ]
+    },
+    {
+        id: 'belanja',
+        label: 'Belanja',
+        icons: [
+            { id: 'belanja', label: 'Tas Belanja', svg: `<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path>` },
+            { id: 'keranjang', label: 'Keranjang', svg: `<circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>` },
+            { id: 'pakaian', label: 'Pakaian', svg: `<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>` },
+            { id: 'elektronik', label: 'Elektronik & Gadget', svg: `<rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>` }
+        ]
+    },
+    {
+        id: 'rumah',
+        label: 'Rumah',
+        icons: [
+            { id: 'rumah', label: 'Rumah', svg: `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>` },
+            { id: 'tagihan', label: 'Tagihan', svg: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line>` },
+            { id: 'listrik', label: 'Listrik', svg: `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>` },
+            { id: 'air', label: 'Air', svg: `<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>` },
+            { id: 'wifi', label: 'Internet & WiFi', svg: `<path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line>` },
+            { id: 'perabot', label: 'Perkakas & Perabot', svg: `<path d="M21 2l-2 2m-1.5 6.5l3-3a1 1 0 0 0 0-1.41l-2.09-2.09a1 1 0 0 0-1.41 0l-3 3M14 6l-9.5 9.5a2 2 0 0 0-.58 1.41V21h4.09a2 2 0 0 0 1.41-.58L19 11"></path>` }
+        ]
+    },
+    {
+        id: 'kesehatan',
+        label: 'Kesehatan',
+        icons: [
+            { id: 'kesehatan', label: 'Kesehatan', svg: `<path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l.77.78L12 21.23l7.65-8.22.77-.78a5.4 5.4 0 0 0 0-7.65z"></path>` },
+            { id: 'obat', label: 'Obat & Farmasi', svg: `<line x1="9" y1="15" x2="15" y2="9"></line><path d="M10.5 20.5l-6-6a5 5 0 0 1 7.07-7.07l6 6a5 5 0 0 1-7.07 7.07z"></path>` },
+            { id: 'dokter', label: 'Dokter & Medis', svg: `<rect x="3" y="3" width="18" height="18" rx="3"></rect><path d="M12 8v8M8 12h8"></path>` },
+            { id: 'olahraga', label: 'Olahraga & Kebugaran', svg: `<path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12"></path>` }
+        ]
+    },
+    {
+        id: 'pendidikan',
+        label: 'Pendidikan',
+        icons: [
+            { id: 'buku', label: 'Buku', svg: `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>` },
+            { id: 'sekolah', label: 'Pendidikan & Sekolah', svg: `<path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path>` },
+            { id: 'kursus', label: 'Kursus & Sertifikat', svg: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>` }
+        ]
+    },
+    {
+        id: 'hiburan',
+        label: 'Hiburan',
+        icons: [
+            { id: 'game', label: 'Game & Permainan', svg: `<rect x="2" y="6" width="20" height="12" rx="3"></rect><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"></path>` },
+            { id: 'film', label: 'Bioskop & Film', svg: `<rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="8" x2="22" y2="8"></line><line x1="2" y1="16" x2="22" y2="16"></line><line x1="6" y1="4" x2="6" y2="8"></line><line x1="10" y1="4" x2="10" y2="8"></line><line x1="14" y1="4" x2="14" y2="8"></line><line x1="18" y1="4" x2="18" y2="8"></line><line x1="6" y1="16" x2="6" y2="20"></line><line x1="10" y1="16" x2="10" y2="20"></line><line x1="14" y1="16" x2="14" y2="20"></line><line x1="18" y1="16" x2="18" y2="20"></line>` },
+            { id: 'musik', label: 'Musik', svg: `<path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle>` },
+            { id: 'liburan', label: 'Liburan & Wisata', svg: `<rect x="3" y="7" width="18" height="14" rx="2"></rect><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path><line x1="12" y1="12" x2="12" y2="12.01"></line>` }
+        ]
+    },
+    {
+        id: 'keuangan',
+        label: 'Keuangan',
+        icons: [
+            { id: 'gaji', label: 'Gaji & Pendapatan', svg: `<rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>` },
+            { id: 'bonus', label: 'Bonus & Hadiah', svg: `<polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>` },
+            { id: 'investasi', label: 'Investasi', svg: `<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline>` },
+            { id: 'tabungan', label: 'Tabungan', svg: `<line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>` },
+            { id: 'kartu', label: 'Kartu Bank', svg: `<rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line>` }
+        ]
+    },
+    {
+        id: 'lainnya',
+        label: 'Lainnya',
+        icons: [
+            { id: 'netral', label: 'Netral (Bawaan)', svg: `<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>` },
+            { id: 'bintang', label: 'Bintang', svg: `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>` },
+            { id: 'titik_tiga', label: 'Titik Tiga', svg: `<circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle><circle cx="5" cy="12" r="1.5"></circle>` },
+            { id: 'donasi', label: 'Donasi & Amal', svg: `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>` },
+            { id: 'hewan', label: 'Hewan Peliharaan', svg: `<circle cx="12" cy="15" r="3"></circle><circle cx="8" cy="9" r="1.5"></circle><circle cx="16" cy="9" r="1.5"></circle><circle cx="5.5" cy="13" r="1.5"></circle><circle cx="18.5" cy="13" r="1.5"></circle>` }
+        ]
+    }
+];
+
+export const CATEGORY_ICONS = {};
+for (const theme of CATEGORY_ICON_THEMES) {
+    for (const icon of theme.icons) {
+        CATEGORY_ICONS[icon.id] = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon.svg}</svg>`;
     }
 }
+
+export function getCategoryIconSvgById(iconId) {
+    const key = String(iconId || '').trim();
+    if (key && Object.prototype.hasOwnProperty.call(CATEGORY_ICONS, key)) {
+        return CATEGORY_ICONS[key];
+    }
+    return CATEGORY_ICONS[NEUTRAL_CATEGORY_ICON_ID];
+}
+
+export function findCategoryItem(categoryName, type) {
+    if (!currentCategories || !categoryName) return null;
+    const norm = String(categoryName).trim().toLowerCase();
+    const types = (type && (type === 'income' || type === 'expense')) ? [type] : ['expense', 'income'];
+    for (const t of types) {
+        const list = currentCategories[t];
+        if (Array.isArray(list)) {
+            const found = list.find(c => getCatName(c).trim().toLowerCase() === norm);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+export function getCategoryIconSvg(categoryNameOrItemOrId, type) {
+    if (type === 'transfer') {
+        return TRANSFER_ICON_SVG;
+    }
+    if (type === 'penyesuaian') {
+        return PENYESUAIAN_ICON_SVG;
+    }
+
+    if (categoryNameOrItemOrId && typeof categoryNameOrItemOrId === 'object') {
+        const iconId = getCatIcon(categoryNameOrItemOrId);
+        if (iconId) return getCategoryIconSvgById(iconId);
+        const name = getCatName(categoryNameOrItemOrId);
+        const item = findCategoryItem(name, type);
+        return getCategoryIconSvgById(item ? getCatIcon(item) : NEUTRAL_CATEGORY_ICON_ID);
+    }
+
+    const str = String(categoryNameOrItemOrId || '').trim();
+    if (!str) {
+        return getCategoryIconSvgById(NEUTRAL_CATEGORY_ICON_ID);
+    }
+
+    const item = findCategoryItem(str, type);
+    if (item) {
+        return getCategoryIconSvgById(getCatIcon(item));
+    }
+
+    if (Object.prototype.hasOwnProperty.call(CATEGORY_ICONS, str)) {
+        return getCategoryIconSvgById(str);
+    }
+
+    return getCategoryIconSvgById(NEUTRAL_CATEGORY_ICON_ID);
+}
+
+function renderIconPicker(currentSelectedId) {
+    if (!iconPickerBody) return;
+    iconPickerBody.innerHTML = '';
+
+    CATEGORY_ICON_THEMES.forEach(theme => {
+        const groupEl = document.createElement('div');
+        groupEl.className = 'icon-picker-group';
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'icon-picker-group-title';
+        titleEl.textContent = theme.label;
+        groupEl.appendChild(titleEl);
+
+        const gridEl = document.createElement('div');
+        gridEl.className = 'icon-picker-grid';
+
+        theme.icons.forEach(icon => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'icon-picker-item' + (currentSelectedId === icon.id ? ' is-selected' : '');
+            btn.setAttribute('aria-label', `${icon.label} (${theme.label})`);
+            btn.title = icon.label;
+            btn.innerHTML = getCategoryIconSvgById(icon.id);
+            btn.addEventListener('click', () => {
+                if (typeof activeIconPickerCallback === 'function') {
+                    activeIconPickerCallback(icon.id);
+                }
+                closeIconPicker();
+            });
+            gridEl.appendChild(btn);
+        });
+
+        groupEl.appendChild(gridEl);
+        iconPickerBody.appendChild(groupEl);
+    });
+}
+
+export function openIconPicker(selectedIconId, onSelectCallback) {
+    activeIconPickerCallback = onSelectCallback;
+    currentIconPickerSelectedId = String(selectedIconId || '').trim();
+    renderIconPicker(currentIconPickerSelectedId);
+    if (iconPickerDialog && typeof iconPickerDialog.showModal === 'function') {
+        iconPickerDialog.showModal();
+    }
+}
+
+export function closeIconPicker() {
+    if (iconPickerDialog && iconPickerDialog.open) {
+        iconPickerDialog.close();
+    }
+    activeIconPickerCallback = null;
+    currentIconPickerSelectedId = '';
+}
+
 
 function formatGroupDate(dateString) {
     if (!dateString) return 'Lainnya';
@@ -2889,7 +3073,7 @@ function renderDonutChart(transactions) {
             }
 
             donutDetail.innerHTML = `
-                <span class="chart-detail-month">${escapeHTML(catItem.category)}:</span>
+                <span class="chart-detail-month"><span class="stats-category-icon" aria-hidden="true">${getCategoryIconSvg(catItem.category, currentDonutType)}</span>${escapeHTML(catItem.category)}:</span>
                 <strong class="${amountClass} tabular-nums">${currencyFormatter.format(catItem.amount, currentStatsCurrency)}</strong>
                 <span class="chart-detail-count">(${formatPercent(catItem.percentage)} - ${catItem.count} transaksi)</span>
                 ${subcatDetailHtml}
@@ -2958,6 +3142,7 @@ function renderDonutChart(transactions) {
                 aria-label="${escapeHTML(cat.category)}: ${currencyFormatter.format(cat.amount, currentStatsCurrency)} (${percentStr})">
                 <div class="donut-legend-main">
                     <span class="donut-legend-color" style="background-color: ${cat.color}"></span>
+                    <span class="stats-category-icon" aria-hidden="true">${getCategoryIconSvg(cat.category, currentDonutType)}</span>
                     <span class="donut-legend-name" title="${escapeHTML(cat.category)}">${escapeHTML(cat.category)}</span>
                 </div>
                 <div class="donut-legend-side">
@@ -4659,6 +4844,12 @@ function render() {
 }
 
 function renderCategorySettings() {
+    if (btnAddExpenseIcon) {
+        btnAddExpenseIcon.innerHTML = getCategoryIconSvgById(selectedAddExpenseIcon);
+    }
+    if (btnAddIncomeIcon) {
+        btnAddIncomeIcon.innerHTML = getCategoryIconSvgById(selectedAddIncomeIcon);
+    }
     renderCategoryGroup('expense', expenseCategoryList);
     renderCategoryGroup('income', incomeCategoryList);
 }
@@ -4838,6 +5029,7 @@ function renderCategoryGroup(type, container) {
         if (isEditing) {
             catRow.innerHTML = `
                 <form class="category-inline-edit-form">
+                    <button type="button" class="btn-icon btn-category-icon-picker btn-edit-category-icon" aria-label="Pilih ikon kategori ${escapeHTML(cat)}" title="Pilih ikon">${getCategoryIconSvgById(editingCategory.icon)}</button>
                     <input type="text" class="category-edit-input" value="${escapeHTML(cat)}" required autocomplete="off" aria-label="Ubah nama kategori ${escapeHTML(cat)}">
                     <div class="category-item-actions">
                         <button type="submit" class="btn-icon btn-save-cat">Simpan</button>
@@ -4848,11 +5040,21 @@ function renderCategoryGroup(type, container) {
 
             const editForm = catRow.querySelector('.category-inline-edit-form');
             const editInput = catRow.querySelector('.category-edit-input');
+            const btnEditIcon = catRow.querySelector('.btn-edit-category-icon');
             const btnCancelCat = catRow.querySelector('.btn-cancel-cat');
+
+            if (btnEditIcon) {
+                btnEditIcon.addEventListener('click', () => {
+                    openIconPicker(editingCategory.icon, (chosenIcon) => {
+                        editingCategory.icon = chosenIcon;
+                        btnEditIcon.innerHTML = getCategoryIconSvgById(chosenIcon);
+                    });
+                });
+            }
 
             editForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                await handleSaveCategoryName(type, cat, editInput.value.trim());
+                await handleSaveCategoryName(type, cat, editInput.value.trim(), editingCategory.icon);
             });
 
             btnCancelCat.addEventListener('click', () => {
@@ -4873,7 +5075,10 @@ function renderCategoryGroup(type, container) {
             });
         } else {
             catRow.innerHTML = `
-                <span class="category-name">${escapeHTML(cat)}</span>
+                <div class="category-item-main">
+                    <span class="category-item-icon" aria-hidden="true">${getCategoryIconSvgById(catItem.icon)}</span>
+                    <span class="category-name">${escapeHTML(cat)}</span>
+                </div>
                 <div class="category-item-actions">
                     <button type="button" class="btn-icon btn-add-subcat" data-type="${type}" data-cat="${escapeHTML(cat)}" aria-label="Tambah sub kategori untuk ${escapeHTML(cat)}">+ Sub</button>
                     <button type="button" class="btn-icon btn-edit-cat" data-type="${type}" data-name="${escapeHTML(cat)}" aria-label="Ubah nama kategori ${escapeHTML(cat)}">Ubah</button>
@@ -4890,7 +5095,7 @@ function renderCategoryGroup(type, container) {
             });
 
             catRow.querySelector('.btn-edit-cat').addEventListener('click', () => {
-                editingCategory = { type, name: cat };
+                editingCategory = { type, name: cat, icon: (typeof catItem === 'object' && catItem.icon) ? catItem.icon : '' };
                 addingSubcategoryFor = null;
                 editingSubcategory = null;
                 renderCategorySettings();
@@ -5091,35 +5296,48 @@ function renderCategoryGroup(type, container) {
     });
 }
 
-async function handleSaveCategoryName(type, oldName, newName) {
+async function handleSaveCategoryName(type, oldName, newName, newIcon = '') {
     if (!newName) {
         showNotification('Nama kategori tidak boleh kosong.', 'warn');
         return;
     }
-    if (newName === oldName) {
+
+    const list = currentCategories[type] || [];
+    const catItem = list.find(c => getCatName(c) === oldName);
+    const oldIcon = (catItem && typeof catItem === 'object' && catItem.icon) ? catItem.icon : '';
+    const cleanNewIcon = String(newIcon || '').trim();
+
+    if (newName === oldName && cleanNewIcon === oldIcon) {
         editingCategory = null;
         renderCategorySettings();
         return;
     }
 
-    const list = currentCategories[type] || [];
-    const exists = list.some(c => getCatName(c) !== oldName && getCatName(c).toLowerCase() === newName.toLowerCase());
-    if (exists) {
-        showNotification(`Kategori "${newName}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`, 'warn');
-        return;
+    if (newName !== oldName) {
+        const exists = list.some(c => getCatName(c) !== oldName && getCatName(c).toLowerCase() === newName.toLowerCase());
+        if (exists) {
+            showNotification(`Kategori "${newName}" sudah ada di daftar ${type === 'income' ? 'pemasukan' : 'pengeluaran'}.`, 'warn');
+            return;
+        }
     }
 
     ensureToken();
 
-    const catItem = list.find(c => getCatName(c) === oldName);
     if (catItem) {
         if (typeof catItem === 'object') {
             catItem.name = newName;
+            if (cleanNewIcon) {
+                catItem.icon = cleanNewIcon;
+            } else {
+                delete catItem.icon;
+            }
         } else {
             const idx = list.indexOf(catItem);
-            list[idx] = { name: newName, order: idx };
+            const newItem = { name: newName, order: idx };
+            if (cleanNewIcon) newItem.icon = cleanNewIcon;
+            list[idx] = newItem;
         }
-        if (currentCategories.subcategories && currentCategories.subcategories[type] && currentCategories.subcategories[type][oldName]) {
+        if (newName !== oldName && currentCategories.subcategories && currentCategories.subcategories[type] && currentCategories.subcategories[type][oldName]) {
             currentCategories.subcategories[type][newName] = currentCategories.subcategories[type][oldName];
             delete currentCategories.subcategories[type][oldName];
         }
@@ -5128,7 +5346,7 @@ async function handleSaveCategoryName(type, oldName, newName) {
         try {
             await saveCategories(currentCategories);
 
-            if (type === 'expense' && currentBudgets) {
+            if (newName !== oldName && type === 'expense' && currentBudgets) {
                 let budgetChanged = false;
                 if (currentBudgets.items && currentBudgets.items[oldName] !== undefined) {
                     currentBudgets.items[newName] = currentBudgets.items[oldName];
@@ -5150,6 +5368,10 @@ async function handleSaveCategoryName(type, oldName, newName) {
             renderCategorySettings();
             renderBudgetSettings();
             renderBudgetSection();
+            render();
+            if (typeof renderDonutChart === 'function') {
+                renderDonutChart(currentTransactions);
+            }
             if (txCategoryInput.value === oldName) {
                 populateCategoryOptions(newName, null, txSubcategoryInput ? txSubcategoryInput.value : null);
             } else {
@@ -5179,14 +5401,27 @@ async function handleAddCategory(type, inputEl) {
 
     ensureToken();
 
+    const chosenIcon = type === 'expense' ? selectedAddExpenseIcon : selectedAddIncomeIcon;
+    const cleanIcon = chosenIcon ? chosenIcon.trim() : '';
     const maxOrder = list.length > 0 ? Math.max(...list.map(c => typeof c.order === 'number' ? c.order : 0)) : -1;
-    list.push({ name, order: maxOrder + 1 });
+    const newItem = { name, order: maxOrder + 1 };
+    if (cleanIcon) {
+        newItem.icon = cleanIcon;
+    }
+    list.push(newItem);
     currentCategories[type] = list;
     currentCategories.updatedAt = Date.now();
 
     try {
         await saveCategories(currentCategories);
         inputEl.value = '';
+        if (type === 'expense') {
+            selectedAddExpenseIcon = '';
+            if (btnAddExpenseIcon) btnAddExpenseIcon.innerHTML = getCategoryIconSvgById('');
+        } else {
+            selectedAddIncomeIcon = '';
+            if (btnAddIncomeIcon) btnAddIncomeIcon.innerHTML = getCategoryIconSvgById('');
+        }
         renderCategorySettings();
         renderBudgetSettings();
         populateCategoryOptions(txCategoryInput.value, null, txSubcategoryInput ? txSubcategoryInput.value : null);
@@ -5851,7 +6086,10 @@ function renderBudgetSection() {
         listHtml += `
             <div class="budget-item">
                 <div class="budget-item-header">
-                    <span class="budget-category-name">${escapeHTML(cat)}</span>
+                    <div class="budget-category-title-wrap">
+                        <span class="budget-category-icon" aria-hidden="true">${getCategoryIconSvg(cat, 'expense')}</span>
+                        <span class="budget-category-name">${escapeHTML(cat)}</span>
+                    </div>
                     <span class="budget-spending tabular-nums">${formattedTerpakai} <span class="budget-spending-divider">dari</span> ${formattedBudget}</span>
                 </div>
                 <div class="budget-progress-track" role="progressbar" aria-valuenow="${Math.round(percent)}" aria-valuemin="0" aria-valuemax="100" aria-label="Progres budget ${escapeHTML(cat)}: ${Math.round(percent)}%">
@@ -6084,9 +6322,12 @@ function renderBudgetSettings() {
         } else {
             const orphanBadge = isOrphan ? `<span class="budget-orphan-badge">(tidak ada di daftar kategori)</span>` : '';
             catRow.innerHTML = `
-                <div>
-                    <span class="category-name">${escapeHTML(cat)}</span>${orphanBadge}
-                    <span class="budget-item-amount">&bull; ${currencyFormatter.format(amount)} / bulan</span>
+                <div class="budget-settings-cat-main">
+                    <span class="budget-category-icon" aria-hidden="true">${getCategoryIconSvg(cat, 'expense')}</span>
+                    <div>
+                        <span class="category-name">${escapeHTML(cat)}</span>${orphanBadge}
+                        <span class="budget-item-amount">&bull; ${currencyFormatter.format(amount)} / bulan</span>
+                    </div>
                 </div>
                 <div class="category-item-actions">
                     <button type="button" class="btn-icon btn-edit-budget" data-name="${escapeHTML(cat)}" aria-label="Ubah budget ${escapeHTML(cat)}">Ubah</button>
@@ -8312,6 +8553,39 @@ async function init() {
                 renderStatsChart(currentTransactions);
                 renderDonutChart(currentTransactions);
             }
+        });
+    }
+
+    if (btnAddExpenseIcon) {
+        btnAddExpenseIcon.addEventListener('click', () => {
+            openIconPicker(selectedAddExpenseIcon, (chosenIcon) => {
+                selectedAddExpenseIcon = chosenIcon;
+                btnAddExpenseIcon.innerHTML = getCategoryIconSvgById(chosenIcon);
+            });
+        });
+    }
+
+    if (btnAddIncomeIcon) {
+        btnAddIncomeIcon.addEventListener('click', () => {
+            openIconPicker(selectedAddIncomeIcon, (chosenIcon) => {
+                selectedAddIncomeIcon = chosenIcon;
+                btnAddIncomeIcon.innerHTML = getCategoryIconSvgById(chosenIcon);
+            });
+        });
+    }
+
+    if (btnIconPickerClose) {
+        btnIconPickerClose.addEventListener('click', () => closeIconPicker());
+    }
+
+    if (btnIconPickerCancel) {
+        btnIconPickerCancel.addEventListener('click', () => closeIconPicker());
+    }
+
+    if (iconPickerDialog) {
+        iconPickerDialog.addEventListener('cancel', () => {
+            activeIconPickerCallback = null;
+            currentIconPickerSelectedId = '';
         });
     }
 

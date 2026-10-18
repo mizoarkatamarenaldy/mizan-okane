@@ -98,6 +98,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Statistik: tab Harian, Bulanan, Tahunan
   - [x] Geser urutan budget
   - [x] Budget per sub kategori
+  - [x] Ikon kategori kustom
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

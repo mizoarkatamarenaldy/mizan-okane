@@ -633,6 +633,7 @@
                         <h4 class="category-group-title expense">Pengeluaran</h4>
                         <ul id="expense-category-list" class="category-items" aria-label="Daftar kategori pengeluaran"></ul>
                         <form id="form-add-expense-cat" class="category-add-form">
+                            <button type="button" class="btn-icon btn-category-icon-picker" id="btn-add-expense-icon" aria-label="Pilih ikon kategori pengeluaran" title="Pilih ikon"></button>
                             <input type="text" id="input-add-expense-cat" placeholder="Tambah kategori pengeluaran..." required autocomplete="off" aria-label="Tambah kategori pengeluaran">
                             <button type="submit" class="btn-primary btn-small">Tambah</button>
                         </form>
@@ -644,6 +645,7 @@
                         <h4 class="category-group-title income">Pemasukan</h4>
                         <ul id="income-category-list" class="category-items" aria-label="Daftar kategori pemasukan"></ul>
                         <form id="form-add-income-cat" class="category-add-form">
+                            <button type="button" class="btn-icon btn-category-icon-picker" id="btn-add-income-icon" aria-label="Pilih ikon kategori pemasukan" title="Pilih ikon"></button>
                             <input type="text" id="input-add-income-cat" placeholder="Tambah kategori pemasukan..." required autocomplete="off" aria-label="Tambah kategori pemasukan">
                             <button type="submit" class="btn-primary btn-small">Tambah</button>
                         </form>
@@ -1115,6 +1117,24 @@
                 <div class="confirm-dialog-actions">
                     <button type="button" id="btn-adjust-cancel" class="btn-secondary">Batal</button>
                     <button type="button" id="btn-adjust-confirm" class="btn-primary" disabled>Konfirmasi</button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- Dialog Pemilih Ikon Kategori -->
+        <dialog id="icon-picker-dialog" class="confirm-dialog icon-picker-dialog" closedby="any" aria-labelledby="icon-picker-dialog-title">
+            <div class="confirm-dialog-content icon-picker-dialog-content">
+                <div class="icon-picker-dialog-header">
+                    <h3 id="icon-picker-dialog-title" class="confirm-dialog-title">Pilih Ikon Kategori</h3>
+                    <button type="button" class="btn-icon btn-icon-picker-close" id="btn-icon-picker-close" aria-label="Tutup pemilih ikon" title="Tutup">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="icon-picker-dialog-body" id="icon-picker-dialog-body">
+                    <!-- Diisi kelompok tema dan grid ikon lewat JS -->
+                </div>
+                <div class="confirm-dialog-actions icon-picker-actions">
+                    <button type="button" id="btn-icon-picker-cancel" class="btn-secondary">Batal</button>
                 </div>
             </div>
         </dialog>
