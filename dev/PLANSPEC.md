@@ -1473,3 +1473,33 @@ Cek manual:
 - Klik semua tombol navigasi dan tombol (+): semuanya merespons.
 - Buka di lebar HP: tampilan sama seperti sebelum item ini, tombol edit dan hapus tetap terlihat.
 
+## Perbaikan UI PC 7: Timbangan
+
+Tujuan: Merapikan halaman Timbangan di tampilan PC. Tombol back dihapus karena tidak penting dan memakan tempat. Ruang yang kosong dipakai supaya kartu kiri muat semua tanpa scroll, dan tiga kartu terlihat sama bentuknya.
+
+Tempat dan tampilan:
+- Halaman Timbangan, tampilan PC (desktop/).
+- Hapus tombol back (ikon panah kiri) di kiri judul "Timbangan". Judul, subjudul, dan pilihan Mata Uang (Rupiah, Yen, Dolar) tetap ada.
+- Kartu kiri "Timbang Sebelum Beli": seluruh isinya (harga barang, kategori, dompet sumber dana, kotak status, dan semua baris ringkasan sampai "Timbangan bulan ini setelah beli") harus terlihat penuh tanpa scroll di dalam kartu pada ukuran jendela PC yang normal. Caranya: pakai ruang yang dibebaskan tombol back, dan rapatkan jarak antar elemen bila perlu. Kalau jendela memang terlalu pendek, scroll di dalam kartu hanya sebagai cadangan.
+- Kartu tengah "Timbangan Bulan Ini": samakan bentuknya dengan kartu kiri dan kanan, yaitu posisi atas, tinggi, radius, border, dan padding sama. Tiga kartu berjajar dengan tinggi yang sama. Isi kartu tengah (navigasi bulan, gambar timbangan, pemasukan, pengeluaran, kotak surplus, baris Equilibrium) tetap ada dan ditata rapi di dalam kartu yang lebih tinggi.
+- Kartu kanan "Sesuaikan Saldo": ikut tinggi yang sama dengan dua kartu lain. Kalau daftar dompet lebih panjang dari kartu, scroll di dalam kartu.
+- Header kartu di ketiganya memakai gaya judul yang konsisten.
+
+Aturan:
+- Hanya mengubah tampilan halaman Timbangan di PC.
+- Tidak mengubah logika simulasi, perhitungan saldo, budget, Equilibrium, atau penyesuaian saldo.
+- Tidak mengubah halaman lain.
+- Tidak menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Timbangan di PC dengan jendela ukuran normal: tombol back tidak ada, kartu kiri terlihat penuh tanpa scroll di dalamnya.
+- Tiga kartu (kiri, tengah, kanan) sejajar di atas dan sama tinggi di bawah.
+- Ganti pilihan Mata Uang ke Yen dan Dolar: tampilan tetap rapi di tiga kartu dan angka tetap benar.
+- Isi harga barang lalu pilih kategori dan dompet: hasil simulasi sama seperti sebelum perubahan.
+- Klik "Sesuaikan" pada satu dompet: dialog berfungsi seperti biasa.
+- Ganti bulan di kartu tengah: angka berubah seperti biasa.
+- Buka halaman lain (Beranda, Riwayat, Statistik, Pengaturan): tampilannya tidak berubah.
+

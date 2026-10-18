@@ -10,6 +10,16 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 7: Timbangan
+- Diperbaiki: Tiga kartu halaman Timbangan di layar PC (@media min-width: 1024px) disamakan bentuknya (posisi atas, tinggi penuh 100%, radius 8px, border 1px, dan padding 12px 14px) sehingga berjajar sejajar di atas dan sama tinggi di bawah (`desktop/src/css/style.css`).
+- Diperbaiki: Seluruh isi kartu kiri "Timbang Sebelum Beli" tampil penuh tanpa scroll pada jendela PC ukuran normal (1366x768 dan 1920x1080) dengan memanfaatkan ruang yang dibebaskan, merapatkan jarak vertikal antar elemen, dan menjadikan scroll di dalam kartu sebagai cadangan saat jendela terlalu pendek (`desktop/src/css/style.css`).
+- Diperbaiki: Tata letak kartu tengah "Timbangan Bulan Ini" ditata rapi di dalam kartu yang lebih tinggi dengan SVG timbangan yang fleksibel (`clamp(80px, 15vh, 130px)`), rincian pemasukan/pengeluaran serta kotak surplus terpusat, dan baris Equilibrium tertata di bagian bawah kartu (`desktop/src/css/style.css`).
+- Diperbaiki: Kartu kanan "Sesuaikan Saldo" mengikuti tinggi yang sama dengan dua kartu lain dan scroll terjadi di dalam daftar dompet (`#timbangan-adjust-wallet-list`) saat daftar dompet melebihi tinggi kartu (`desktop/src/css/style.css`).
+- Diperbaiki: Gaya header kartu di ketiga kolom diselaraskan dengan ukuran font, ketebalan, warna, dan tinggi area header yang konsisten (`desktop/src/css/style.css`).
+- Diubah: Menghapus tombol back (ikon panah kiri) di kiri judul "Timbangan" pada tampilan PC sementara judul, subjudul, dan pilihan mata uang tetap ada (`desktop/src/index.html`, `desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v70` agar perubahan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 7: Timbangan" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 6: Variasi Riwayat
 - Ditambah: Garis aksen 3 px di sisi kiri tiap baris transaksi pada layar PC (@media min-width: 1024px) dengan warna token sesuai jenis transaksi: hijau token income untuk pemasukan, merah token expense untuk pengeluaran, dan netral token text-secondary untuk transfer dan penyesuaian saldo (`desktop/src/css/style.css`).
 - Ditambah: Tampilan nama dompet sebagai chip kecil berlatar token surface-raised dengan sudut membulat token radius-input 6 px dan border tipis token border (`desktop/src/css/style.css`).
