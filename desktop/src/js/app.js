@@ -3116,89 +3116,86 @@ function renderDonutChart(transactions) {
 
     function updateDonutDetail(catItem) {
         if (!donutDetail) return;
+        if (!catItem) {
+            donutDetail.textContent = '';
+            donutDetail.classList.add('hidden');
+            return;
+        }
         donutDetail.classList.remove('hidden');
         const amountClass = isIncome ? 'chart-detail-amount income' : 'chart-detail-amount';
-        if (!catItem) {
-            donutDetail.innerHTML = `
-                <span class="chart-detail-month">Total ${typeLabel}:</span>
-                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(totalAmount, currentStatsCurrency)}</strong>
-                <span class="chart-detail-count">(${sortedCategories.length} kategori, ${periodTx.length} transaksi)</span>
-            `;
-        } else {
-            const catTransactions = periodTx.filter(tx => getTxStatsCategory(tx) === catItem.category);
-            const subcatMap = new Map();
-            let noSubAmount = 0;
-            let noSubCount = 0;
-            for (const tx of catTransactions) {
-                const sub = getTxSubcategory(tx);
-                const amt = getTxEffectiveAmount(tx);
-                if (sub) {
-                    const item = subcatMap.get(sub) || { amount: 0, count: 0 };
-                    item.amount += amt;
-                    item.count += 1;
-                    subcatMap.set(sub, item);
-                } else {
-                    noSubAmount += amt;
-                    noSubCount += 1;
-                }
+        const catTransactions = periodTx.filter(tx => getTxStatsCategory(tx) === catItem.category);
+        const subcatMap = new Map();
+        let noSubAmount = 0;
+        let noSubCount = 0;
+        for (const tx of catTransactions) {
+            const sub = getTxSubcategory(tx);
+            const amt = getTxEffectiveAmount(tx);
+            if (sub) {
+                const item = subcatMap.get(sub) || { amount: 0, count: 0 };
+                item.amount += amt;
+                item.count += 1;
+                subcatMap.set(sub, item);
+            } else {
+                noSubAmount += amt;
+                noSubCount += 1;
             }
+        }
 
-            for (const [sub, item] of subcatMap.entries()) {
-                item.amount = currentStatsCurrency === 'USD' ? Math.round(item.amount * 100) / 100 : Math.round(item.amount);
-            }
-            noSubAmount = currentStatsCurrency === 'USD' ? Math.round(noSubAmount * 100) / 100 : Math.round(noSubAmount);
+        for (const [sub, item] of subcatMap.entries()) {
+            item.amount = currentStatsCurrency === 'USD' ? Math.round(item.amount * 100) / 100 : Math.round(item.amount);
+        }
+        noSubAmount = currentStatsCurrency === 'USD' ? Math.round(noSubAmount * 100) / 100 : Math.round(noSubAmount);
 
-            let subcatDetailHtml = '';
-            if (subcatMap.size > 0) {
-                const sortedSubs = Array.from(subcatMap.entries()).sort((a, b) => b[1].amount - a[1].amount);
-                let rowsHtml = '';
-                for (const [subName, subData] of sortedSubs) {
-                    const subPct = catItem.amount > 0 ? formatPercent((subData.amount / catItem.amount) * 100) : '0%';
-                    rowsHtml += `
-                        <div class="donut-subcat-row">
-                            <div class="donut-subcat-main">
-                                <span class="stats-category-icon" aria-hidden="true">${getSubcategoryIconSvg(catItem.category, subName, currentDonutType)}</span>
-                                <span class="donut-subcat-name">${escapeHTML(subName)}</span>
-                            </div>
-                            <div class="donut-subcat-meta">
-                                <span class="donut-subcat-pct tabular-nums">${subPct} (${subData.count})</span>
-                                <strong class="donut-subcat-amount tabular-nums">${currencyFormatter.format(subData.amount, currentStatsCurrency)}</strong>
-                            </div>
+        let subcatDetailHtml = '';
+        if (subcatMap.size > 0) {
+            const sortedSubs = Array.from(subcatMap.entries()).sort((a, b) => b[1].amount - a[1].amount);
+            let rowsHtml = '';
+            for (const [subName, subData] of sortedSubs) {
+                const subPct = catItem.amount > 0 ? formatPercent((subData.amount / catItem.amount) * 100) : '0%';
+                rowsHtml += `
+                    <div class="donut-subcat-row">
+                        <div class="donut-subcat-main">
+                            <span class="stats-category-icon" aria-hidden="true">${getSubcategoryIconSvg(catItem.category, subName, currentDonutType)}</span>
+                            <span class="donut-subcat-name">${escapeHTML(subName)}</span>
                         </div>
-                    `;
-                }
-                if (noSubAmount > 0) {
-                    const noSubPct = catItem.amount > 0 ? formatPercent((noSubAmount / catItem.amount) * 100) : '0%';
-                    rowsHtml += `
-                        <div class="donut-subcat-row is-no-sub">
-                            <div class="donut-subcat-main">
-                                <span class="stats-category-icon" aria-hidden="true">${getCategoryIconSvg(catItem.category, currentDonutType)}</span>
-                                <span class="donut-subcat-name">Tanpa sub kategori</span>
-                            </div>
-                            <div class="donut-subcat-meta">
-                                <span class="donut-subcat-pct tabular-nums">${noSubPct} (${noSubCount})</span>
-                                <strong class="donut-subcat-amount tabular-nums">${currencyFormatter.format(noSubAmount, currentStatsCurrency)}</strong>
-                            </div>
-                        </div>
-                    `;
-                }
-                subcatDetailHtml = `
-                    <div class="donut-subcat-section">
-                        <span class="donut-subcat-title">Rincian Sub Kategori</span>
-                        <div class="donut-subcat-list">
-                            ${rowsHtml}
+                        <div class="donut-subcat-meta">
+                            <span class="donut-subcat-pct tabular-nums">${subPct} (${subData.count})</span>
+                            <strong class="donut-subcat-amount tabular-nums">${currencyFormatter.format(subData.amount, currentStatsCurrency)}</strong>
                         </div>
                     </div>
                 `;
             }
-
-            donutDetail.innerHTML = `
-                <span class="chart-detail-month"><span class="stats-category-icon" aria-hidden="true">${getCategoryIconSvg(catItem.category, currentDonutType)}</span>${escapeHTML(catItem.category)}:</span>
-                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(catItem.amount, currentStatsCurrency)}</strong>
-                <span class="chart-detail-count">(${formatPercent(catItem.percentage)} - ${catItem.count} transaksi)</span>
-                ${subcatDetailHtml}
+            if (noSubAmount > 0) {
+                const noSubPct = catItem.amount > 0 ? formatPercent((noSubAmount / catItem.amount) * 100) : '0%';
+                rowsHtml += `
+                    <div class="donut-subcat-row is-no-sub">
+                        <div class="donut-subcat-main">
+                            <span class="stats-category-icon" aria-hidden="true">${getCategoryIconSvg(catItem.category, currentDonutType)}</span>
+                            <span class="donut-subcat-name">Tanpa sub kategori</span>
+                        </div>
+                        <div class="donut-subcat-meta">
+                            <span class="donut-subcat-pct tabular-nums">${noSubPct} (${noSubCount})</span>
+                            <strong class="donut-subcat-amount tabular-nums">${currencyFormatter.format(noSubAmount, currentStatsCurrency)}</strong>
+                        </div>
+                    </div>
+                `;
+            }
+            subcatDetailHtml = `
+                <div class="donut-subcat-section">
+                    <span class="donut-subcat-title">Rincian Sub Kategori</span>
+                    <div class="donut-subcat-list">
+                        ${rowsHtml}
+                    </div>
+                </div>
             `;
         }
+
+        donutDetail.innerHTML = `
+            <span class="chart-detail-month"><span class="stats-category-icon" aria-hidden="true">${getCategoryIconSvg(catItem.category, currentDonutType)}</span>${escapeHTML(catItem.category)}:</span>
+            <strong class="${amountClass} tabular-nums">${currencyFormatter.format(catItem.amount, currentStatsCurrency)}</strong>
+            <span class="chart-detail-count">(${formatPercent(catItem.percentage)} - ${catItem.count} transaksi)</span>
+            ${subcatDetailHtml}
+        `;
     }
 
     const radius = 75;
@@ -3339,18 +3336,6 @@ function renderDonutChart(transactions) {
 
     segments.forEach(seg => {
         const catName = seg.dataset.category;
-        seg.addEventListener('mouseenter', () => {
-            if (!activeDonutCategory) highlightCategory(catName);
-        });
-        seg.addEventListener('mouseleave', () => {
-            if (!activeDonutCategory) highlightCategory(null);
-        });
-        seg.addEventListener('focus', () => {
-            if (!activeDonutCategory) highlightCategory(catName);
-        });
-        seg.addEventListener('blur', () => {
-            if (!activeDonutCategory) highlightCategory(null);
-        });
         seg.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleCategory(catName);
@@ -3360,26 +3345,16 @@ function renderDonutChart(transactions) {
                 e.preventDefault();
                 toggleCategory(catName);
             } else if (e.key === 'Escape') {
-                activeDonutCategory = null;
-                highlightCategory(null);
+                if (activeDonutCategory) {
+                    activeDonutCategory = null;
+                    highlightCategory(null);
+                }
             }
         });
     });
 
     legendItems.forEach(item => {
         const catName = item.dataset.category;
-        item.addEventListener('mouseenter', () => {
-            if (!activeDonutCategory) highlightCategory(catName);
-        });
-        item.addEventListener('mouseleave', () => {
-            if (!activeDonutCategory) highlightCategory(null);
-        });
-        item.addEventListener('focus', () => {
-            if (!activeDonutCategory) highlightCategory(catName);
-        });
-        item.addEventListener('blur', () => {
-            if (!activeDonutCategory) highlightCategory(null);
-        });
         item.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleCategory(catName);
@@ -3389,8 +3364,10 @@ function renderDonutChart(transactions) {
                 e.preventDefault();
                 toggleCategory(catName);
             } else if (e.key === 'Escape') {
-                activeDonutCategory = null;
-                highlightCategory(null);
+                if (activeDonutCategory) {
+                    activeDonutCategory = null;
+                    highlightCategory(null);
+                }
             }
         });
     });

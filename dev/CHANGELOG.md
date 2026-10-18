@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 5: Detail diagram Statistik lewat klik
+- Diperbaiki: Kotak rincian kategori di diagram donut Statistik yang sebelumnya muncul saat kursor diarahkan (hover/focus) diubah agar hanya terbuka setelah diklik atau ditekan tombol keyboard Enter/Spasi, menutup kembali jika diklik/ditekan lagi, serta berpindah jika kategori lain diklik (`desktop/src/js/app.js`).
+- Diubah: Menghapus listener event kursor dan fokus (mouseenter, mouseleave, focus, blur) pada irisan donut dan baris kategori sehingga arah kursor saja tidak lagi memicu pembukaan kotak rincian, sementara efek hover visual pada baris kategori tetap ditangani CSS ke token surface-raised (`desktop/src/js/app.js`).
+- Diubah: Mengosongkan dan menyembunyikan kotak rincian kategori saat tidak ada kategori yang aktif (tertutup secara default) (`desktop/src/js/app.js`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v68` agar perubahan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 5: Detail diagram Statistik lewat klik" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 4: Timbangan tanpa scroll
 - Diperbaiki: Tampilan halaman Timbangan di layar PC (@media min-width: 1024px) dipadatkan sehingga seluruh isi ketiga kolom terlihat utuh tanpa scroll pada layar 1366x768 dan 1920x1080 dengan data contoh aktif (4 dompet) tanpa mengubah HTML (`desktop/src/css/style.css`).
 - Diubah: Mengurangi jarak vertikal dan padding kartu menggunakan token DESIGN.md (padding kartu 10px 14px, gap form dan hasil 6px/3px, margin kontrol atas 8px), menyesuaikan tinggi SVG timbangan fleksibel terhadap tinggi layar (`clamp(80px, 14vh, 120px)`) agar gambar dan tombol tetap utuh terlihat, mempertahankan padding-bawah 88 px tiap kolom dan fallback scroll tingkat kolom di layar pendek (`desktop/src/css/style.css`).

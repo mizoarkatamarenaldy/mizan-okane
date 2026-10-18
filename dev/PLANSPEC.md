@@ -1408,3 +1408,33 @@ Cek manual:
 - Buka DevTools Console: tidak ada error merah.
 - Klik semua tombol navigasi, tombol (+), tombol "Sesuaikan", dan pilihan mata uang: semuanya merespons.
 - Buka di lebar HP: tampilan sama seperti sebelum item ini.
+
+## Perbaikan UI PC 5: Detail diagram Statistik lewat klik
+
+Tujuan: Kotak rincian kategori di diagram donut Statistik sekarang muncul saat kursor diarahkan dan kadang bermasalah. Ubah supaya rincian hanya muncul setelah diklik.
+
+Tempat dan tampilan:
+- Halaman Statistik, diagram donut per kategori beserta daftar kategorinya.
+- Klik irisan donut atau baris kategori: kotak rincian kategori itu terbuka. Isi dan letak kotak rincian tidak berubah.
+- Klik kategori yang sama sekali lagi: kotak rincian tertutup.
+- Klik kategori lain: kotak rincian pindah ke kategori itu.
+- Dengan keyboard: irisan dan baris kategori yang sedang fokus bisa dibuka dan ditutup dengan Enter atau Spasi.
+- Arahkan kursor saja tidak membuka rincian. Hover pada baris kategori hanya mengganti latar ke token surface-raised lewat CSS yang sudah ada, tanpa animasi.
+
+Aturan:
+- Izin dari pemilik: boleh mengubah logika di desktop/src/js/app.js, hanya pada penanganan event kursor dan fokus (mouseenter, mouseleave, mouseover, focus, blur) di irisan donut dan daftar kategori diagram Statistik, serta penanganan klik dan keyboard di tempat yang sama. Bagian lain app.js tidak boleh diubah.
+- Hanya ubah desktop/src/js/app.js dan desktop/src/sw.js (naikkan satu nomor dari versi cache sekarang. Jangan pakai nomor mizan-v64, karena pernah terkirim dan sudah dibatalkan).
+- DILARANG mengubah desktop/src/index.html dan desktop/src/css/style.css. Kalau perubahan ini ternyata butuh perubahan HTML atau CSS, berhenti dan laporkan ke pemilik apa yang mentok.
+- Jangan sentuh halaman Beranda, Timbangan, dan Riwayat, dan jangan sentuh folder mobile/.
+- Jangan menambah fitur baru di diagram. Hanya pemicunya yang diganti dari kursor ke klik.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Statistik di PC dengan Mode Data Contoh. Arahkan kursor ke irisan dan baris kategori: rincian tidak muncul.
+- Klik satu kategori: rincian muncul. Klik kategori yang sama lagi: rincian tertutup. Klik kategori lain: rincian pindah.
+- Tab ke baris kategori lalu tekan Enter dan Spasi: rincian terbuka dan tertutup.
+- Ganti bulan atau tab Harian, Bulanan, Tahunan lalu klik kategori: rincian tetap benar.
+- Buka DevTools Console di semua halaman: tidak ada error merah.
+- Klik semua tombol navigasi, tombol (+), dan satu tombol di tiap halaman: semuanya merespons.
