@@ -1195,18 +1195,53 @@ Cek manual:
 
 ## Revisi UI PC
 
-Tujuan: Membuat tampilan versi PC punya desain sendiri yang berbeda dari mobile. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+Tujuan: Di layar PC, tampilan sekarang hanya kolom HP yang ditaruh di tengah, sehingga layar lebar terbuang dan halaman harus di-scroll panjang. Ubah jadi tampilan dashboard yang memakai seluruh lebar layar. Tampilan HP dan APK tidak boleh berubah sama sekali.
+
+Izin dari pemilik:
+- Boleh mengubah dev/DESIGN.md hanya di bagian "Tata letak", baris "Satu kolom, max-width 640px, di tengah, juga di layar lebar", menjadi: di HP satu kolom max-width 640px; di PC (lebar 1024 px ke atas) memakai tata letak dashboard sesuai spek "Revisi UI PC". Bagian lain DESIGN.md tidak boleh diubah.
+- Kalau sw.js memakai nama versi cache, boleh menaikkan nomor versinya supaya tampilan baru termuat. Tidak ada perubahan lain di sw.js.
+
+Titik pindah:
+- Semua perubahan hanya aktif lewat @media (min-width: 1024px). Di bawah 1024 px tampilan harus sama persis seperti sekarang.
+- Di layar lebar, lebar isi dibatasi max-width 1600px, di tengah, dengan jarak samping 16px.
+
+Tempat dan tampilan:
+- Header dan navigasi: tetap seperti sekarang (nama app di kiri, ikon status sinkron di kanan, tab navigasi di atas). Tinggi header dan navigasi dihitung agar isi halaman pas di sisa tinggi layar.
+- Beranda, 3 kolom, tinggi total isi = tinggi layar dikurangi header dan navigasi, halaman tidak scroll panjang:
+  - Kolom kiri: kartu saldo (navigasi bulan, Total Saldo, Pemasukan, Pengeluaran) lalu kartu dompet di bawahnya.
+  - Kolom tengah: Budget.
+  - Kolom kanan: Transaksi Terakhir.
+  - Tiap kolom punya scroll sendiri (overflow-y auto) kalau isinya melebihi tinggi kolom.
+  - Banner data contoh (kalau tampil) tetap di atas, selebar penuh, di luar 3 kolom.
+  - Tombol tambah (+) tetap melayang di pojok kanan bawah.
+- Riwayat: pencarian dan filter bulan di satu baris atas. Daftar dikelompokkan per tanggal seperti sekarang, tapi tiap baris dibuat lebar seperti tabel: ikon dan kategori, catatan, dompet, waktu, jumlah (rata kanan, dengan tanda), tombol aksi. Bukan kartu sempit.
+- Statistik: grafik disusun 2 kolom. Tab Harian, Bulanan, Tahunan tetap di atas.
+- Pengaturan: daftar nama bagian di kiri (klik untuk lompat ke bagian itu), isi bagian di kanan. Hanya tampilan, isi dan perilaku pengaturan tidak berubah.
+- Timbangan, Kebijakan Privasi, Syarat dan Ketentuan: konten dibatasi max-width 800px dan ditaruh di tengah.
+- Form tambah/edit transaksi dan form transfer: tampil sebagai dialog di tengah layar, lebar sekitar 480px, dengan latar belakang gelap di belakangnya. Esc menutup dialog. Urutan isi form tidak berubah.
+- Efek hover pada tombol, baris, dan tab: hanya ganti warna latar ke token surface-raised yang sudah ada. Tanpa animasi.
 
 Aturan:
-- Item ini baru boleh dikerjakan setelah "Pemisahan folder" selesai.
-- Hanya mengubah tampilan di folder desktop/. Folder mobile/ dan logika data tidak boleh disentuh.
-- Spek rinci (navigasi PC, lebar konten, tampilan riwayat, dan seterusnya) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+- Hanya CSS dan penyusunan HTML. Tidak ada perubahan logika, nama fungsi, nama kunci data, atau alur sinkron.
+- Warna, font, ukuran teks, radius, dan tanpa bayangan tetap mengikuti dev/DESIGN.md. Tidak ada warna, font, bayangan, atau animasi baru. Latar belakang dialog memakai warna token bg dengan transparansi, bukan warna baru.
+- Aturan kartu tetap berlaku: dilarang kartu di dalam kartu.
+- Target sentuh minimal 44 px dan indikator fokus keyboard tetap ada.
+- Mode terang dan gelap sama-sama harus benar.
+- Sengaja TIDAK dilakukan: pintasan keyboard (selain Esc untuk dialog), sidebar navigasi, fitur baru, perubahan tampilan HP.
+- Dilarang menjalankan build. Folder mobile/ dan dev/ tidak disentuh, kecuali dev/PLAN.md, dev/CHANGELOG.md, dev/PLANSPEC.md, dan baris "Tata letak" di dev/DESIGN.md sesuai izin di atas.
 
 Data:
-- Belum ditentukan. Ditulis saat spek rinci dibuat.
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. dev/SCHEMA.md tidak berubah.
 
-Cek manual:
-- Belum ditentukan. Ditulis saat spek rinci dibuat.
+Cek manual (dilakukan pemilik):
+- Buka situs di browser PC lebar 1280x720: Beranda tampil 3 kolom, halaman tidak scroll panjang, kolom yang isinya banyak scroll sendiri.
+- Buka di 1920x1080: 3 kolom tetap rapi, isi di tengah dan tidak melebar lewat 1600 px.
+- Perkecil jendela ke bawah 1024 px: tampilan kembali sama persis dengan tampilan HP sekarang. Ulangi di Riwayat, Statistik, Pengaturan.
+- Klik tombol tambah (+): form tampil sebagai dialog di tengah, Esc menutupnya, transaksi tersimpan seperti biasa.
+- Riwayat: baris lebar rapi, pencarian dan filter bulan masih jalan.
+- Pengaturan: klik nama bagian di kiri, isi di kanan lompat ke bagian itu.
+- Ganti mode terang dan gelap: semua halaman terbaca jelas.
+- Login Google dan sinkron Drive masih jalan seperti biasa.
 
 ## Konversi Tauri
 

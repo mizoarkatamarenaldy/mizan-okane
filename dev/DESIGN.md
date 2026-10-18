@@ -61,7 +61,7 @@ Semua angka uang memakai tabular-nums.
 | Nama app di header | 18px, satu baris |
 
 ## Tata letak
-- Satu kolom, max-width 640px, di tengah, juga di layar lebar.
+- di HP satu kolom max-width 640px; di PC (lebar 1024 px ke atas) memakai tata letak dashboard sesuai spek "Revisi UI PC".
 - Header tipis (sekitar 56px): nama app satu baris di kiri, ikon status sinkron di kanan.
 - Navigasi: di HP berupa bar bawah (4 item: ikon + label), di PC berupa tab di atas.
 - Tombol tambah transaksi mengambang (FAB) di kanan bawah, di atas bar bawah.

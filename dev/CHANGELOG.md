@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Revisi UI PC
+- Ditambah: Tata letak dashboard layar lebar (@media min-width: 1024px) dengan lebar konten maksimal 1600px di tengah, tinggi konten pas satu layar tanpa scroll panjang, serta Beranda 3 kolom (kolom kiri: saldo dan dompet; kolom tengah: budget; kolom kanan: transaksi terakhir) dengan overflow scroll mandiri per kolom (`desktop/src/index.html`, `desktop/src/css/style.css`).
+- Ditambah: Tampilan Riwayat di layar PC dengan pencarian dan filter bulan pada satu baris atas, serta baris transaksi melebar seperti tabel terstruktur (ikon dan kategori, catatan, dompet, waktu, jumlah rata kanan dengan tanda, tombol aksi) (`desktop/src/index.html`, `desktop/src/css/style.css`).
+- Ditambah: Tampilan Statistik di layar PC dengan grafik bar dan diagram donut tersusun berdampingan dalam 2 kolom, tab skala waktu tetap di atas (`desktop/src/index.html`, `desktop/src/css/style.css`).
+- Ditambah: Tampilan Pengaturan di layar PC dengan daftar nama bagian di kolom kiri yang langsung menampilkan isi bagian di kolom kanan saat diklik (`desktop/src/css/style.css`).
+- Ditambah: Pembatasan lebar maksimal 800px di tengah layar untuk halaman Timbangan, Kebijakan Privasi, dan Syarat dan Ketentuan di layar PC (`desktop/src/css/style.css`).
+- Ditambah: Formulir tambah/edit transaksi dan transfer sebagai dialog tengah lebar 480px dengan latar belakang gelap transparan dari token bg, penutupan dengan tombol Esc, urutan field terjaga, dan efek hover instan ke token surface-raised tanpa animasi (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v62` agar pembaruan tampilan termuat (`desktop/src/sw.js`).
+- Diubah: Memperbarui baris tata letak pada `dev/DESIGN.md` untuk mencatat tata letak dashboard di PC (1024px ke atas) sesuai izin dari pemilik (`dev/DESIGN.md`).
+- Diubah: Memperbarui spesifikasi lengkap dan mencentang item "Revisi UI PC" (`dev/PLANSPEC.md`, `dev/PLAN.md`).
+
 ## 2026-10-18: Pemisahan folder
 - Ditambah: Pemisahan struktur repositori menjadi folder kerja `desktop/src/` (file web aplikasi: `index.html`, `privasi.html`, `syarat.html`, `sw.js`, `manifest.webmanifest`, `css/`, `js/`, `icons/`) dan `mobile/capacitor/` (proyek Capacitor: `android/`, `capacitor.config.json`, `package.json`, `package-lock.json`, `scripts/`, `assets/`) dengan riwayat git terjaga penuh.
 - Ditambah: Workflow GitHub Actions `.github/workflows/pages.yml` untuk memublikasikan isi `desktop/src/` sebagai artefak GitHub Pages saat push ke branch `main` atau dijalankan manual (`workflow_dispatch`), tanpa langkah build.

@@ -5127,3 +5127,446 @@ button:disabled {
 body.modal-open {
     overflow: hidden;
 }
+
+/* ==========================================================================
+   Helper Wrapper Layout untuk Mobile (< 1024px)
+   display: contents agar struktur DOM tidak mengubah tata letak mobile sama sekali
+   ========================================================================== */
+.beranda-dashboard-grid,
+.beranda-col,
+.list-controls-row,
+.stats-controls-row,
+.stats-charts-grid {
+    display: contents;
+}
+
+.list-header .history-search-bar:not(.hidden) {
+    width: 100%;
+    order: 3;
+    margin-top: 10px;
+}
+
+/* ==========================================================================
+   Revisi UI PC (DESIGN.md & PLANSPEC.md)
+   Aktif hanya pada layar lebar (@media (min-width: 1024px))
+   ========================================================================== */
+@media (min-width: 1024px) {
+    /* 1. Titik Pindah & Lebar Kontainer */
+    html, body {
+        height: 100%;
+    }
+
+    body {
+        overflow-y: hidden;
+    }
+
+    .container {
+        max-width: 1600px;
+        height: 100vh;
+        height: 100dvh;
+        margin: 0 auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    /* 2. Header & Navigasi: tetap seperti sekarang, tinggi dihitung pas sisa layar */
+    .app-header {
+        flex: 0 0 56px;
+        min-height: 56px;
+        height: 56px;
+        margin-bottom: 16px;
+        padding-bottom: 0;
+    }
+
+    /* Banner Data Contoh: tetap di atas, selebar penuh di luar 3 kolom */
+    .demo-mode-indicator {
+        flex: 0 0 auto;
+        margin-bottom: 16px;
+        width: 100%;
+    }
+
+    /* Container Halaman (Page View) */
+    .page-view {
+        flex: 1 1 0%;
+        min-height: 0;
+        overflow-y: auto;
+        box-sizing: border-box;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+
+    /* 3. Beranda: 3 Kolom Dashboard */
+    #page-beranda {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    #page-beranda.hidden {
+        display: none !important;
+    }
+
+    .beranda-dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        height: 100%;
+        min-height: 0;
+        flex: 1 1 0%;
+        align-items: stretch;
+    }
+
+    .beranda-col {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+
+    #page-beranda .summary {
+        margin-bottom: 0;
+        flex: 0 0 auto;
+    }
+
+    #page-beranda .wallets-section {
+        margin-bottom: 0;
+        flex: 0 0 auto;
+    }
+
+    #page-beranda .wallet-balances {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow-x: visible;
+        padding: 0;
+    }
+
+    #page-beranda .wallet-balance-item {
+        max-width: 100%;
+        width: 100%;
+        min-height: 44px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+    }
+
+    #page-beranda .budget-section {
+        margin-bottom: 0;
+        min-height: 100%;
+    }
+
+    #page-beranda .recent-tx-section {
+        margin-bottom: 0;
+        min-height: 100%;
+    }
+
+    /* Tombol tambah (+) tetap melayang di pojok kanan bawah */
+    .fab-btn {
+        right: max(24px, calc(50% - 800px + 24px));
+        bottom: 28px;
+    }
+
+    /* 4. Riwayat: Pencarian & Filter Bulan di Satu Baris Atas, Tabel Lebar */
+    #page-riwayat .list-section {
+        background: var(--surface);
+        padding: 20px;
+        margin-bottom: 0;
+    }
+
+    #page-riwayat .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+    }
+
+    #page-riwayat .list-controls-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 0 0 auto;
+    }
+
+    #page-riwayat #history-search-bar {
+        display: block !important;
+        margin: 0;
+        width: 320px;
+    }
+
+    #page-riwayat #btn-toggle-search {
+        display: none;
+    }
+
+    #page-riwayat .list-filter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    /* Baris Tabel Lebar Riwayat */
+    #page-riwayat .tx-date-group-items {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    #page-riwayat .tx-item {
+        display: grid;
+        grid-template-columns: 36px minmax(140px, 1.2fr) minmax(180px, 2fr) minmax(110px, 0.8fr) minmax(75px, 0.5fr) minmax(130px, 1fr) auto;
+        align-items: center;
+        column-gap: 16px;
+        row-gap: 0;
+        padding: 10px 16px;
+        border-radius: var(--radius-card, 8px);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        margin-bottom: 0;
+    }
+
+    #page-riwayat .tx-item-content,
+    #page-riwayat .tx-item-main {
+        display: contents;
+    }
+
+    #page-riwayat .tx-item-icon {
+        grid-column: 1;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    #page-riwayat .tx-item-category {
+        grid-column: 2;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #page-riwayat .tx-item-note-row {
+        grid-column: 3;
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 13.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #page-riwayat .tx-item-sub {
+        display: contents;
+    }
+
+    #page-riwayat .tx-item-wallet {
+        grid-column: 4;
+        color: var(--text-secondary);
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #page-riwayat .tx-item-time {
+        grid-column: 5;
+        color: var(--text-secondary);
+        font-size: 13px;
+        white-space: nowrap;
+        margin: 0;
+    }
+
+    #page-riwayat .tx-item-amount-col {
+        grid-column: 6;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    #page-riwayat .tx-item-amount-col .tx-amount {
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    #page-riwayat .tx-actions {
+        grid-column: 7;
+        margin-left: 0;
+        display: flex;
+        gap: 6px;
+    }
+
+    /* 5. Statistik: Grafik Disusun 2 Kolom, Tab Waktu Tetap di Atas */
+    #page-statistik .stats-scale-bar {
+        margin-bottom: 16px;
+    }
+
+    .stats-controls-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .stats-controls-row .stats-month-bar,
+    .stats-controls-row .stats-currency-bar {
+        margin-bottom: 0;
+    }
+
+    .stats-charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .stats-charts-grid .chart-section,
+    .stats-charts-grid .donut-section {
+        margin-bottom: 0;
+    }
+
+    #page-statistik:has(.donut-section.hidden) .chart-section {
+        grid-column: 1 / -1;
+    }
+
+    /* 6. Pengaturan: Daftar Bagian di Kiri, Isi di Kanan */
+    #page-pengaturan {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    #settings-main-view {
+        display: block !important;
+        grid-column: 1;
+        position: sticky;
+        top: 0;
+    }
+
+    .settings-submenu-view {
+        grid-column: 2;
+    }
+
+    .settings-submenu-view.hidden {
+        display: none !important;
+    }
+
+    #page-pengaturan:not(:has(.settings-submenu-view:not(.hidden))) #submenu-tampilan {
+        display: block !important;
+    }
+
+    .settings-submenu-header .btn-submenu-back {
+        display: none;
+    }
+
+    /* Penanda menu pengaturan aktif di kolom kiri */
+    #page-pengaturan:has(#submenu-tampilan:not(.hidden)) .settings-menu-row[data-submenu="tampilan"],
+    #page-pengaturan:has(#submenu-kategori:not(.hidden)) .settings-menu-row[data-submenu="kategori"],
+    #page-pengaturan:has(#submenu-dompet:not(.hidden)) .settings-menu-row[data-submenu="dompet"],
+    #page-pengaturan:has(#submenu-budget:not(.hidden)) .settings-menu-row[data-submenu="budget"],
+    #page-pengaturan:has(#submenu-data:not(.hidden)) .settings-menu-row[data-submenu="data"],
+    #page-pengaturan:has(#submenu-akun:not(.hidden)) .settings-menu-row[data-submenu="akun"],
+    #page-pengaturan:has(#submenu-tentang:not(.hidden)) .settings-menu-row[data-submenu="tentang"],
+    #page-pengaturan:has(#submenu-bahaya:not(.hidden)) .settings-menu-row[data-submenu="bahaya"],
+    #page-pengaturan:not(:has(.settings-submenu-view:not(.hidden))) .settings-menu-row[data-submenu="tampilan"] {
+        background-color: var(--surface-raised);
+        border-color: var(--accent);
+    }
+
+    /* 7. Timbangan, Kebijakan Privasi, Syarat dan Ketentuan: max-width 800px di Tengah */
+    #page-timbangan {
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .privacy-card,
+    .privacy-nav-top {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+    }
+
+    .privacy-card {
+        overflow-y: auto;
+        max-height: calc(100vh - 90px);
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+
+    /* 8. Form Dialog di Tengah Layar: lebar sekitar 480px dengan latar gelap */
+    .form-screen {
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .form-screen-backdrop,
+    dialog::backdrop,
+    .confirm-dialog::backdrop {
+        background-color: rgba(15, 17, 23, 0.75);
+    }
+
+    .form-screen-container {
+        max-width: 480px;
+        width: 100%;
+        border-radius: var(--radius-card, 8px);
+        border: 1px solid var(--border);
+        box-shadow: none;
+        max-height: 88vh;
+        padding: 20px 24px 24px;
+    }
+
+    .form-screen-sheet-handle {
+        display: none;
+    }
+
+    /* 9. Efek Hover: hanya ganti warna latar ke token surface-raised, tanpa animasi */
+    button,
+    .btn-secondary,
+    .btn-icon,
+    .btn-link-action,
+    .btn-action-outline,
+    .chart-toggle-btn,
+    .stats-scale-tab,
+    .desktop-nav .nav-tab-btn,
+    .tx-item,
+    .settings-menu-row,
+    .wallet-balance-item,
+    .settings-about-link {
+        transition: none !important;
+    }
+
+    .btn-secondary:hover:not(:disabled),
+    .btn-icon:hover:not(:disabled),
+    .btn-link-action:hover:not(:disabled),
+    .btn-action-outline:hover:not(:disabled),
+    .btn-demo-banner-exit:hover,
+    .chart-toggle-btn:hover:not(.is-active),
+    .stats-scale-tab:hover:not(.is-active),
+    .desktop-nav .nav-tab-btn:hover:not(.is-active),
+    .tx-item:hover,
+    .settings-menu-row:hover,
+    .wallet-balance-item:hover:not(.is-selected),
+    .settings-about-link:hover,
+    .category-item:hover,
+    .subcategory-item:hover {
+        background-color: var(--surface-raised) !important;
+    }
+}
