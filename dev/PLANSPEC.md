@@ -1085,3 +1085,36 @@ Cek manual:
 - Aksi: ekspor JSON, reset setelan pabrik, lalu impor lagi. Hasil: ikon sub kategori kembali sesuai pilihan.
 - Aksi: impor file JSON lama tanpa field ikon sub kategori. Hasil: impor berhasil, sub kategori memakai ikon induk.
 - Aksi: sinkron ke perangkat lain. Hasil: ikon sub kategori sama di perangkat itu.
+
+## Perbaikan: dialog Pilih Ikon muncul sendiri di Pengaturan
+
+Tujuan: Menghilangkan dialog "Pilih Ikon" yang tampil permanen di halaman Pengaturan tanpa diminta, supaya dialog itu hanya muncul saat pengguna menekan pemilih ikon.
+
+Gejala:
+- Di halaman Pengaturan (menu utama, dengan daftar Akun dan Sinkron, Tentang, Zona Bahaya), sebuah kotak "Pilih Ikon" tampil di bagian bawah halaman, di bawah kartu Zona Bahaya, di sebelah tombol tambah.
+- Kotak itu hanya berisi judul "Pilih Ikon", tombol silang (X), dan tombol "Batal". Daftar ikon tidak tampil.
+- Tombol silang dan tombol Batal tidak berfungsi, jadi kotak tidak bisa ditutup.
+- Kalau pemilih ikon ditekan lewat jalur normal (di pengaturan kategori atau sub kategori), jendela pemilih ikon yang benar terbuka dan berfungsi. Jadi yang rusak adalah satu dialog tambahan yang tampil tanpa dibuka.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Hasil akhirnya: halaman Pengaturan tidak menampilkan kotak "Pilih Ikon" kecuali pemilih ikon sedang dibuka.
+
+Aturan:
+- Cari penyebabnya dulu, jangan menebak. Periksa semua tempat yang membuat dialog "Pilih Ikon" (pemilih ikon kategori dan pemilih ikon sub kategori). Kemungkinan: ada dialog yang dirender di halaman Pengaturan tanpa kondisi tersembunyi, ada elemen dialog ganda, atau aturan CSS menimpa atribut tersembunyi.
+- Perbaiki akar masalahnya sehingga dialog tersembunyi saat tidak dibuka, bukan sekadar menyembunyikan lewat patch visual.
+- Pastikan hanya ada satu mekanisme pemilih ikon untuk kategori dan sub kategori, tanpa dialog duplikat.
+- Pemilih ikon yang benar tetap berfungsi seperti sebelumnya: membuka dari ikon di samping field nama, menampilkan daftar ikon per tema, dan bisa ditutup lewat X, Batal, dan memilih ikon.
+- Periksa juga halaman lain yang mungkin kena masalah yang sama (Beranda, Riwayat, Statistik, Timbangan), tapi hanya perbaiki yang berkaitan dengan dialog pemilih ikon.
+- Fitur ini sengaja TIDAK mengubah desain pemilih ikon, set ikon, atau perilaku lain.
+- Tidak boleh mengubah file di luar yang berkaitan dengan dialog pemilih ikon.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Aksi: buka Pengaturan dari Beranda. Hasil: tidak ada kotak "Pilih Ikon" di halaman.
+- Aksi: buka Pengaturan, masuk ke pengaturan kategori, tekan ikon kategori. Hasil: pemilih ikon terbuka dengan daftar ikon, bisa dipilih dan bisa ditutup.
+- Aksi: sama, tapi untuk sub kategori. Hasil: sama seperti di atas.
+- Aksi: tutup pemilih ikon lewat X dan lewat Batal, lalu kembali ke halaman Pengaturan. Hasil: tidak ada kotak "Pilih Ikon" yang tertinggal.
+- Aksi: muat ulang aplikasi langsung di halaman Pengaturan, di tema gelap dan terang, di lebar layar HP dan PC. Hasil: tidak ada kotak "Pilih Ikon" yang muncul.
+

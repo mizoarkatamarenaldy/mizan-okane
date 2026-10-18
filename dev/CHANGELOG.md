@@ -10,6 +10,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan: dialog Pilih Ikon muncul sendiri di Pengaturan
+- Diperbaiki: Dialog pemilih ikon (`#icon-picker-dialog`) yang tampil permanen di halaman Pengaturan tanpa diminta diperbaiki akar masalahnya dengan menghapus deklarasi `display: flex;` tanpa syarat pada selector `.icon-picker-dialog` yang sebelumnya menimpa aturan semantik bawaan browser `dialog:not([open])`, serta menambahkan aturan eksplisit `.icon-picker-dialog:not([open])` dan `.confirm-dialog:not([open])` dengan `display: none` dan `.icon-picker-dialog[open]` dengan `display: flex; flex-direction: column;` agar dialog tersembunyi sempurna saat ditutup (`css/style.css`).
+- Diperbaiki: Penanganan penutupan dialog pemilih ikon diperkuat dengan listener event `close`, pembersihan state runtime callback pemilih ikon, fallback penutupan klik di luar modal (backdrop), serta penutupan dialog saat tombol fisik back Android ditekan (`js/app.js`).
+- Diubah: Mencentang item "Perbaikan: dialog Pilih Ikon muncul sendiri di Pengaturan" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Ikon sub kategori
 - Ditambah: Pemilih ikon sub kategori saat menambah dan mengedit sub kategori di Pengaturan menggunakan dialog pemilih ikon yang sama dengan kategori, lengkap dengan tombol untuk mereset/mengikuti ikon induk serta target sentuh minimal 44 px (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Tampilan ikon sub kategori di samping nama sub kategori pada seluruh antarmuka aplikasi: daftar sub kategori di Pengaturan, chip sub kategori formulir transaksi, riwayat transaksi (pada baris teks dan badge transaksi), rincian sub kategori di diagram statistik, serta daftar budget di Beranda dan Pengaturan (`css/style.css`, `js/app.js`).

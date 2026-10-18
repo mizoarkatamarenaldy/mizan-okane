@@ -100,6 +100,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Budget per sub kategori
   - [x] Ikon kategori kustom
   - [x] Ikon sub kategori
+  - [x] Perbaikan: dialog Pilih Ikon muncul sendiri di Pengaturan
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

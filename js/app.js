@@ -430,6 +430,11 @@ window.handleAndroidBack = function() {
         return true;
     }
 
+    if (iconPickerDialog && iconPickerDialog.open) {
+        closeIconPicker();
+        return true;
+    }
+
     // 2. Jika layar formulir (tambah/edit transaksi) sedang terbuka, tutup formulir
     if (formScreen && !formScreen.classList.contains('hidden')) {
         resetForm();
@@ -8725,6 +8730,30 @@ async function init() {
             activeIconPickerCallback = null;
             currentIconPickerSelectedId = '';
         });
+
+        iconPickerDialog.addEventListener('close', () => {
+            activeIconPickerCallback = null;
+            currentIconPickerSelectedId = '';
+            if (btnIconPickerClear) {
+                btnIconPickerClear.style.display = 'none';
+            }
+        });
+
+        if (!('closedBy' in HTMLDialogElement.prototype)) {
+            iconPickerDialog.addEventListener('click', (event) => {
+                if (event.target !== iconPickerDialog) return;
+                const rect = iconPickerDialog.getBoundingClientRect();
+                const isInside = (
+                    rect.top <= event.clientY &&
+                    event.clientY <= rect.top + rect.height &&
+                    rect.left <= event.clientX &&
+                    event.clientX <= rect.left + rect.width
+                );
+                if (!isInside) {
+                    closeIconPicker();
+                }
+            });
+        }
     }
 
     if (formAddExpenseCat && inputAddExpenseCat) {

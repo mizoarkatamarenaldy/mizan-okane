@@ -4431,6 +4431,10 @@ button:disabled {
     box-shadow: var(--elevated-shadow);
 }
 
+.confirm-dialog:not([open]) {
+    display: none;
+}
+
 .confirm-dialog::backdrop {
     background-color: var(--backdrop-bg);
 }
@@ -4779,9 +4783,16 @@ button:disabled {
     width: calc(100% - 32px);
     max-height: 85vh;
     padding: 20px;
+    box-sizing: border-box;
+}
+
+.icon-picker-dialog:not([open]) {
+    display: none;
+}
+
+.icon-picker-dialog[open] {
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
 }
 
 .icon-picker-dialog-content {
