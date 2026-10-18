@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 4: Timbangan tanpa scroll
+- Diperbaiki: Tampilan halaman Timbangan di layar PC (@media min-width: 1024px) dipadatkan sehingga seluruh isi ketiga kolom terlihat utuh tanpa scroll pada layar 1366x768 dan 1920x1080 dengan data contoh aktif (4 dompet) tanpa mengubah HTML (`desktop/src/css/style.css`).
+- Diubah: Mengurangi jarak vertikal dan padding kartu menggunakan token DESIGN.md (padding kartu 10px 14px, gap form dan hasil 6px/3px, margin kontrol atas 8px), menyesuaikan tinggi SVG timbangan fleksibel terhadap tinggi layar (`clamp(80px, 14vh, 120px)`) agar gambar dan tombol tetap utuh terlihat, mempertahankan padding-bawah 88 px tiap kolom dan fallback scroll tingkat kolom di layar pendek (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v67` agar perubahan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 4: Timbangan tanpa scroll" di `dev/PLAN.md`.
+
+
 ## 2026-10-18: Perbaikan UI PC 3: Beranda
 - Diperbaiki: Bug tampilan kartu Budget di layar PC (@media min-width: 1024px) di mana tinggi kartu terkunci sehingga baris sub kategori keluar dari kartu dan memiliki scrollbar sendiri; diubah agar kartu tumbuh mengikuti isi tanpa scrollbar tersendiri (`min-height: auto; height: auto; overflow: visible; flex: 0 0 auto; box-sizing: border-box;`) serta kartu Transaksi Terakhir juga tumbuh mengikuti isinya (`desktop/src/css/style.css`).
 - Diubah: Menukar posisi kolom Beranda di layar PC lewat CSS (`grid-column` dan `grid-row: 1`) sehingga urutan kolom dari kiri menjadi Budget (`.beranda-col-center` pada kolom 1), Total Saldo beserta daftar dompet (`.beranda-col-left` pada kolom 2), dan Transaksi Terakhir (`.beranda-col-right` pada kolom 3) tanpa mengubah urutan elemen di HP (`desktop/src/css/style.css`).

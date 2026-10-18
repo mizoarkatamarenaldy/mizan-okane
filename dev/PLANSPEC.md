@@ -1378,6 +1378,33 @@ Cek manual:
 - Klik semua tombol navigasi, tombol (+), dan tombol di tiap kolom: semuanya merespons.
 - Buka di lebar HP: urutan dan tampilan sama seperti sebelum item ini.
 
+## Perbaikan UI PC 4: Timbangan tanpa scroll
 
+Tujuan: Di PC, halaman Timbangan menampilkan seluruh isinya sekaligus tanpa perlu scroll, supaya tiga kolom bisa dilihat dalam satu layar.
 
+Tempat dan tampilan:
+- Halaman Timbangan di PC (lebar 1024 px ke atas). Tiga kolom tetap: kiri "Timbang Sebelum Beli", tengah timbangan, kanan "Sesuaikan Saldo".
+- Target: di layar 1366x768 ke atas, semua isi ketiga kolom terlihat tanpa scroll, dengan data contoh aktif (4 dompet).
+- Caranya: tampilan lebih padat. Kurangi jarak vertikal antar elemen dan padding kartu memakai token spasi yang sudah ada di dev/DESIGN.md. Tinggi gambar timbangan SVG menyesuaikan tinggi layar (misalnya lewat satuan vh) dan tetap utuh.
+- Cadangan: di layar yang lebih pendek dari target, atau bila isi kolom kanan memanjang karena dompet banyak, scroll di tingkat kolom (overflow-y: auto) tetap ada. Tidak ada scrollbar di dalam kartu.
+- Padding-bawah 88 px di tiap kolom tetap dipertahankan supaya tombol (+) tidak menutup isi.
+- Tampilan HP dan APK tidak berubah. Semua aturan baru hanya di dalam @media (min-width: 1024px).
 
+Aturan:
+- Hanya ubah desktop/src/css/style.css dan desktop/src/sw.js (naikkan satu nomor dari versi cache sekarang. Jangan pakai nomor mizan-v64, karena pernah terkirim dan sudah dibatalkan).
+- DILARANG mengubah desktop/src/index.html dan desktop/src/js/app.js.
+- Kalau target tanpa scroll tidak bisa dicapai tanpa mengubah index.html, jangan ubah HTML. Berhenti dan laporkan ke pemilik apa yang mentok.
+- Ukuran font dan tap target minimal 44 px tetap mengikuti dev/DESIGN.md, jangan dikecilkan demi memadatkan.
+- Jangan sentuh halaman Beranda, Statistik, dan Riwayat.
+- Hover hanya ganti latar ke token surface-raised, tanpa animasi.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Timbangan di PC 1366x768 dan 1920x1080 dengan Mode Data Contoh: ketiga kolom terlihat utuh, tidak ada scrollbar di kolom maupun kartu.
+- Buka di 1280x720: boleh ada scroll di tingkat kolom, tapi tidak di dalam kartu.
+- Gambar timbangan tampil utuh, tidak terpotong, dan tombol di bawahnya terlihat.
+- Buka DevTools Console: tidak ada error merah.
+- Klik semua tombol navigasi, tombol (+), tombol "Sesuaikan", dan pilihan mata uang: semuanya merespons.
+- Buka di lebar HP: tampilan sama seperti sebelum item ini.
