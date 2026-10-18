@@ -284,30 +284,30 @@
 
         <!-- 4. Halaman Timbangan (Mizan) -->
         <main id="page-timbangan" class="page-view hidden" role="tabpanel" aria-label="Timbangan">
-            <div class="timbangan-top-controls">
-                <!-- Header Halaman Timbangan -->
-                <div class="timbangan-header-bar">
-                    <button type="button" id="btn-timbangan-back" class="btn-icon btn-timbangan-back" aria-label="Kembali ke Beranda" title="Kembali ke Beranda">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                    </button>
-                    <div class="timbangan-title-wrap">
-                        <h2 class="timbangan-main-title card-title">Timbangan</h2>
-                        <span class="timbangan-sub-title">Keseimbangan keuangan dan simulasi belanja</span>
-                    </div>
-                </div>
-
-                <!-- Pilihan Mata Uang -->
-                <div id="timbangan-currency-bar" class="stats-currency-bar">
-                    <span class="stats-currency-label">Mata Uang</span>
-                    <div class="type-segmented-control timbangan-currency-control" role="radiogroup" aria-label="Pilihan mata uang timbangan">
-                        <button type="button" id="btn-timbangan-currency-idr" class="chart-toggle-btn is-active" data-currency="IDR" aria-pressed="true">Rupiah</button>
-                        <button type="button" id="btn-timbangan-currency-jpy" class="chart-toggle-btn" data-currency="JPY" aria-pressed="false">Yen</button>
-                        <button type="button" id="btn-timbangan-currency-usd" class="chart-toggle-btn" data-currency="USD" aria-pressed="false">Dolar</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="timbangan-dashboard-grid">
+                <div class="timbangan-top-controls">
+                    <!-- Header Halaman Timbangan -->
+                    <div class="timbangan-header-bar">
+                        <button type="button" id="btn-timbangan-back" class="btn-icon btn-timbangan-back" aria-label="Kembali ke Beranda" title="Kembali ke Beranda">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <div class="timbangan-title-wrap">
+                            <h2 class="timbangan-main-title card-title">Timbangan</h2>
+                            <span class="timbangan-sub-title">Keseimbangan keuangan dan simulasi belanja</span>
+                        </div>
+                    </div>
+
+                    <!-- Pilihan Mata Uang -->
+                    <div id="timbangan-currency-bar" class="stats-currency-bar">
+                        <span class="stats-currency-label">Mata Uang</span>
+                        <div class="type-segmented-control timbangan-currency-control" role="radiogroup" aria-label="Pilihan mata uang timbangan">
+                            <button type="button" id="btn-timbangan-currency-idr" class="chart-toggle-btn is-active" data-currency="IDR" aria-pressed="true">Rupiah</button>
+                            <button type="button" id="btn-timbangan-currency-jpy" class="chart-toggle-btn" data-currency="JPY" aria-pressed="false">Yen</button>
+                            <button type="button" id="btn-timbangan-currency-usd" class="chart-toggle-btn" data-currency="USD" aria-pressed="false">Dolar</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Kolom tengah: Timbangan Bulan Ini (DOM order 1 untuk mobile) -->
                 <div class="timbangan-col timbangan-col-center">
                     <!-- Bagian 1: Timbangan Bulan Ini -->

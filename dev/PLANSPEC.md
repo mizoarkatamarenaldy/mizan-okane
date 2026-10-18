@@ -1320,5 +1320,45 @@ Cek manual (dilakukan pemilik):
 - Perkecil jendela ke bawah 1024 px: Riwayat dan Timbangan kembali sama persis dengan tampilan HP sekarang.
 - Ganti mode terang dan gelap: keduanya terbaca jelas.
 
+## Perbaikan UI PC 2: Timbangan dan Diagram
+
+Tujuan: Hasil "Perbaikan UI PC: Riwayat dan Timbangan" untuk Timbangan masih salah (kartu jatuh ke baris berbeda dan tiap kartu punya scrollbar sendiri), dan diagram di Statistik membuka detail hanya karena kursor lewat sehingga tata letak bergeser dan bertabrakan. Perbaiki keduanya. Tampilan HP dan APK tidak boleh berubah sama sekali.
+
+Izin dari pemilik:
+- Boleh mengubah desktop/src/js/app.js hanya pada penanganan event kursor (mouseenter, mouseover, mousemove, atau sejenisnya) di diagram donut dan daftar kategori Statistik, agar detail kategori TIDAK terbuka karena kursor lewat. Detail hanya terbuka lewat klik (atau Enter/Spasi saat fokus keyboard). Tidak ada perubahan lain di app.js.
+- Boleh menaikkan nomor versi cache di desktop/src/sw.js. Tidak ada perubahan lain di sw.js.
+
+Titik pindah:
+- Perubahan CSS dan HTML hanya aktif lewat @media (min-width: 1024px). Di bawah 1024 px tampilan harus sama persis seperti sekarang. Wrapper HTML baru memakai display: contents di bawah 1024 px.
+
+Tempat dan tampilan:
+- Timbangan, susunan grid: header (tombol kembali, judul, pilihan Mata Uang) satu baris penuh di atas (grid-column: 1 / -1). Tiga kolom ada di baris yang sama tepat di bawah header, semuanya mulai dari atas dan setinggi sisa layar. Kolom kiri: kartu "Timbang Sebelum Beli". Kolom tengah: "Timbangan Bulan Ini" (navigasi bulan, gambar timbangan, Pemasukan dan Pengeluaran, kotak Surplus atau Defisit, baris Equilibrium). Kolom kanan: kartu "Sesuaikan Saldo". Lebar kolom sekitar 1 : 1,2 : 1. Lebar isi max-width 1600px di tengah.
+- Timbangan, scroll: yang punya overflow-y: auto adalah kolom, satu scroll per kolom. Kartu di dalam kolom tidak boleh punya scrollbar sendiri dan tidak dibatasi tinggi (tinggi mengikuti isi). Gunakan min-height: 0 pada elemen grid supaya kolom tidak melebar melewati layar. Kalau isi satu kolom muat, tidak ada scrollbar sama sekali.
+- Timbangan, gambar timbangan: tampil utuh, tidak terpotong, ukurannya menyesuaikan lebar kolom tengah.
+- Tombol tambah (+): tombol tetap melayang di pojok kanan bawah dan tidak boleh menutupi isi. Beri padding-bawah sekitar 88 px di dalam setiap kolom yang bisa di-scroll (kolom Timbangan, kolom Beranda, area Statistik) supaya isi paling bawah bisa digulir ke atas tombol.
+- Statistik, diagram donut dan daftar kategori: detail kategori (kotak "Rincian Sub Kategori") hanya terbuka lewat klik pada irisan donut atau baris kategori. Klik kategori yang sama sekali lagi menutupnya. Mengarahkan kursor tidak membuka apa pun. Hover hanya boleh mengganti warna latar baris ke token surface-raised, tanpa animasi.
+- Statistik, tata letak saat detail terbuka: kotak detail tampil di atas donut dan daftar, selebar kartu, dan kartu bertambah tinggi mengikuti isi. Donut dan daftar kategori tidak boleh tertimpa, terpotong, atau bertabrakan. Kartu diagram tidak punya scrollbar sendiri; yang scroll adalah area halaman Statistik.
+- Baris kategori di Statistik dibuat bisa difokus dan bisa diaktifkan dengan Enter dan Spasi, dengan indikator fokus keyboard yang sudah ada.
+
+Aturan:
+- Selain izin di atas, hanya CSS dan penyusunan HTML. Tidak ada perubahan logika, nama fungsi, nama kunci data, atau alur sinkron.
+- Warna, font, ukuran teks, radius, dan tanpa bayangan tetap mengikuti dev/DESIGN.md. Tidak ada warna, font, bayangan, atau animasi baru.
+- Aturan kartu tetap berlaku: dilarang kartu di dalam kartu.
+- Target sentuh minimal 44 px dan indikator fokus keyboard tetap ada. Mode terang dan gelap sama-sama harus benar.
+- Sengaja TIDAK dilakukan: perubahan Beranda, Riwayat, Pengaturan, form, fitur baru, perubahan tampilan HP.
+- Dilarang menjalankan build. Hanya ubah desktop/ dan dev/PLAN.md, dev/CHANGELOG.md, dev/PLANSPEC.md.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. dev/SCHEMA.md tidak berubah.
+
+Cek manual (dilakukan pemilik):
+- Browser PC 1280x720, buka Timbangan: header di atas, tiga kolom sejajar di bawahnya (Timbang Sebelum Beli di kiri, timbangan di tengah, Sesuaikan Saldo di kanan), semuanya mulai dari atas. Tidak ada scrollbar di dalam kartu. Kolom yang isinya panjang scroll sendiri dan isi paling bawah tidak tertutup tombol (+).
+- Timbangan: gambar timbangan utuh, simulasi Timbang Sebelum Beli dan Sesuaikan Saldo bekerja seperti biasa, ganti Rupiah, Yen, Dolar dan ganti bulan tetap jalan.
+- Statistik, tab Pengeluaran dan Pemasukan: arahkan kursor ke irisan donut dan baris kategori, tidak ada detail yang terbuka dan tata letak tidak bergeser. Klik satu kategori, detail terbuka di atas dan donut serta daftar tetap utuh tanpa tabrakan. Klik lagi, detail menutup.
+- Statistik: Tab (keyboard) ke baris kategori lalu Enter, detail terbuka.
+- Di 1920x1080: Timbangan dan Statistik rapi, isi tidak melebar lewat 1600 px.
+- Perkecil jendela ke bawah 1024 px: Timbangan dan Statistik kembali sama persis dengan tampilan HP sekarang, dan di HP ketuk kategori masih membuka detail seperti biasa.
+- Ganti mode terang dan gelap: keduanya terbaca jelas.
+
 
 

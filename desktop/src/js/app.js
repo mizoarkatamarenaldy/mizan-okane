@@ -3116,15 +3116,13 @@ function renderDonutChart(transactions) {
 
     function updateDonutDetail(catItem) {
         if (!donutDetail) return;
+        if (!catItem) {
+            donutDetail.textContent = '';
+            donutDetail.classList.add('hidden');
+            return;
+        }
         donutDetail.classList.remove('hidden');
         const amountClass = isIncome ? 'chart-detail-amount income' : 'chart-detail-amount';
-        if (!catItem) {
-            donutDetail.innerHTML = `
-                <span class="chart-detail-month">Total ${typeLabel}:</span>
-                <strong class="${amountClass} tabular-nums">${currencyFormatter.format(totalAmount, currentStatsCurrency)}</strong>
-                <span class="chart-detail-count">(${sortedCategories.length} kategori, ${periodTx.length} transaksi)</span>
-            `;
-        } else {
             const catTransactions = periodTx.filter(tx => getTxStatsCategory(tx) === catItem.category);
             const subcatMap = new Map();
             let noSubAmount = 0;
@@ -3339,18 +3337,6 @@ function renderDonutChart(transactions) {
 
     segments.forEach(seg => {
         const catName = seg.dataset.category;
-        seg.addEventListener('mouseenter', () => {
-            if (!activeDonutCategory) highlightCategory(catName);
-        });
-        seg.addEventListener('mouseleave', () => {
-            if (!activeDonutCategory) highlightCategory(null);
-        });
-        seg.addEventListener('focus', () => {
-            if (!activeDonutCategory) highlightCategory(catName);
-        });
-        seg.addEventListener('blur', () => {
-            if (!activeDonutCategory) highlightCategory(null);
-        });
         seg.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleCategory(catName);
@@ -3360,26 +3346,16 @@ function renderDonutChart(transactions) {
                 e.preventDefault();
                 toggleCategory(catName);
             } else if (e.key === 'Escape') {
-                activeDonutCategory = null;
-                highlightCategory(null);
+                if (activeDonutCategory) {
+                    activeDonutCategory = null;
+                    highlightCategory(null);
+                }
             }
         });
     });
 
     legendItems.forEach(item => {
         const catName = item.dataset.category;
-        item.addEventListener('mouseenter', () => {
-            if (!activeDonutCategory) highlightCategory(catName);
-        });
-        item.addEventListener('mouseleave', () => {
-            if (!activeDonutCategory) highlightCategory(null);
-        });
-        item.addEventListener('focus', () => {
-            if (!activeDonutCategory) highlightCategory(catName);
-        });
-        item.addEventListener('blur', () => {
-            if (!activeDonutCategory) highlightCategory(null);
-        });
         item.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleCategory(catName);
@@ -3389,8 +3365,10 @@ function renderDonutChart(transactions) {
                 e.preventDefault();
                 toggleCategory(catName);
             } else if (e.key === 'Escape') {
-                activeDonutCategory = null;
-                highlightCategory(null);
+                if (activeDonutCategory) {
+                    activeDonutCategory = null;
+                    highlightCategory(null);
+                }
             }
         });
     });
