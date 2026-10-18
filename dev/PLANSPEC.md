@@ -1577,3 +1577,38 @@ Cek manual:
 - Perkecil jendela ke ukuran HP: tata letak kembali vertikal satu kolom, tanpa tombol kategori cepat.
 - Buka halaman lain (Beranda, Riwayat, Timbangan, Statistik, Pengaturan): tampilannya tidak berubah.
 
+## Perbaikan UI PC 10: Kolom Form Transaksi
+
+Tujuan: Dua penyempurnaan kecil di dialog tambah dan edit transaksi. Pilihan bulan di Tanggal & Waktu terpotong, dan baris Kategori tampilannya belum seragam dengan baris Dompet.
+
+Buka hanya bagian "Perbaikan UI PC 9: Form Transaksi Lanjutan" di dev/PLANSPEC.md sebagai acuan. Semua aturannya tetap berlaku kecuali yang diubah di bawah ini.
+
+Tempat dan tampilan:
+- Dialog tambah transaksi dan dialog edit transaksi (satu komponen yang sama).
+- Tanggal & Waktu: perlebar pilihan bulan supaya nama bulan terpanjang (misalnya "September" dan "November") tampil penuh tanpa terpotong. Pakai ruang kosong di sisi kanan baris tanggal. Pilihan hari dan tahun tidak berubah. Pilihan jam dan menit tetap seperti sekarang.
+- Baris Kategori: samakan tampilannya dengan baris Dompet. Label "Kategori" di kiri, di kanan kotak berbingkai dengan tinggi, bingkai, radius, padding, dan tanda panah bawah yang sama dengan kotak Dompet. Isi kotak: ikon dan nama kategori (ditambah sub kategori bila dipilih). Kalau belum dipilih, tampil teks "Pilih kategori" dengan gaya yang sama seperti "Pilih dompet". Tanda panah kanan (>) yang lama dihapus.
+- Klik kotak Kategori tetap membuka panel dua kolom yang sudah ada, tanpa perubahan. Panel itu tidak diganti jadi dropdown biasa.
+- Sejajarkan tinggi baris Kategori dan Dompet di kolom kanan dengan baris Tanggal & Waktu dan Total di kolom kiri, supaya garis pemisah tiap baris rata.
+- Berlaku di layar lebar dan layar sempit.
+
+Aturan:
+- Hanya mengubah tampilan lewat CSS dan markup tampilan, tanpa mengubah logika.
+- Semua field, validasi, dan aturan yang sudah ada tidak berubah: Waktu wajib diisi, format jam 12 atau 24 jam, titik pemisah ribuan, desimal USD, dompet harus dipilih manual, aturan sub kategori.
+- Perilaku simpan, edit, dan transfer tidak berubah. Tab Transfer tidak berubah.
+- Sengaja TIDAK menambah fitur baru dan tidak mengubah halaman lain.
+- Tidak menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka dialog tambah transaksi di PC: pilihan bulan menampilkan "Oktober" penuh. Pilih September dan November: tetap tampil penuh.
+- Kotak Kategori terlihat seragam dengan kotak Dompet (tinggi, bingkai, panah bawah), dan baris kanan sejajar dengan baris kiri.
+- Klik kotak Kategori: panel dua kolom terbuka dan berfungsi seperti sebelumnya. Setelah memilih, kotak menampilkan ikon, kategori, dan sub kategori.
+- Kategori belum dipilih: kotak menampilkan "Pilih kategori". Simpan tanpa kategori: tetap ditolak seperti sebelumnya.
+- Tambah pengeluaran, pemasukan, dan transfer: data tersimpan sama seperti sebelum perubahan.
+- Edit transaksi lama: kotak Kategori terisi dengan benar.
+- Perkecil jendela ke ukuran HP: tata letak satu kolom tetap rapi, bulan tidak terpotong.
+- Buka halaman lain: tampilannya tidak berubah.
+
+

@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 10: Kolom Form Transaksi
+- Diperbaiki: Pilihan bulan pada komponen Tanggal & Waktu diperlebar menjadi 115 px (baik di tampilan dasar maupun layar PC) agar nama bulan terpanjang seperti "September" dan "November" tampil utuh tanpa terpotong (`desktop/src/css/style.css`).
+- Diubah: Tampilan baris Kategori diseragamkan dengan baris Dompet berupa kotak berbingkai tinggi 40 px, border 1 px, radius 6 px, padding 0 10px, background token surface, dan ikon panah bawah chevron (menggantikan tanda panah kanan yang lama), dengan teks "Pilih kategori" bergaya placeholder saat belum dipilih (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diperbaiki: Tinggi baris Kategori dan Dompet di kolom kanan disejajarkan dengan baris Tanggal & Waktu dan Total di kolom kiri sehingga garis pemisah tiap baris rata baik di layar lebar maupun layar sempit (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v73` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 10: Kolom Form Transaksi" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 9: Form Transaksi Lanjutan
 - Diperbaiki: Dialog form tambah dan edit transaksi di layar PC (@media min-width: 1024px) dilebarkan menjadi persegi panjang horizontal (max-width 820px) dengan tata letak isi dua kolom menggunakan CSS Grid sehingga seluruh isinya tampil penuh tanpa scroll di dalam dialog pada ukuran jendela PC normal (`desktop/src/css/style.css`).
 - Diubah: Tata letak form transaksi di PC ditata rapi dua kolom: baris paling atas tiga tab jenis (Pengeluaran, Pemasukan, Transfer) selebar dialog; kolom kiri berisi Tanggal & Waktu (tanggal dan jam bersebelahan dalam satu baris) serta Total; kolom kanan berisi Kategori dan Dompet (atau Dari dan Ke pada tab Transfer); baris di bawah kedua kolom selebar dialog berisi Catatan; dan paling bawah tombol Simpan selebar dialog (`desktop/src/css/style.css`).

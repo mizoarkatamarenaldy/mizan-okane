@@ -4175,7 +4175,8 @@ button:disabled {
 }
 
 .compact-date-inputs .date-select-month {
-    flex: 0 0 88px;
+    flex: 0 0 115px;
+    width: 115px;
 }
 
 .compact-date-inputs .date-select-year {
@@ -4218,7 +4219,7 @@ button:disabled {
     font-size: 16px !important;
     font-weight: 600 !important;
     color: var(--text) !important;
-    min-height: 36px !important;
+    min-height: 40px !important;
     outline: none !important;
     box-shadow: none !important;
     width: 100% !important;
@@ -4226,27 +4227,41 @@ button:disabled {
     font-feature-settings: "tnum";
 }
 
-/* Komponen Nilai: Kategori */
+/* Komponen Nilai: Kategori & Dompet */
+.category-row-btn,
+.compact-select {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 10px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+    cursor: pointer;
+    outline: none;
+}
+
 .category-row-btn {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
-    min-height: 40px;
-    padding: 4px 0;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    cursor: pointer;
-    font-size: 14px;
     text-align: left;
-    outline: none;
 }
 
-.category-row-btn:focus-visible {
+.category-row-btn:hover,
+.compact-select:hover {
+    background-color: var(--surface-raised);
+}
+
+.category-row-btn:focus-visible,
+.compact-select:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
-    border-radius: var(--radius-input, 6px);
+    border-color: var(--accent);
 }
 
 .category-row-btn-content {
@@ -4280,29 +4295,16 @@ button:disabled {
     text-overflow: ellipsis;
 }
 
+.category-display-text.is-placeholder,
+.compact-select:has(option[value=""]:checked),
+.compact-select:invalid {
+    color: var(--text-secondary);
+}
+
 .category-row-chevron {
     color: var(--text-secondary);
     flex-shrink: 0;
     margin-left: 8px;
-}
-
-/* Komponen Nilai: Dompet */
-.compact-select {
-    width: 100%;
-    min-height: 40px;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 14px;
-    cursor: pointer;
-    outline: none;
-    padding: 4px 0;
-}
-
-.compact-select:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: var(--radius-input, 6px);
 }
 
 .compact-select option {
@@ -6311,7 +6313,8 @@ body.modal-open {
     }
 
     .compact-date-inputs .date-select-month {
-        flex: 0 0 70px;
+        flex: 0 0 115px;
+        width: 115px;
     }
 
     .compact-date-inputs .date-select-year {

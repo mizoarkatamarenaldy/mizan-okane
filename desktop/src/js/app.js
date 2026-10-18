@@ -619,16 +619,24 @@ export function updateCategoryRowDisplay() {
     const sub = txSubcategoryInput ? txSubcategoryInput.value.trim() : '';
     if (!txCategoryDisplayText) return;
     if (!cat) {
-        if (txCategoryDisplayIcon) txCategoryDisplayIcon.innerHTML = '';
-        txCategoryDisplayText.textContent = '';
+        if (txCategoryDisplayIcon) {
+            txCategoryDisplayIcon.innerHTML = '';
+            txCategoryDisplayIcon.style.display = 'none';
+        }
+        txCategoryDisplayText.textContent = 'Pilih kategori';
+        txCategoryDisplayText.classList.add('is-placeholder');
+        if (btnOpenCategoryPicker) btnOpenCategoryPicker.classList.add('is-empty');
         return;
     }
     const type = getSelectedType();
     const iconSvg = sub ? getSubcategoryIconSvg(cat, sub, type) : getCategoryIconSvg(cat, type);
     if (txCategoryDisplayIcon) {
         txCategoryDisplayIcon.innerHTML = iconSvg || '';
+        txCategoryDisplayIcon.style.display = iconSvg ? 'inline-flex' : 'none';
     }
     txCategoryDisplayText.textContent = sub ? `${cat} > ${sub}` : cat;
+    txCategoryDisplayText.classList.remove('is-placeholder');
+    if (btnOpenCategoryPicker) btnOpenCategoryPicker.classList.remove('is-empty');
 }
 
 let currentPickerHighlightedCategory = null;
@@ -7410,6 +7418,12 @@ txTypeInputs.forEach(radio => {
         updateTypeUI(radio.value);
     });
 });
+
+if (txCategoryInput) {
+    txCategoryInput.addEventListener('change', () => {
+        updateCategoryRowDisplay();
+    });
+}
 
 if (btnOpenCategoryPicker) {
     btnOpenCategoryPicker.addEventListener('click', (e) => {

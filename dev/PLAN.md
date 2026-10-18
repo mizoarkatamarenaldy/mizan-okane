@@ -112,6 +112,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Perbaikan UI PC 7: Timbangan
 - [x] Perbaikan UI PC 8: Form Tambah Transaksi
 - [x] Perbaikan UI PC 9: Form Transaksi Lanjutan
+- [x] Perbaikan UI PC 10: Kolom Form Transaksi
 - [ ] Konversi Tauri
 - [ ] Konversi Kotlin
 - [ ] APK rilis
