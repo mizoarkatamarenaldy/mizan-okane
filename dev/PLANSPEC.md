@@ -1118,3 +1118,34 @@ Cek manual:
 - Aksi: tutup pemilih ikon lewat X dan lewat Batal, lalu kembali ke halaman Pengaturan. Hasil: tidak ada kotak "Pilih Ikon" yang tertinggal.
 - Aksi: muat ulang aplikasi langsung di halaman Pengaturan, di tema gelap dan terang, di lebar layar HP dan PC. Hasil: tidak ada kotak "Pilih Ikon" yang muncul.
 
+## Kategori Equilibrium
+
+Tujuan: Penyesuaian saldo (Equilibrium) punya kategori yang jelas, dan hasilnya ikut terhitung di Statistik. Defisit juga dapat pilihan penyebab, sama seperti surplus.
+
+Tempat dan tampilan:
+- Dialog "Berapa saldo riil sekarang?" di Timbangan: saat selisih negatif, tampil bagian "Kategori Penyesuaian" dengan tiga pilihan: Biaya admin, Lupa catat, Koreksi. Gayanya sama dengan pilihan di surplus. Default terpilih: Koreksi.
+- Pilihan saat selisih positif tetap: Bunga, Cashback, Koreksi.
+- Tidak ada elemen tampilan lain yang baru. Baris Equilibrium di Timbangan tetap seperti sekarang.
+
+Aturan:
+- Equilibrium adalah kategori induk tetap bawaan aplikasi. Ada satu di daftar kategori pemasukan (untuk surplus) dan satu di daftar kategori pengeluaran (untuk defisit).
+- Sub kategorinya adalah pilihan di dialog: pemasukan = Bunga, Cashback, Koreksi; pengeluaran = Biaya admin, Lupa catat, Koreksi.
+- Penyesuaian surplus dihitung sebagai pemasukan di Statistik, penyesuaian defisit sebagai pengeluaran, keduanya di bawah kategori induk Equilibrium.
+- Di grafik dan donut Statistik hanya induk Equilibrium yang muncul, sebagai satu irisan, sama seperti kategori lain. Sub kategori tidak dipecah di grafik.
+- Equilibrium dan sub kategorinya tidak bisa diedit, dihapus, digeser, atau diberi ikon kustom di Pengaturan, dan tidak muncul sebagai pilihan di form tambah/edit transaksi biasa.
+- Equilibrium tidak punya budget dan tidak muncul di daftar budget.
+- Angka Surplus/Defisit di kartu Timbangan Bulan Ini tidak berubah: tetap hanya dari transaksi biasa, Equilibrium tetap baris terpisah.
+- Penyesuaian lama yang belum punya label dianggap Koreksi.
+- Hal yang sengaja TIDAK dilakukan: "Lupa catat" tidak mengarahkan ke form pengeluaran, tetap satu baris penyesuaian.
+
+Data:
+- Equilibrium adalah kategori bawaan dari kode, jangan disimpan sebagai kategori buatan pengguna di daftar kategori. Kalau perlu menambah field label sub kategori pada data penyesuaian, pastikan data lama tetap terbaca, dan pastikan sinkron Drive, ekspor, dan impor JSON tetap aman. Tulis hasilnya di entri CHANGELOG.
+
+Cek manual:
+- Dompet Kas Tunai saldo di app Rp 700.000, isi saldo riil 500.000: muncul pilihan Biaya admin, Lupa catat, Koreksi dengan Koreksi terpilih. Pilih Lupa catat, konfirmasi. Di Statistik bulan itu, pengeluaran bertambah Rp 200.000 di kategori Equilibrium.
+- Isi saldo riil 800.000: muncul Bunga, Cashback, Koreksi. Pilih Bunga, konfirmasi. Di Statistik, pemasukan bertambah Rp 100.000 di kategori Equilibrium.
+- Di donut Statistik, Equilibrium muncul sebagai satu irisan, bukan per sub kategori.
+- Di Pengaturan kategori, Equilibrium tidak bisa diedit, dihapus, atau digeser. Di form tambah transaksi, Equilibrium tidak ada di daftar kategori.
+- Kartu Surplus di Timbangan tidak berubah setelah penyesuaian, baris Equilibrium tetap menampilkan angka bersihnya.
+
+

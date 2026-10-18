@@ -528,6 +528,11 @@ function getCategoryNames(type) {
 }
 
 export function getSubcategoriesFor(type, categoryName) {
+    if (categoryName === 'Equilibrium') {
+        if (type === 'income') return ['Bunga', 'Cashback', 'Koreksi'];
+        if (type === 'expense') return ['Biaya admin', 'Lupa catat', 'Koreksi'];
+        return ['Bunga', 'Cashback', 'Biaya admin', 'Lupa catat', 'Koreksi'];
+    }
     if (!currentCategories || !currentCategories.subcategories || !categoryName) return [];
     const group = currentCategories.subcategories[type];
     if (!group || typeof group !== 'object') return [];
@@ -540,7 +545,17 @@ export function getSubcategoriesFor(type, categoryName) {
 }
 
 export function getTxSubcategory(tx) {
-    if (!tx || !tx.subcategory || tx.type === 'transfer') return '';
+    if (!tx || tx.type === 'transfer') return '';
+    if (tx.type === 'penyesuaian') {
+        if (typeof tx.subcategory === 'string' && tx.subcategory.trim()) {
+            return tx.subcategory.trim();
+        }
+        if (typeof tx.category === 'string' && tx.category.trim() && tx.category.trim() !== 'Equilibrium') {
+            return tx.category.trim();
+        }
+        return 'Koreksi';
+    }
+    if (!tx.subcategory) return '';
     const subs = getSubcategoriesFor(tx.type, tx.category);
     return subs.includes(tx.subcategory) ? tx.subcategory : '';
 }
@@ -548,10 +563,45 @@ export function getTxSubcategory(tx) {
 export function getTxCategoryDisplayText(tx) {
     if (!tx) return '';
     if (tx.type === 'transfer') return 'Transfer';
+    if (tx.type === 'penyesuaian') {
+        const sub = getTxSubcategory(tx);
+        return sub ? `Equilibrium > ${sub}` : 'Equilibrium';
+    }
     const cat = tx.category || '';
     if (!cat) return '';
     const sub = getTxSubcategory(tx);
     return sub ? `${cat} > ${sub}` : cat;
+}
+
+export function isTxMatchingStatsType(tx, targetType) {
+    if (!tx || tx.deleted || !tx.date) return false;
+    if (targetType === 'income') {
+        if (tx.type === 'income' && tx.amount > 0) return true;
+        if (tx.type === 'penyesuaian' && tx.amount > 0) return true;
+        return false;
+    }
+    if (targetType === 'expense') {
+        if (tx.type === 'expense' && tx.amount > 0) return true;
+        if (tx.type === 'penyesuaian' && tx.amount < 0) return true;
+        return false;
+    }
+    return false;
+}
+
+export function getTxEffectiveAmount(tx) {
+    if (!tx) return 0;
+    if (tx.type === 'penyesuaian') {
+        return Math.abs(tx.amount);
+    }
+    return tx.amount;
+}
+
+export function getTxStatsCategory(tx) {
+    if (!tx) return 'Lainnya';
+    if (tx.type === 'penyesuaian') {
+        return 'Equilibrium';
+    }
+    return (tx.category && tx.category.trim()) ? tx.category.trim() : 'Lainnya';
 }
 
 export function populateSubcategoryOptions(categoryName, selectedSub = null) {
@@ -1565,6 +1615,7 @@ export function getCategoryIconSvg(categoryNameOrItemOrId, type) {
         const iconId = getCatIcon(categoryNameOrItemOrId);
         if (iconId) return getCategoryIconSvgById(iconId);
         const name = getCatName(categoryNameOrItemOrId);
+        if (name === 'Equilibrium') return PENYESUAIAN_ICON_SVG;
         const item = findCategoryItem(name, type);
         return getCategoryIconSvgById(item ? getCatIcon(item) : NEUTRAL_CATEGORY_ICON_ID);
     }
@@ -1572,6 +1623,9 @@ export function getCategoryIconSvg(categoryNameOrItemOrId, type) {
     const str = String(categoryNameOrItemOrId || '').trim();
     if (!str) {
         return getCategoryIconSvgById(NEUTRAL_CATEGORY_ICON_ID);
+    }
+    if (str === 'Equilibrium') {
+        return PENYESUAIAN_ICON_SVG;
     }
 
     const item = findCategoryItem(str, type);
@@ -1606,6 +1660,9 @@ export function findSubcategoryItem(categoryName, subcategoryName, type) {
 }
 
 export function getSubcategoryIconSvg(categoryName, subcategoryNameOrItem, type) {
+    if (categoryName === 'Equilibrium') {
+        return PENYESUAIAN_ICON_SVG;
+    }
     let iconId = '';
     if (subcategoryNameOrItem && typeof subcategoryNameOrItem === 'object') {
         iconId = getCatIcon(subcategoryNameOrItem);
@@ -2081,10 +2138,10 @@ function renderMonthlyChart(transactions) {
     // Filter transaksi aktif (tidak terhapus) sesuai tipe (pengeluaran atau pemasukan),
     // transfer antar dompet tidak dihitung, jumlah > 0, dan mata uang sesuai pilihan statistik
     const chartTx = (transactions || []).filter(tx => 
-        tx.type === currentChartType && 
+        isTxMatchingStatsType(tx, currentChartType) && 
         tx.type !== 'transfer' && 
         !tx.deleted && 
-        tx.amount > 0 &&
+        tx.date &&
         getTransactionCurrency(tx) === currentStatsCurrency
     );
 
@@ -2124,7 +2181,7 @@ function renderMonthlyChart(transactions) {
         const month = String(parseInt(match[2], 10)).padStart(2, '0');
         const key = `${year}-${month}`;
         const item = monthData.get(key) || { total: 0, count: 0 };
-        item.total += tx.amount;
+        item.total += getTxEffectiveAmount(tx);
         if (currentStatsCurrency === 'USD') {
             item.total = Math.round(item.total * 100) / 100;
         } else {
@@ -2355,10 +2412,9 @@ function renderDailyChart(transactions) {
 
     // Filter transaksi aktif untuk tipe dan mata uang
     const chartTx = (transactions || []).filter(tx => 
-        tx.type === currentChartType && 
+        isTxMatchingStatsType(tx, currentChartType) && 
         tx.type !== 'transfer' && 
         !tx.deleted && 
-        tx.amount > 0 &&
         getTransactionCurrency(tx) === currentStatsCurrency &&
         tx.date
     );
@@ -2410,7 +2466,7 @@ function renderDailyChart(transactions) {
         const d = parseInt(match[3], 10);
         if (dayData.has(d)) {
             const item = dayData.get(d);
-            item.total += tx.amount;
+            item.total += getTxEffectiveAmount(tx);
             if (currentStatsCurrency === 'USD') {
                 item.total = Math.round(item.total * 100) / 100;
             } else {
@@ -2546,10 +2602,9 @@ function renderYearlyChart(transactions) {
 
     // Filter transaksi aktif untuk tipe dan mata uang
     const chartTx = (transactions || []).filter(tx => 
-        tx.type === currentChartType && 
+        isTxMatchingStatsType(tx, currentChartType) && 
         tx.type !== 'transfer' && 
         !tx.deleted && 
-        tx.amount > 0 &&
         getTransactionCurrency(tx) === currentStatsCurrency &&
         tx.date
     );
@@ -2610,7 +2665,7 @@ function renderYearlyChart(transactions) {
         const y = parseInt(match[1], 10);
         if (yearData.has(y)) {
             const item = yearData.get(y);
-            item.total += tx.amount;
+            item.total += getTxEffectiveAmount(tx);
             if (currentStatsCurrency === 'USD') {
                 item.total = Math.round(item.total * 100) / 100;
             } else {
@@ -2955,10 +3010,9 @@ function renderDonutChart(transactions) {
     // Filter transaksi untuk periode yang dipilih sesuai tipe (pengeluaran atau pemasukan),
     // transfer antar dompet tidak dihitung, tidak terhapus, jumlah > 0, dan mata uang sesuai pilihan statistik
     const periodTx = (transactions || []).filter(tx => {
-        if (tx.type !== currentDonutType) return false;
+        if (!isTxMatchingStatsType(tx, currentDonutType)) return false;
         if (tx.type === 'transfer') return false;
         if (tx.deleted) return false;
-        if (!(tx.amount > 0)) return false;
         if (!tx.date) return false;
         if (getTransactionCurrency(tx) !== currentStatsCurrency) return false;
         const match = tx.date.match(/^(\d{4})-(\d{1,2})/);
@@ -2997,12 +3051,13 @@ function renderDonutChart(transactions) {
     const categoryMap = new Map();
     let totalAmount = 0;
     for (const tx of periodTx) {
-        const cat = (tx.category && tx.category.trim()) ? tx.category.trim() : 'Lainnya';
+        const cat = getTxStatsCategory(tx);
         const item = categoryMap.get(cat) || { amount: 0, count: 0 };
-        item.amount += tx.amount;
+        const amt = getTxEffectiveAmount(tx);
+        item.amount += amt;
         item.count += 1;
         categoryMap.set(cat, item);
-        totalAmount += tx.amount;
+        totalAmount += amt;
     }
 
     for (const [k, item] of categoryMap.entries()) {
@@ -3070,19 +3125,20 @@ function renderDonutChart(transactions) {
                 <span class="chart-detail-count">(${sortedCategories.length} kategori, ${periodTx.length} transaksi)</span>
             `;
         } else {
-            const catTransactions = periodTx.filter(tx => ((tx.category && tx.category.trim()) ? tx.category.trim() : 'Lainnya') === catItem.category);
+            const catTransactions = periodTx.filter(tx => getTxStatsCategory(tx) === catItem.category);
             const subcatMap = new Map();
             let noSubAmount = 0;
             let noSubCount = 0;
             for (const tx of catTransactions) {
                 const sub = getTxSubcategory(tx);
+                const amt = getTxEffectiveAmount(tx);
                 if (sub) {
                     const item = subcatMap.get(sub) || { amount: 0, count: 0 };
-                    item.amount += tx.amount;
+                    item.amount += amt;
                     item.count += 1;
                     subcatMap.set(sub, item);
                 } else {
-                    noSubAmount += tx.amount;
+                    noSubAmount += amt;
                     noSubCount += 1;
                 }
             }
@@ -3841,6 +3897,28 @@ function renderTimbanganEquilibrium() {
 let currentAdjustWalletId = null;
 let currentAdjustDiff = 0;
 let currentAdjustCategory = 'Bunga';
+const ADJUST_POSITIVE_CATEGORIES = ['Bunga', 'Cashback', 'Koreksi'];
+const ADJUST_NEGATIVE_CATEGORIES = ['Biaya admin', 'Lupa catat', 'Koreksi'];
+let currentAdjustChipMode = null;
+
+function renderAdjustCategoryChips(isPositive) {
+    if (!adjustCategoryChips) return;
+    const mode = isPositive ? 'pos' : 'neg';
+    const categories = isPositive ? ADJUST_POSITIVE_CATEGORIES : ADJUST_NEGATIVE_CATEGORIES;
+    const defaultCat = isPositive ? 'Bunga' : 'Koreksi';
+
+    if (currentAdjustChipMode !== mode) {
+        currentAdjustChipMode = mode;
+        currentAdjustCategory = defaultCat;
+    } else if (!categories.includes(currentAdjustCategory)) {
+        currentAdjustCategory = defaultCat;
+    }
+
+    adjustCategoryChips.innerHTML = categories.map(cat => {
+        const isActive = cat === currentAdjustCategory;
+        return `<button type="button" class="adjust-cat-chip${isActive ? ' is-active' : ''}" data-category="${escapeHTML(cat)}" role="radio" aria-checked="${isActive ? 'true' : 'false'}">${escapeHTML(cat)}</button>`;
+    }).join('');
+}
 
 function renderTimbanganAdjustSection() {
     if (!timbanganAdjustWalletList) return;
@@ -3905,14 +3983,8 @@ function openAdjustDialog(walletId) {
 
     currentAdjustDiff = 0;
     currentAdjustCategory = 'Bunga';
-
-    if (adjustCategoryChips) {
-        adjustCategoryChips.querySelectorAll('.adjust-cat-chip').forEach(chip => {
-            const isDefault = chip.dataset.category === 'Bunga';
-            chip.classList.toggle('is-active', isDefault);
-            chip.setAttribute('aria-checked', String(isDefault));
-        });
-    }
+    currentAdjustChipMode = null;
+    renderAdjustCategoryChips(true);
 
     updateAdjustDialogDiffUI(appBal, curr);
 
@@ -3964,6 +4036,7 @@ function updateAdjustDialogDiffUI(appBal, curr) {
             adjustDiffVal.textContent = '+' + currencyFormatter.format(diff, curr);
             adjustDiffVal.className = 'adjust-diff-val tabular-nums is-plus';
         }
+        renderAdjustCategoryChips(true);
         if (adjustCategoryGroup) adjustCategoryGroup.classList.remove('hidden');
         btnAdjustConfirm.disabled = false;
     } else {
@@ -3973,8 +4046,8 @@ function updateAdjustDialogDiffUI(appBal, curr) {
             adjustDiffVal.textContent = '−' + currencyFormatter.format(Math.abs(diff), curr);
             adjustDiffVal.className = 'adjust-diff-val tabular-nums is-minus';
         }
-        if (adjustCategoryGroup) adjustCategoryGroup.classList.add('hidden');
-        currentAdjustCategory = 'Koreksi';
+        renderAdjustCategoryChips(false);
+        if (adjustCategoryGroup) adjustCategoryGroup.classList.remove('hidden');
         btnAdjustConfirm.disabled = false;
     }
 }
@@ -3994,7 +4067,7 @@ function createTxItemElement(tx, filterWallet) {
     txEl.dataset.id = tx.id;
     const isTransfer = tx.type === 'transfer';
     const isPenyesuaian = tx.type === 'penyesuaian';
-    const sub = (!isTransfer && !isPenyesuaian) ? getTxSubcategory(tx) : '';
+    const sub = !isTransfer ? getTxSubcategory(tx) : '';
 
     let sign = '';
     let amountClass = '';
@@ -4016,7 +4089,7 @@ function createTxItemElement(tx, filterWallet) {
         amountClass = 'transfer';
         sign = ''; // Transfer: teks biru, tanpa tanda +/−, ada label "Transfer"
     } else if (isPenyesuaian) {
-        categoryText = `Penyesuaian: ${escapeHTML(tx.category || 'Koreksi')}`;
+        categoryText = `Penyesuaian: ${escapeHTML(sub || 'Koreksi')}`;
         categoryHtml = categoryText;
         const isPlus = tx.amount >= 0;
         sign = isPlus ? '+' : '−';
@@ -4261,6 +4334,7 @@ export function matchesHistorySearch(tx, query, wallets = currentWallets) {
         if (typeof tx.category === 'string' && tx.category.toLowerCase().includes(q)) return true;
     } else if (tx.type === 'penyesuaian') {
         if ('penyesuaian'.includes(q)) return true;
+        if ('equilibrium'.includes(q)) return true;
         if (typeof tx.category === 'string' && tx.category.toLowerCase().includes(q)) return true;
     } else if (typeof tx.category === 'string' && tx.category.toLowerCase().includes(q)) {
         return true;
@@ -5411,6 +5485,10 @@ async function handleSaveCategoryName(type, oldName, newName, newIcon = '') {
         showNotification('Nama kategori tidak boleh kosong.', 'warn');
         return;
     }
+    if (newName.toLowerCase() === 'equilibrium') {
+        showNotification('Nama "Equilibrium" adalah nama kategori bawaan sistem.', 'warn');
+        return;
+    }
 
     const list = currentCategories[type] || [];
     const catItem = list.find(c => getCatName(c) === oldName);
@@ -5499,6 +5577,10 @@ async function handleAddCategory(type, inputEl) {
     const name = inputEl.value.trim();
     if (!name) {
         showNotification('Nama kategori tidak boleh kosong.', 'warn');
+        return;
+    }
+    if (name.toLowerCase() === 'equilibrium') {
+        showNotification('Nama "Equilibrium" adalah nama kategori bawaan sistem.', 'warn');
         return;
     }
 
@@ -7931,7 +8013,7 @@ btnExportCsv.addEventListener('click', async () => {
                 escapeCSVField(tx.time || ''),
                 escapeCSVField(walletName),
                 escapeCSVField(tx.type === 'penyesuaian' ? 'Penyesuaian' : tx.type),
-                escapeCSVField(tx.category || (tx.type === 'transfer' ? 'Transfer' : '')),
+                escapeCSVField(tx.type === 'penyesuaian' ? 'Equilibrium' : (tx.category || (tx.type === 'transfer' ? 'Transfer' : ''))),
                 escapeCSVField(tx.amount),
                 escapeCSVField(tx.note || ''),
                 escapeCSVField(getTxSubcategory(tx) || '')
@@ -8280,16 +8362,16 @@ if (adjustRealBalanceInput) {
 }
 
 if (adjustCategoryChips) {
-    adjustCategoryChips.querySelectorAll('.adjust-cat-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            adjustCategoryChips.querySelectorAll('.adjust-cat-chip').forEach(c => {
-                c.classList.remove('is-active');
-                c.setAttribute('aria-checked', 'false');
-            });
-            chip.classList.add('is-active');
-            chip.setAttribute('aria-checked', 'true');
-            currentAdjustCategory = chip.dataset.category || 'Koreksi';
+    adjustCategoryChips.addEventListener('click', (e) => {
+        const chip = e.target.closest('.adjust-cat-chip');
+        if (!chip) return;
+        adjustCategoryChips.querySelectorAll('.adjust-cat-chip').forEach(c => {
+            c.classList.remove('is-active');
+            c.setAttribute('aria-checked', 'false');
         });
+        chip.classList.add('is-active');
+        chip.setAttribute('aria-checked', 'true');
+        currentAdjustCategory = chip.dataset.category || (currentAdjustDiff > 0 ? 'Bunga' : 'Koreksi');
     });
 }
 
@@ -8312,14 +8394,17 @@ if (btnAdjustConfirm) {
         const now = new Date();
         const date = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
         const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        const cat = currentAdjustDiff > 0 ? (currentAdjustCategory || 'Bunga') : 'Koreksi';
+        const subcat = currentAdjustDiff > 0
+            ? (ADJUST_POSITIVE_CATEGORIES.includes(currentAdjustCategory) ? currentAdjustCategory : 'Bunga')
+            : (ADJUST_NEGATIVE_CATEGORIES.includes(currentAdjustCategory) ? currentAdjustCategory : 'Koreksi');
 
         const tx = {
             id: crypto.randomUUID(),
             type: 'penyesuaian',
             amount: currentAdjustDiff,
             walletId: currentAdjustWalletId,
-            category: cat,
+            category: 'Equilibrium',
+            subcategory: subcat,
             date,
             time,
             note: '',

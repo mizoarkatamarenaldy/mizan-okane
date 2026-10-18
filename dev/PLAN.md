@@ -101,6 +101,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Ikon kategori kustom
   - [x] Ikon sub kategori
   - [x] Perbaikan: dialog Pilih Ikon muncul sendiri di Pengaturan
+  - [x] Kategori Equilibrium
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

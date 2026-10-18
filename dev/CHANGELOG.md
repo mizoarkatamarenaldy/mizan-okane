@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Kategori Equilibrium
+- Ditambah: Kategori induk bawaan sistem "Equilibrium" dengan sub kategori pilihan pada penyesuaian saldo (pemasukan = Bunga, Cashback, Koreksi; pengeluaran = Biaya admin, Lupa catat, Koreksi) (`index.html`, `js/app.js`).
+- Ditambah: Pilihan kategori penyesuaian pada dialog saldo riil di Timbangan saat selisih bernilai negatif (Biaya admin, Lupa catat, Koreksi) dengan Koreksi sebagai pilihan default aktif (`index.html`, `js/app.js`).
+- Ditambah: Perhitungan penyesuaian surplus sebagai pemasukan dan penyesuaian defisit sebagai pengeluaran di bawah kategori induk Equilibrium pada seluruh visualisasi halaman Statistik (grafik harian, bulanan, tahunan, dan diagram donut per kategori) (`js/app.js`).
+- Ditambah: Dukungan field `subcategory` pada transaksi penyesuaian dengan kompatibilitas data lama (transaksi penyesuaian tanpa label otomatis dianggap Koreksi), keamanan sinkronisasi Google Drive, ekspor/impor cadangan JSON, serta pencantuman tipe "Penyesuaian" dan kategori "Equilibrium" pada ekspor CSV (`js/app.js`).
+- Diubah: Diagram donut Statistik menampilkan Equilibrium sebagai satu irisan utuh dan rincian sub kategori hanya tampil saat irisan atau legenda Equilibrium dipilih (`js/app.js`).
+- Diubah: Kategori Equilibrium dan sub kategorinya dilindungi sehingga tidak bisa diedit, dihapus, digeser, atau diberi ikon kustom di Pengaturan, serta tidak muncul pada formulir transaksi biasa maupun daftar budget (`js/app.js`).
+- Diubah: Angka surplus/defisit kartu Timbangan bulan ini tetap murni dari transaksi biasa tanpa perubahan, baris Equilibrium tetap menampilkan total bersih penyesuaian secara terpisah (`js/app.js`).
+- Diubah: Versi service worker dinaikkan ke `mizan-v61` (`sw.js`).
+- Diubah: Mencentang item "Kategori Equilibrium" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Perbaikan: dialog Pilih Ikon muncul sendiri di Pengaturan
 - Diperbaiki: Dialog pemilih ikon (`#icon-picker-dialog`) yang tampil permanen di halaman Pengaturan tanpa diminta diperbaiki akar masalahnya dengan menghapus deklarasi `display: flex;` tanpa syarat pada selector `.icon-picker-dialog` yang sebelumnya menimpa aturan semantik bawaan browser `dialog:not([open])`, serta menambahkan aturan eksplisit `.icon-picker-dialog:not([open])` dan `.confirm-dialog:not([open])` dengan `display: none` dan `.icon-picker-dialog[open]` dengan `display: flex; flex-direction: column;` agar dialog tersembunyi sempurna saat ditutup (`css/style.css`).
 - Diperbaiki: Penanganan penutupan dialog pemilih ikon diperkuat dengan listener event `close`, pembersihan state runtime callback pemilih ikon, fallback penutupan klik di luar modal (backdrop), serta penutupan dialog saat tombol fisik back Android ditekan (`js/app.js`).
