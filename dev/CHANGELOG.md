@@ -10,6 +10,10 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Spek item setelah Tahap 5
+- Ditambah: Spesifikasi empat item setelah Tahap 5 (Pemisahan folder, Revisi UI PC, Konversi Tauri, dan Konversi Kotlin) di bagian akhir dokumen (`dev/PLANSPEC.md`).
+- Diubah: Menambahkan catatan penundaan rilis hingga Konversi Kotlin selesai pada bagian "APK rilis" dan "APK Item A" (`dev/PLANSPEC.md`).
+
 ## 2026-10-18: Kategori Equilibrium
 - Ditambah: Kategori induk bawaan sistem "Equilibrium" dengan sub kategori pilihan pada penyesuaian saldo (pemasukan = Bunga, Cashback, Koreksi; pengeluaran = Biaya admin, Lupa catat, Koreksi) (`index.html`, `js/app.js`).
 - Ditambah: Pilihan kategori penyesuaian pada dialog saldo riil di Timbangan saat selisih bernilai negatif (Biaya admin, Lupa catat, Koreksi) dengan Koreksi sebagai pilihan default aktif (`index.html`, `js/app.js`).

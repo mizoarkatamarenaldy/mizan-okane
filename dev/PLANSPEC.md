@@ -133,9 +133,11 @@ Statistik, Pengaturan, Kebijakan Privasi, Syarat dan Ketentuan
 (semua teks Indonesia, mode terang dan gelap, tes di HP)
 
 ## APK rilis: unggah APK ke GitHub Releases
+Catatan: ditunda sampai Konversi Kotlin selesai. Yang dirilis nanti APK hasil Kotlin, bukan APK Capacitor. Login Google native dikerjakan sebagai bagian Konversi Kotlin.
 (dikerjakan pemilik setelah dua perbaikan APK di atas selesai dan APK dibuild ulang; APK tidak dimasukkan ke repo lewat git add)
 
 ## APK Item A: login Google native untuk APK
+Catatan: ditunda sampai Konversi Kotlin selesai. Yang dirilis nanti APK hasil Kotlin, bukan APK Capacitor. Login Google native dikerjakan sebagai bagian Konversi Kotlin.
 (plugin Google Sign-In untuk Capacitor, OAuth Client ID tipe Android, token Drive `appDataFolder` didapat lewat jalur native; logika sinkron dan aturan konflik tidak berubah; versi web tetap memakai login yang sekarang; dikerjakan setelah APK rilis, dites di HP asli)
 
 ## Mata uang per dompet, tahap 1: Rupiah dan Yen
@@ -1147,5 +1149,70 @@ Cek manual:
 - Di donut Statistik, Equilibrium muncul sebagai satu irisan, bukan per sub kategori.
 - Di Pengaturan kategori, Equilibrium tidak bisa diedit, dihapus, atau digeser. Di form tambah transaksi, Equilibrium tidak ada di daftar kategori.
 - Kartu Surplus di Timbangan tidak berubah setelah penyesuaian, baris Equilibrium tetap menampilkan angka bersihnya.
+
+## Pemisahan folder
+
+Tujuan: Memisahkan struktur folder repo menjadi dev/, mobile/ (Kotlin, khusus Android), dan desktop/ (Tauri, khusus Windows) dalam satu monorepo. Tujuannya supaya mobile dan desktop punya UI sendiri. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+
+Aturan:
+- Item ini baru boleh dikerjakan setelah semua fitur Tahap 5 tercentang.
+- Item ini mengubah struktur repo, jadi wajib ada prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut folder mana yang boleh dipindah.
+- Sebelum dikerjakan, pemilik membuat tag git "pra-pisah-folder" sendiri.
+- Spek rinci wajib memuat pembuatan dev/SCHEMA.md, yang mencatat format JSON backup dan struktur file di Google Drive appDataFolder.
+- Setelah item ini selesai, fitur dibekukan. Perubahan logika bersama (bukan UI) hanya boleh dengan prompt "Izin dari pemilik" dan dikerjakan di desktop/ dan mobile/ sekaligus.
+- Spek rinci (folder apa dipisah jadi apa, dampak ke GitHub Pages, www/, android/, dan alur RULES.md) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+
+Data:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+Cek manual:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+## Revisi UI PC
+
+Tujuan: Membuat tampilan versi PC punya desain sendiri yang berbeda dari mobile. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+
+Aturan:
+- Item ini baru boleh dikerjakan setelah "Pemisahan folder" selesai.
+- Hanya mengubah tampilan di folder desktop/. Folder mobile/ dan logika data tidak boleh disentuh.
+- Spek rinci (navigasi PC, lebar konten, tampilan riwayat, dan seterusnya) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+
+Data:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+Cek manual:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+## Konversi Tauri
+
+Tujuan: Mengonversi versi desktop (khusus Windows) memakai Tauri di folder desktop/. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+
+Aturan:
+- Item ini baru boleh dikerjakan setelah semua fitur Tahap 5 tercentang, serta "Pemisahan folder" dan "Revisi UI PC" selesai.
+- Item ini menyentuh "Keputusan terkunci" (bagian APK dan Capacitor). Sebelum dikerjakan, pemilik harus memberi prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut persis bagian mana yang boleh diubah.
+- Spek rinci (target platform, nasib Capacitor, jalur login Google) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+
+Data:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+Cek manual:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+## Konversi Kotlin
+
+Tujuan: Menulis ulang versi mobile (khusus Android) memakai Kotlin di folder mobile/, menggantikan versi Capacitor. Tidak memakai Kotlin Multiplatform. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+
+Aturan:
+- Item ini baru boleh dikerjakan setelah "Konversi Tauri" selesai.
+- Item ini menyentuh "Keputusan terkunci" (bagian Bentuk PWA, penyimpanan, dan APK dengan Capacitor). Sebelum dikerjakan, pemilik harus memberi prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut persis bagian mana yang boleh diubah.
+- Item ini juga mencakup login Google native dan rilis APK. Spek rincinya wajib menulis nasib item "APK Item A" dan "APK rilis" di dev/PLAN.md.
+- Format file di Google Drive harus tetap sama dengan dev/SCHEMA.md supaya data desktop dan mobile saling cocok.
+- Spek rinci (apa yang dikonversi, nasib versi PWA dan Capacitor, jalur login Google, nasib data di IndexedDB dan Drive) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+
+Data:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+Cek manual:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
 
 
