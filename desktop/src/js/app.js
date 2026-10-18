@@ -55,6 +55,11 @@ const txCategoryDropdownText = document.getElementById('tx-category-dropdown-tex
 const categoryDropdownMenu = document.getElementById('category-dropdown-menu');
 const categoryDropdownPrimaryCol = document.getElementById('category-dropdown-primary-col');
 const categoryDropdownSubCol = document.getElementById('category-dropdown-sub-col');
+const walletDropdownPc = document.getElementById('wallet-dropdown-pc');
+const txWalletDropdownBtn = document.getElementById('tx-wallet-dropdown-btn');
+const txWalletDropdownText = document.getElementById('tx-wallet-dropdown-text');
+const walletDropdownMenu = document.getElementById('wallet-dropdown-menu');
+const walletDropdownCol = document.getElementById('wallet-dropdown-col');
 const txDateDaySelect = document.getElementById('tx-date-day');
 const txDateMonthSelect = document.getElementById('tx-date-month');
 const txDateYearSelect = document.getElementById('tx-date-year');
@@ -496,6 +501,7 @@ window.handleAndroidBack = function() {
 function openFormScreen() {
     if (!formScreen) return;
     formScreen.classList.remove('hidden');
+    syncWalletInputA11y();
     if (btnFabAdd) btnFabAdd.classList.add('hidden');
     document.body.classList.add('modal-open');
     if (txAmountInput) {
@@ -506,6 +512,7 @@ function openFormScreen() {
 function closeFormScreen() {
     if (!formScreen) return;
     closeCategoryPcDropdown();
+    closeWalletPcDropdown();
     formScreen.classList.add('hidden');
     if (btnFabAdd) btnFabAdd.classList.remove('hidden');
     document.body.classList.remove('modal-open');
@@ -910,6 +917,7 @@ export function openCategoryPcDropdown() {
     if (!categoryDropdownMenu || !txCategoryDropdownBtn) return;
     const type = getSelectedType();
     if (type === 'transfer') return;
+    closeWalletPcDropdown();
 
     const list = getCategoryNames(type).filter(c => c !== 'Equilibrium');
     const currentCat = txCategoryInput ? txCategoryInput.value.trim() : '';
@@ -1010,6 +1018,117 @@ export function toggleCategoryPcDropdown() {
         closeCategoryPcDropdown();
     } else {
         openCategoryPcDropdown();
+    }
+}
+
+// Implementasi Dropdown Dompet PC
+export function updateWalletDropdownUI() {
+    if (!txWalletInput) return;
+    const selectedWalletId = txWalletInput.value;
+    const isPlaceholder = !selectedWalletId;
+    let displayText = 'Pilih dompet';
+
+    if (!isPlaceholder) {
+        const opt = Array.from(txWalletInput.options).find(o => o.value === selectedWalletId);
+        if (opt) {
+            displayText = opt.textContent;
+        } else {
+            const wName = getWalletName(selectedWalletId);
+            const wCurr = getWalletCurrency(selectedWalletId);
+            displayText = `${wName} (${wCurr})`;
+        }
+    }
+
+    if (txWalletDropdownText) {
+        txWalletDropdownText.textContent = displayText;
+        txWalletDropdownText.classList.toggle('is-placeholder', isPlaceholder);
+    }
+    if (txWalletDropdownBtn) {
+        txWalletDropdownBtn.classList.toggle('is-empty', isPlaceholder);
+    }
+    syncWalletInputA11y();
+}
+
+export function syncWalletInputA11y() {
+    if (!txWalletInput) return;
+    const isPc = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
+    const isTransfer = getSelectedType() === 'transfer';
+    if (isPc && !isTransfer) {
+        txWalletInput.setAttribute('tabindex', '-1');
+        txWalletInput.setAttribute('aria-hidden', 'true');
+    } else {
+        txWalletInput.removeAttribute('tabindex');
+        txWalletInput.removeAttribute('aria-hidden');
+    }
+}
+
+export function openWalletPcDropdown() {
+    if (!walletDropdownMenu || !txWalletDropdownBtn) return;
+    if (getSelectedType() === 'transfer') return;
+
+    closeCategoryPcDropdown();
+
+    const selectedWalletId = txWalletInput ? txWalletInput.value : '';
+    const options = txWalletInput ? Array.from(txWalletInput.options).filter(o => o.value !== '') : [];
+
+    let html = '';
+    for (const opt of options) {
+        const isSelected = (opt.value === selectedWalletId);
+        html += `
+            <button type="button" class="category-dropdown-item wallet-dropdown-item ${isSelected ? 'is-selected' : ''}" data-wallet-id="${escapeHTML(opt.value)}" role="menuitem">
+                <span class="category-dropdown-item-text">${escapeHTML(opt.textContent)}</span>
+            </button>
+        `;
+    }
+
+    if (walletDropdownCol) {
+        walletDropdownCol.innerHTML = html;
+
+        walletDropdownCol.querySelectorAll('.wallet-dropdown-item').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                walletDropdownCol.querySelectorAll('.wallet-dropdown-item').forEach(b => {
+                    b.classList.toggle('is-highlighted', b === btn);
+                });
+            });
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectWalletFromPcDropdown(btn.dataset.walletId);
+            });
+        });
+    }
+
+    walletDropdownMenu.classList.remove('hidden');
+    txWalletDropdownBtn.setAttribute('aria-expanded', 'true');
+}
+
+export function closeWalletPcDropdown() {
+    if (!walletDropdownMenu) return;
+    walletDropdownMenu.classList.add('hidden');
+    if (txWalletDropdownBtn) {
+        txWalletDropdownBtn.setAttribute('aria-expanded', 'false');
+    }
+}
+
+export function toggleWalletPcDropdown() {
+    if (!walletDropdownMenu) return;
+    const isOpen = !walletDropdownMenu.classList.contains('hidden');
+    if (isOpen) {
+        closeWalletPcDropdown();
+    } else {
+        openWalletPcDropdown();
+    }
+}
+
+export function selectWalletFromPcDropdown(walletId) {
+    if (txWalletInput) {
+        txWalletInput.value = walletId;
+        txWalletInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    updateWalletDropdownUI();
+    closeWalletPcDropdown();
+    if (txWalletDropdownBtn) {
+        txWalletDropdownBtn.focus();
     }
 }
 
@@ -1159,6 +1278,8 @@ export function updateSaveButtonState() {
 
 function updateTypeUI(type) {
     const isTransfer = type === 'transfer';
+    closeWalletPcDropdown();
+    syncWalletInputA11y();
     if (txWalletLabel) {
         txWalletLabel.textContent = isTransfer ? 'Dari' : 'Dompet';
     }
@@ -1227,6 +1348,7 @@ function updateTypeUI(type) {
     }
     updateCategoryRowDisplay();
     updateSaveButtonState();
+    updateWalletDropdownUI();
 }
 
 function getActiveWallets() {
@@ -1384,6 +1506,7 @@ function populateWalletOptions(selectedFromVal = null, selectedToVal = null) {
 
     updateFormCurrencyUI();
     updateSaveButtonState();
+    updateWalletDropdownUI();
 }
 
 function populateWalletFilterOptions() {
@@ -7364,6 +7487,7 @@ async function performDeleteSubcategoryBudget(cat, sub) {
 
 function resetForm() {
     closeCategoryPcDropdown();
+    closeWalletPcDropdown();
     txForm.reset();
     txIdInput.value = '';
     if (txCategoryInput) {
@@ -7627,6 +7751,7 @@ attachAmountInputFormatting(inputBudgetAmount, () => 'IDR');
 txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {
         closeCategoryPcDropdown();
+        closeWalletPcDropdown();
         if (radio.value === 'transfer') {
             if (getActiveWallets().length < 2) {
                 showNotification('Transfer membutuhkan minimal 2 dompet. Silakan tambah dompet baru terlebih dahulu di Pengaturan Dompet.', 'warn');
@@ -7771,19 +7896,105 @@ if (categoryDropdownMenu) {
     });
 }
 
+if (formRowWallet) {
+    formRowWallet.addEventListener('click', (e) => {
+        if (getSelectedType() === 'transfer') return;
+        if (window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) {
+            if (e.target && e.target.closest('#wallet-dropdown-pc')) {
+                return;
+            }
+            e.preventDefault();
+            toggleWalletPcDropdown();
+        }
+    });
+}
+
+if (txWalletDropdownBtn) {
+    txWalletDropdownBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleWalletPcDropdown();
+    });
+
+    txWalletDropdownBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const isOpen = walletDropdownMenu && !walletDropdownMenu.classList.contains('hidden');
+            if (!isOpen) {
+                openWalletPcDropdown();
+            }
+            setTimeout(() => {
+                if (walletDropdownCol) {
+                    const targetBtn = walletDropdownCol.querySelector('.wallet-dropdown-item.is-selected') ||
+                                      walletDropdownCol.querySelector('.wallet-dropdown-item');
+                    if (targetBtn) targetBtn.focus();
+                }
+            }, 10);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            closeWalletPcDropdown();
+        }
+    });
+}
+
+if (walletDropdownMenu) {
+    walletDropdownMenu.addEventListener('keydown', (e) => {
+        const activeEl = document.activeElement;
+        const items = Array.from(walletDropdownCol.querySelectorAll('.wallet-dropdown-item'));
+        const idx = items.indexOf(activeEl);
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            closeWalletPcDropdown();
+            if (txWalletDropdownBtn) txWalletDropdownBtn.focus();
+            return;
+        }
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const next = items[idx + 1] || items[0];
+            if (next) {
+                next.focus();
+                next.dispatchEvent(new MouseEvent('mouseenter'));
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prev = items[idx - 1] || items[items.length - 1];
+            if (prev) {
+                prev.focus();
+                prev.dispatchEvent(new MouseEvent('mouseenter'));
+            }
+        } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (activeEl && activeEl.classList.contains('wallet-dropdown-item')) {
+                activeEl.click();
+            }
+        }
+    });
+}
+
 document.addEventListener('click', (e) => {
-    if (!categoryDropdownMenu || categoryDropdownMenu.classList.contains('hidden')) return;
-    if (categoryDropdownPc && !categoryDropdownPc.contains(e.target)) {
-        closeCategoryPcDropdown();
+    if (categoryDropdownMenu && !categoryDropdownMenu.classList.contains('hidden')) {
+        if (categoryDropdownPc && !categoryDropdownPc.contains(e.target)) {
+            closeCategoryPcDropdown();
+        }
+    }
+    if (walletDropdownMenu && !walletDropdownMenu.classList.contains('hidden')) {
+        if (walletDropdownPc && !walletDropdownPc.contains(e.target)) {
+            closeWalletPcDropdown();
+        }
     }
 });
 
 window.addEventListener('resize', () => {
     if (!window.matchMedia('(min-width: 1024px)').matches) {
         closeCategoryPcDropdown();
+        closeWalletPcDropdown();
     } else {
         closeCategoryPicker();
     }
+    syncWalletInputA11y();
 });
 if (btnCloseCatPicker) {
     btnCloseCatPicker.addEventListener('click', () => {
@@ -9172,6 +9383,14 @@ async function init() {
 
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && formScreen && !formScreen.classList.contains('hidden')) {
+            if (categoryDropdownMenu && !categoryDropdownMenu.classList.contains('hidden')) {
+                closeCategoryPcDropdown();
+                return;
+            }
+            if (walletDropdownMenu && !walletDropdownMenu.classList.contains('hidden')) {
+                closeWalletPcDropdown();
+                return;
+            }
             if ((!confirmDialog || !confirmDialog.open) && (!deleteAllDialog || !deleteAllDialog.open)) {
                 resetForm();
                 closeFormScreen();
@@ -9323,6 +9542,7 @@ async function init() {
                 populateWalletOptions(txWalletInput.value, txToWalletInput.value);
             }
             updateSaveButtonState();
+            updateWalletDropdownUI();
         });
     }
 

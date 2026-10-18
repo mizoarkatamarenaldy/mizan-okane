@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-19: Perbaikan UI PC 12: Dropdown Dompet
+- Ditambah: Dropdown Dompet khusus tampilan PC (@media min-width: 1024px) pada form Tambah/Edit Transaksi untuk tab Pengeluaran dan Pemasukan dengan gaya tampilan, tinggi baris, panel, hover, dan status terpilih yang identik dengan dropdown Kategori PC 11, serta navigasi keyboard penuh (Enter/Spasi untuk membuka, Panah Atas/Bawah untuk navigasi, Enter untuk memilih, Escape untuk menutup) (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diperbaiki: Sinkronisasi nilai pilihan dompet ke elemen select bawaan yang disembunyikan secara visual di PC sehingga seluruh alur validasi, pemilihan manual, format angka, dan mata uang tetap berjalan tanpa mengubah logika form (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diubah: Tab Transfer pada PC dan tampilan mobile di bawah breakpoint PC tetap mempertahankan field dompet select bawaan tanpa perubahan (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v75` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 12: Dropdown Dompet" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 11: Dropdown Kategori
 - Ditambah: Dropdown bertingkat Kategori pada form Tambah/Edit Transaksi di tampilan PC (@media min-width: 1024px) dengan daftar kategori induk berpanah ">" untuk yang memiliki sub kategori, membuka daftar sub kategori di sebelah kanannya saat kursor diarahkan, opsi "(tanpa sub kategori)" pada baris pertama daftar sub untuk memilih kategori induk saja, pemilihan langsung untuk kategori tanpa sub, scroll jika daftar panjang, dan navigasi keyboard penuh (Enter/Spasi, Panah Atas/Bawah/Kiri/Kanan, Escape) (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
 - Diperbaiki: Kotak Kategori dan kotak Dompet pada form transaksi di PC dibuat simetris dengan font, tinggi (40 px), border, radius (6 px), padding, dan bentuk serta posisi panah chevron yang sejajar dan seragam (`desktop/src/index.html`, `desktop/src/css/style.css`).

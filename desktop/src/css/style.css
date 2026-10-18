@@ -4322,6 +4322,17 @@ button:disabled {
     display: none !important;
 }
 
+/* Dropdown Dompet PC */
+.wallet-dropdown-menu {
+    width: 100%;
+}
+
+.wallet-dropdown-col {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
 .category-dropdown-item {
     display: flex;
     align-items: center;
@@ -6492,12 +6503,12 @@ body.modal-open {
         grid-row: 2;
     }
 
-    /* Perbaikan UI PC 11: Dropdown Bertingkat Kategori & Simetri Kotak Dompet */
+    /* Perbaikan UI PC 11 & 12: Dropdown Bertingkat Kategori & Dropdown Dompet PC */
     #btn-open-category-picker {
         display: none !important;
     }
 
-    .category-dropdown-pc {
+    #category-dropdown-pc {
         display: block !important;
     }
 
@@ -6508,7 +6519,35 @@ body.modal-open {
         width: 100%;
     }
 
-    #form-row-wallet .compact-select {
+    /* Tab Pengeluaran & Pemasukan di PC: Tampilkan dropdown dompet baru, sembunyikan select & chevron bawaan */
+    .tx-form:not(.is-transfer) #wallet-dropdown-pc {
+        display: block !important;
+    }
+
+    .tx-form:not(.is-transfer) #form-row-wallet #tx-wallet {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .tx-form:not(.is-transfer) #form-row-wallet .wallet-row-chevron {
+        display: none !important;
+    }
+
+    /* Tab Transfer di PC: Tetap pakai select bawaan seperti hasil PC 11 */
+    .tx-form.is-transfer #wallet-dropdown-pc {
+        display: none !important;
+    }
+
+    .tx-form.is-transfer #form-row-wallet .compact-select {
         -webkit-appearance: none;
         -moz-appearance: none;
         appearance: none;
@@ -6516,7 +6555,7 @@ body.modal-open {
         padding-left: 10px;
     }
 
-    #form-row-wallet .wallet-row-chevron {
+    .tx-form.is-transfer #form-row-wallet .wallet-row-chevron {
         position: absolute;
         right: 10px;
         top: 50%;

@@ -1648,3 +1648,39 @@ Cek manual:
 - Edit transaksi lama yang punya sub kategori: kotak Kategori menampilkan pilihan lamanya dengan benar.
 - Tes keyboard: Tab ke kotak, buka, pilih dengan panah dan Enter.
 - Perkecil jendela sampai di bawah breakpoint PC: tampilan Kategori kembali seperti sebelum item ini (tombol dan panel dua kolom), dan tetap berfungsi.
+
+## Perbaikan UI PC 12: Dropdown Dompet
+
+Tujuan: Di tampilan PC, daftar pilihan Dompet di form Tambah/Edit Transaksi memakai tampilan yang sama persis dengan daftar Kategori dari item PC 11, supaya kedua kotak sinkron.
+
+Cakupan:
+- Hanya tampilan PC, yaitu layar selebar breakpoint PC yang sudah dipakai item PC 9 dan PC 11. Gunakan breakpoint yang sama.
+- Tampilan di bawah breakpoint itu (mobile) TIDAK diubah. Di sana Dompet tetap memakai select bawaan seperti sekarang.
+- Hanya field Dompet di tab Pengeluaran dan Pemasukan. Field dompet di tab Transfer tidak diubah.
+
+Tempat dan tampilan (tampilan PC):
+- Field Dompet di form Tambah dan Edit Transaksi. Klik kotak Dompet membuka daftar dompet di bawah kotak.
+- Daftar Dompet memakai gaya yang sama dengan daftar Kategori PC 11: warna latar panel, garis, radius sudut, bayangan (kalau ada di daftar Kategori), tinggi baris, padding, font, ketebalan font, warna teks, sorotan baris saat kursor diarahkan, dan keadaan baris terpilih. Pakai ulang kelas CSS atau komponen yang sama dengan daftar Kategori, jangan menyalin gaya baru. Tidak ada warna, font, atau bayangan baru.
+- Isi daftar: satu baris per dompet dengan teks seperti sekarang (contoh "Kas Tunai (IDR)"), tanpa ikon, tanpa tanda ">", tanpa daftar kedua di sebelah kanan. Lebar daftar sama dengan lebar kotak Dompet.
+- Pilihan kosong "Pilih dompet" tidak muncul sebagai baris di daftar. Kotak tertutup menampilkan teks "Pilih dompet" (warna placeholder, sama seperti "Pilih kategori") selama belum ada dompet yang dipilih.
+- Setelah memilih, kotak menampilkan nama dompet terpilih dan daftar menutup. Daftar juga menutup saat klik di luar atau tekan Escape.
+- Kotak tertutup Dompet dan Kategori tetap identik (font, tinggi, panah, posisi), seperti hasil PC 11.
+
+Aturan:
+- Select Dompet yang sudah ada tetap menjadi sumber nilai. Di tampilan PC select itu disembunyikan secara visual tapi tetap ada di halaman. Dropdown baru mengisi nilai select itu lalu memicu event change, supaya semua logika yang membaca select (validasi, pengisian form saat edit, dompet dipilih manual, mata uang dompet, simpan) berjalan tanpa diubah.
+- Dompet tetap kosong secara bawaan dan harus dipilih manual, sama seperti sekarang. Validasi kalau belum dipilih tetap sama.
+- Urutan dompet mengikuti urutan di Pengaturan, sama seperti sekarang.
+- Keyboard: Enter atau Spasi membuka daftar, panah atas/bawah pindah baris, Enter memilih, Escape menutup.
+- Yang sengaja TIDAK dilakukan: mengubah tampilan mobile, mengubah tab Transfer, mengubah logika form, menambah ikon dompet, mengubah halaman lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Tambah Transaksi di PC, klik Kategori lalu Dompet: panel daftar keduanya sama (latar, garis, sudut, font, tinggi baris, sorotan hover).
+- Klik Dompet, pilih "Dompet Yen (JPY)": kotak menampilkan pilihan itu, dan label serta format angka Total ikut mata uang Yen seperti sebelum item ini.
+- Simpan tanpa memilih dompet: validasi muncul seperti sebelumnya.
+- Edit transaksi lama: kotak Dompet menampilkan dompet transaksi itu dengan benar.
+- Tes keyboard: Tab ke kotak Dompet, buka dengan Enter, pilih dengan panah dan Enter, tutup dengan Escape.
+- Tab Transfer: field dompetnya tidak berubah.
+- Perkecil jendela sampai di bawah breakpoint PC: Dompet kembali memakai select bawaan dan tetap berfungsi.

@@ -1057,6 +1057,23 @@
                                     <svg class="wallet-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
+
+                                    <!-- Dropdown Dompet PC (khusus Pengeluaran & Pemasukan di layar PC) -->
+                                    <div id="wallet-dropdown-pc" class="wallet-dropdown-pc category-dropdown-pc">
+                                        <button type="button" id="tx-wallet-dropdown-btn" class="category-dropdown-btn is-empty" aria-haspopup="true" aria-expanded="false" aria-labelledby="tx-wallet-label tx-wallet-dropdown-text">
+                                            <div class="category-row-btn-content">
+                                                <span id="tx-wallet-dropdown-text" class="category-display-text is-placeholder">Pilih dompet</span>
+                                            </div>
+                                            <svg class="category-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                        <div id="wallet-dropdown-menu" class="wallet-dropdown-menu category-dropdown-menu hidden" role="menu" aria-label="Pilihan Dompet">
+                                            <div class="wallet-dropdown-col category-dropdown-primary-col" id="wallet-dropdown-col" role="none">
+                                                <!-- Diisi via JS: daftar dompet -->
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
