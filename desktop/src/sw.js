@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mizan-v65';
+const CACHE_NAME = 'mizan-v66';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

@@ -10,6 +10,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 3: Beranda
+- Diperbaiki: Bug tampilan kartu Budget di layar PC (@media min-width: 1024px) di mana tinggi kartu terkunci sehingga baris sub kategori keluar dari kartu dan memiliki scrollbar sendiri; diubah agar kartu tumbuh mengikuti isi tanpa scrollbar tersendiri (`min-height: auto; height: auto; overflow: visible; flex: 0 0 auto; box-sizing: border-box;`) serta kartu Transaksi Terakhir juga tumbuh mengikuti isinya (`desktop/src/css/style.css`).
+- Diubah: Menukar posisi kolom Beranda di layar PC lewat CSS (`grid-column` dan `grid-row: 1`) sehingga urutan kolom dari kiri menjadi Budget (`.beranda-col-center` pada kolom 1), Total Saldo beserta daftar dompet (`.beranda-col-left` pada kolom 2), dan Transaksi Terakhir (`.beranda-col-right` pada kolom 3) tanpa mengubah urutan elemen di HP (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v66` agar perubahan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 3: Beranda" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 2A: CSS Timbangan
 - Diperbaiki: Tata letak 3 kolom sejajar pada halaman Timbangan di layar PC (@media min-width: 1024px) dengan lebar 1 : 1,2 : 1 (kiri: Timbang Sebelum Beli, tengah: Timbangan Bulan Ini, kanan: Sesuaikan Saldo) mulai dari tinggi baris yang sama (`grid-row: 1`) dan header satu baris penuh di atasnya (`desktop/src/css/style.css`).
 - Diperbaiki: Scroll halaman Timbangan di PC dipindahkan ke tingkat kolom (`overflow-y: auto`), kartu mengikuti tinggi isi tanpa scrollbar tersendiri (`min-height: auto; height: auto; overflow: visible`), serta gambar timbangan SVG tampil utuh dan ukurannya fleksibel menyesuaikan lebar kolom tengah (`desktop/src/css/style.css`).

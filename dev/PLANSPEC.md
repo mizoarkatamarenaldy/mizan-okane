@@ -1348,5 +1348,36 @@ Cek manual:
 - Klik semua tombol navigasi, tombol (+), dan satu tombol di tiap halaman: semuanya merespons.
 - Buka di lebar HP: tampilan sama seperti sebelum item ini.
 
+## Perbaikan UI PC 3: Beranda
+
+Tujuan: Memperbaiki bug tampilan kartu Budget di Beranda PC dan menukar posisi kolom supaya kartu saldo ada di tengah dan Budget di kiri.
+
+Tempat dan tampilan:
+- Beranda di PC (lebar 1024 px ke atas), tiga kolom. Urutan baru dari kiri: Budget, Total Saldo beserta daftar dompet, Transaksi Terakhir.
+- Bug yang diperbaiki: kartu Budget tingginya terkunci sehingga baris sub kategori (misalnya Restoran, Kopi & Camilan) keluar dari kartu, dan kartu punya scrollbar sendiri. Perbaikan: kartu tumbuh mengikuti isinya, tanpa scrollbar sendiri.
+- Scroll hanya di tingkat kolom (overflow-y: auto), bukan di tiap kartu.
+- Tiap kolom diberi padding-bawah 88 px supaya tombol (+) tidak menutup isi paling bawah, termasuk kartu Transaksi Terakhir.
+- Tampilan HP dan APK tidak berubah. Semua aturan baru hanya di dalam @media (min-width: 1024px).
+
+Aturan:
+- Hanya ubah desktop/src/css/style.css dan desktop/src/sw.js (naikkan satu nomor dari versi cache sekarang. Jangan pakai nomor mizan-v64, karena pernah terkirim dan sudah dibatalkan).
+- DILARANG mengubah desktop/src/index.html dan desktop/src/js/app.js. Tukar posisi kolom lewat CSS (grid-template-areas, grid-column, atau order).
+- Kalau tukar posisi tidak bisa dilakukan tanpa mengubah index.html, jangan ubah HTML. Berhenti dan laporkan ke pemilik apa yang mentok.
+- Urutan elemen di HP tetap seperti sekarang.
+- Jangan sentuh halaman Timbangan, Statistik, dan Riwayat.
+- Hover hanya ganti latar ke token surface-raised, tanpa animasi.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Beranda di PC 1366x768 dan 1920x1080 dengan Mode Data Contoh: urutan kolom Budget, Total Saldo, Transaksi Terakhir.
+- Di kolom Budget, semua baris sub kategori berada di dalam kartu, tidak ada scrollbar di dalam kartu.
+- Scroll tiap kolom sampai bawah: isi terakhir tidak tertutup tombol (+).
+- Buka DevTools Console: tidak ada error merah.
+- Klik semua tombol navigasi, tombol (+), dan tombol di tiap kolom: semuanya merespons.
+- Buka di lebar HP: urutan dan tampilan sama seperti sebelum item ini.
+
+
 
 

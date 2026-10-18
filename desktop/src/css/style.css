@@ -5237,6 +5237,21 @@ body.modal-open {
         box-sizing: border-box;
     }
 
+    .beranda-col-center {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .beranda-col-left {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .beranda-col-right {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
     #page-beranda .summary {
         margin-bottom: 0;
         flex: 0 0 auto;
@@ -5268,12 +5283,20 @@ body.modal-open {
 
     #page-beranda .budget-section {
         margin-bottom: 0;
-        min-height: 100%;
+        min-height: auto;
+        height: auto;
+        overflow: visible;
+        flex: 0 0 auto;
+        box-sizing: border-box;
     }
 
     #page-beranda .recent-tx-section {
         margin-bottom: 0;
-        min-height: 100%;
+        min-height: auto;
+        height: auto;
+        overflow: visible;
+        flex: 0 0 auto;
+        box-sizing: border-box;
     }
 
     /* Tombol tambah (+) tetap melayang di pojok kanan bawah */
