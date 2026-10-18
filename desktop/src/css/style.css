@@ -5402,19 +5402,40 @@ body.modal-open {
 
     #page-riwayat .tx-item {
         display: grid;
-        grid-template-columns: 36px 180px minmax(0, 1fr) 140px 80px 150px 96px;
+        grid-template-columns: 36px 160px 220px 130px 70px 140px 96px;
         align-items: center;
-        column-gap: 16px;
+        column-gap: 12px;
         row-gap: 0;
         min-height: 52px;
         height: 52px;
         padding: 0 12px;
         border: none;
         border-bottom: 1px solid var(--border);
+        border-left: 3px solid var(--text-secondary);
         background: transparent;
         border-radius: 0;
         margin-bottom: 0;
         box-sizing: border-box;
+        transition: none !important;
+    }
+
+    #page-riwayat .tx-item:has(.tx-item-icon.income) {
+        border-left-color: var(--income);
+    }
+
+    #page-riwayat .tx-item:has(.tx-item-icon.expense) {
+        border-left-color: var(--expense);
+    }
+
+    #page-riwayat .tx-item:has(.tx-item-icon.transfer),
+    #page-riwayat .tx-item:has(.tx-item-icon.penyesuaian),
+    #page-riwayat .tx-item.is-readonly {
+        border-left-color: var(--text-secondary);
+    }
+
+    #page-riwayat .tx-item:hover {
+        background-color: var(--surface-raised) !important;
+        transition: none !important;
     }
 
     #page-riwayat .tx-item-content,
@@ -5472,12 +5493,22 @@ body.modal-open {
     #page-riwayat .tx-item-wallet {
         grid-column: 4;
         grid-row: 1;
+        display: inline-flex;
+        align-items: center;
+        background-color: var(--surface-raised);
         color: var(--text-secondary);
-        font-size: 13px;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: var(--radius-input, 6px);
+        border: 1px solid var(--border);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+        justify-self: start;
     }
 
     #page-riwayat .tx-item-time {
@@ -5518,6 +5549,15 @@ body.modal-open {
         width: 44px;
         height: 44px;
         flex: 0 0 44px;
+        opacity: 0;
+        transition: none !important;
+    }
+
+    #page-riwayat .tx-item:hover .tx-actions .btn-icon,
+    #page-riwayat .tx-item:focus-within .tx-actions .btn-icon,
+    #page-riwayat .tx-actions .btn-icon:focus,
+    #page-riwayat .tx-actions .btn-icon:focus-visible {
+        opacity: 1;
     }
 
     /* 5. Statistik: Grafik Disusun 2 Kolom, Tab Waktu Tetap di Atas */

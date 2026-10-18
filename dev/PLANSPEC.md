@@ -1438,3 +1438,38 @@ Cek manual:
 - Ganti bulan atau tab Harian, Bulanan, Tahunan lalu klik kategori: rincian tetap benar.
 - Buka DevTools Console di semua halaman: tidak ada error merah.
 - Klik semua tombol navigasi, tombol (+), dan satu tombol di tiap halaman: semuanya merespons.
+
+## Perbaikan UI PC 6: Variasi Riwayat
+
+Tujuan: Halaman Riwayat di PC terasa kosong dan semua baris tampil sama. Beri sedikit variasi tampilan lewat CSS saja, tanpa fitur baru.
+
+Tempat dan tampilan:
+- Halaman Riwayat di PC (lebar 1024 px ke atas), daftar transaksi yang dikelompokkan per tanggal.
+- Garis aksen di sisi kiri tiap baris transaksi: warna token pemasukan untuk pemasukan, warna token pengeluaran untuk pengeluaran, warna token netral untuk transfer dan penyesuaian saldo. Pakai token warna yang sudah ada di dev/DESIGN.md, tebal garis 3 px.
+- Kolom baris dirapikan dengan CSS grid berlebar tetap, supaya catatan, dompet, jam, dan nominal sejajar dari atas ke bawah dan celah kosong di tengah hilang. Kalau markup mengizinkan, nama dompet dan jam ditumpuk dua baris dalam satu kolom. Kalau tidak, tetap dua kolom terpisah berlebar tetap.
+- Nama dompet tampil sebagai chip kecil: latar token surface-raised, sudut membulat sesuai token radius yang sudah ada. Berlaku bila nama dompet adalah elemen tersendiri di markup.
+- Hover baris: latar berganti ke token surface-raised, tanpa animasi dan tanpa transisi. Tombol edit dan hapus disembunyikan (opacity 0) dan baru terlihat saat hover baris atau saat ada elemen di dalam baris yang menerima fokus keyboard (:focus-within). Ukuran tombol tetap 44 px dan tetap bisa diklik.
+- Tampilan HP dan APK tidak berubah. Semua aturan baru hanya di dalam @media (min-width: 1024px).
+
+Aturan:
+- Hanya ubah desktop/src/css/style.css dan desktop/src/sw.js (naikkan satu nomor dari versi cache sekarang. Jangan pakai nomor mizan-v64, karena pernah terkirim dan sudah dibatalkan).
+- DILARANG mengubah desktop/src/index.html dan desktop/src/js/app.js.
+- Kalau ada poin yang tidak bisa dicapai tanpa mengubah HTML atau JS, kerjakan poin lain yang bisa, lalu laporkan ke pemilik poin mana yang mentok dan kenapa. Jangan ubah HTML atau JS.
+- Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md. Tidak ada transition pada hover.
+- Header ringkasan (angka total di kiri atas), header tanggal sticky, dan panel samping TIDAK dikerjakan di item ini.
+- Jangan sentuh halaman Beranda, Timbangan, dan Statistik.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Riwayat di PC 1366x768 dan 1920x1080 dengan Mode Data Contoh: garis aksen hijau, merah, dan netral sesuai jenis transaksi (termasuk baris "Penyesuaian: Koreksi" yang netral).
+- Catatan, dompet, jam, dan nominal sejajar vertikal antar baris, tanpa celah kosong yang lebar.
+- Arahkan kursor ke baris: latar berganti, tombol edit dan hapus muncul. Pindah kursor keluar: tombol tersembunyi lagi.
+- Tab dengan keyboard ke tombol edit atau hapus: tombol terlihat saat fokus.
+- Klik edit dan hapus pada satu baris: keduanya merespons seperti sebelumnya.
+- Pencarian, filter bulan, dan filter dompet masih bekerja.
+- Buka DevTools Console di semua halaman: tidak ada error merah.
+- Klik semua tombol navigasi dan tombol (+): semuanya merespons.
+- Buka di lebar HP: tampilan sama seperti sebelum item ini, tombol edit dan hapus tetap terlihat.
+

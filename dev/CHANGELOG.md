@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 6: Variasi Riwayat
+- Ditambah: Garis aksen 3 px di sisi kiri tiap baris transaksi pada layar PC (@media min-width: 1024px) dengan warna token sesuai jenis transaksi: hijau token income untuk pemasukan, merah token expense untuk pengeluaran, dan netral token text-secondary untuk transfer dan penyesuaian saldo (`desktop/src/css/style.css`).
+- Ditambah: Tampilan nama dompet sebagai chip kecil berlatar token surface-raised dengan sudut membulat token radius-input 6 px dan border tipis token border (`desktop/src/css/style.css`).
+- Diperbaiki: Perataan kolom baris Riwayat di PC dirapikan menggunakan CSS grid dengan lebar kolom tetap (ikon 36px, kategori 160px, catatan 220px, dompet 130px, waktu 70px, nominal 140px, aksi 96px) sehingga catatan, dompet, jam, dan nominal sejajar vertikal antar baris dan celah kosong di tengah hilang tanpa mengubah HTML/JS (`desktop/src/css/style.css`).
+- Diubah: Tombol edit dan hapus pada baris transaksi di PC disembunyikan (opacity 0) secara default dan tampil saat baris di-hover atau saat elemen di dalam baris menerima fokus keyboard (:focus-within), sementara ukuran tombol tetap 44 px dan respons klik/fokus tetap berfungsi penuh tanpa animasi/transisi (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v69` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI PC 6: Variasi Riwayat" di `dev/PLAN.md`.
+
 ## 2026-10-18: Perbaikan UI PC 5: Detail diagram Statistik lewat klik
 - Diperbaiki: Kotak rincian kategori di diagram donut Statistik yang sebelumnya muncul saat kursor diarahkan (hover/focus) diubah agar hanya terbuka setelah diklik atau ditekan tombol keyboard Enter/Spasi, menutup kembali jika diklik/ditekan lagi, serta berpindah jika kategori lain diklik (`desktop/src/js/app.js`).
 - Diubah: Menghapus listener event kursor dan fokus (mouseenter, mouseleave, focus, blur) pada irisan donut dan baris kategori sehingga arah kursor saja tidak lagi memicu pembukaan kotak rincian, sementara efek hover visual pada baris kategori tetap ditangani CSS ke token surface-raised (`desktop/src/js/app.js`).

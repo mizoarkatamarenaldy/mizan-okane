@@ -108,6 +108,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Perbaikan UI PC 3: Beranda
 - [x] Perbaikan UI PC 4: Timbangan tanpa scroll
 - [x] Perbaikan UI PC 5: Detail diagram Statistik lewat klik
+- [x] Perbaikan UI PC 6: Variasi Riwayat
 - [ ] Konversi Tauri
 - [ ] Konversi Kotlin
 - [ ] APK rilis
