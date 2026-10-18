@@ -1051,3 +1051,37 @@ Cek manual:
 - Aksi: impor file JSON lama tanpa field ikon. Hasil: impor berhasil, kategori memakai ikon netral.
 - Aksi: sinkron ke perangkat lain. Hasil: ikon pilihan tampil sama di perangkat itu.
 - Aksi: buka di tema gelap dan terang, di HP. Hasil: ikon terbaca jelas dan pemilih ikon bisa digulir dengan nyaman.
+
+## Ikon sub kategori
+
+Tujuan: Sub kategori bisa punya ikon sendiri, dipilih dari set ikon bawaan yang sama dengan ikon kategori, supaya sub kategori mudah dikenali sekilas.
+
+Tempat dan tampilan:
+- Di pengaturan sub kategori, saat menambah dan mengedit sub kategori, ada pemilih ikon yang sama dengan pemilih ikon kategori (ikon terpilih di samping field nama, menekannya membuka daftar ikon per tema).
+- Ikon sub kategori tampil di samping nama sub kategori di semua tempat nama sub kategori ditampilkan: daftar sub kategori, form tambah dan edit transaksi, Riwayat, Statistik, dan daftar budget.
+- Di daftar budget, ikon dibaca dari sub kategori, bukan disimpan sendiri di budget. Mengganti ikon sub kategori otomatis mengganti ikon di budget.
+- Pakai set ikon, gaya, warna, label pembaca layar, dan target sentuh minimal 44 px yang sama dengan item "Ikon kategori kustom". Jangan tambah ikon baru ke set kecuali perlu.
+- Tampilan baru wajib mengikuti dev/DESIGN.md.
+
+Aturan:
+- Pilihan ikon sub kategori bersifat opsional.
+- Sub kategori tanpa ikon pilihan menampilkan ikon kategori induknya. Kalau induk juga belum punya ikon pilihan, tampilkan ikon netral bawaan.
+- Kalau ikon induk diganti, sub kategori yang belum punya ikon pilihan ikut berubah mengikuti induk.
+- Kalau ID ikon pada data tidak dikenal, tampilkan ikon induk atau ikon netral dan jangan error.
+- Ikon hanya mengubah tampilan. Nama, urutan, budget, dan perhitungan sub kategori tidak berubah.
+- Fitur ini sengaja TIDAK menyediakan unggah gambar, tidak mendukung emoji bebas, dan tidak menambah ikon untuk dompet.
+
+Data:
+- Ada tambahan satu field ikon pada sub kategori, berisi ID ikon berupa teks, sama seperti field ikon pada kategori. Ikuti cara sub kategori disimpan, termasuk aturan konflik "yang terbaru menang".
+- Field ikon ikut sinkron Drive, ekspor JSON, impor JSON, dan backup lengkap. Reset setelan pabrik mengembalikan ke kondisi tanpa ikon pilihan.
+- Data lama dan impor JSON dari versi lama (tanpa field ikon sub kategori) tetap valid dan berhasil, tanpa migrasi paksa.
+- Sub kategori pada data contoh lengkap diberi ikon yang sesuai. Data contoh tetap tidak ikut sinkron, ekspor, atau impor.
+
+Cek manual:
+- Kondisi awal: sub kategori Kopi belum punya ikon pilihan, induknya Makan punya ikon. Hasil: Kopi tampil dengan ikon Makan.
+- Aksi: pilih ikon sendiri untuk Kopi. Hasil: ikon tampil di daftar sub kategori, form transaksi, Riwayat, Statistik, dan daftar budget.
+- Kondisi awal: Kopi punya budget dan ikon sendiri. Aksi: ganti ikon Kopi. Hasil: ikon di daftar budget ikut berubah tanpa mengatur budget lagi.
+- Kondisi awal: Kopi tanpa ikon pilihan. Aksi: ganti ikon Makan. Hasil: ikon Kopi ikut berubah mengikuti Makan.
+- Aksi: ekspor JSON, reset setelan pabrik, lalu impor lagi. Hasil: ikon sub kategori kembali sesuai pilihan.
+- Aksi: impor file JSON lama tanpa field ikon sub kategori. Hasil: impor berhasil, sub kategori memakai ikon induk.
+- Aksi: sinkron ke perangkat lain. Hasil: ikon sub kategori sama di perangkat itu.

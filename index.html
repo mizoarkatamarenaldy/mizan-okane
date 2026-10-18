@@ -1121,11 +1121,11 @@
             </div>
         </dialog>
 
-        <!-- Dialog Pemilih Ikon Kategori -->
+        <!-- Dialog Pemilih Ikon Kategori & Sub Kategori -->
         <dialog id="icon-picker-dialog" class="confirm-dialog icon-picker-dialog" closedby="any" aria-labelledby="icon-picker-dialog-title">
             <div class="confirm-dialog-content icon-picker-dialog-content">
                 <div class="icon-picker-dialog-header">
-                    <h3 id="icon-picker-dialog-title" class="confirm-dialog-title">Pilih Ikon Kategori</h3>
+                    <h3 id="icon-picker-dialog-title" class="confirm-dialog-title">Pilih Ikon</h3>
                     <button type="button" class="btn-icon btn-icon-picker-close" id="btn-icon-picker-close" aria-label="Tutup pemilih ikon" title="Tutup">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
@@ -1134,6 +1134,7 @@
                     <!-- Diisi kelompok tema dan grid ikon lewat JS -->
                 </div>
                 <div class="confirm-dialog-actions icon-picker-actions">
+                    <button type="button" id="btn-icon-picker-clear" class="btn-secondary" style="display: none;">Ikuti Induk</button>
                     <button type="button" id="btn-icon-picker-cancel" class="btn-secondary">Batal</button>
                 </div>
             </div>

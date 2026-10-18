@@ -3386,13 +3386,34 @@ p {
     border: 1px solid var(--border);
     border-radius: var(--radius-input, 6px);
     background: var(--surface);
-    min-height: 40px;
+    min-height: 44px;
     gap: 8px;
 }
 
 .subcategory-item.editing {
     background: var(--surface);
     padding: 4px 6px;
+}
+
+.subcategory-item-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.subcategory-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    flex-shrink: 0;
+}
+
+.subcategory-item-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
 }
 
 .subcategory-name {
@@ -3463,12 +3484,12 @@ p {
     border-radius: var(--radius-input, 6px);
     background: var(--surface);
     color: var(--text);
-    min-height: 40px;
+    min-height: 44px;
 }
 
 .subcategory-inline-form .btn-save-cat,
 .subcategory-inline-form .btn-cancel-cat {
-    min-height: 40px;
+    min-height: 44px;
     padding: 6px 12px;
     font-size: 12.5px;
 }
@@ -4722,6 +4743,34 @@ button:disabled {
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
+    min-width: 0;
+}
+
+.tx-subcategory-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+}
+
+.tx-subcategory-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.tx-subcategory-icon svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+}
+
+.donut-subcat-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     min-width: 0;
 }
 

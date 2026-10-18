@@ -99,6 +99,7 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Geser urutan budget
   - [x] Budget per sub kategori
   - [x] Ikon kategori kustom
+  - [x] Ikon sub kategori
 
 ## Rencana setelah Tahap 5
 - [ ] Konversi Tauri

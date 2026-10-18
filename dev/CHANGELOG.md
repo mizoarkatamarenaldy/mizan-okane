@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Ikon sub kategori
+- Ditambah: Pemilih ikon sub kategori saat menambah dan mengedit sub kategori di Pengaturan menggunakan dialog pemilih ikon yang sama dengan kategori, lengkap dengan tombol untuk mereset/mengikuti ikon induk serta target sentuh minimal 44 px (`index.html`, `css/style.css`, `js/app.js`).
+- Ditambah: Tampilan ikon sub kategori di samping nama sub kategori pada seluruh antarmuka aplikasi: daftar sub kategori di Pengaturan, chip sub kategori formulir transaksi, riwayat transaksi (pada baris teks dan badge transaksi), rincian sub kategori di diagram statistik, serta daftar budget di Beranda dan Pengaturan (`css/style.css`, `js/app.js`).
+- Ditambah: Dukungan field `icon` pada sub kategori di IndexedDB yang tersimpan, tersinkron Google Drive dengan aturan resolusi konflik yang terbaru menang, serta diekspor/diimpor pada cadangan JSON dengan fallback aman ke ikon induk atau ikon netral (`js/db.js`, `js/app.js`).
+- Diubah: Sub kategori tanpa ikon pilihan otomatis menampilkan ikon kategori induknya (atau netral jika induk belum berikon), dan bila ikon induk diganti maka sub kategori tanpa ikon ikut berubah mengikuti induk (`js/app.js`).
+- Diubah: Di daftar budget Beranda dan Pengaturan, ikon dibaca langsung secara dinamis dari sub kategori sehingga penggantian ikon sub kategori otomatis langsung memperbarui tampilan budget (`js/app.js`).
+- Diubah: Sub kategori pada data contoh lengkap diberi ikon yang sesuai, dan reset setelan pabrik mengembalikan ke kondisi tanpa ikon pilihan (`js/db.js`).
+- Diubah: Mencentang item "Ikon sub kategori" di `dev/PLAN.md` serta menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Ikon kategori kustom
 - Ditambah: Pemilih ikon kategori (`#icon-picker-dialog`) saat menambah dan mengedit kategori dengan set ikon bawaan berupa SVG inline yang dikelompokkan ke dalam 9 tema (Makanan, Transportasi, Belanja, Rumah, Kesehatan, Pendidikan, Hiburan, Keuangan, Lainnya), lengkap dengan target sentuh minimal 44 px dan label pembaca layar (`index.html`, `css/style.css`, `js/app.js`).
 - Ditambah: Tampilan ikon kategori di samping nama kategori pada seluruh antarmuka aplikasi: daftar kategori di Pengaturan, chip kategori formulir transaksi, riwayat transaksi, legenda & rincian statistik, serta daftar budget di Beranda dan Pengaturan (`index.html`, `css/style.css`, `js/app.js`).

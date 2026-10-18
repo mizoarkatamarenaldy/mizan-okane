@@ -136,43 +136,43 @@ export const SAMPLE_CATEGORIES = {
   subcategories: {
     income: {
       'Gaji': [
-        { name: 'Gaji Pokok', order: 0 },
-        { name: 'Tunjangan', order: 1 }
+        { name: 'Gaji Pokok', order: 0, icon: 'gaji' },
+        { name: 'Tunjangan', order: 1, icon: 'kartu' }
       ],
       'Bonus': [
-        { name: 'Bonus Tahunan', order: 0 },
-        { name: 'Komisi', order: 1 }
+        { name: 'Bonus Tahunan', order: 0, icon: 'bonus' },
+        { name: 'Komisi', order: 1, icon: 'tabungan' }
       ],
       'Investasi': [
-        { name: 'Dividen', order: 0 },
-        { name: 'Bunga', order: 1 }
+        { name: 'Dividen', order: 0, icon: 'investasi' },
+        { name: 'Bunga', order: 1, icon: 'tabungan' }
       ]
     },
     expense: {
       'Makan': [
-        { name: 'Restoran', order: 0 },
-        { name: 'Belanja Bahan', order: 1 },
-        { name: 'Kopi & Camilan', order: 2 }
+        { name: 'Restoran', order: 0, icon: 'makan' },
+        { name: 'Belanja Bahan', order: 1, icon: 'keranjang' },
+        { name: 'Kopi & Camilan', order: 2, icon: 'kopi' }
       ],
       'Transport': [
-        { name: 'Bensin', order: 0 },
-        { name: 'Parkir', order: 1 },
-        { name: 'Transportasi Umum', order: 2 }
+        { name: 'Bensin', order: 0, icon: 'bensin' },
+        { name: 'Parkir', order: 1, icon: 'mobil' },
+        { name: 'Transportasi Umum', order: 2, icon: 'bus' }
       ],
       'Tagihan': [
-        { name: 'Listrik', order: 0 },
-        { name: 'Air & IPL', order: 1 },
-        { name: 'Internet', order: 2 }
+        { name: 'Listrik', order: 0, icon: 'listrik' },
+        { name: 'Air & IPL', order: 1, icon: 'air' },
+        { name: 'Internet', order: 2, icon: 'wifi' }
       ],
       'Belanja': [
-        { name: 'Kebutuhan Rumah', order: 0 },
-        { name: 'Pakaian', order: 1 },
-        { name: 'Elektronik', order: 2 }
+        { name: 'Kebutuhan Rumah', order: 0, icon: 'rumah' },
+        { name: 'Pakaian', order: 1, icon: 'pakaian' },
+        { name: 'Elektronik', order: 2, icon: 'elektronik' }
       ],
       'Hiburan': [
-        { name: 'Streaming', order: 0 },
-        { name: 'Hobi', order: 1 },
-        { name: 'Liburan', order: 2 }
+        { name: 'Streaming', order: 0, icon: 'film' },
+        { name: 'Hobi', order: 1, icon: 'game' },
+        { name: 'Liburan', order: 2, icon: 'liburan' }
       ]
     }
   },
@@ -446,7 +446,11 @@ export function sanitizeSubcategoryList(list) {
     const sub = sanitizeCategoryItem(item, idx);
     if (sub && !seen.has(sub.name.toLowerCase())) {
       seen.add(sub.name.toLowerCase());
-      result.push({ name: sub.name, order: sub.order });
+      const subObj = { name: sub.name, order: sub.order };
+      if (sub.icon) {
+        subObj.icon = sub.icon;
+      }
+      result.push(subObj);
     }
   });
   result.sort((a, b) => a.order - b.order);

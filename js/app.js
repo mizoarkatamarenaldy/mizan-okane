@@ -121,8 +121,10 @@ const btnAddExpenseIcon = document.getElementById('btn-add-expense-icon');
 const btnAddIncomeIcon = document.getElementById('btn-add-income-icon');
 const iconPickerDialog = document.getElementById('icon-picker-dialog');
 const iconPickerBody = document.getElementById('icon-picker-dialog-body');
+const iconPickerTitle = document.getElementById('icon-picker-dialog-title');
 const btnIconPickerClose = document.getElementById('btn-icon-picker-close');
 const btnIconPickerCancel = document.getElementById('btn-icon-picker-cancel');
+const btnIconPickerClear = document.getElementById('btn-icon-picker-clear');
 
 let selectedAddExpenseIcon = '';
 let selectedAddIncomeIcon = '';
@@ -571,7 +573,8 @@ export function populateSubcategoryOptions(categoryName, selectedSub = null) {
     let chipsHtml = '';
     for (const sub of subs) {
         const isSel = targetSub === sub;
-        chipsHtml += `<button type="button" class="category-chip ${isSel ? 'is-selected' : ''}" data-value="${escapeHTML(sub)}" role="radio" aria-checked="${String(isSel)}">${escapeHTML(sub)}</button>`;
+        const iconSvg = getSubcategoryIconSvg(categoryName, sub, type);
+        chipsHtml += `<button type="button" class="category-chip ${isSel ? 'is-selected' : ''}" data-value="${escapeHTML(sub)}" role="radio" aria-checked="${String(isSel)}"><span class="category-chip-icon" aria-hidden="true">${iconSvg}</span>${escapeHTML(sub)}</button>`;
     }
     subcategoryChipsContainer.innerHTML = chipsHtml;
 
@@ -1578,6 +1581,44 @@ export function getCategoryIconSvg(categoryNameOrItemOrId, type) {
     return getCategoryIconSvgById(NEUTRAL_CATEGORY_ICON_ID);
 }
 
+export function findSubcategoryItem(categoryName, subcategoryName, type) {
+    if (!currentCategories || !currentCategories.subcategories || !categoryName || !subcategoryName) return null;
+    const catNorm = String(categoryName).trim().toLowerCase();
+    const subNorm = String(subcategoryName).trim().toLowerCase();
+    const types = (type && (type === 'income' || type === 'expense')) ? [type] : ['expense', 'income'];
+    for (const t of types) {
+        const group = currentCategories.subcategories[t];
+        if (group && typeof group === 'object') {
+            for (const [cName, subs] of Object.entries(group)) {
+                if (cName.trim().toLowerCase() === catNorm && Array.isArray(subs)) {
+                    const found = subs.find(s => getCatName(s).trim().toLowerCase() === subNorm);
+                    if (found) return found;
+                }
+            }
+        }
+    }
+    return null;
+}
+
+export function getSubcategoryIconSvg(categoryName, subcategoryNameOrItem, type) {
+    let iconId = '';
+    if (subcategoryNameOrItem && typeof subcategoryNameOrItem === 'object') {
+        iconId = getCatIcon(subcategoryNameOrItem);
+    } else if (subcategoryNameOrItem) {
+        const item = findSubcategoryItem(categoryName, subcategoryNameOrItem, type);
+        if (item) {
+            iconId = getCatIcon(item);
+        }
+    }
+
+    if (iconId && Object.prototype.hasOwnProperty.call(CATEGORY_ICONS, iconId)) {
+        return getCategoryIconSvgById(iconId);
+    }
+
+    // Fallback ke ikon kategori induk (atau ikon netral jika induk belum punya ikon)
+    return getCategoryIconSvg(categoryName, type);
+}
+
 function renderIconPicker(currentSelectedId) {
     if (!iconPickerBody) return;
     iconPickerBody.innerHTML = '';
@@ -1615,9 +1656,18 @@ function renderIconPicker(currentSelectedId) {
     });
 }
 
-export function openIconPicker(selectedIconId, onSelectCallback) {
+export function openIconPicker(selectedIconId, onSelectCallback, options = {}) {
     activeIconPickerCallback = onSelectCallback;
     currentIconPickerSelectedId = String(selectedIconId || '').trim();
+    if (iconPickerTitle) {
+        const isSub = !!options.isSubcategory;
+        iconPickerTitle.textContent = options.title || (isSub ? 'Pilih Ikon Sub Kategori' : 'Pilih Ikon Kategori');
+    }
+    if (btnIconPickerClear) {
+        const isSub = !!options.isSubcategory;
+        btnIconPickerClear.textContent = isSub ? 'Ikuti Induk' : 'Ikon Bawaan';
+        btnIconPickerClear.style.display = '';
+    }
     renderIconPicker(currentIconPickerSelectedId);
     if (iconPickerDialog && typeof iconPickerDialog.showModal === 'function') {
         iconPickerDialog.showModal();
@@ -1630,6 +1680,9 @@ export function closeIconPicker() {
     }
     activeIconPickerCallback = null;
     currentIconPickerSelectedId = '';
+    if (btnIconPickerClear) {
+        btnIconPickerClear.style.display = 'none';
+    }
 }
 
 
@@ -3042,7 +3095,10 @@ function renderDonutChart(transactions) {
                     const subPct = catItem.amount > 0 ? formatPercent((subData.amount / catItem.amount) * 100) : '0%';
                     rowsHtml += `
                         <div class="donut-subcat-row">
-                            <span class="donut-subcat-name">${escapeHTML(subName)}</span>
+                            <div class="donut-subcat-main">
+                                <span class="stats-category-icon" aria-hidden="true">${getSubcategoryIconSvg(catItem.category, subName, currentDonutType)}</span>
+                                <span class="donut-subcat-name">${escapeHTML(subName)}</span>
+                            </div>
                             <div class="donut-subcat-meta">
                                 <span class="donut-subcat-pct tabular-nums">${subPct} (${subData.count})</span>
                                 <strong class="donut-subcat-amount tabular-nums">${currencyFormatter.format(subData.amount, currentStatsCurrency)}</strong>
@@ -3054,7 +3110,10 @@ function renderDonutChart(transactions) {
                     const noSubPct = catItem.amount > 0 ? formatPercent((noSubAmount / catItem.amount) * 100) : '0%';
                     rowsHtml += `
                         <div class="donut-subcat-row is-no-sub">
-                            <span class="donut-subcat-name">Tanpa sub kategori</span>
+                            <div class="donut-subcat-main">
+                                <span class="stats-category-icon" aria-hidden="true">${getCategoryIconSvg(catItem.category, currentDonutType)}</span>
+                                <span class="donut-subcat-name">Tanpa sub kategori</span>
+                            </div>
                             <div class="donut-subcat-meta">
                                 <span class="donut-subcat-pct tabular-nums">${noSubPct} (${noSubCount})</span>
                                 <strong class="donut-subcat-amount tabular-nums">${currencyFormatter.format(noSubAmount, currentStatsCurrency)}</strong>
@@ -3930,11 +3989,13 @@ function createTxItemElement(tx, filterWallet) {
     txEl.dataset.id = tx.id;
     const isTransfer = tx.type === 'transfer';
     const isPenyesuaian = tx.type === 'penyesuaian';
+    const sub = (!isTransfer && !isPenyesuaian) ? getTxSubcategory(tx) : '';
 
     let sign = '';
     let amountClass = '';
     const displayCategory = getTxCategoryDisplayText(tx);
     let categoryText = escapeHTML(displayCategory);
+    let categoryHtml = '';
     let walletText = '';
 
     if (isTransfer) {
@@ -3945,11 +4006,13 @@ function createTxItemElement(tx, filterWallet) {
         const fromText = `${escapeHTML(fromName)}${fromDeleted ? ' (dihapus)' : ''}`;
         const toText = `${escapeHTML(toName)}${toDeleted ? ' (dihapus)' : ''}`;
         categoryText = 'Transfer';
+        categoryHtml = 'Transfer <span class="tx-transfer-badge">Transfer</span>';
         walletText = `${fromText} &rarr; ${toText}`;
         amountClass = 'transfer';
         sign = ''; // Transfer: teks biru, tanpa tanda +/−, ada label "Transfer"
     } else if (isPenyesuaian) {
         categoryText = `Penyesuaian: ${escapeHTML(tx.category || 'Koreksi')}`;
+        categoryHtml = categoryText;
         const isPlus = tx.amount >= 0;
         sign = isPlus ? '+' : '−';
         amountClass = isPlus ? 'income' : 'expense';
@@ -3960,6 +4023,13 @@ function createTxItemElement(tx, filterWallet) {
         amountClass = tx.type === 'income' ? 'income' : 'expense';
         const wName = escapeHTML(getWalletName(tx.walletId));
         walletText = isWalletDeleted(tx.walletId) ? `${wName} (dihapus)` : wName;
+        const cat = tx.category || '';
+        if (sub) {
+            const subIconSvg = getSubcategoryIconSvg(cat, sub, tx.type);
+            categoryHtml = `${escapeHTML(cat)} &gt; <span class="tx-subcategory-name"><span class="tx-subcategory-icon" aria-hidden="true">${subIconSvg}</span>${escapeHTML(sub)}</span>`;
+        } else {
+            categoryHtml = escapeHTML(cat);
+        }
     }
 
     if (isPenyesuaian) {
@@ -3972,7 +4042,7 @@ function createTxItemElement(tx, filterWallet) {
     }
 
     const timeFormatted = tx.time ? formatTimeDisplay(tx.time, currentTimeFormat) : '';
-    const iconSvg = getCategoryIconSvg(tx.category, tx.type);
+    const iconSvg = sub ? getSubcategoryIconSvg(tx.category, sub, tx.type) : getCategoryIconSvg(tx.category, tx.type);
 
     const hasNote = tx.note && tx.note.trim() !== '';
 
@@ -3982,7 +4052,7 @@ function createTxItemElement(tx, filterWallet) {
         </div>
         <div class="tx-item-content">
             <div class="tx-item-main">
-                <span class="tx-item-category">${categoryText}${isTransfer ? ' <span class="tx-transfer-badge">Transfer</span>' : ''}</span>
+                <span class="tx-item-category">${categoryHtml}</span>
                 <div class="tx-item-amount-col">
                     <span class="tx-amount ${amountClass} tabular-nums">${sign}${currencyFormatter.format(Math.abs(tx.amount), getTransactionCurrency(tx))}</span>
                 </div>
@@ -5088,7 +5158,7 @@ function renderCategoryGroup(type, container) {
             `;
 
             catRow.querySelector('.btn-add-subcat').addEventListener('click', () => {
-                addingSubcategoryFor = { type, cat };
+                addingSubcategoryFor = { type, cat, icon: '' };
                 editingCategory = null;
                 editingSubcategory = null;
                 renderCategorySettings();
@@ -5109,6 +5179,7 @@ function renderCategoryGroup(type, container) {
 
         // Sub categories list
         const subList = getSubcategoriesFor(type, cat);
+        const rawSubs = currentCategories?.subcategories?.[type]?.[cat] || [];
         if (subList.length > 0) {
             const subUl = document.createElement('ul');
             subUl.className = 'subcategory-items';
@@ -5119,11 +5190,17 @@ function renderCategoryGroup(type, container) {
                 const subLi = document.createElement('li');
                 subLi.setAttribute('data-name', sub);
                 const isSubEditing = editingSubcategory && editingSubcategory.type === type && editingSubcategory.cat === cat && editingSubcategory.name === sub;
+                const subItem = rawSubs.find(s => getCatName(s) === sub);
+                const subIcon = (subItem && typeof subItem === 'object' && subItem.icon) ? subItem.icon : '';
 
                 if (isSubEditing) {
+                    const displayedEditIcon = editingSubcategory.icon
+                        ? getCategoryIconSvgById(editingSubcategory.icon)
+                        : getSubcategoryIconSvg(cat, '', type);
                     subLi.className = 'subcategory-item editing';
                     subLi.innerHTML = `
                         <form class="category-inline-edit-form" style="width: 100%;">
+                            <button type="button" class="btn-icon btn-category-icon-picker btn-edit-subcategory-icon" aria-label="Pilih ikon sub kategori ${escapeHTML(sub)}" title="Pilih ikon">${displayedEditIcon}</button>
                             <input type="text" class="category-edit-input" value="${escapeHTML(sub)}" required autocomplete="off" aria-label="Ubah nama sub kategori ${escapeHTML(sub)}">
                             <div class="category-item-actions">
                                 <button type="submit" class="btn-icon btn-save-cat">Simpan</button>
@@ -5134,11 +5211,21 @@ function renderCategoryGroup(type, container) {
 
                     const subEditForm = subLi.querySelector('.category-inline-edit-form');
                     const subEditInput = subLi.querySelector('.category-edit-input');
+                    const btnEditSubIcon = subLi.querySelector('.btn-edit-subcategory-icon');
                     const subBtnCancel = subLi.querySelector('.btn-cancel-cat');
+
+                    if (btnEditSubIcon) {
+                        btnEditSubIcon.addEventListener('click', () => {
+                            openIconPicker(editingSubcategory.icon || '', (chosenIcon) => {
+                                editingSubcategory.icon = chosenIcon;
+                                btnEditSubIcon.innerHTML = chosenIcon ? getCategoryIconSvgById(chosenIcon) : getSubcategoryIconSvg(cat, '', type);
+                            }, { isSubcategory: true, title: `Pilih Ikon Sub Kategori (${sub})` });
+                        });
+                    }
 
                     subEditForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        await handleSaveSubcategoryName(type, cat, sub, subEditInput.value.trim());
+                        await handleSaveSubcategoryName(type, cat, sub, subEditInput.value.trim(), editingSubcategory.icon);
                     });
 
                     subBtnCancel.addEventListener('click', () => {
@@ -5158,9 +5245,13 @@ function renderCategoryGroup(type, container) {
                         subEditInput.select();
                     });
                 } else {
+                    const subIconSvg = getSubcategoryIconSvg(cat, subItem || sub, type);
                     subLi.className = 'subcategory-item';
                     subLi.innerHTML = `
-                        <span class="subcategory-name">${escapeHTML(sub)}</span>
+                        <div class="subcategory-item-main">
+                            <span class="subcategory-item-icon" aria-hidden="true">${subIconSvg}</span>
+                            <span class="subcategory-name">${escapeHTML(sub)}</span>
+                        </div>
                         <div class="subcategory-item-actions">
                             <button type="button" class="btn-icon btn-edit-subcat" data-type="${type}" data-cat="${escapeHTML(cat)}" data-name="${escapeHTML(sub)}" aria-label="Ubah nama sub kategori ${escapeHTML(sub)}">Ubah</button>
                             <button type="button" class="btn-icon btn-delete-subcat" data-type="${type}" data-cat="${escapeHTML(cat)}" data-name="${escapeHTML(sub)}" aria-label="Hapus sub kategori ${escapeHTML(sub)}">Hapus</button>
@@ -5169,7 +5260,7 @@ function renderCategoryGroup(type, container) {
                     `;
 
                     subLi.querySelector('.btn-edit-subcat').addEventListener('click', () => {
-                        editingSubcategory = { type, cat, name: sub };
+                        editingSubcategory = { type, cat, name: sub, icon: subIcon };
                         editingCategory = null;
                         addingSubcategoryFor = null;
                         renderCategorySettings();
@@ -5226,18 +5317,32 @@ function renderCategoryGroup(type, container) {
         if (addingSubcategoryFor && addingSubcategoryFor.type === type && addingSubcategoryFor.cat === cat) {
             const addForm = document.createElement('form');
             addForm.className = 'subcategory-inline-form';
+            const displayedAddIcon = addingSubcategoryFor.icon
+                ? getCategoryIconSvgById(addingSubcategoryFor.icon)
+                : getSubcategoryIconSvg(cat, '', type);
             addForm.innerHTML = `
+                <button type="button" class="btn-icon btn-category-icon-picker btn-add-subcategory-icon" aria-label="Pilih ikon sub kategori untuk ${escapeHTML(cat)}" title="Pilih ikon">${displayedAddIcon}</button>
                 <input type="text" class="subcategory-add-input" placeholder="Tambah sub kategori ${escapeHTML(cat)}..." required autocomplete="off" aria-label="Tambah sub kategori ${escapeHTML(cat)}">
                 <button type="submit" class="btn-icon btn-save-cat">Simpan</button>
                 <button type="button" class="btn-icon btn-cancel-cat">Batal</button>
             `;
 
             const addInput = addForm.querySelector('.subcategory-add-input');
+            const btnAddSubIcon = addForm.querySelector('.btn-add-subcategory-icon');
             const btnCancelAdd = addForm.querySelector('.btn-cancel-cat');
+
+            if (btnAddSubIcon) {
+                btnAddSubIcon.addEventListener('click', () => {
+                    openIconPicker(addingSubcategoryFor.icon || '', (chosenIcon) => {
+                        addingSubcategoryFor.icon = chosenIcon;
+                        btnAddSubIcon.innerHTML = chosenIcon ? getCategoryIconSvgById(chosenIcon) : getSubcategoryIconSvg(cat, '', type);
+                    }, { isSubcategory: true, title: `Pilih Ikon Sub Kategori (${cat})` });
+                });
+            }
 
             addForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                await handleAddSubcategory(type, cat, addInput.value.trim());
+                await handleAddSubcategory(type, cat, addInput.value.trim(), addingSubcategoryFor.icon || '');
             });
 
             btnCancelAdd.addEventListener('click', () => {
@@ -5496,7 +5601,7 @@ async function performDeleteCategory(type, name) {
     }
 }
 
-async function handleAddSubcategory(type, cat, subName) {
+async function handleAddSubcategory(type, cat, subName, icon = '') {
     const name = subName.trim();
     if (!name) {
         showNotification('Nama sub kategori tidak boleh kosong.', 'warn');
@@ -5523,7 +5628,12 @@ async function handleAddSubcategory(type, cat, subName) {
     ensureToken();
 
     const maxOrder = list.length > 0 ? Math.max(...list.map(s => typeof s.order === 'number' ? s.order : 0)) : -1;
-    list.push({ name, order: maxOrder + 1 });
+    const newSub = { name, order: maxOrder + 1 };
+    const cleanIcon = String(icon || '').trim();
+    if (cleanIcon) {
+        newSub.icon = cleanIcon;
+    }
+    list.push(newSub);
     currentCategories.updatedAt = Date.now();
 
     try {
@@ -5541,34 +5651,47 @@ async function handleAddSubcategory(type, cat, subName) {
     }
 }
 
-async function handleSaveSubcategoryName(type, cat, oldName, newName) {
+async function handleSaveSubcategoryName(type, cat, oldName, newName, newIcon = '') {
     const name = newName.trim();
     if (!name) {
         showNotification('Nama sub kategori tidak boleh kosong.', 'warn');
         return;
     }
-    if (name === oldName) {
+
+    const list = currentCategories.subcategories[type][cat] || [];
+    const subItem = list.find(s => getCatName(s) === oldName);
+    const oldIcon = (subItem && typeof subItem === 'object' && subItem.icon) ? subItem.icon : '';
+    const cleanNewIcon = String(newIcon || '').trim();
+
+    if (name === oldName && cleanNewIcon === oldIcon) {
         editingSubcategory = null;
         renderCategorySettings();
         return;
     }
 
-    const list = currentCategories.subcategories[type][cat] || [];
-    const exists = list.some(s => getCatName(s) !== oldName && getCatName(s).toLowerCase() === name.toLowerCase());
-    if (exists) {
-        showNotification(`Sub kategori "${name}" sudah ada di kategori "${cat}".`, 'warn');
-        return;
+    if (name !== oldName) {
+        const exists = list.some(s => getCatName(s) !== oldName && getCatName(s).toLowerCase() === name.toLowerCase());
+        if (exists) {
+            showNotification(`Sub kategori "${name}" sudah ada di kategori "${cat}".`, 'warn');
+            return;
+        }
     }
 
     ensureToken();
 
-    const subItem = list.find(s => getCatName(s) === oldName);
     if (subItem) {
         if (typeof subItem === 'object') {
             subItem.name = name;
+            if (cleanNewIcon) {
+                subItem.icon = cleanNewIcon;
+            } else {
+                delete subItem.icon;
+            }
         } else {
             const idx = list.indexOf(subItem);
-            list[idx] = { name, order: idx };
+            const newItem = { name, order: idx };
+            if (cleanNewIcon) newItem.icon = cleanNewIcon;
+            list[idx] = newItem;
         }
         currentCategories.subcategories[type][cat] = list;
         currentCategories.updatedAt = Date.now();
@@ -5576,7 +5699,7 @@ async function handleSaveSubcategoryName(type, cat, oldName, newName) {
         try {
             await saveCategories(currentCategories);
 
-            if (type === 'expense' && currentBudgets?.subcategories?.[cat]?.[oldName] !== undefined) {
+            if (name !== oldName && type === 'expense' && currentBudgets?.subcategories?.[cat]?.[oldName] !== undefined) {
                 currentBudgets.subcategories[cat][name] = currentBudgets.subcategories[cat][oldName];
                 delete currentBudgets.subcategories[cat][oldName];
                 currentBudgets.updatedAt = Date.now();
@@ -5584,13 +5707,15 @@ async function handleSaveSubcategoryName(type, cat, oldName, newName) {
             }
 
             let txChanged = false;
-            const now = Date.now();
-            for (const tx of currentTransactions) {
-                if (tx.type === type && tx.category === cat && tx.subcategory === oldName) {
-                    tx.subcategory = name;
-                    tx.updatedAt = now;
-                    await saveTransaction(tx);
-                    txChanged = true;
+            if (name !== oldName) {
+                const now = Date.now();
+                for (const tx of currentTransactions) {
+                    if (tx.type === type && tx.category === cat && tx.subcategory === oldName) {
+                        tx.subcategory = name;
+                        tx.updatedAt = now;
+                        await saveTransaction(tx);
+                        txChanged = true;
+                    }
                 }
             }
 
@@ -5598,16 +5723,14 @@ async function handleSaveSubcategoryName(type, cat, oldName, newName) {
             renderCategorySettings();
             renderBudgetSettings();
             renderBudgetSection();
-            if (txChanged) {
-                render();
-            }
+            render();
             if (txCategoryInput.value === cat) {
                 populateSubcategoryOptions(cat, txSubcategoryInput.value === oldName ? name : txSubcategoryInput.value);
             }
             markDirty().catch(err => console.error("Gagal mengubah nama sub kategori untuk sinkron", err));
-            showNotification(`Sub kategori berhasil diubah menjadi "${name}".`, 'success');
+            showNotification(name !== oldName ? `Sub kategori berhasil diubah menjadi "${name}".` : `Ikon sub kategori "${name}" berhasil diubah.`, 'success');
         } catch (error) {
-            console.error("Gagal mengubah nama sub kategori", error);
+            console.error("Gagal mengubah sub kategori", error);
             showNotification("Terjadi kesalahan saat menyimpan sub kategori.", "error");
         }
     }
@@ -6138,7 +6261,10 @@ function renderBudgetSection() {
             listHtml += `
                 <div class="budget-item budget-item-subcategory">
                     <div class="budget-item-header">
-                        <span class="budget-category-name">${escapeHTML(sub)}</span>
+                        <div class="budget-category-title-wrap">
+                            <span class="budget-category-icon" aria-hidden="true">${getSubcategoryIconSvg(cat, sub, 'expense')}</span>
+                            <span class="budget-category-name">${escapeHTML(sub)}</span>
+                        </div>
                         <span class="budget-spending tabular-nums">${formattedSubTerpakai} <span class="budget-spending-divider">dari</span> ${formattedSubBudget}</span>
                     </div>
                     <div class="budget-progress-track" role="progressbar" aria-valuenow="${Math.round(subPercent)}" aria-valuemin="0" aria-valuemax="100" aria-label="Progres budget sub kategori ${escapeHTML(sub)}: ${Math.round(subPercent)}%">
@@ -6415,9 +6541,12 @@ function renderBudgetSettings() {
                     });
                 } else {
                     subLi.innerHTML = `
-                        <div>
-                            <span class="subcategory-name">${escapeHTML(sub)}</span>
-                            <span class="budget-item-amount">&bull; ${currencyFormatter.format(subAmount)} / bulan</span>
+                        <div class="budget-settings-cat-main">
+                            <span class="budget-category-icon" aria-hidden="true">${getSubcategoryIconSvg(cat, sub, 'expense')}</span>
+                            <div>
+                                <span class="subcategory-name">${escapeHTML(sub)}</span>
+                                <span class="budget-item-amount">&bull; ${currencyFormatter.format(subAmount)} / bulan</span>
+                            </div>
                         </div>
                         <div class="category-item-actions">
                             <button type="button" class="btn-icon btn-edit-sub-budget" data-cat="${escapeHTML(cat)}" data-sub="${escapeHTML(sub)}" aria-label="Ubah budget ${escapeHTML(sub)}">Ubah</button>
@@ -8580,6 +8709,15 @@ async function init() {
 
     if (btnIconPickerCancel) {
         btnIconPickerCancel.addEventListener('click', () => closeIconPicker());
+    }
+
+    if (btnIconPickerClear) {
+        btnIconPickerClear.addEventListener('click', () => {
+            if (typeof activeIconPickerCallback === 'function') {
+                activeIconPickerCallback('');
+            }
+            closeIconPicker();
+        });
     }
 
     if (iconPickerDialog) {
