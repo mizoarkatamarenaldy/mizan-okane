@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-18: Perbaikan UI PC 2A: CSS Timbangan
+- Diperbaiki: Tata letak 3 kolom sejajar pada halaman Timbangan di layar PC (@media min-width: 1024px) dengan lebar 1 : 1,2 : 1 (kiri: Timbang Sebelum Beli, tengah: Timbangan Bulan Ini, kanan: Sesuaikan Saldo) mulai dari tinggi baris yang sama (`grid-row: 1`) dan header satu baris penuh di atasnya (`desktop/src/css/style.css`).
+- Diperbaiki: Scroll halaman Timbangan di PC dipindahkan ke tingkat kolom (`overflow-y: auto`), kartu mengikuti tinggi isi tanpa scrollbar tersendiri (`min-height: auto; height: auto; overflow: visible`), serta gambar timbangan SVG tampil utuh dan ukurannya fleksibel menyesuaikan lebar kolom tengah (`desktop/src/css/style.css`).
+- Ditambah: Padding-bawah 88 px pada kolom Timbangan, kolom Beranda, dan halaman Statistik di layar PC agar tombol melayang tambah (+) tidak menutup konten paling bawah saat digulir (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v65` agar perubahan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Mencentang item "Perbaikan UI PC 2A: CSS Timbangan" di `dev/PLAN.md` dan menambahkan spesifikasinya di `dev/PLANSPEC.md`.
+
 ## 2026-10-18: Perbaikan UI PC: Riwayat dan Timbangan
 - Ditambah: Tampilan Riwayat di layar PC dengan baris transaksi satu lapis (tinggi 52px), kolom berurutan dengan lebar tetap (ikon 36px, kategori 180px, catatan 1fr terpotong elipsis, dompet 140px, waktu 80px, jumlah 150px rata kanan, tombol aksi 96px dengan ruang tersisa saat tanpa tombol edit), pemisah garis tipis token border tanpa kartu bersarang, serta blok ringkasan total tersusun rapi satu mata uang per baris (`desktop/src/css/style.css`).
 - Ditambah: Tata letak dashboard 3 kolom pada halaman Timbangan di layar PC (@media min-width: 1024px) dengan lebar kolom berbanding 1 : 1,2 : 1 (kiri: Timbang Sebelum Beli, tengah: Timbangan Bulan Ini & Equilibrium, kanan: Sesuaikan Saldo), scroll independen per kolom (overflow-y auto), tinggi pas sisa layar tanpa scroll panjang halaman, dan pembatasan lebar konten maksimal 1600px di tengah (`desktop/src/index.html`, `desktop/src/css/style.css`).

@@ -5233,6 +5233,8 @@ body.modal-open {
         overflow-x: hidden;
         scrollbar-width: thin;
         scrollbar-color: var(--border) transparent;
+        padding-bottom: 88px;
+        box-sizing: border-box;
     }
 
     #page-beranda .summary {
@@ -5496,6 +5498,11 @@ body.modal-open {
     }
 
     /* 5. Statistik: Grafik Disusun 2 Kolom, Tab Waktu Tetap di Atas */
+    #page-statistik {
+        padding-bottom: 88px;
+        box-sizing: border-box;
+    }
+
     #page-statistik .stats-scale-bar {
         margin-bottom: 16px;
     }
@@ -5596,6 +5603,8 @@ body.modal-open {
         margin-bottom: 16px;
         flex: 0 0 auto;
         gap: 16px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     #page-timbangan .timbangan-header-bar {
@@ -5627,25 +5636,60 @@ body.modal-open {
         overflow-x: hidden;
         scrollbar-width: thin;
         scrollbar-color: var(--border) transparent;
+        padding-bottom: 88px;
+        box-sizing: border-box;
     }
 
     .timbangan-col-left {
         grid-column: 1;
+        grid-row: 1;
     }
 
     .timbangan-col-center {
         grid-column: 2;
+        grid-row: 1;
     }
 
     .timbangan-col-right {
         grid-column: 3;
+        grid-row: 1;
     }
 
     #page-timbangan .timbangan-section,
     #page-timbangan .timbangan-calc-section {
+        margin-top: 0;
         margin-bottom: 0;
-        min-height: 100%;
+        min-height: auto;
+        height: auto;
+        overflow: visible;
         box-sizing: border-box;
+    }
+
+    #page-timbangan .timbangan-scale-container {
+        width: 100%;
+    }
+
+    #page-timbangan .timbangan-svg-wrap {
+        max-width: 100%;
+        width: 100%;
+        margin: 6px auto 10px;
+    }
+
+    #page-timbangan .timbangan-svg {
+        width: 100%;
+        height: auto;
+        max-height: none;
+        display: block;
+    }
+
+    #page-timbangan .timbangan-pan-amounts {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    #page-timbangan .timbangan-verdict-box {
+        max-width: 100%;
+        width: 100%;
     }
 
     /* Kebijakan Privasi, Syarat dan Ketentuan: max-width 800px di Tengah */

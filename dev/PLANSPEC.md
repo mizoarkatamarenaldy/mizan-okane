@@ -1320,5 +1320,33 @@ Cek manual (dilakukan pemilik):
 - Perkecil jendela ke bawah 1024 px: Riwayat dan Timbangan kembali sama persis dengan tampilan HP sekarang.
 - Ganti mode terang dan gelap: keduanya terbaca jelas.
 
+## Perbaikan UI PC 2A: CSS Timbangan
+
+Tujuan: Merapikan tata letak halaman Timbangan di PC dan memastikan tombol (+) tidak menutup isi, hanya lewat perubahan CSS. Ini potongan pertama dari item "Perbaikan UI PC 2" yang sebelumnya dibatalkan (revert) karena semua tombol di PC tidak bisa diklik.
+
+Tempat dan tampilan:
+- Halaman Timbangan di PC (lebar 1024 px ke atas): tiga kolom sejajar dengan lebar 1 : 1,2 : 1 (kiri "Timbang Sebelum Beli", tengah timbangan, kanan "Sesuaikan Saldo"), semua mulai dari tinggi yang sama.
+- Scroll ada di tingkat kolom (overflow-y: auto), bukan di tiap kartu. Kartu tidak punya scrollbar sendiri.
+- Gambar timbangan SVG tampil utuh dan menyesuaikan lebar kolom tengah.
+- Kolom Timbangan, kolom Beranda, dan halaman Statistik di PC diberi padding-bawah 88 px supaya tombol (+) tidak menutup isi paling bawah.
+- Tampilan HP dan APK tidak berubah. Semua aturan baru hanya di dalam @media (min-width: 1024px).
+
+Aturan:
+- Hanya ubah desktop/src/css/style.css dan desktop/src/sw.js (naikkan versi cache ke mizan-v65, karena mizan-v64 pernah terkirim dan sudah dibatalkan).
+- DILARANG mengubah desktop/src/index.html dan desktop/src/js/app.js.
+- Kalau header Timbangan tidak bisa merentang satu baris penuh di atas tiga kolom tanpa mengubah index.html, jangan ubah HTML. Berhenti dan laporkan ke pemilik apa yang mentok.
+- Jangan sentuh detail kategori di Statistik (itu item terpisah).
+- Hover hanya ganti latar ke token surface-raised, tanpa animasi.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Timbangan di PC 1280x720 dan 1920x1080: tiga kolom sejajar, scroll per kolom, tidak ada scrollbar di dalam kartu.
+- Buka Beranda dan Statistik di PC, scroll sampai bawah: isi terakhir tidak tertutup tombol (+).
+- Buka DevTools Console di semua halaman: tidak ada error merah.
+- Klik semua tombol navigasi, tombol (+), dan satu tombol di tiap halaman: semuanya merespons.
+- Buka di lebar HP: tampilan sama seperti sebelum item ini.
+
 
 
