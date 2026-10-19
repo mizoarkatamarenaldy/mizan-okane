@@ -177,6 +177,42 @@
       "description": "Permission identifier",
       "oneOf": [
         {
+          "description": "Enables the tauri_get_access_token command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-tauri-get-access-token",
+          "markdownDescription": "Enables the tauri_get_access_token command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the tauri_login_google command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-tauri-login-google",
+          "markdownDescription": "Enables the tauri_login_google command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the tauri_logout_google command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-tauri-logout-google",
+          "markdownDescription": "Enables the tauri_logout_google command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the tauri_get_access_token command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-tauri-get-access-token",
+          "markdownDescription": "Denies the tauri_get_access_token command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the tauri_login_google command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-tauri-login-google",
+          "markdownDescription": "Denies the tauri_login_google command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the tauri_logout_google command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-tauri-logout-google",
+          "markdownDescription": "Denies the tauri_logout_google command without any pre-configured scope."
+        },
+        {
           "description": "Default core plugins set.\n#### This default permission set includes:\n\n- `core:path:default`\n- `core:event:default`\n- `core:window:default`\n- `core:webview:default`\n- `core:app:default`\n- `core:image:default`\n- `core:resources:default`\n- `core:menu:default`\n- `core:tray:default`",
           "type": "string",
           "const": "core:default",

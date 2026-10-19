@@ -1918,3 +1918,25 @@ Cek manual:
 - Tambah transaksi di Tauri, cek sinkron ke perangkat lain lewat Drive.
 - Hapus oauth-desktop.json sementara. Hasil: muncul pesan jelas, aplikasi tidak crash.
 - Mode tanpa login di Tauri dan login di browser biasa tetap berfungsi seperti sebelumnya.
+
+## Perbaikan Tauri: fitur form reqwest
+
+Tujuan: Item "Login Google Tauri: loopback" gagal kompilasi di desktop/tauri/src-tauri/src/lib.rs (baris sekitar 353 dan 427) dengan error E0599: method `form` tidak ditemukan pada `RequestBuilder`. Perbaiki supaya kompilasi berhasil.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Aturan:
+- Folder kerja: desktop/tauri/. Jangan ubah desktop/src.
+- Buka desktop/tauri/src-tauri/Cargo.toml dan lihat versi reqwest yang dipakai. Di reqwest versi baru, method `form` hanya tersedia kalau fitur `form` dinyalakan. Nyalakan fitur `form` pada dependensi reqwest di Cargo.toml. Fitur lain yang sudah ada jangan dihapus.
+- Jangan ubah logika di lib.rs, jangan ganti library HTTP, dan jangan tulis ulang cara kirim form.
+- Perubahan pada desktop/tauri/src-tauri/Cargo.lock yang muncul karena fitur ini boleh ikut di-commit.
+- Kalau fitur `form` tidak ada atau bukan penyebabnya, berhenti dan laporkan versi reqwest serta isi bagian dependensinya, jangan cari jalan lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. dev/SCHEMA.md tidak perlu diubah.
+
+Cek manual:
+- Pemilik menjalankan npm run dev dari desktop/tauri. Hasil yang diharapkan: tidak ada error E0599 dan jendela "Mizan Okane" muncul.
+- Ketuk login Google. Hasil yang diharapkan: browser sistem terbuka ke halaman Google.
+

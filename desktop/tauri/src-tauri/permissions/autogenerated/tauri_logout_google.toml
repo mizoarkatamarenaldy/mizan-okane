@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-tauri-logout-google"
+description = "Enables the tauri_logout_google command without any pre-configured scope."
+commands.allow = ["tauri_logout_google"]
+
+[[permission]]
+identifier = "deny-tauri-logout-google"
+description = "Denies the tauri_logout_google command without any pre-configured scope."
+commands.deny = ["tauri_logout_google"]

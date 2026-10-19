@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-tauri-get-access-token"
+description = "Enables the tauri_get_access_token command without any pre-configured scope."
+commands.allow = ["tauri_get_access_token"]
+
+[[permission]]
+identifier = "deny-tauri-get-access-token"
+description = "Denies the tauri_get_access_token command without any pre-configured scope."
+commands.deny = ["tauri_get_access_token"]
