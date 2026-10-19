@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-19: Perbaikan Tauri: popup login Google
+- Diperbaiki: Penanganan permintaan pembukaan jendela baru (`window.open`) pada jendela Tauri "Mizan Okane" menggunakan hook `.setup` dan `on_new_window` pada `WebviewWindowBuilder` di `desktop/tauri/src-tauri/src/lib.rs`, sehingga popup Google OAuth dapat terbuka dan pesan "Jendela login Google diblokir browser. Ketuk tombolnya lagi." tidak muncul lagi.
+- Diubah: Mengizinkan jendela baru HANYA untuk alamat HTTPS milik Google dengan host `accounts.google.com` (`NewWindowResponse::Allow`), dan menolak (`NewWindowResponse::Deny`) seluruh alamat lainnya (`desktop/tauri/src-tauri/src/lib.rs`).
+- Diubah: Menyetel `"create": false` pada konfigurasi jendela `main` di `desktop/tauri/src-tauri/tauri.conf.json` agar jendela utama dibangun melalui `WebviewWindowBuilder::from_config` di dalam `.setup` sesuai panduan resmi Tauri v2 (`desktop/tauri/src-tauri/tauri.conf.json`).
+- Ditambah: Menyertakan berkas lockfile dependensi dan skema capability dari inisialisasi lingkungan Tauri (`desktop/tauri/package-lock.json`, `desktop/tauri/src-tauri/Cargo.lock`, `desktop/tauri/src-tauri/gen/schemas/acl-manifests.json`, `desktop/tauri/src-tauri/gen/schemas/capabilities.json`, `desktop/tauri/src-tauri/gen/schemas/desktop-schema.json`, `desktop/tauri/src-tauri/gen/schemas/windows-schema.json`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan Tauri: popup login Google" di `dev/PLAN.md` (`dev/PLANSPEC.md`, `dev/PLAN.md`).
+
 ## 2026-10-19: Konversi Tauri
 - Ditambah: Proyek desktop Windows menggunakan Tauri v2 di `desktop/tauri/` yang membuka situs web di GitHub Pages (`https://mizoarkatamarenaldy.github.io/mizan-okane/`) dalam satu jendela aplikasi mandiri berukuran awal 1100 x 750 yang dapat diubah ukurannya (`desktop/tauri/src-tauri/tauri.conf.json`, `desktop/tauri/src-tauri/Cargo.toml`, `desktop/tauri/src-tauri/build.rs`, `desktop/tauri/src-tauri/src/main.rs`, `desktop/tauri/src-tauri/src/lib.rs`, `desktop/tauri/src-tauri/capabilities/default.json`).
 - Ditambah: Ikon aplikasi multi-resolusi untuk Windows (32x32, 128x128, 128x128@2x, icon.ico, icon.png) yang dihasilkan dari logo asli aplikasi tanpa membuat aset visual baru (`desktop/tauri/src-tauri/icons/32x32.png`, `desktop/tauri/src-tauri/icons/128x128.png`, `desktop/tauri/src-tauri/icons/128x128@2x.png`, `desktop/tauri/src-tauri/icons/icon.ico`, `desktop/tauri/src-tauri/icons/icon.png`).

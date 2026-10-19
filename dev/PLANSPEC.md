@@ -1866,5 +1866,25 @@ Cek manual:
 - Buka form edit transaksi lama, ubah catatan. Hasil: saran muncul sama seperti di form tambah.
 - Masuk mode data contoh, ketik di Catatan. Hasil: saran berasal dari data contoh saja.
 
+## Perbaikan Tauri: popup login Google
 
+Tujuan: Tombol login Google di jendela Tauri "Mizan Okane" saat ini hanya menampilkan "Jendela login Google diblokir browser. Ketuk tombolnya lagi." karena popup tidak terbuka. Perbaiki supaya popup login Google bisa terbuka di jendela Tauri.
 
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Aturan:
+- Folder kerja: desktop/tauri/. Jangan ubah desktop/src.
+- Cari tahu versi Tauri yang dipakai, lalu pakai cara resmi versi itu untuk menangani permintaan jendela baru (new window / window.open) dari halaman web.
+- Izinkan jendela baru HANYA untuk alamat milik Google yang dipakai alur login (accounts.google.com). Alamat lain tetap ditolak.
+- Alamat situs GitHub Pages, origin, dan OAuth Client ID tidak boleh berubah.
+- Jangan tambah jalur login lain (misalnya membuka browser sistem atau deep link). Itu bukan bagian item ini.
+- Kalau setelah popup terbuka Google menampilkan "disallowed_useragent" atau menolak login, jangan coba cara lain. Berhenti dan laporkan.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Jalankan npm run dev dari desktop/tauri (oleh pemilik). Ketuk tombol login Google. Hasil yang diharapkan: popup Google terbuka dan pesan "diblokir browser" tidak muncul.
+- Setelah login berhasil, tutup dan buka lagi aplikasi. Hasil yang diharapkan: transaksi tetap ada.
+- Mode tanpa login tetap berfungsi seperti sebelumnya.

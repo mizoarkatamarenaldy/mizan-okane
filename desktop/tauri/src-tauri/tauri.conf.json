@@ -17,7 +17,8 @@
         "width": 1100,
         "height": 750,
         "resizable": true,
-        "url": "https://mizoarkatamarenaldy.github.io/mizan-okane/"
+        "url": "https://mizoarkatamarenaldy.github.io/mizan-okane/",
+        "create": false
       }
     ],
     "security": {

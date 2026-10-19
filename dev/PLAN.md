@@ -124,7 +124,8 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik
 - [x] Saran catatan lama
+- [x] Perbaikan Tauri: popup login Google
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.
-- [ ] Rollover budget
+- [ ] Rollover budget
