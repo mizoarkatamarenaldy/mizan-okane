@@ -853,6 +853,37 @@ export function selectCategoryFromPcDropdown(catName, subName = '') {
     }
 }
 
+function scrollDropdownIntoView(menuEl) {
+    if (!menuEl || menuEl.classList.contains('hidden')) return;
+    const formScroll = document.querySelector('.form-body-scroll');
+    if (!formScroll || formScroll.clientHeight === 0) return;
+
+    requestAnimationFrame(() => {
+        const menuRect = menuEl.getBoundingClientRect();
+        const scrollRect = formScroll.getBoundingClientRect();
+        if (menuRect.bottom > scrollRect.bottom) {
+            const diff = menuRect.bottom - scrollRect.bottom + 12;
+            const remainingScroll = formScroll.scrollHeight - formScroll.scrollTop - formScroll.clientHeight;
+            if (remainingScroll < diff) {
+                const currentPadding = parseFloat(getComputedStyle(formScroll).paddingBottom) || 20;
+                formScroll.style.paddingBottom = `${currentPadding + (diff - remainingScroll) + 16}px`;
+            }
+            formScroll.scrollBy({ top: diff, behavior: 'smooth' });
+        }
+    });
+}
+
+function resetFormScrollPadding() {
+    const formScroll = document.querySelector('.form-body-scroll');
+    if (!formScroll) return;
+    const isCatOpen = categoryDropdownMenu && !categoryDropdownMenu.classList.contains('hidden');
+    const isWalletOpen = walletDropdownMenu && !walletDropdownMenu.classList.contains('hidden');
+    const isToWalletOpen = toWalletDropdownMenu && !toWalletDropdownMenu.classList.contains('hidden');
+    if (!isCatOpen && !isWalletOpen && !isToWalletOpen) {
+        formScroll.style.paddingBottom = '';
+    }
+}
+
 export function closeCategoryPcDropdown() {
     if (!categoryDropdownMenu) return;
     categoryDropdownMenu.classList.add('hidden');
@@ -864,6 +895,7 @@ export function closeCategoryPcDropdown() {
         txCategoryDropdownBtn.setAttribute('aria-expanded', 'false');
     }
     pcDropdownActiveCategory = null;
+    resetFormScrollPadding();
 }
 
 export function renderCategoryPcDropdownSub(catName, currentCat, currentSub, type) {
@@ -904,6 +936,7 @@ export function renderCategoryPcDropdownSub(catName, currentCat, currentSub, typ
 
     categoryDropdownSubCol.innerHTML = html;
     categoryDropdownSubCol.classList.remove('hidden');
+    scrollDropdownIntoView(categoryDropdownMenu);
 
     categoryDropdownSubCol.querySelectorAll('.category-dropdown-sub-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -1016,6 +1049,7 @@ export function openCategoryPcDropdown() {
 
     categoryDropdownMenu.classList.remove('hidden');
     txCategoryDropdownBtn.setAttribute('aria-expanded', 'true');
+    scrollDropdownIntoView(categoryDropdownMenu);
 }
 
 export function toggleCategoryPcDropdown() {
@@ -1084,24 +1118,13 @@ export function updateWalletDropdownUI() {
 }
 
 export function syncWalletInputA11y() {
-    const isPc = window.matchMedia && window.matchMedia('(min-width: 1024px)').matches;
     if (txWalletInput) {
-        if (isPc) {
-            txWalletInput.setAttribute('tabindex', '-1');
-            txWalletInput.setAttribute('aria-hidden', 'true');
-        } else {
-            txWalletInput.removeAttribute('tabindex');
-            txWalletInput.removeAttribute('aria-hidden');
-        }
+        txWalletInput.setAttribute('tabindex', '-1');
+        txWalletInput.setAttribute('aria-hidden', 'true');
     }
     if (txToWalletInput) {
-        if (isPc) {
-            txToWalletInput.setAttribute('tabindex', '-1');
-            txToWalletInput.setAttribute('aria-hidden', 'true');
-        } else {
-            txToWalletInput.removeAttribute('tabindex');
-            txToWalletInput.removeAttribute('aria-hidden');
-        }
+        txToWalletInput.setAttribute('tabindex', '-1');
+        txToWalletInput.setAttribute('aria-hidden', 'true');
     }
 }
 
@@ -1143,6 +1166,7 @@ export function openWalletPcDropdown() {
 
     walletDropdownMenu.classList.remove('hidden');
     txWalletDropdownBtn.setAttribute('aria-expanded', 'true');
+    scrollDropdownIntoView(walletDropdownMenu);
 }
 
 export function closeWalletPcDropdown() {
@@ -1151,6 +1175,7 @@ export function closeWalletPcDropdown() {
     if (txWalletDropdownBtn) {
         txWalletDropdownBtn.setAttribute('aria-expanded', 'false');
     }
+    resetFormScrollPadding();
 }
 
 export function toggleWalletPcDropdown() {
@@ -1213,6 +1238,7 @@ export function openToWalletPcDropdown() {
 
     toWalletDropdownMenu.classList.remove('hidden');
     txToWalletDropdownBtn.setAttribute('aria-expanded', 'true');
+    scrollDropdownIntoView(toWalletDropdownMenu);
 }
 
 export function closeToWalletPcDropdown() {
@@ -1221,6 +1247,7 @@ export function closeToWalletPcDropdown() {
     if (txToWalletDropdownBtn) {
         txToWalletDropdownBtn.setAttribute('aria-expanded', 'false');
     }
+    resetFormScrollPadding();
 }
 
 export function toggleToWalletPcDropdown() {
@@ -7902,17 +7929,10 @@ if (btnOpenCategoryPicker) {
 }
 if (formRowCategory) {
     formRowCategory.addEventListener('click', (e) => {
-        if (window.matchMedia('(min-width: 1024px)').matches) {
-            if (e.target && e.target.closest('#category-dropdown-pc')) {
-                return;
-            }
-            toggleCategoryPcDropdown();
+        if (e.target && e.target.closest('#category-dropdown-pc')) {
             return;
         }
-        if (e.target && (e.target.closest('#btn-open-category-picker') || e.target.closest('.category-row-btn'))) {
-            return;
-        }
-        openCategoryPicker();
+        toggleCategoryPcDropdown();
     });
 }
 
@@ -8022,25 +8042,21 @@ if (categoryDropdownMenu) {
 
 if (formRowWallet) {
     formRowWallet.addEventListener('click', (e) => {
-        if (window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) {
-            if (e.target && e.target.closest('#wallet-dropdown-pc')) {
-                return;
-            }
-            e.preventDefault();
-            toggleWalletPcDropdown();
+        if (e.target && e.target.closest('#wallet-dropdown-pc')) {
+            return;
         }
+        e.preventDefault();
+        toggleWalletPcDropdown();
     });
 }
 
 if (formRowToWallet) {
     formRowToWallet.addEventListener('click', (e) => {
-        if (window.matchMedia && window.matchMedia('(min-width: 1024px)').matches) {
-            if (e.target && e.target.closest('#to-wallet-dropdown-pc')) {
-                return;
-            }
-            e.preventDefault();
-            toggleToWalletPcDropdown();
+        if (e.target && e.target.closest('#to-wallet-dropdown-pc')) {
+            return;
         }
+        e.preventDefault();
+        toggleToWalletPcDropdown();
     });
 }
 
@@ -8193,13 +8209,10 @@ document.addEventListener('click', (e) => {
 });
 
 window.addEventListener('resize', () => {
-    if (!window.matchMedia('(min-width: 1024px)').matches) {
-        closeCategoryPcDropdown();
-        closeWalletPcDropdown();
-        closeToWalletPcDropdown();
-    } else {
-        closeCategoryPicker();
-    }
+    closeCategoryPcDropdown();
+    closeWalletPcDropdown();
+    closeToWalletPcDropdown();
+    closeCategoryPicker();
     syncWalletInputA11y();
 });
 if (btnCloseCatPicker) {

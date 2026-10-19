@@ -4285,17 +4285,52 @@ button:disabled {
     border-color: var(--accent);
 }
 
-/* Dropdown Bertingkat Kategori PC (disembunyikan secara default di mobile) */
+/* Dropdown Bertingkat Kategori & Dompet (tampil di mobile dan PC) */
+#btn-open-category-picker {
+    display: none !important;
+}
+
 .category-dropdown-pc {
-    display: none;
+    display: block;
     position: relative;
     width: 100%;
+}
+
+#wallet-dropdown-pc,
+#to-wallet-dropdown-pc {
+    display: block !important;
+}
+
+#form-row-wallet .form-row-wallet-val,
+#form-row-to-wallet .form-row-wallet-val {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+#form-row-wallet #tx-wallet,
+#form-row-to-wallet #tx-to-wallet {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .category-dropdown-menu {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    right: 0;
+    left: auto;
+    min-width: 100%;
+    max-width: calc(100vw - 32px);
     z-index: 1050;
     display: flex;
     background-color: var(--surface);
@@ -4310,9 +4345,10 @@ button:disabled {
 }
 
 .category-dropdown-primary-col {
-    min-width: 190px;
-    max-width: 240px;
+    min-width: 150px;
+    max-width: 165px;
     max-height: 280px;
+    flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 4px;
@@ -4322,9 +4358,10 @@ button:disabled {
 }
 
 .category-dropdown-sub-col {
-    min-width: 180px;
-    max-width: 240px;
+    min-width: 140px;
+    max-width: 155px;
     max-height: 280px;
+    flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 4px;
@@ -4338,9 +4375,12 @@ button:disabled {
     display: none !important;
 }
 
-/* Dropdown Dompet PC */
+/* Dropdown Dompet */
 .wallet-dropdown-menu {
+    left: 0;
+    right: 0;
     width: 100%;
+    min-width: 100%;
 }
 
 .wallet-dropdown-col {
@@ -4354,7 +4394,7 @@ button:disabled {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    min-height: 36px;
+    min-height: 44px;
     padding: 6px 10px;
     background: transparent;
     border: none;
@@ -6686,6 +6726,29 @@ body.modal-open {
     #form-row-wallet .wallet-row-chevron,
     #form-row-to-wallet .wallet-row-chevron {
         display: none !important;
+    }
+
+    .category-dropdown-menu {
+        left: 0;
+        right: auto;
+        min-width: 0;
+        max-width: none;
+    }
+
+    .category-dropdown-primary-col {
+        min-width: 190px;
+        max-width: 240px;
+        flex: none;
+    }
+
+    .category-dropdown-sub-col {
+        min-width: 180px;
+        max-width: 240px;
+        flex: none;
+    }
+
+    .category-dropdown-item {
+        min-height: 36px;
     }
 
     #form-row-note {

@@ -10,6 +10,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-19: Perbaikan UI Mobile 2: Dropdown Kustom Mobile
+- Ditambah: Dropdown kustom Kategori, Dompet, Dari, dan Ke pada form Tambah/Edit Transaksi untuk tampilan mobile (di bawah breakpoint PC 1024px) memakai komponen dan kelas CSS yang sama dengan versi PC (PC 11, PC 12, PC 13) dengan tinggi kotak dan tinggi baris minimal 44 px, ikon, panah, serta placeholder seragam (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Diperbaiki: Sinkronisasi nilai pilihan dropdown kustom ke elemen select bawaan yang disembunyikan secara visual di mobile dengan memicu event change sehingga seluruh logika validasi form, pemilihan manual, format angka mata uang, dan aturan filter dompet transfer tetap berjalan tanpa perubahan (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Ditambah: Penanganan scroll otomatis (`scrollDropdownIntoView`) pada form saat dropdown dibuka di mobile jika ruang di bawah kotak tidak cukup, sehingga daftar terlihat penuh dan tidak tertutup tombol Simpan yang menempel di bawah layar (`desktop/src/js/app.js`).
+- Diubah: Tampilan PC (layar lebar >= 1024px) dipertahankan sama persis seperti sebelumnya (tinggi baris dropdown 36 px, tata letak dua kolom, dan posisi dropdown kiri) (`desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v78` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Perbaikan UI Mobile 2: Dropdown Kustom Mobile" di `dev/PLAN.md`.
+
 ## 2026-10-19: Perbaikan UI Mobile 1: Form Transaksi Layar Penuh
 - Diperbaiki: Form Tambah/Edit Transaksi pada tampilan mobile (di bawah breakpoint PC 1024px) diubah dari dialog melayang menjadi tampilan layar penuh (`100dvh`) tanpa backdrop gelap dan tanpa kotak melayang, dengan bar atas tipis 56 px berisi tombol kembali berikon panah (`#btn-form-back`) di sisi kiri dan judul "Tambah Transaksi" atau "Edit Transaksi" di kanannya (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
 - Diubah: Susunan field pada form di mobile ditata vertikal satu kolom selebar layar di dalam kontainer scroll (`.form-body-scroll`) dengan urutan yang sama seperti PC (Pengeluaran/Pemasukan: Tanggal & Waktu, Total, Kategori, Dompet, Catatan; Transfer: Tanggal & Waktu, Dari, Ke, Total, Catatan) serta target sentuh tombol jenis, input, dan select minimal 44 px (`desktop/src/index.html`, `desktop/src/css/style.css`).

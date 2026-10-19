@@ -1768,3 +1768,48 @@ Cek manual:
 - Console (F12) tidak ada tulisan merah.
 - Nama di lingkup global: semua file JS di desktop/src/ berbagi satu lingkup global. Sebelum menulis kode baru, cari dengan grep setiap nama const, let, atau function level atas yang akan dibuat, dan pastikan belum ada. Setelah selesai, cek lagi bahwa tiap nama hanya satu deklarasi.
 
+## Perbaikan UI Mobile 2: Dropdown Kustom Mobile
+
+Tujuan: Di tampilan mobile, field Kategori, Dompet, Dari, dan Ke di form Tambah/Edit Transaksi memakai dropdown kustom yang sama dengan versi PC (PC 11, PC 12, PC 13), supaya tampilan dan perilakunya seragam di PC dan HP.
+
+Izin dari pemilik: Aturan "tampilan mobile tidak diubah" dari item PC 11 sampai PC 13, dan aturan di item Mobile 1 bahwa dropdown mobile tetap select bawaan, dikecualikan untuk item ini. Yang boleh diubah di tampilan mobile hanya markup, CSS, dan JS tampilan untuk empat field tersebut di form Tambah/Edit Transaksi. Logika, struktur data, dan halaman lain tetap tidak boleh diubah.
+
+Cakupan:
+- Hanya tampilan di bawah breakpoint PC yang sudah dipakai item PC 9 sampai PC 13. Tampilan PC TIDAK diubah.
+- Hanya field Kategori (tab Pengeluaran dan Pemasukan), Dompet (tab Pengeluaran dan Pemasukan), serta Dari dan Ke (tab Transfer).
+- Buka hanya bagian "Perbaikan UI PC 11", "Perbaikan UI PC 12", dan "Perbaikan UI PC 13" di dev/PLANSPEC.md sebagai acuan isi daftar, perilaku, dan aturan. Pakai ulang komponen, fungsi, dan kelas CSS dari ketiga item itu. Jangan menyalin gaya baru dan jangan menulis ulang fungsi yang sudah ada.
+
+Tempat dan tampilan (mobile):
+- Isi daftar, teks baris, ikon (hanya bila PC 11 memakainya), keadaan kosong, dan pilihan terpilih sama persis dengan versi PC masing-masing field.
+- Kotak tertutup selebar field di kolom form, tinggi minimal 44 px, dengan panah dan placeholder seperti versi PC.
+- Daftar terbuka tampil tepat di bawah kotak dengan lebar sama dengan kotak. Tinggi daftar dibatasi dan bisa di-scroll di dalam daftar. Tinggi baris minimal 44 px.
+- Kalau ruang di bawah kotak tidak cukup, form di-scroll otomatis sampai daftar terlihat penuh. Daftar tidak boleh tertutup tombol Simpan.
+- Tidak ada warna, font, bayangan, atau animasi baru.
+
+Aturan:
+- Select bawaan tetap menjadi sumber nilai. Di mobile keempat select disembunyikan secara visual tapi tetap ada. Dropdown mengisi nilai select lalu memicu event change, seperti di PC.
+- Aturan yang mempengaruhi isi pilihan (opsi dinonaktifkan, disembunyikan, atau difilter menurut field lain atau mata uang) tetap berlaku, seperti di PC 13. Daftar dibangun dari opsi select yang aktif setiap kali dibuka.
+- Hanya satu daftar terbuka dalam satu waktu. Daftar menutup saat memilih, saat ketuk di luar, atau saat tekan Escape.
+- Mekanisme tombol back Android dan tombol kembali dari Mobile 1 tidak diubah.
+- Validasi, penyimpanan, dan logika transfer tidak berubah.
+- Yang sengaja TIDAK dilakukan: mengubah tampilan PC, mengubah logika, mengubah field lain (tanggal, waktu, jumlah, catatan), menambah ikon dompet, mengubah halaman lain.
+- Jangan jalankan build. Folder mobile/capacitor/www/ dan mobile/capacitor/android/ dibangun pemilik.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Perkecil jendela di bawah breakpoint PC, buka Tambah Transaksi tab Pengeluaran: Kategori dan Dompet tampil sebagai dropdown kustom, isi dan perilakunya sama dengan di PC.
+- Pilih kategori dan dompet, simpan: transaksi tersimpan dengan nilai yang benar.
+- Tab Transfer: Dari dan Ke dropdown kustom. Dompet yang sama atau beda mata uang diperlakukan sama persis seperti di PC dan seperti sebelum item ini.
+- Buka satu daftar lalu daftar lain: yang pertama menutup.
+- Ketuk di luar daftar: daftar menutup.
+- Field di dekat bagian bawah layar: daftar tetap terlihat penuh dan tidak tertutup tombol Simpan.
+- Edit transaksi lama dan transfer lama: nilai tampil benar.
+- Simpan tanpa memilih dompet: validasi muncul seperti sebelumnya.
+- Tombol kembali dan tombol back Android tetap menutup form.
+- Lebarkan jendela ke ukuran PC: tampilan PC sama persis seperti sebelumnya.
+- Console (F12) tidak ada tulisan merah.
+- Nama di lingkup global: semua file JS di desktop/src/ berbagi satu lingkup global. Sebelum menulis kode baru, cari dengan grep setiap nama const, let, atau function level atas yang akan dibuat, dan pastikan belum ada. Setelah selesai, cek lagi bahwa tiap nama hanya satu deklarasi.
+
+
