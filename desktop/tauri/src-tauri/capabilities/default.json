@@ -9,6 +9,9 @@
     ]
   },
   "permissions": [
-    "core:default"
+    "core:default",
+    "allow-tauri-login-google",
+    "allow-tauri-get-access-token",
+    "allow-tauri-logout-google"
   ]
 }

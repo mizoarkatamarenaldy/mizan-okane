@@ -10,6 +10,7 @@ node_modules/
 *.pem
 *.key
 client_secret*.json
+oauth-desktop.json
 
 # Hasil build
 dist/

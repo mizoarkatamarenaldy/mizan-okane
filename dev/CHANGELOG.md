@@ -10,6 +10,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-19: Login Google Tauri: loopback
+- Ditambah: Alur login Google OAuth loopback lokal (127.0.0.1) dengan PKCE di Tauri menggunakan pembukaan browser sistem bawaan, penangkapan kode otorisasi via `TcpListener` lokal sementara, penukaran token ke Google API, serta penyimpanan refresh token di folder data aplikasi pengguna (`desktop/tauri/src-tauri/src/lib.rs`).
+- Ditambah: Konfigurasi AppManifest pada `build.rs` dan kapabilitas `capabilities/default.json` untuk mengizinkan pemanggilan perintah IPC kustom (`tauri_login_google`, `tauri_get_access_token`, `tauri_logout_google`) khusus dari origin situs GitHub Pages (`desktop/tauri/src-tauri/build.rs`, `desktop/tauri/src-tauri/capabilities/default.json`).
+- Ditambah: Berkas contoh `desktop/tauri/src-tauri/oauth-desktop.example.json` dengan nilai kosong serta aturan pengabaian berkas kredensial asli `oauth-desktop.json` di `.gitignore` dan `desktop/tauri/.gitignore` (`desktop/tauri/src-tauri/oauth-desktop.example.json`, `.gitignore`, `desktop/tauri/.gitignore`).
+- Ditambah: Dependensi pendukung alur OAuth dan PKCE di `desktop/tauri/src-tauri/Cargo.toml` (`reqwest`, `sha2`, `base64`, `url`, `getrandom`) serta pengaktifan `withGlobalTauri` di `desktop/tauri/src-tauri/tauri.conf.json`.
+- Diubah: Menambahkan cabang aktif saat berjalan di dalam Tauri (`isTauri`) pada `desktop/src/js/sync.js` untuk delegasi login Google ke sisi Rust, pembaruan otomatis access token lewat refresh token di latar belakang, dan logout tanpa mengubah perilaku login di browser biasa (`desktop/src/js/sync.js`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v80` (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Login Google Tauri: loopback" di `dev/PLAN.md` (`dev/PLANSPEC.md`, `dev/PLAN.md`).
+
 ## 2026-10-19: Perbaikan Tauri: popup login Google
 - Diperbaiki: Penanganan permintaan pembukaan jendela baru (`window.open`) pada jendela Tauri "Mizan Okane" menggunakan hook `.setup` dan `on_new_window` pada `WebviewWindowBuilder` di `desktop/tauri/src-tauri/src/lib.rs`, sehingga popup Google OAuth dapat terbuka dan pesan "Jendela login Google diblokir browser. Ketuk tombolnya lagi." tidak muncul lagi.
 - Diubah: Mengizinkan jendela baru HANYA untuk alamat HTTPS milik Google dengan host `accounts.google.com` (`NewWindowResponse::Allow`), dan menolak (`NewWindowResponse::Deny`) seluruh alamat lainnya (`desktop/tauri/src-tauri/src/lib.rs`).

@@ -62,6 +62,32 @@ export function isLinked() {
     return isGoogleLinked || !!getAccount();
 }
 
+export function isTauri() {
+    return typeof window !== 'undefined' && Boolean(window.__TAURI__?.core?.invoke);
+}
+
+async function getTauriAccessToken() {
+    if (!isTauri()) return null;
+    try {
+        const auth = await window.__TAURI__.core.invoke('tauri_get_access_token');
+        if (auth && auth.access_token) {
+            accessToken = auth.access_token;
+            tokenExpiresAt = Date.now() + (Number(auth.expires_in) || 3600) * 1000;
+            if (auth.email) {
+                setAccount({ email: auth.email });
+                cachedLoginHint = auth.email;
+                setState({ email: auth.email });
+            }
+            return accessToken;
+        }
+    } catch (err) {
+        console.warn('Gagal memperbarui token lewat Tauri refresh token:', err);
+        const msg = err?.message || String(err || 'Sesi Google berakhir.');
+        throw new AuthRequiredError(msg);
+    }
+    throw new AuthRequiredError('Sesi Google berakhir. Silakan login lagi.');
+}
+
 // --- Google Identity Services ---
 
 function injectGisScript() {
@@ -161,6 +187,9 @@ function requestToken() {
 
 export function ensureToken() {
     if (!isLinked() || tokenValid() || !navigator.onLine) return null;
+    if (isTauri()) {
+        return getTauriAccessToken();
+    }
     return requestToken();
 }
 
@@ -579,8 +608,18 @@ export function setupFirstTapListener() {
 
 async function ensureTokenAndSync() {
     if (!tokenValid() && navigator.onLine) {
-        requestToken();
-        setState({ status: 'connecting', message: '' });
+        if (isTauri()) {
+            try {
+                await getTauriAccessToken();
+            } catch (err) {
+                setState({ status: 'needs-login', message: err.message });
+                setupFirstTapListener();
+                return;
+            }
+        } else {
+            requestToken();
+            setState({ status: 'connecting', message: '' });
+        }
     }
     await syncNow();
 }
@@ -594,8 +633,12 @@ export async function syncNow({ interactive = false, force = null } = {}) {
 
     // Minta token sebelum await apa pun supaya popup tetap dianggap aksi pengguna.
     let tokenPromise = null;
-    if (!tokenValid() && interactive && navigator.onLine) {
-        tokenPromise = requestToken();
+    if (!tokenValid() && navigator.onLine) {
+        if (isTauri()) {
+            tokenPromise = getTauriAccessToken();
+        } else if (interactive) {
+            tokenPromise = requestToken();
+        }
     }
 
     if (!navigator.onLine) {
@@ -620,7 +663,11 @@ export async function syncNow({ interactive = false, force = null } = {}) {
         } else if (pendingToken) {
             await pendingToken.promise;
         } else if (!tokenValid()) {
-            throw new AuthRequiredError('Sesi Google berakhir.');
+            if (isTauri()) {
+                await getTauriAccessToken();
+            } else {
+                throw new AuthRequiredError('Sesi Google berakhir.');
+            }
         }
         const meta = await runSync(force);
         setState({ status: 'synced', lastSyncAt: meta.lastSyncAt, message: '' });
@@ -646,6 +693,38 @@ export async function syncNow({ interactive = false, force = null } = {}) {
 }
 
 export async function signIn() {
+    if (isTauri()) {
+        setState({ status: 'connecting', message: 'Membuka browser untuk login...' });
+        try {
+            const auth = await window.__TAURI__.core.invoke('tauri_login_google');
+            if (!auth || !auth.access_token) {
+                throw new AuthRequiredError('Login Google dibatalkan atau token tidak diterima.');
+            }
+            accessToken = auth.access_token;
+            tokenExpiresAt = Date.now() + (Number(auth.expires_in) || 3600) * 1000;
+            let email = auth.email;
+            if (!email) {
+                try {
+                    email = await fetchEmail();
+                } catch {
+                    email = null;
+                }
+            }
+            setAccount({ email });
+            cachedLoginHint = email || '';
+            isGoogleLinked = true;
+            await setMeta(META_KEY_LINKED, true);
+            setState({ email, status: 'connecting', message: '' });
+        } catch (err) {
+            console.error('Tauri Google login error:', err);
+            const msg = err?.message || String(err || 'Login Google gagal.');
+            setState({ status: isLinked() ? 'needs-login' : 'signed-out', message: msg });
+            return;
+        }
+        await syncNow();
+        return;
+    }
+
     // requestToken dipanggil sinkron di dalam handler klik.
     const tokenPromise = requestToken();
     setState({ status: 'connecting', message: '' });
@@ -667,6 +746,13 @@ export async function signIn() {
 }
 
 export async function signOut() {
+    if (isTauri()) {
+        try {
+            await window.__TAURI__.core.invoke('tauri_logout_google');
+        } catch (err) {
+            console.warn('Gagal logout Tauri:', err);
+        }
+    }
     // Token dibuang dari memori dan akun dilupakan. Data lokal tidak disentuh.
     accessToken = null;
     tokenExpiresAt = 0;
@@ -683,7 +769,9 @@ export async function clearRemoteData() {
     if (!isLinked()) return;
 
     if (!tokenValid()) {
-        if (pendingToken) {
+        if (isTauri()) {
+            await getTauriAccessToken();
+        } else if (pendingToken) {
             await pendingToken.promise;
         } else {
             await requestToken();
@@ -777,6 +865,11 @@ export async function initSync({ onState, onRemoteApplied }) {
         if (isLinked()) {
             if (tokenValid()) {
                 syncNow();
+            } else if (isTauri()) {
+                getTauriAccessToken().then(() => syncNow()).catch((err) => {
+                    setState({ status: 'needs-login', message: err.message });
+                    setupFirstTapListener();
+                });
             } else {
                 setState({ status: 'standby', message: 'Ketuk di mana saja untuk lanjut sinkron.' });
                 setupFirstTapListener();
@@ -790,6 +883,11 @@ export async function initSync({ onState, onRemoteApplied }) {
         if (document.visibilityState === 'visible' && isLinked()) {
             if (tokenValid()) {
                 syncNow();
+            } else if (isTauri()) {
+                getTauriAccessToken().then(() => syncNow()).catch((err) => {
+                    setState({ status: 'needs-login', message: err.message });
+                    setupFirstTapListener();
+                });
             } else {
                 setState({ status: 'standby', message: 'Ketuk di mana saja untuk lanjut sinkron.' });
                 setupFirstTapListener();
@@ -797,14 +895,32 @@ export async function initSync({ onState, onRemoteApplied }) {
         }
     });
 
-    const marker = await getMeta(META_KEY_LINKED);
-    const account = getAccount();
-    const hasMarker = !!marker || !!account;
+    let marker = await getMeta(META_KEY_LINKED);
+    let account = getAccount();
+    let hasMarker = !!marker || !!account;
+
+    if (!hasMarker && isTauri()) {
+        try {
+            const auth = await window.__TAURI__.core.invoke('tauri_get_access_token');
+            if (auth && auth.access_token) {
+                accessToken = auth.access_token;
+                tokenExpiresAt = Date.now() + (Number(auth.expires_in) || 3600) * 1000;
+                if (auth.email) {
+                    setAccount({ email: auth.email });
+                    account = { email: auth.email };
+                    cachedLoginHint = auth.email;
+                }
+                hasMarker = true;
+                await setMeta(META_KEY_LINKED, true);
+            }
+        } catch {}
+    }
+
     isGoogleLinked = hasMarker;
 
     if (!hasMarker) {
         setState({ status: 'signed-out', email: null, message: '' });
-        if (navigator.onLine) loadGis().catch(() => {});
+        if (navigator.onLine && !isTauri()) loadGis().catch(() => {});
         return;
     }
 
@@ -815,10 +931,20 @@ export async function initSync({ onState, onRemoteApplied }) {
     const meta = await getSyncMeta();
     const email = account?.email || meta?.account || null;
     cachedLoginHint = email || '';
-    setState({ email, lastSyncAt: meta.account === email ? meta.lastSyncAt : null });
+    setState({ email, lastSyncAt: meta?.account === email ? meta?.lastSyncAt : null });
 
     if (!navigator.onLine) {
         setState({ status: 'offline', message: '' });
+        return;
+    }
+
+    if (isTauri()) {
+        getTauriAccessToken().then(() => {
+            syncNow();
+        }).catch((err) => {
+            setState({ status: 'needs-login', message: err.message });
+            setupFirstTapListener();
+        });
         return;
     }
 

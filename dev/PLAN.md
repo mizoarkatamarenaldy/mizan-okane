@@ -125,6 +125,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [ ] Persiapan rilis publik
 - [x] Saran catatan lama
 - [x] Perbaikan Tauri: popup login Google
+- [x] Login Google Tauri: loopback
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

@@ -8,3 +8,7 @@ node_modules/
 # Distribution & bundles
 dist/
 build/
+
+# Desktop OAuth credentials
+oauth-desktop.json
+src-tauri/oauth-desktop.json

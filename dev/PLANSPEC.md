@@ -1888,3 +1888,33 @@ Cek manual:
 - Jalankan npm run dev dari desktop/tauri (oleh pemilik). Ketuk tombol login Google. Hasil yang diharapkan: popup Google terbuka dan pesan "diblokir browser" tidak muncul.
 - Setelah login berhasil, tutup dan buka lagi aplikasi. Hasil yang diharapkan: transaksi tetap ada.
 - Mode tanpa login tetap berfungsi seperti sebelumnya.
+
+## Login Google Tauri: loopback
+
+Tujuan: Login Google di jendela Tauri "Mizan Okane" memakai browser sistem dengan redirect loopback (127.0.0.1), bukan popup di WebView2, karena Google tidak menyukai login di webview tertanam dan bisa menolaknya kapan saja.
+
+Izin dari pemilik: Item ini boleh (a) memakai OAuth Client ID baru bertipe Desktop yang khusus dipakai di aplikasi Tauri, (b) mengubah logika login di desktop/src HANYA dengan cabang yang aktif saat berjalan di dalam Tauri, dan (c) mengubah desktop/tauri/ serta .gitignore. Yang tetap tidak boleh berubah: alamat situs GitHub Pages, origin, OAuth Client ID web yang sudah ada, dan perilaku login di browser biasa.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Tombol login Google yang sudah ada dipakai apa adanya.
+
+Aturan:
+- Di dalam Tauri, tombol login memanggil sisi Rust. Rust membuka browser sistem ke halaman persetujuan Google, menjalankan server lokal sementara di 127.0.0.1 dengan port bebas, menangkap kode otorisasi, menukarnya jadi token memakai PKCE, lalu menyerahkan access token ke halaman web. Setelah itu server lokal ditutup.
+- Scope sama dengan login web yang sudah ada (akses Drive appDataFolder). Jangan tambah scope.
+- Refresh token disimpan di folder data aplikasi Tauri milik pengguna, jangan di repo. Access token yang habis diperbarui otomatis lewat refresh token supaya sinkron Drive tetap jalan.
+- Client ID dan client secret Desktop dibaca dari file desktop/tauri/src-tauri/oauth-desktop.json yang dimasukkan ke .gitignore. Commit hanya file contoh oauth-desktop.example.json dengan nilai kosong. Jangan pernah menaruh nilai asli di repo, kode, atau CHANGELOG.
+- Kalau file oauth-desktop.json tidak ada atau kosong, tampilkan pesan jelas di aplikasi, jangan crash.
+- Gunakan cara resmi versi Tauri yang dipakai, termasuk izin (capability) agar halaman dari situs GitHub Pages boleh memanggil perintah ini. Izinkan hanya untuk origin situs itu.
+- Di browser biasa dan GitHub Pages, jalur login lama tetap dipakai tanpa perubahan. Kode popup Tauri dari item sebelumnya jangan dihapus.
+- Jangan tambah jalur login lain, jangan ubah mode tanpa login.
+- Kalau ada langkah yang tidak bisa diselesaikan tanpa melanggar aturan di atas, berhenti dan laporkan, jangan cari jalan lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. dev/SCHEMA.md tidak perlu diubah.
+
+Cek manual:
+- Pemilik mengisi oauth-desktop.json, lalu menjalankan npm run dev dari desktop/tauri. Ketuk login Google. Hasil: browser sistem terbuka ke halaman Google, setelah setuju kembali ke aplikasi dalam keadaan sudah login, tanpa pesan "diblokir".
+- Tutup dan buka lagi aplikasi. Hasil: masih login dan transaksi tetap ada.
+- Tambah transaksi di Tauri, cek sinkron ke perangkat lain lewat Drive.
+- Hapus oauth-desktop.json sementara. Hasil: muncul pesan jelas, aplikasi tidak crash.
+- Mode tanpa login di Tauri dan login di browser biasa tetap berfungsi seperti sebelumnya.
