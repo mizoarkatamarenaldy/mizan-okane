@@ -16,6 +16,7 @@ oauth-desktop.json
 dist/
 build/
 www/
+.gradle/
 
 # Log
 *.log

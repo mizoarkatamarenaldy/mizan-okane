@@ -1940,3 +1940,35 @@ Cek manual:
 - Pemilik menjalankan npm run dev dari desktop/tauri. Hasil yang diharapkan: tidak ada error E0599 dan jendela "Mizan Okane" muncul.
 - Ketuk login Google. Hasil yang diharapkan: browser sistem terbuka ke halaman Google.
 
+## Kotlin 1: Kerangka
+
+Tujuan: menyiapkan kerangka aplikasi Android native di mobile/kotlin/ yang bisa dibuild pemilik dan jalan di HP, dengan tema dari DESIGN.md dan navigasi kosong. Ini fondasi untuk item Kotlin berikutnya.
+
+Tempat dan tampilan:
+- Header tipis berisi tulisan "Mizan Okane" dengan ikon neraca di sampingnya, sama seperti header web. Ikon dibuat sebagai vector drawable dari ikon web di desktop/src.
+- Bilah navigasi bawah dengan lima tab, label dan urutan sama persis dengan web: Beranda, Riwayat, Timbangan, Statistik, Pengaturan. Tombol Timbangan di tengah dan menonjol, seperti di web.
+- Tiap tab menampilkan halaman kosong yang hanya memuat judul halamannya.
+- Baca desktop/src hanya untuk mencocokkan label, urutan, dan ikon navigasi. Jangan ubah isi desktop/.
+- Warna dan tipografi diambil dari dev/DESIGN.md, dipasang lewat tema Compose (Color, Type, Theme). Sediakan skema terang dan gelap, ikut pengaturan sistem untuk sementara. Tombol ganti tema dikerjakan di item Kotlin lain.
+
+Aturan:
+- Nama aplikasi di launcher: "Mizan Okane". Package: com.mizoar.mizanokane. Semua teks tampilan dalam bahasa Indonesia dan ditaruh di strings.xml.
+- Navigasi memakai Navigation Compose. Tombol back sistem: dari tab selain Beranda kembali ke Beranda, dari Beranda keluar aplikasi.
+- Dependensi hanya yang dibutuhkan kerangka: Compose, Material 3, Navigation Compose, lifecycle. Material 3 hanya sebagai komponen dasar, semua warna, font, dan bentuk wajib dari DESIGN.md.
+- Kalau font di DESIGN.md butuh file font, pakai hanya yang berlisensi bebas (misalnya OFL) dan taruh di res/font. Kalau ragu soal lisensi, jangan taruh file apa pun dan laporkan ke pemilik.
+- Pastikan .gitignore (di root repo atau mobile/kotlin/) mencakup semua folder dan file hasil build yang dilarang di dev/RULES.md. Tambahkan yang belum ada.
+- Ikon launcher tidak diubah di item ini.
+- Sengaja TIDAK dilakukan: Room atau database apa pun, Hilt atau injeksi dependensi, jaringan, login Google, data contoh, fitur apa pun dari web, dan perubahan di desktop/ atau mobile/capacitor/.
+- Jangan menjalankan Gradle atau perintah build apa pun. Jangan membuat atau mengubah gradlew dan gradle-wrapper.jar.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Pemilik build dan install di HP Android 14: aplikasi terbuka tanpa crash, nama di launcher "Mizan Okane".
+- Ada lima tab sesuai urutan web dengan Timbangan di tengah dan menonjol. Tiap tab diketuk menampilkan judul halamannya.
+- Tombol back dari Riwayat kembali ke Beranda, dari Beranda keluar aplikasi.
+- Ganti HP ke mode gelap lalu terang: warna mengikuti tema DESIGN.md dan tidak ada warna di luar itu.
+- `git status --short` setelah sesi tidak memuat folder build, local.properties, atau file keystore.
+
+

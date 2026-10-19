@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Mizan Okane</string>
+    <string name="nav_beranda">Beranda</string>
+    <string name="nav_riwayat">Riwayat</string>
+    <string name="nav_timbangan">Timbangan</string>
+    <string name="nav_statistik">Statistik</string>
+    <string name="nav_pengaturan">Pengaturan</string>
+    <string name="desc_app_logo">Logo Mizan Okane</string>
+</resources>

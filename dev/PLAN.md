@@ -120,6 +120,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] **Perbaikan UI Mobile 2: Dropdown Kustom Mobile**
 - [x] Konversi Tauri
 - [ ] Konversi Kotlin
+  - [x] Kotlin 1: Kerangka
 - [ ] APK rilis
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik

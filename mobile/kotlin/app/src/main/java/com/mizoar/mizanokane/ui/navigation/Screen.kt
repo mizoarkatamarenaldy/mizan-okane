@@ -1,0 +1,45 @@
+package com.mizoar.mizanokane.ui.navigation
+
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import com.mizoar.mizanokane.R
+
+sealed class Screen(
+    val route: String,
+    @StringRes val titleRes: Int,
+    @DrawableRes val iconRes: Int
+) {
+    data object Beranda : Screen(
+        route = "beranda",
+        titleRes = R.string.nav_beranda,
+        iconRes = R.drawable.ic_nav_beranda
+    )
+
+    data object Riwayat : Screen(
+        route = "riwayat",
+        titleRes = R.string.nav_riwayat,
+        iconRes = R.drawable.ic_nav_riwayat
+    )
+
+    data object Timbangan : Screen(
+        route = "timbangan",
+        titleRes = R.string.nav_timbangan,
+        iconRes = R.drawable.ic_neraca
+    )
+
+    data object Statistik : Screen(
+        route = "statistik",
+        titleRes = R.string.nav_statistik,
+        iconRes = R.drawable.ic_nav_statistik
+    )
+
+    data object Pengaturan : Screen(
+        route = "pengaturan",
+        titleRes = R.string.nav_pengaturan,
+        iconRes = R.drawable.ic_nav_pengaturan
+    )
+
+    companion object {
+        val items = listOf(Beranda, Riwayat, Timbangan, Statistik, Pengaturan)
+    }
+}

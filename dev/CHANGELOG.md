@@ -10,6 +10,17 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-20: Kotlin 1: Kerangka
+- Ditambah: Kerangka aplikasi Android native di `mobile/kotlin/` berbasis Jetpack Compose, Material 3, dan Navigation Compose dengan package `com.mizoar.mizanokane` dan nama aplikasi "Mizan Okane" (`mobile/kotlin/`).
+- Ditambah: Implementasi token warna dan tipografi tema Compose (`Color.kt`, `Theme.kt`, `Type.kt`) untuk skema gelap dan terang murni mengikuti `dev/DESIGN.md` tanpa dynamic colors (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/theme/Color.kt`, `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/theme/Theme.kt`, `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/theme/Type.kt`).
+- Ditambah: Komponen `AppHeader` tipis dengan nama aplikasi dan ikon neraca vector drawable yang dibuat dari SVG web di `desktop/src` (`mobile/kotlin/app/src/main/res/drawable/ic_neraca.xml`, `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/AppHeader.kt`).
+- Ditambah: Bilah navigasi bawah `BottomNavigationBar` dengan lima tab (Beranda, Riwayat, Timbangan, Statistik, Pengaturan) beserta ikon vector drawables, dengan tombol Timbangan di tengah yang menonjol (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/BottomNavigationBar.kt`, `mobile/kotlin/app/src/main/res/drawable/ic_nav_beranda.xml`, `mobile/kotlin/app/src/main/res/drawable/ic_nav_riwayat.xml`, `mobile/kotlin/app/src/main/res/drawable/ic_nav_statistik.xml`, `mobile/kotlin/app/src/main/res/drawable/ic_nav_pengaturan.xml`, `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/navigation/Screen.kt`).
+- Ditambah: Halaman kosong `EmptyScreen` untuk tiap tab yang memuat judul halamannya, serta penanganan navigasi tombol back sistem agar kembali ke Beranda dari tab lain dan keluar aplikasi saat di Beranda (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/MainActivity.kt`, `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/EmptyScreen.kt`).
+- Ditambah: Seluruh teks tampilan dalam bahasa Indonesia di `mobile/kotlin/app/src/main/res/values/strings.xml` dan token warna di `mobile/kotlin/app/src/main/res/values/colors.xml` (`mobile/kotlin/app/src/main/res/values/strings.xml`, `mobile/kotlin/app/src/main/res/values/colors.xml`).
+- Diubah: Menambahkan dependensi Navigation Compose pada `libs.versions.toml` dan `mobile/kotlin/app/build.gradle.kts` (`mobile/kotlin/gradle/libs.versions.toml`, `mobile/kotlin/app/build.gradle.kts`).
+- Diubah: Memperbarui `.gitignore` di root repo dan `mobile/kotlin/.gitignore` untuk memastikan folder dan file hasil build Kotlin diabaikan sesuai `dev/RULES.md` (`.gitignore`, `mobile/kotlin/.gitignore`).
+- Diubah: Menambahkan spesifikasi dan mencentang item "Kotlin 1: Kerangka" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-10-19: Keputusan Kotlin
 - Diubah: Memperbarui poin keputusan terkunci di `dev/PLAN.md` mengenai keputusan beralih ke aplikasi native Kotlin (Jetpack Compose, Room) di `mobile/kotlin/`, membekukan `mobile/capacitor/`, serta menegaskan arsitektur native Android tanpa KMP (`dev/PLAN.md`).
 - Ditambah: Menambahkan enam poin aturan pengembangan Android Kotlin pada bagian "Aturan setelah pemisahan folder" di `dev/RULES.md` mengenai batas folder kerja, larangan eksekusi build dan sync gradle, larangan staging hasil build, keselarasan fitur dengan web, kepatuhan format data SCHEMA.md, dan package ID aplikasi (`dev/RULES.md`).
