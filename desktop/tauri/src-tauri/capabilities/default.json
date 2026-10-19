@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capability for Mizan Okane",
+  "windows": ["main"],
+  "remote": {
+    "urls": [
+      "https://mizoarkatamarenaldy.github.io/mizan-okane/*"
+    ]
+  },
+  "permissions": [
+    "core:default"
+  ]
+}

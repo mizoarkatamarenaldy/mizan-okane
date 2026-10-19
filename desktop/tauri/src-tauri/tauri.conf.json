@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Mizan Okane",
+  "version": "1.0.0",
+  "identifier": "com.mizoar.mizanokane",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "devUrl": "https://mizoarkatamarenaldy.github.io/mizan-okane/",
+    "frontendDist": "https://mizoarkatamarenaldy.github.io/mizan-okane/"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Mizan Okane",
+        "width": 1100,
+        "height": 750,
+        "resizable": true,
+        "url": "https://mizoarkatamarenaldy.github.io/mizan-okane/"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ]
+  }
+}

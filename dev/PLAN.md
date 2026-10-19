@@ -118,7 +118,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] **Perbaikan UI PC 13: Dropdown Dompet Transfer**
 - [x] **Perbaikan UI Mobile 1: Form Transaksi Layar Penuh**
 - [x] **Perbaikan UI Mobile 2: Dropdown Kustom Mobile**
-- [ ] Konversi Tauri
+- [x] Konversi Tauri
 - [ ] Konversi Kotlin
 - [ ] APK rilis
 - [ ] APK Item A: login Google native

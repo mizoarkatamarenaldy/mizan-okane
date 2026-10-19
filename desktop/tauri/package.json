@@ -1,0 +1,14 @@
+{
+  "name": "mizan-okane-desktop",
+  "version": "1.0.0",
+  "description": "Aplikasi desktop Windows Mizan Okane menggunakan Tauri",
+  "private": true,
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

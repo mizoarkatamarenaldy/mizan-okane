@@ -1245,18 +1245,32 @@ Cek manual (dilakukan pemilik):
 
 ## Konversi Tauri
 
-Tujuan: Mengonversi versi desktop (khusus Windows) memakai Tauri di folder desktop/. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+Tujuan: Membuat aplikasi desktop Windows memakai Tauri yang membuka situs mizan-okane di GitHub Pages dalam jendelanya sendiri, supaya bisa dipasang dan dibuka seperti aplikasi biasa.
+
+Tempat dan tampilan:
+- Proyek Tauri ada di desktop/tauri/. Isi desktop/src/ tidak diubah sama sekali.
+- Satu jendela, judul "Mizan Okane", ukuran awal 1100 x 750, bisa diubah ukurannya.
+- Jendela memuat alamat situs GitHub Pages yang sudah ada (ambil dari konfigurasi atau dokumen repo yang sudah memuatnya, jangan menebak). File web tidak dibawa di dalam aplikasi.
+- Ikon aplikasi memakai logo aplikasi yang sudah ada di repo. Jangan buat gambar baru.
+- Tidak ada elemen tampilan baru di dalam aplikasi web.
 
 Aturan:
-- Item ini baru boleh dikerjakan setelah semua fitur Tahap 5 tercentang, serta "Pemisahan folder" dan "Revisi UI PC" selesai.
-- Item ini menyentuh "Keputusan terkunci" (bagian APK dan Capacitor). Sebelum dikerjakan, pemilik harus memberi prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut persis bagian mana yang boleh diubah.
-- Spek rinci (target platform, nasib Capacitor, jalur login Google) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+- Target hanya Windows. Tidak ada target macOS, Linux, atau Android.
+- Alamat situs, origin, dan OAuth Client ID tidak boleh berubah.
+- Mobile/capacitor/ tidak disentuh.
+- Tambahkan desktop/tauri/.gitignore yang mengecualikan folder hasil build Tauri (misalnya src-tauri/target/ dan folder dist atau bundle bila ada).
+- Jangan menjalankan build atau perintah Tauri apa pun. Pemilik yang membangun.
+- Hal yang sengaja TIDAK dilakukan: tidak ada login Google versi native, tidak ada mode offline khusus di luar yang sudah dimiliki situs, tidak ada fitur baru di aplikasi web.
+- Di akhir pekerjaan, tulis di CHANGELOG.md perintah persis yang perlu dijalankan pemilik untuk menjalankan dan membangun aplikasi.
 
 Data:
-- Belum ditentukan. Ditulis saat spek rinci dibuat.
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Data di aplikasi Tauri tersimpan di penyimpanan jendelanya sendiri dan terpisah dari data di browser. Pemindahan data antar keduanya lewat ekspor dan impor JSON yang sudah ada.
 
-Cek manual:
-- Belum ditentukan. Ditulis saat spek rinci dibuat.
+Cek manual (dilakukan pemilik):
+- Jalankan aplikasi dengan perintah dari CHANGELOG.md. Hasil: jendela "Mizan Okane" terbuka dan menampilkan situs.
+- Tambah satu transaksi, tutup aplikasi, buka lagi. Hasil: transaksi masih ada.
+- Tekan login Google. Hasil yang diharapkan: login berhasil dan sinkron Drive jalan. Kalau login diblokir atau gagal, catat pesan error-nya apa adanya. Itu bukan kegagalan item ini, tapi bahan keputusan jalur login berikutnya.
+- Pakai mode tanpa login. Hasil: semua fitur dasar tetap jalan.
 
 ## Konversi Kotlin
 

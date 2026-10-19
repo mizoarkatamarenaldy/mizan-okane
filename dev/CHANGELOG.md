@@ -10,6 +10,23 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-19: Konversi Tauri
+- Ditambah: Proyek desktop Windows menggunakan Tauri v2 di `desktop/tauri/` yang membuka situs web di GitHub Pages (`https://mizoarkatamarenaldy.github.io/mizan-okane/`) dalam satu jendela aplikasi mandiri berukuran awal 1100 x 750 yang dapat diubah ukurannya (`desktop/tauri/src-tauri/tauri.conf.json`, `desktop/tauri/src-tauri/Cargo.toml`, `desktop/tauri/src-tauri/build.rs`, `desktop/tauri/src-tauri/src/main.rs`, `desktop/tauri/src-tauri/src/lib.rs`, `desktop/tauri/src-tauri/capabilities/default.json`).
+- Ditambah: Ikon aplikasi multi-resolusi untuk Windows (32x32, 128x128, 128x128@2x, icon.ico, icon.png) yang dihasilkan dari logo asli aplikasi tanpa membuat aset visual baru (`desktop/tauri/src-tauri/icons/32x32.png`, `desktop/tauri/src-tauri/icons/128x128.png`, `desktop/tauri/src-tauri/icons/128x128@2x.png`, `desktop/tauri/src-tauri/icons/icon.ico`, `desktop/tauri/src-tauri/icons/icon.png`).
+- Ditambah: Konfigurasi pengabaian berkas hasil build Tauri dan dependensi di `desktop/tauri/.gitignore` serta package configuration dan dokumentasi petunjuk menjalankan/membangun aplikasi (`desktop/tauri/.gitignore`, `desktop/tauri/package.json`, `desktop/tauri/README.md`).
+- Diubah: Memperbarui spesifikasi Konversi Tauri di `dev/PLANSPEC.md` dan mencentang item "Konversi Tauri" di `dev/PLAN.md` (`dev/PLANSPEC.md`, `dev/PLAN.md`).
+- Catatan: Perintah persis yang perlu dijalankan pemilik untuk menjalankan dan membangun aplikasi:
+  1. Menjalankan aplikasi (mode pengembangan/dev):
+     - Jalankan `cd desktop/tauri`
+     - Jalankan `npm install` (hanya pertama kali)
+     - Jalankan `npm run dev`
+     - (Alternatif langsung via Cargo: masuk ke `desktop/tauri/src-tauri` lalu jalankan `cargo run`)
+  2. Membangun paket installer Windows (NSIS .exe):
+     - Jalankan `cd desktop/tauri`
+     - Jalankan `npm run build`
+     - Berkas installer .exe siap pakai akan dihasilkan di folder `desktop/tauri/src-tauri/target/release/bundle/nsis/`
+     - (Alternatif jika menggunakan cargo-tauri: masuk ke `desktop/tauri/src-tauri` lalu jalankan `cargo tauri build`)
+
 ## 2026-10-19: Saran catatan lama
 - Ditambah: Fitur saran catatan lama pada field Catatan (`#tx-note`) di form tambah dan edit transaksi (tab Pengeluaran dan Pemasukan) untuk tampilan HP dan PC, berupa panel saran yang muncul otomatis di bawah field saat mengetik minimal 2 huruf (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
 - Ditambah: Logika pemfilteran dan pemeringkatan saran secara langsung dari riwayat transaksi aktif non-hapus (tanpa transfer dan Equilibrium), deduplikasi catatan tanpa membedakan huruf besar/kecil, urutan yang diawali ketikan dulu lalu frekuensi pemakaian terbanyak lalu waktu pemakaian terbaru, dibatasi maksimal 8 saran, serta penyorotan huruf yang cocok dengan warna token accent (`desktop/src/js/app.js`, `desktop/src/css/style.css`).
