@@ -10,6 +10,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-10-19: Saran catatan lama
+- Ditambah: Fitur saran catatan lama pada field Catatan (`#tx-note`) di form tambah dan edit transaksi (tab Pengeluaran dan Pemasukan) untuk tampilan HP dan PC, berupa panel saran yang muncul otomatis di bawah field saat mengetik minimal 2 huruf (`desktop/src/index.html`, `desktop/src/css/style.css`, `desktop/src/js/app.js`).
+- Ditambah: Logika pemfilteran dan pemeringkatan saran secara langsung dari riwayat transaksi aktif non-hapus (tanpa transfer dan Equilibrium), deduplikasi catatan tanpa membedakan huruf besar/kecil, urutan yang diawali ketikan dulu lalu frekuensi pemakaian terbanyak lalu waktu pemakaian terbaru, dibatasi maksimal 8 saran, serta penyorotan huruf yang cocok dengan warna token accent (`desktop/src/js/app.js`, `desktop/src/css/style.css`).
+- Ditambah: Navigasi keyboard (Panah Atas/Bawah untuk pindah baris, Enter untuk memilih saran, Escape untuk menutup daftar) di PC, pemilihan lewat klik/sentuh, penyesuaian posisi buka ke atas atau scroll di dalam panel saat ruang keyboard di HP sempit, serta penutupan otomatis saat field kehilangan fokus atau form ditutup (`desktop/src/js/app.js`, `desktop/src/css/style.css`).
+- Diubah: Menaikkan versi cache service worker ke `mizan-v79` agar pembaruan antarmuka termuat (`desktop/src/sw.js`).
+- Diubah: Menambahkan spesifikasi di `dev/PLANSPEC.md` dan mencentang item "Saran catatan lama" di `dev/PLAN.md`.
+
 ## 2026-10-19: Perbaikan UI Mobile 2: Dropdown Kustom Mobile
 - Ditambah: Dropdown kustom Kategori, Dompet, Dari, dan Ke pada form Tambah/Edit Transaksi untuk tampilan mobile (di bawah breakpoint PC 1024px) memakai komponen dan kelas CSS yang sama dengan versi PC (PC 11, PC 12, PC 13) dengan tinggi kotak dan tinggi baris minimal 44 px, ikon, panah, serta placeholder seragam (`desktop/src/css/style.css`, `desktop/src/js/app.js`).
 - Diperbaiki: Sinkronisasi nilai pilihan dropdown kustom ke elemen select bawaan yang disembunyikan secara visual di mobile dengan memicu event change sehingga seluruh logika validasi form, pemilihan manual, format angka mata uang, dan aturan filter dompet transfer tetap berjalan tanpa perubahan (`desktop/src/css/style.css`, `desktop/src/js/app.js`).

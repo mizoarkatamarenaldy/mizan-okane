@@ -30,6 +30,9 @@ const formGroupSubcategory = document.getElementById('form-group-subcategory');
 const txSubcategoryInput = document.getElementById('tx-subcategory');
 const subcategoryChipsContainer = document.getElementById('subcategory-chips');
 const txNoteInput = document.getElementById('tx-note');
+const txNoteSuggestions = document.getElementById('tx-note-suggestions');
+let currentNoteSuggestions = [];
+let activeNoteSuggestionIndex = -1;
 const btnSave = document.getElementById('btn-save');
 const btnCancel = document.getElementById('btn-cancel');
 const btnDeleteFromForm = document.getElementById('btn-delete-from-form');
@@ -519,6 +522,7 @@ function closeFormScreen() {
     closeCategoryPcDropdown();
     closeWalletPcDropdown();
     closeToWalletPcDropdown();
+    closeNoteSuggestions();
     formScreen.classList.add('hidden');
     if (btnFabAdd) btnFabAdd.classList.remove('hidden');
     document.body.classList.remove('modal-open');
@@ -879,7 +883,8 @@ function resetFormScrollPadding() {
     const isCatOpen = categoryDropdownMenu && !categoryDropdownMenu.classList.contains('hidden');
     const isWalletOpen = walletDropdownMenu && !walletDropdownMenu.classList.contains('hidden');
     const isToWalletOpen = toWalletDropdownMenu && !toWalletDropdownMenu.classList.contains('hidden');
-    if (!isCatOpen && !isWalletOpen && !isToWalletOpen) {
+    const isNoteOpen = txNoteSuggestions && !txNoteSuggestions.classList.contains('hidden');
+    if (!isCatOpen && !isWalletOpen && !isToWalletOpen && !isNoteOpen) {
         formScroll.style.paddingBottom = '';
     }
 }
@@ -1272,6 +1277,238 @@ export function selectToWalletFromPcDropdown(walletId) {
     }
 }
 
+// === Saran Catatan Lama ===
+
+function compareTxRecency(txA, txB) {
+    if (!txA && !txB) return 0;
+    if (!txA) return -1;
+    if (!txB) return 1;
+    const dateA = txA.date || '';
+    const dateB = txB.date || '';
+    if (dateA !== dateB) return dateA > dateB ? 1 : -1;
+    const timeA = txA.time || '';
+    const timeB = txB.time || '';
+    if (timeA !== timeB) return timeA > timeB ? 1 : -1;
+    return (txA.createdAt || 0) - (txB.createdAt || 0);
+}
+
+export function getNoteSuggestions(query) {
+    if (getSelectedType() === 'transfer') {
+        return [];
+    }
+    const typed = (query || '').trim();
+    if (typed.length < 2) {
+        return [];
+    }
+    const lowerTyped = typed.toLowerCase();
+
+    // 1. Group valid historical notes (case-insensitive, trimmed)
+    const noteMap = new Map();
+    for (const tx of currentTransactions) {
+        if (tx.deleted) continue;
+        if (tx.type === 'transfer' || tx.type === 'penyesuaian') continue;
+        if ((tx.category || '').trim().toLowerCase() === 'equilibrium') continue;
+        if (!tx.note || typeof tx.note !== 'string') continue;
+        const trimmed = tx.note.trim();
+        if (!trimmed) continue;
+        const key = trimmed.toLowerCase();
+
+        const existing = noteMap.get(key);
+        if (!existing) {
+            noteMap.set(key, {
+                text: trimmed,
+                count: 1,
+                latestTx: tx
+            });
+        } else {
+            existing.count += 1;
+            if (compareTxRecency(tx, existing.latestTx) > 0) {
+                existing.latestTx = tx;
+                existing.text = trimmed;
+            }
+        }
+    }
+
+    // 2. Filter matching notes
+    const matched = [];
+    for (const item of noteMap.values()) {
+        const lowerText = item.text.toLowerCase();
+        const index = lowerText.indexOf(lowerTyped);
+        if (index !== -1) {
+            matched.push({
+                text: item.text,
+                count: item.count,
+                latestTx: item.latestTx,
+                startsWith: index === 0
+            });
+        }
+    }
+
+    // 3. Sort:
+    // - yang diawali ketikan dulu
+    // - lalu yang paling sering dipakai
+    // - lalu yang paling baru dipakai
+    matched.sort((a, b) => {
+        if (a.startsWith !== b.startsWith) {
+            return a.startsWith ? -1 : 1;
+        }
+        if (a.count !== b.count) {
+            return b.count - a.count;
+        }
+        const recencyComp = compareTxRecency(a.latestTx, b.latestTx);
+        if (recencyComp !== 0) {
+            return -recencyComp;
+        }
+        return a.text.localeCompare(b.text);
+    });
+
+    // 4. Tampilkan paling banyak 8 saran
+    const topSuggestions = matched.slice(0, 8);
+
+    // 5. Kalau tidak ada yang cocok, atau ketikan sudah sama persis dengan satu-satunya saran, daftar tidak ditampilkan
+    if (topSuggestions.length === 0) {
+        return [];
+    }
+    if (topSuggestions.length === 1 && topSuggestions[0].text.trim().toLowerCase() === lowerTyped) {
+        return [];
+    }
+
+    return topSuggestions;
+}
+
+function highlightNoteMatch(text, query) {
+    if (!query) return escapeHTML(text);
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return escapeHTML(text);
+    const escapedQuery = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map(part => {
+        if (part.toLowerCase() === trimmedQuery.toLowerCase()) {
+            return `<span class="tx-note-suggestion-match">${escapeHTML(part)}</span>`;
+        }
+        return escapeHTML(part);
+    }).join('');
+}
+
+function positionNoteSuggestions() {
+    if (!txNoteSuggestions || txNoteSuggestions.classList.contains('hidden') || !txNoteInput) return;
+    const inputRect = txNoteInput.getBoundingClientRect();
+    const viewportHeight = window.visualViewport ? window.visualViewport.height : (window.innerHeight || document.documentElement.clientHeight);
+    const spaceBelow = viewportHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+    if (spaceBelow < 160 && spaceAbove > spaceBelow) {
+        txNoteSuggestions.classList.add('is-open-upward');
+    } else {
+        txNoteSuggestions.classList.remove('is-open-upward');
+    }
+}
+
+function updateNoteSuggestionHighlight() {
+    if (!txNoteSuggestions) return;
+    const items = txNoteSuggestions.querySelectorAll('.tx-note-suggestion-item');
+    items.forEach((item, idx) => {
+        if (idx === activeNoteSuggestionIndex) {
+            item.classList.add('is-highlighted');
+            item.setAttribute('aria-selected', 'true');
+            if (txNoteInput) txNoteInput.setAttribute('aria-activedescendant', item.id);
+            item.scrollIntoView({ block: 'nearest' });
+        } else {
+            item.classList.remove('is-highlighted');
+            item.setAttribute('aria-selected', 'false');
+        }
+    });
+    if (activeNoteSuggestionIndex === -1 && txNoteInput) {
+        txNoteInput.removeAttribute('aria-activedescendant');
+    }
+}
+
+export function closeNoteSuggestions() {
+    if (!txNoteSuggestions || txNoteSuggestions.classList.contains('hidden')) return;
+    txNoteSuggestions.classList.add('hidden');
+    txNoteSuggestions.innerHTML = '';
+    txNoteSuggestions.classList.remove('is-open-upward');
+    activeNoteSuggestionIndex = -1;
+    currentNoteSuggestions = [];
+    if (txNoteInput) {
+        txNoteInput.setAttribute('aria-expanded', 'false');
+        txNoteInput.removeAttribute('aria-activedescendant');
+    }
+    resetFormScrollPadding();
+}
+
+export function isNoteSuggestionsOpen() {
+    return !!(txNoteSuggestions && !txNoteSuggestions.classList.contains('hidden'));
+}
+
+export function selectNoteSuggestion(text) {
+    if (!txNoteInput) return;
+    txNoteInput.value = text;
+    closeNoteSuggestions();
+    txNoteInput.focus();
+}
+
+function renderNoteSuggestions(suggestions, query) {
+    if (!txNoteSuggestions) return;
+    if (!suggestions || suggestions.length === 0) {
+        closeNoteSuggestions();
+        return;
+    }
+
+    currentNoteSuggestions = suggestions;
+    activeNoteSuggestionIndex = -1;
+
+    let html = '';
+    suggestions.forEach((item, idx) => {
+        const highlighted = highlightNoteMatch(item.text, query);
+        html += `<div id="tx-note-suggestion-${idx}" class="tx-note-suggestion-item" role="option" aria-selected="false" data-index="${idx}" data-text="${escapeHTML(item.text)}">${highlighted}</div>`;
+    });
+
+    txNoteSuggestions.innerHTML = html;
+    txNoteSuggestions.classList.remove('hidden');
+    if (txNoteInput) {
+        txNoteInput.setAttribute('aria-expanded', 'true');
+        txNoteInput.removeAttribute('aria-activedescendant');
+    }
+
+    const items = txNoteSuggestions.querySelectorAll('.tx-note-suggestion-item');
+    items.forEach((itemEl, idx) => {
+        itemEl.addEventListener('mouseenter', () => {
+            activeNoteSuggestionIndex = idx;
+            updateNoteSuggestionHighlight();
+        });
+        itemEl.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            selectNoteSuggestion(itemEl.dataset.text);
+        });
+        itemEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectNoteSuggestion(itemEl.dataset.text);
+        });
+    });
+
+    positionNoteSuggestions();
+
+    if (!txNoteSuggestions.classList.contains('is-open-upward')) {
+        scrollDropdownIntoView(txNoteSuggestions);
+    }
+}
+
+export function updateNoteSuggestions() {
+    if (!txNoteInput) return;
+    if (getSelectedType() === 'transfer') {
+        closeNoteSuggestions();
+        return;
+    }
+    const query = txNoteInput.value;
+    const suggestions = getNoteSuggestions(query);
+    if (suggestions.length > 0) {
+        renderNoteSuggestions(suggestions, query);
+    } else {
+        closeNoteSuggestions();
+    }
+}
+
 export function populateSubcategoryOptions(categoryName, selectedSub = null) {
     if (!formGroupSubcategory || !subcategoryChipsContainer) return;
     const type = getSelectedType();
@@ -1420,6 +1657,7 @@ function updateTypeUI(type) {
     const isTransfer = type === 'transfer';
     closeWalletPcDropdown();
     closeToWalletPcDropdown();
+    closeNoteSuggestions();
     syncWalletInputA11y();
     if (txWalletLabel) {
         txWalletLabel.textContent = isTransfer ? 'Dari' : 'Dompet';
@@ -7630,6 +7868,7 @@ function resetForm() {
     closeCategoryPcDropdown();
     closeWalletPcDropdown();
     closeToWalletPcDropdown();
+    closeNoteSuggestions();
     txForm.reset();
     txIdInput.value = '';
     if (txCategoryInput) {
@@ -7667,6 +7906,7 @@ function resetForm() {
 
 async function handleSubmit(e) {
     e.preventDefault();
+    closeNoteSuggestions();
 
     const timeValue = getTimeValueFromForm();
     if (!timeValue) {
@@ -7897,6 +8137,66 @@ txForm.querySelectorAll('input, select, textarea').forEach(field => {
         }, 300);
     });
 });
+
+if (txNoteInput) {
+    txNoteInput.addEventListener('input', () => {
+        updateNoteSuggestions();
+    });
+
+    txNoteInput.addEventListener('keydown', (e) => {
+        if (!isNoteSuggestionsOpen()) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (currentNoteSuggestions.length > 0) {
+                activeNoteSuggestionIndex = (activeNoteSuggestionIndex + 1) % currentNoteSuggestions.length;
+                updateNoteSuggestionHighlight();
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentNoteSuggestions.length > 0) {
+                if (activeNoteSuggestionIndex <= 0) {
+                    activeNoteSuggestionIndex = currentNoteSuggestions.length - 1;
+                } else {
+                    activeNoteSuggestionIndex -= 1;
+                }
+                updateNoteSuggestionHighlight();
+            }
+        } else if (e.key === 'Enter') {
+            if (activeNoteSuggestionIndex >= 0 && activeNoteSuggestionIndex < currentNoteSuggestions.length) {
+                e.preventDefault();
+                e.stopPropagation();
+                selectNoteSuggestion(currentNoteSuggestions[activeNoteSuggestionIndex].text);
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            closeNoteSuggestions();
+        }
+    });
+
+    txNoteInput.addEventListener('blur', () => {
+        setTimeout(() => {
+            closeNoteSuggestions();
+        }, 150);
+    });
+}
+
+document.addEventListener('click', (e) => {
+    if (isNoteSuggestionsOpen()) {
+        if (txNoteSuggestions && !txNoteSuggestions.contains(e.target) && e.target !== txNoteInput) {
+            closeNoteSuggestions();
+        }
+    }
+});
+
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+        if (isNoteSuggestionsOpen()) {
+            positionNoteSuggestions();
+        }
+    });
+}
 
 txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -9612,6 +9912,10 @@ async function init() {
             }
             if (toWalletDropdownMenu && !toWalletDropdownMenu.classList.contains('hidden')) {
                 closeToWalletPcDropdown();
+                return;
+            }
+            if (isNoteSuggestionsOpen()) {
+                closeNoteSuggestions();
                 return;
             }
             if ((!confirmDialog || !confirmDialog.open) && (!deleteAllDialog || !deleteAllDialog.open)) {

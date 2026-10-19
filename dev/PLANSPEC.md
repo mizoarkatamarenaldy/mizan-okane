@@ -1812,4 +1812,45 @@ Cek manual:
 - Console (F12) tidak ada tulisan merah.
 - Nama di lingkup global: semua file JS di desktop/src/ berbagi satu lingkup global. Sebelum menulis kode baru, cari dengan grep setiap nama const, let, atau function level atas yang akan dibuat, dan pastikan belum ada. Setelah selesai, cek lagi bahwa tiap nama hanya satu deklarasi.
 
+## Saran catatan lama
+
+Tujuan: Saat mengisi Catatan di form transaksi, aplikasi menampilkan saran dari catatan yang pernah dipakai, supaya tidak perlu mengetik ulang.
+
+Tempat dan tampilan:
+- Di field Catatan pada form tambah dan edit transaksi (tab Pengeluaran dan Pemasukan), di tampilan HP dan PC.
+- Saat pengguna mengetik, muncul daftar saran tepat di bawah field Catatan, berupa panel dengan satu catatan per baris.
+- Bagian huruf yang cocok dengan ketikan diberi warna aksen dari dev/DESIGN.md. Huruf lain memakai warna teks biasa.
+- Di HP, daftar harus tetap terlihat saat keyboard muncul. Kalau ruang di bawah field tidak cukup, daftar boleh dibuka ke atas atau dibuat bisa digulir di dalam panelnya.
+- Di PC, saran bisa dipilih dengan klik, dan juga dengan tombol panah atas bawah lalu Enter. Escape menutup daftar.
+
+Aturan:
+- Sumber saran: field catatan dari transaksi yang sudah ada. Jangan simpan daftar saran di tempat lain, hitung saat dibutuhkan.
+- Daftar mulai muncul setelah pengguna mengetik minimal 2 huruf.
+- Pencocokan tidak membedakan huruf besar dan kecil, dan boleh cocok di bagian mana pun dari catatan (contoh: ketik "aya" memunculkan "Ayam geprek" dan "Mie ayam").
+- Catatan yang sama (tanpa membedakan huruf besar kecil dan spasi di pinggir) hanya muncul satu kali.
+- Urutan: yang diawali ketikan dulu, lalu yang paling sering dipakai, lalu yang paling baru dipakai.
+- Tampilkan paling banyak 8 saran.
+- Transaksi yang sudah ditandai terhapus tidak ikut jadi sumber saran.
+- Catatan dari transfer antar dompet dan dari penyesuaian saldo (Equilibrium) tidak ikut jadi sumber saran.
+- Memilih saran mengisi field Catatan dengan teks itu, menutup daftar, dan tidak mengubah field lain (kategori, dompet, total tetap seperti sebelumnya).
+- Kalau tidak ada yang cocok, atau ketikan sudah sama persis dengan satu-satunya saran, daftar tidak ditampilkan.
+- Daftar ikut tertutup saat field kehilangan fokus atau form ditutup.
+- Hal yang sengaja TIDAK dilakukan: tidak mengisi kategori otomatis dari saran, tidak ada pengaturan baru untuk fitur ini, tidak ada saran di field lain (misalnya Deskripsi).
+- Mode data contoh: saran hanya memakai transaksi data contoh yang sedang tampil.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Punya transaksi dengan catatan "Ayam geprek" dan "Mie ayam". Buka form tambah, ketik "ay" di Catatan. Hasil: kedua catatan muncul, "Ayam geprek" di atas karena diawali ketikan, huruf "ay" berwarna.
+- Ketik 1 huruf saja. Hasil: tidak ada daftar.
+- Pilih salah satu saran. Hasil: field Catatan terisi, daftar menutup, field lain tidak berubah.
+- Hapus transaksi berisi catatan "Mie ayam", lalu ketik "mie". Hasil: "Mie ayam" tidak muncul.
+- Buat dua transaksi dengan catatan "nasi goreng" dan "Nasi Goreng". Ketik "nasi". Hasil: hanya satu saran.
+- Di HP dengan keyboard terbuka, ketik di Catatan. Hasil: daftar tetap terlihat dan bisa dipilih.
+- Di PC, gunakan panah bawah, Enter, dan Escape pada daftar. Hasil: sesuai aturan di atas.
+- Buka form edit transaksi lama, ubah catatan. Hasil: saran muncul sama seperti di form tambah.
+- Masuk mode data contoh, ketik di Catatan. Hasil: saran berasal dari data contoh saja.
+
+
 

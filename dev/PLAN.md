@@ -123,6 +123,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [ ] APK rilis
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik
+- [x] Saran catatan lama
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

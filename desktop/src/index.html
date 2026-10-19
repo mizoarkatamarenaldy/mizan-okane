@@ -1114,7 +1114,8 @@
                             <div class="form-row form-row-note" id="form-row-note">
                                 <label for="tx-note" class="form-row-label">Catatan</label>
                                 <div class="form-row-value form-row-note-val">
-                                    <textarea id="tx-note" class="compact-text-input" placeholder="Tulis catatan (opsional)..." rows="3" autocomplete="off"></textarea>
+                                    <textarea id="tx-note" class="compact-text-input" placeholder="Tulis catatan (opsional)..." rows="3" autocomplete="off" aria-autocomplete="list" aria-controls="tx-note-suggestions" aria-expanded="false"></textarea>
+                                    <div id="tx-note-suggestions" class="tx-note-suggestions hidden" role="listbox" aria-label="Saran catatan lama"></div>
                                 </div>
                             </div>
                         </div>
