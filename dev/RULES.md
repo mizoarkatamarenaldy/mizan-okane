@@ -39,3 +39,9 @@ Bagian ini hanya berlaku setelah item "Pemisahan folder" tercentang di dev/PLAN.
 - Larangan build berlaku untuk mobile/capacitor/www/, mobile/capacitor/android/, dan folder hasil build apa pun di desktop/ dan mobile/. Pemilik yang membangun. Sampai Konversi Kotlin selesai, mobile/capacitor/ dibekukan.
 - Alamat situs GitHub Pages, origin, dan OAuth Client ID tidak boleh berubah. Isi desktop/src adalah akar situs, dan semua path di dalamnya tetap relatif.
 - Setiap perubahan format data wajib memperbarui dev/SCHEMA.md di commit yang sama.
+- Proyek Android Kotlin ada di mobile/kotlin/. Prompt Kotlin menyebut folder kerja mobile/. Jangan ubah desktop/ saat mengerjakan Kotlin, dan jangan ubah mobile/capacitor/.
+- Dilarang menjalankan `./gradlew`, `gradle`, atau perintah build dan sync Android apa pun. Dilarang membuat atau mengubah file keystore. Kalau pemilik melaporkan error build, perbaiki hanya yang dilaporkan.
+- Dilarang `git add` pada folder dan file hasil build Kotlin: mobile/kotlin/build/, mobile/kotlin/app/build/, mobile/kotlin/.gradle/, mobile/kotlin/.idea/, mobile/kotlin/local.properties, serta file berekstensi .jks dan .keystore. Kalau ada yang muncul di `git status --short`, berhenti dan laporkan.
+- Perilaku versi Kotlin harus sama dengan versi web di desktop/src. Kalau ragu, web yang jadi acuan. Dilarang menambah fitur yang tidak ada di web.
+- Format data mengikuti dev/SCHEMA.md. Kotlin tidak boleh mengubahnya. Perubahan format tetap hanya dengan "Izin dari pemilik" dan dikerjakan di desktop/ dan mobile/ sekaligus.
+- Package ID Android adalah com.mizoar.mizanokane. OAuth Client ID Web tidak berubah. Client ID Android baru hanya boleh ditambahkan dengan "Izin dari pemilik".

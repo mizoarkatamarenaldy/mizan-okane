@@ -13,7 +13,7 @@ Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Dr
 - Transaksi dihapus dengan penanda "terhapus" (soft delete), bukan dibuang langsung.
 - Hosting: GitHub Pages.
 - Harus ada tombol ekspor JSON manual sebagai cadangan.
-- APK: dibungkus dengan Capacitor, file web dimasukkan ke dalam APK (tidak membuka situs). Versi PWA di GitHub Pages tetap ada dan tetap jadi sumber kode. Login Google di APK memakai jalur native Android, sedangkan data tetap di Drive `appDataFolder`. Dirilis lewat GitHub Releases, bukan Play Store.
+- Android: aplikasi native Kotlin (Jetpack Compose, Room), ditulis ulang di mobile/kotlin/. Capacitor tidak dilanjutkan dan APK Capacitor tidak dirilis. mobile/capacitor/ dibekukan sebagai acuan sampai Konversi Kotlin selesai. Login Google di APK memakai jalur native Android, sedangkan data tetap di Drive `appDataFolder`. Dirilis lewat GitHub Releases, bukan Play Store. Kotlin khusus Android, Tauri khusus Windows, tanpa KMP. Versi PWA di GitHub Pages tetap ada sebagai preview dan sumber kode untuk desktop.
 
 ## Versi 1: fitur minimal
 Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
