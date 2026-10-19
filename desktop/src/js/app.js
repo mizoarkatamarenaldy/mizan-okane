@@ -7778,7 +7778,7 @@ function handleEdit(id) {
 
     if (tx.type === 'transfer') {
         populateWalletOptions(tx.walletId || DEFAULT_WALLET_ID, tx.toWalletId || null);
-        formTitle.textContent = 'Ubah Transfer';
+        formTitle.textContent = 'Edit Transaksi';
     } else {
         // Pilihan dompet: gunakan walletId transaksi atau fallback DEFAULT_WALLET_ID
         populateWalletOptions(tx.walletId || DEFAULT_WALLET_ID);
@@ -7792,7 +7792,7 @@ function handleEdit(id) {
             // Minta pengguna memilih kategori dari daftar yang sesuai
             populateCategoryOptions(null, tx.category, tx.subcategory || null);
         }
-        formTitle.textContent = 'Ubah Transaksi';
+        formTitle.textContent = 'Edit Transaksi';
     }
 
     btnCancel.classList.remove('hidden');
@@ -7862,6 +7862,14 @@ btnCancel.addEventListener('click', () => {
 });
 attachAmountInputFormatting(txAmountInput, () => getWalletCurrency(txWalletInput ? txWalletInput.value : DEFAULT_WALLET_ID));
 attachAmountInputFormatting(inputBudgetAmount, () => 'IDR');
+
+txForm.querySelectorAll('input, select, textarea').forEach(field => {
+    field.addEventListener('focus', () => {
+        setTimeout(() => {
+            field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 300);
+    });
+});
 
 txTypeInputs.forEach(radio => {
     radio.addEventListener('change', () => {

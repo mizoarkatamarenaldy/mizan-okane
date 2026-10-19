@@ -1725,3 +1725,46 @@ Cek manual:
 - Tab Pengeluaran dan Pemasukan: tidak berubah.
 - Perkecil jendela sampai di bawah breakpoint PC: "Dari" dan "Ke" kembali ke select bawaan dan tetap berfungsi.
 
+## Perbaikan UI Mobile 1: Form Transaksi Layar Penuh
+
+Tujuan: Di tampilan mobile, form Tambah/Edit Transaksi tidak lagi berupa dialog melayang, tapi tampil layar penuh dengan field tersusun vertikal, supaya lebih lega dan catatan mudah dibaca. Ini versi mobile dari perubahan form di PC 8 sampai PC 10.
+
+Izin dari pemilik: Aturan "tampilan mobile tidak diubah" dari item PC 8 sampai PC 13 dikecualikan untuk item ini. Yang boleh diubah di tampilan mobile hanya markup, CSS, dan JS tampilan untuk form Tambah/Edit Transaksi. Logika, struktur data, dan halaman lain tetap tidak boleh diubah.
+
+Cakupan:
+- Hanya tampilan di bawah breakpoint PC yang sudah dipakai item PC 9 sampai PC 13. Gunakan breakpoint yang sama. Tampilan PC TIDAK diubah.
+- Hanya form Tambah/Edit Transaksi, semua tab (Pengeluaran, Pemasukan, Transfer).
+- Buka hanya bagian "Perbaikan UI PC 8", "Perbaikan UI PC 9", dan "Perbaikan UI PC 10" di dev/PLANSPEC.md sebagai acuan urutan dan pengelompokan field. Susunan horizontal di PC diterjemahkan jadi susunan vertikal satu kolom di mobile, urutan field sama.
+
+Tempat dan tampilan (mobile):
+- Tombol tambah dan tombol edit transaksi membuka form yang menutupi seluruh layar, tanpa latar gelap di belakang dan tanpa kotak melayang.
+- Bagian atas: bar tipis dengan tombol kembali (panah) di kiri dan judul "Tambah Transaksi" atau "Edit Transaksi". Pakai gaya header yang sudah ada.
+- Di bawah bar: tab tipe transaksi, lalu field tersusun vertikal, satu kolom selebar layar, bisa di-scroll.
+- Field Catatan dibuat lebih tinggi dan selebar layar, beberapa baris, supaya isi catatan terbaca nyaman.
+- Tombol Simpan menempel di bawah layar dan selalu terlihat saat scroll, dengan memperhitungkan safe area. Tombol lain yang sekarang ada di form (misalnya Hapus) tetap ada dengan fungsi yang sama.
+- Target sentuh minimal 44 px, seperti aturan yang sudah ada.
+- Tidak ada warna, font, bayangan, atau animasi baru.
+
+Aturan:
+- Field "Dompet", "Kategori", "Dari", dan "Ke" di mobile tetap select bawaan. Dropdown kustom untuk mobile dikerjakan di item terpisah, jangan dikerjakan di sini.
+- Tombol kembali di bar atas dan tombol back Android menutup form dengan perilaku yang sama seperti tombol tutup/batal sekarang. Jangan ubah mekanisme tombol back yang sudah ada.
+- Saat keyboard muncul, field yang sedang diisi tetap terlihat dan tidak tertutup keyboard atau tombol Simpan.
+- Validasi, penyimpanan, dan logika transfer tidak berubah.
+- Yang sengaja TIDAK dilakukan: mengubah tampilan PC, mengubah dropdown, mengubah logika, menambah field, mengubah halaman lain.
+- Jangan jalankan build. Folder mobile/capacitor/www/ dan mobile/capacitor/android/ dibangun pemilik.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Perkecil jendela di bawah breakpoint PC, klik tombol tambah: form tampil layar penuh, tanpa kotak melayang, dengan bar atas dan tombol kembali.
+- Semua field tersusun vertikal satu kolom di tab Pengeluaran, Pemasukan, dan Transfer, urutannya sama dengan PC.
+- Isi catatan panjang: field Catatan tinggi dan seluruh isi terbaca.
+- Scroll form: tombol Simpan tetap terlihat di bawah.
+- Simpan transaksi baru dan transfer: tersimpan dan saldo berubah seperti sebelumnya.
+- Edit transaksi lama: data terisi benar dan tersimpan.
+- Tombol kembali menutup form tanpa menyimpan. Di APK, tombol back Android juga menutup form.
+- Lebarkan jendela ke ukuran PC: tampilan PC sama persis seperti sebelumnya.
+- Console (F12) tidak ada tulisan merah.
+- Nama di lingkup global: semua file JS di desktop/src/ berbagi satu lingkup global. Sebelum menulis kode baru, cari dengan grep setiap nama const, let, atau function level atas yang akan dibuat, dan pastikan belum ada. Setelah selesai, cek lagi bahwa tiap nama hanya satu deklarasi.
+

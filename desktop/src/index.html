@@ -860,14 +860,17 @@
             <div class="form-screen-container">
                 <div class="form-screen-sheet-handle" aria-hidden="true"></div>
                 <div class="form-screen-header">
-                    <h2 id="form-title">Tambah Transaksi</h2>
-                    <button type="button" id="btn-form-back" class="btn-icon btn-form-close" aria-label="Tutup formulir" title="Tutup">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <button type="button" id="btn-form-back" class="btn-icon btn-form-close" aria-label="Tutup formulir" title="Kembali">
+                        <svg class="form-back-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <svg class="form-close-x" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
+                    <h2 id="form-title">Tambah Transaksi</h2>
                 </div>
                 <div class="form-screen-body">
                     <form id="tx-form" class="tx-form">
                         <input type="hidden" id="tx-id">
+
+                        <div class="form-body-scroll">
 
                         <!-- Pilihan jenis di atas form (Pemasukan, Pengeluaran, Transfer) -->
                         <div class="form-group form-group-type">
@@ -1111,19 +1114,21 @@
                             <div class="form-row form-row-note" id="form-row-note">
                                 <label for="tx-note" class="form-row-label">Catatan</label>
                                 <div class="form-row-value form-row-note-val">
-                                    <input type="text" id="tx-note" class="compact-text-input" placeholder="Tulis catatan (opsional)..." autocomplete="off">
+                                    <textarea id="tx-note" class="compact-text-input" placeholder="Tulis catatan (opsional)..." rows="3" autocomplete="off"></textarea>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Tombol Simpan selebar form & tombol sekunder -->
-                        <div class="form-actions">
-                            <button type="submit" id="btn-save" class="btn-primary btn-save-full" disabled aria-disabled="true">Simpan</button>
-                            <div class="form-actions-secondary">
-                                <button type="button" id="btn-cancel" class="btn-secondary">Batal</button>
-                                <button type="button" id="btn-delete-from-form" class="btn-danger-outline hidden">Hapus Transaksi</button>
-                            </div>
+                        <div class="form-actions-secondary" id="form-actions-secondary">
+                            <button type="button" id="btn-cancel" class="btn-secondary">Batal</button>
+                            <button type="button" id="btn-delete-from-form" class="btn-danger-outline hidden">Hapus Transaksi</button>
                         </div>
+                    </div>
+
+                    <!-- Tombol Simpan selebar form -->
+                    <div class="form-actions" id="form-actions">
+                        <button type="submit" id="btn-save" class="btn-primary btn-save-full" disabled aria-disabled="true">Simpan</button>
+                    </div>
                     </form>
                 </div>
             </div>
