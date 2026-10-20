@@ -45,6 +45,12 @@ sealed class Screen(
         iconRes = R.drawable.ic_plus
     )
 
+    data object KelolaDompet : Screen(
+        route = "kelola_dompet",
+        titleRes = R.string.title_dompet,
+        iconRes = R.drawable.ic_wallet
+    )
+
     companion object {
         val items = listOf(Beranda, Riwayat, Timbangan, Statistik, Pengaturan)
     }

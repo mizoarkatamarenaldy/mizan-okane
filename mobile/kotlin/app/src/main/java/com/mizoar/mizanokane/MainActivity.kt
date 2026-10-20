@@ -30,6 +30,8 @@ import com.mizoar.mizanokane.ui.components.BottomNavigationBar
 import com.mizoar.mizanokane.ui.navigation.Screen
 import com.mizoar.mizanokane.ui.screens.BerandaScreen
 import com.mizoar.mizanokane.ui.screens.EmptyScreen
+import com.mizoar.mizanokane.ui.screens.KelolaDompetScreen
+import com.mizoar.mizanokane.ui.screens.PengaturanScreen
 import com.mizoar.mizanokane.ui.screens.RiwayatScreen
 import com.mizoar.mizanokane.ui.screens.TransactionFormScreen
 import com.mizoar.mizanokane.ui.theme.MizanOkaneTheme
@@ -57,7 +59,7 @@ fun MizanApp(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Beranda.route
 
-    val isFullScreenForm = currentRoute.startsWith(Screen.TransactionForm.route)
+    val isFullScreen = currentRoute.startsWith(Screen.TransactionForm.route) || currentRoute == Screen.KelolaDompet.route
 
     // State bulan & filter dompet yang dibagikan antara Beranda dan Riwayat
     val currentYearMonth = remember { getCurrentYearMonthString() }
@@ -66,7 +68,7 @@ fun MizanApp(
     var selectedWalletFilter by remember { mutableStateOf("all") }
 
     BackHandler(enabled = currentRoute != Screen.Beranda.route) {
-        if (isFullScreenForm) {
+        if (isFullScreen) {
             navController.popBackStack()
         } else {
             navController.navigate(Screen.Beranda.route) {
@@ -95,12 +97,12 @@ fun MizanApp(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            if (!isFullScreenForm) {
+            if (!isFullScreen) {
                 AppHeader()
             }
         },
         bottomBar = {
-            if (!isFullScreenForm) {
+            if (!isFullScreen) {
                 BottomNavigationBar(
                     currentRoute = currentRoute,
                     onTabSelected = onTabSelected
@@ -170,7 +172,17 @@ fun MizanApp(
                 EmptyScreen(title = stringResource(id = R.string.nav_statistik))
             }
             composable(Screen.Pengaturan.route) {
-                EmptyScreen(title = stringResource(id = R.string.nav_pengaturan))
+                PengaturanScreen(
+                    onKelolaDompetClick = {
+                        navController.navigate(Screen.KelolaDompet.route)
+                    }
+                )
+            }
+            composable(Screen.KelolaDompet.route) {
+                KelolaDompetScreen(
+                    repository = repository,
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
             composable(Screen.TransactionForm.route) {
                 TransactionFormScreen(

@@ -87,6 +87,11 @@ class InMemoryMizanRepository : MizanRepository {
         walletsFlow.value = walletsMap.values.sortedBy { it.order }
     }
 
+    override suspend fun saveWallets(wallets: List<WalletEntity>) {
+        wallets.forEach { walletsMap[it.id] = it }
+        walletsFlow.value = walletsMap.values.sortedBy { it.order }
+    }
+
     override suspend fun markWalletDeleted(id: String, updatedAt: Long) {
         val existing = walletsMap[id]
         if (existing != null) {

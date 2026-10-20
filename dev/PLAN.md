@@ -123,6 +123,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
   - [x] Kotlin 1: Kerangka
   - [x] Kotlin 2: Data
   - [x] Kotlin 3: Beranda, Riwayat, form transaksi
+  - [x] Kotlin 4A: Dompet, transfer, mata uang
 - [ ] APK rilis
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik

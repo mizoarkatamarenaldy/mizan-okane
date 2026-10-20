@@ -97,9 +97,10 @@ fun TransactionFormScreen(
     val activeWallets = remember(wallets) { getActiveWallets(wallets) }
 
     // Form fields
-    var txType by remember { mutableStateOf("expense") } // "expense" or "income"
+    var txType by remember { mutableStateOf("expense") } // "expense", "income", or "transfer"
     var amountText by remember { mutableStateOf("") }
-    var selectedWalletId by remember { mutableStateOf("") }
+    var selectedWalletId by remember { mutableStateOf("") } // Dompet (expense/income) atau Dari (transfer)
+    var selectedToWalletId by remember { mutableStateOf("") } // Ke (transfer)
     var selectedCategory by remember { mutableStateOf("") }
     var selectedSubcategory by remember { mutableStateOf<String?>(null) }
     var selectedDate by remember { mutableStateOf(getCurrentDateString()) }
@@ -118,11 +119,12 @@ fun TransactionFormScreen(
         if (isEditMode) {
             val existing = transactions.find { it.id == txId }
             if (existing != null) {
-                txType = if (existing.type == "income") "income" else "expense"
-                selectedWalletId = existing.walletId ?: DefaultData.DEFAULT_WALLET_ID
-                val curr = Uang.getWalletCurrency(selectedWalletId, wallets)
+                txType = existing.type // "expense", "income", or "transfer"
+                selectedWalletId = existing.walletId ?: ""
+                selectedToWalletId = existing.toWalletId ?: ""
+                val curr = Uang.getWalletCurrency(selectedWalletId.takeIf { it.isNotBlank() }, wallets)
                 amountText = Uang.formatAmountForInput(existing.amount, curr)
-                selectedCategory = existing.category ?: ""
+                selectedCategory = existing.category ?: if (existing.type == "transfer") "Transfer" else ""
                 selectedSubcategory = existing.subcategory?.takeIf { it.isNotBlank() }
                 selectedDate = existing.date
                 selectedTime = existing.time ?: getCurrentTimeString()
@@ -133,31 +135,75 @@ fun TransactionFormScreen(
             }
         } else {
             // Mode tambah baru:
-            // Sesuai spek: kolom dompet awalnya kosong. Kalau cuma punya 1 dompet, langsung terpilih.
-            if (activeWallets.size == 1) {
+            // Sesuai spek: kolom dompet awalnya kosong. Kalau cuma punya 1 dompet (pada expense/income), langsung terpilih.
+            if (txType != "transfer" && activeWallets.size == 1) {
                 selectedWalletId = activeWallets[0].id
             } else {
                 selectedWalletId = ""
             }
+            selectedToWalletId = ""
             selectedDate = getCurrentDateString()
             selectedTime = getCurrentTimeString()
             isLoaded = true
         }
     }
 
-    val currentCurrency = remember(selectedWalletId, wallets) {
+    val currentCurrency = remember(txType, selectedWalletId, wallets) {
         Uang.getWalletCurrency(selectedWalletId.takeIf { it.isNotBlank() }, wallets)
     }
 
-    // Pilihan Dompet
-    val walletOptions = remember(activeWallets) {
-        activeWallets.map { w ->
+    // Pilihan Dompet Biasa (Pengeluaran & Pemasukan)
+    val walletOptions = remember(activeWallets, isEditMode, selectedWalletId, wallets) {
+        val list = activeWallets.map { w ->
             val curr = w.currency.ifBlank { "IDR" }
             DropdownOption(w.id, "${w.name} ($curr)")
+        }.toMutableList()
+        if (isEditMode && selectedWalletId.isNotBlank() && !activeWallets.any { it.id == selectedWalletId }) {
+            val oldW = wallets.find { it.id == selectedWalletId }
+            val oldName = oldW?.name ?: DefaultData.DEFAULT_WALLET_NAME
+            val oldCurr = oldW?.currency?.ifBlank { "IDR" } ?: "IDR"
+            list.add(0, DropdownOption(selectedWalletId, "$oldName ($oldCurr) (dihapus)"))
         }
+        list
     }
 
-    // Pilihan Kategori sesuai tipe aktif
+    // Pilihan Dompet Dari (Transfer)
+    val fromWalletOptions = remember(activeWallets, isEditMode, selectedWalletId, wallets) {
+        val list = activeWallets.map { w ->
+            val curr = w.currency.ifBlank { "IDR" }
+            DropdownOption(w.id, "${w.name} ($curr)")
+        }.toMutableList()
+        if (isEditMode && selectedWalletId.isNotBlank() && !activeWallets.any { it.id == selectedWalletId }) {
+            val oldW = wallets.find { it.id == selectedWalletId }
+            val oldName = oldW?.name ?: DefaultData.DEFAULT_WALLET_NAME
+            val oldCurr = oldW?.currency?.ifBlank { "IDR" } ?: "IDR"
+            list.add(0, DropdownOption(selectedWalletId, "$oldName ($oldCurr) (dihapus)"))
+        }
+        list
+    }
+
+    // Pilihan Dompet Ke (Transfer: hanya dompet dengan mata uang sama dan beda ID dari Dari)
+    val toWalletOptions = remember(activeWallets, isEditMode, selectedWalletId, selectedToWalletId, wallets) {
+        val fromCurr = if (selectedWalletId.isNotBlank()) Uang.getWalletCurrency(selectedWalletId, wallets) else null
+        val eligible = if (fromCurr != null) {
+            activeWallets.filter { it.id != selectedWalletId && (it.currency.ifBlank { "IDR" }) == fromCurr }
+        } else {
+            activeWallets
+        }
+        val list = eligible.map { w ->
+            val curr = w.currency.ifBlank { "IDR" }
+            DropdownOption(w.id, "${w.name} ($curr)")
+        }.toMutableList()
+        if (isEditMode && selectedToWalletId.isNotBlank() && !eligible.any { it.id == selectedToWalletId } && selectedToWalletId != selectedWalletId) {
+            val oldW = wallets.find { it.id == selectedToWalletId }
+            val oldName = oldW?.name ?: ""
+            val oldCurr = oldW?.currency?.ifBlank { "IDR" } ?: "IDR"
+            list.add(0, DropdownOption(selectedToWalletId, "$oldName ($oldCurr) (dihapus)"))
+        }
+        list
+    }
+
+    // Pilihan Kategori sesuai tipe aktif (Pengeluaran & Pemasukan)
     val categoryList = remember(txType, categories) {
         if (txType == "income") categories.income.map { it.name }
         else categories.expense.map { it.name }
@@ -184,24 +230,37 @@ fun TransactionFormScreen(
     val parsedAmountCents = remember(amountText, currentCurrency) {
         Uang.parseAmountInput(amountText, currentCurrency)
     }
-    val isFormValid = parsedAmountCents > 0L &&
-            selectedWalletId.isNotBlank() &&
-            selectedDate.isNotBlank() &&
-            selectedTime.isNotBlank()
+    val isFormValid = if (txType == "transfer") {
+        parsedAmountCents > 0L &&
+                selectedWalletId.isNotBlank() &&
+                selectedToWalletId.isNotBlank() &&
+                selectedWalletId != selectedToWalletId &&
+                Uang.getWalletCurrency(selectedWalletId, wallets) == Uang.getWalletCurrency(selectedToWalletId, wallets) &&
+                selectedDate.isNotBlank() &&
+                selectedTime.isNotBlank()
+    } else {
+        parsedAmountCents > 0L &&
+                selectedWalletId.isNotBlank() &&
+                selectedDate.isNotBlank() &&
+                selectedTime.isNotBlank()
+    }
 
     if (showDeleteConfirmDialog && txId != null) {
+        val isTransferTx = txType == "transfer"
         AlertDialog(
             onDismissRequest = { showDeleteConfirmDialog = false },
             containerColor = MizanTheme.colors.surface,
             title = {
                 Text(
-                    text = stringResource(id = R.string.confirm_delete_title),
+                    text = if (isTransferTx) stringResource(id = R.string.confirm_delete_transfer_title)
+                    else stringResource(id = R.string.confirm_delete_title),
                     style = MaterialTheme.typography.titleMedium.copy(color = MizanTheme.colors.text)
                 )
             },
             text = {
                 Text(
-                    text = stringResource(id = R.string.confirm_delete_message),
+                    text = if (isTransferTx) stringResource(id = R.string.confirm_delete_transfer_message)
+                    else stringResource(id = R.string.confirm_delete_message),
                     style = MaterialTheme.typography.bodyMedium.copy(color = MizanTheme.colors.textSecondary)
                 )
             },
@@ -292,7 +351,7 @@ fun TransactionFormScreen(
             }
         }
 
-        // === TAB TIPE TRANSAKSI (PENGELUARAN & PEMASUKAN) ===
+        // === TAB TIPE TRANSAKSI (PENGELUARAN, PEMASUKAN, TRANSFER) ===
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -313,6 +372,9 @@ fun TransactionFormScreen(
                         txType = "expense"
                         selectedCategory = ""
                         selectedSubcategory = null
+                        if (selectedWalletId.isBlank() && activeWallets.size == 1) {
+                            selectedWalletId = activeWallets[0].id
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -339,6 +401,9 @@ fun TransactionFormScreen(
                         txType = "income"
                         selectedCategory = ""
                         selectedSubcategory = null
+                        if (selectedWalletId.isBlank() && activeWallets.size == 1) {
+                            selectedWalletId = activeWallets[0].id
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -347,6 +412,36 @@ fun TransactionFormScreen(
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = if (isIncome) FontWeight.Bold else FontWeight.Normal,
                         color = if (isIncome) MizanTheme.colors.accent else MizanTheme.colors.textSecondary
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Tab Transfer
+            val isTransfer = txType == "transfer"
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .defaultMinSize(minHeight = 40.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (isTransfer) MizanTheme.colors.surface else MizanTheme.colors.surfaceRaised)
+                    .clickable {
+                        txType = "transfer"
+                        selectedCategory = "Transfer"
+                        selectedSubcategory = null
+                        if (!isEditMode) {
+                            selectedWalletId = ""
+                            selectedToWalletId = ""
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.label_transfer),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = if (isTransfer) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isTransfer) MizanTheme.colors.transfer else MizanTheme.colors.textSecondary
                     )
                 )
             }
@@ -360,166 +455,161 @@ fun TransactionFormScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            // 1. JUMLAH
-            Text(
-                text = stringResource(id = R.string.label_jumlah),
-                style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 48.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MizanTheme.colors.surface)
-                    .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(6.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            if (txType == "transfer") {
+                // === FORM TAB TRANSFER ===
+
+                // 1. DARI (Dompet Asal: wajib dipilih manual)
                 Text(
-                    text = when (currentCurrency) {
-                        "USD" -> "$ "
-                        "JPY" -> "¥ "
-                        else -> "Rp "
-                    },
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = MizanTheme.colors.textSecondary,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                BasicTextField(
-                    value = amountText,
-                    onValueChange = { input ->
-                        if (currentCurrency == "USD") {
-                            // USD: Izinkan digit, satu koma/titik, dan maksimal 2 desimal
-                            val clean = input.filter { it.isDigit() || it == ',' || it == '.' }
-                            val sepIdx = clean.indexOfFirst { it == ',' || it == '.' }
-                            if (sepIdx != -1) {
-                                val intP = clean.substring(0, sepIdx).filter { it.isDigit() }
-                                val decP = clean.substring(sepIdx + 1).filter { it.isDigit() }.take(2)
-                                val intFormatted = if (intP.isNotEmpty()) Uang.formatNumber(intP.toLongOrNull() ?: 0L) else "0"
-                                amountText = "$intFormatted,$decP"
-                            } else {
-                                val digits = clean.filter { it.isDigit() }
-                                amountText = if (digits.isNotEmpty()) Uang.formatNumber(digits.toLongOrNull() ?: 0L) else ""
-                            }
-                        } else {
-                            // IDR / JPY: Hanya digit, format dengan titik pemisah ribuan
-                            val digits = input.filter { it.isDigit() }
-                            amountText = if (digits.isNotEmpty()) {
-                                Uang.formatNumber(digits.toLongOrNull() ?: 0L)
-                            } else {
-                                ""
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(
-                        fontFamily = FontFamily.Default,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = MizanTheme.colors.text
-                    ),
-                    cursorBrush = SolidColor(MizanTheme.colors.accent),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = if (currentCurrency == "USD") KeyboardType.Decimal else KeyboardType.Number
-                    ),
-                    singleLine = true,
-                    decorationBox = { innerTextField ->
-                        if (amountText.isEmpty()) {
-                            Text(
-                                text = "0",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    color = MizanTheme.colors.textSecondary,
-                                    fontSize = 20.sp
-                                )
-                            )
-                        }
-                        innerTextField()
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // 2. DOMPET (Wajib, Dropdown Kustom)
-            Text(
-                text = "${stringResource(id = R.string.label_dompet)} *",
-                style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            CustomDropdown(
-                selectedId = selectedWalletId.takeIf { it.isNotBlank() },
-                options = walletOptions,
-                placeholder = stringResource(id = R.string.placeholder_pilih_dompet),
-                onOptionSelected = { id ->
-                    selectedWalletId = id
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // 3. KATEGORI (Opsional, Dropdown Kustom)
-            Text(
-                text = stringResource(id = R.string.label_kategori),
-                style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            CustomDropdown(
-                selectedId = selectedCategory.takeIf { it.isNotBlank() },
-                options = categoryOptions,
-                placeholder = stringResource(id = R.string.placeholder_pilih_kategori),
-                onOptionSelected = { cat ->
-                    selectedCategory = cat
-                    selectedSubcategory = null
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // 4. SUB KATEGORI (Hanya jika kategori memiliki sub kategori)
-            if (subcategoryList.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(14.dp))
-                Text(
-                    text = stringResource(id = R.string.label_subkategori),
+                    text = "${stringResource(id = R.string.label_dari)} *",
                     style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
                 )
-                Spacer(modifier = Modifier.height(6.dp))
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    for (sub in subcategoryList) {
-                        val isSubSelected = selectedSubcategory == sub
-                        Box(
-                            modifier = Modifier
-                                .defaultMinSize(minHeight = 36.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(
-                                    if (isSubSelected) MizanTheme.colors.accent.copy(alpha = 0.2f)
-                                    else MizanTheme.colors.surface
+                Spacer(modifier = Modifier.height(4.dp))
+                CustomDropdown(
+                    selectedId = selectedWalletId.takeIf { it.isNotBlank() },
+                    options = fromWalletOptions,
+                    placeholder = stringResource(id = R.string.placeholder_pilih_dompet),
+                    onOptionSelected = { id ->
+                        selectedWalletId = id
+                        val fromCurr = Uang.getWalletCurrency(id, wallets)
+                        val toCurr = if (selectedToWalletId.isNotBlank()) Uang.getWalletCurrency(selectedToWalletId, wallets) else null
+                        if (selectedToWalletId == id || (toCurr != null && toCurr != fromCurr)) {
+                            selectedToWalletId = ""
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 2. KE (Dompet Tujuan: wajib dipilih manual, mata uang sama dengan Dari)
+                Text(
+                    text = "${stringResource(id = R.string.label_ke)} *",
+                    style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                val toPlaceholder = if (selectedWalletId.isNotBlank() && toWalletOptions.isEmpty()) {
+                    "Tidak ada dompet lain (${Uang.getWalletCurrency(selectedWalletId, wallets)})"
+                } else {
+                    stringResource(id = R.string.placeholder_pilih_dompet)
+                }
+                CustomDropdown(
+                    selectedId = selectedToWalletId.takeIf { it.isNotBlank() },
+                    options = toWalletOptions,
+                    placeholder = toPlaceholder,
+                    onOptionSelected = { id ->
+                        selectedToWalletId = id
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 3. JUMLAH
+                Text(
+                    text = stringResource(id = R.string.label_jumlah),
+                    style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                AmountInputField(
+                    amountText = amountText,
+                    onAmountChange = { amountText = it },
+                    currency = currentCurrency
+                )
+            } else {
+                // === FORM TAB PENGELUARAN & PEMASUKAN ===
+
+                // 1. JUMLAH
+                Text(
+                    text = stringResource(id = R.string.label_jumlah),
+                    style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                AmountInputField(
+                    amountText = amountText,
+                    onAmountChange = { amountText = it },
+                    currency = currentCurrency
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 2. DOMPET (Wajib, Dropdown Kustom)
+                Text(
+                    text = "${stringResource(id = R.string.label_dompet)} *",
+                    style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                CustomDropdown(
+                    selectedId = selectedWalletId.takeIf { it.isNotBlank() },
+                    options = walletOptions,
+                    placeholder = stringResource(id = R.string.placeholder_pilih_dompet),
+                    onOptionSelected = { id ->
+                        selectedWalletId = id
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // 3. KATEGORI (Opsional, Dropdown Kustom)
+                Text(
+                    text = stringResource(id = R.string.label_kategori),
+                    style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                CustomDropdown(
+                    selectedId = selectedCategory.takeIf { it.isNotBlank() },
+                    options = categoryOptions,
+                    placeholder = stringResource(id = R.string.placeholder_pilih_kategori),
+                    onOptionSelected = { cat ->
+                        selectedCategory = cat
+                        selectedSubcategory = null
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // 4. SUB KATEGORI (Hanya jika kategori memiliki sub kategori)
+                if (subcategoryList.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = stringResource(id = R.string.label_subkategori),
+                        style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        for (sub in subcategoryList) {
+                            val isSubSelected = selectedSubcategory == sub
+                            Box(
+                                modifier = Modifier
+                                    .defaultMinSize(minHeight = 36.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(
+                                        if (isSubSelected) MizanTheme.colors.accent.copy(alpha = 0.2f)
+                                        else MizanTheme.colors.surface
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (isSubSelected) MizanTheme.colors.accent else MizanTheme.colors.border,
+                                        RoundedCornerShape(6.dp)
+                                    )
+                                    .clickable {
+                                        selectedSubcategory = if (isSubSelected) null else sub
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = sub,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 13.sp,
+                                        fontWeight = if (isSubSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                        color = if (isSubSelected) MizanTheme.colors.accent else MizanTheme.colors.text
+                                    )
                                 )
-                                .border(
-                                    1.dp,
-                                    if (isSubSelected) MizanTheme.colors.accent else MizanTheme.colors.border,
-                                    RoundedCornerShape(6.dp)
-                                )
-                                .clickable {
-                                    selectedSubcategory = if (isSubSelected) null else sub
-                                }
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = sub,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = 13.sp,
-                                    fontWeight = if (isSubSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (isSubSelected) MizanTheme.colors.accent else MizanTheme.colors.text
-                                )
-                            )
+                            }
                         }
                     }
                 }
@@ -527,7 +617,7 @@ fun TransactionFormScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 5. TANGGAL & WAKTU (Berdampingan)
+            // TANGGAL & WAKTU (Berdampingan)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -547,12 +637,13 @@ fun TransactionFormScreen(
                             .background(MizanTheme.colors.surface)
                             .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(6.dp))
                             .clickable {
-                                val parts = selectedDate.split('-')
+                                val parts = selectedDate.split("-")
                                 val y = parts.getOrNull(0)?.toIntOrNull() ?: 2026
-                                val m = (parts.getOrNull(1)?.toIntOrNull() ?: 10) - 1
-                                val d = parts.getOrNull(2)?.toIntOrNull() ?: 20
-                                DatePickerDialog(context, { _, year, month, day ->
-                                    selectedDate = String.format(Locale.ROOT, "%04d-%02d-%02d", year, month + 1, day)
+                                val m = (parts.getOrNull(1)?.toIntOrNull() ?: 1) - 1
+                                val d = parts.getOrNull(2)?.toIntOrNull() ?: 1
+                                DatePickerDialog(context, { _, year, monthOfYear, dayOfMonth ->
+                                    val formatted = String.format(Locale.ROOT, "%04d-%02d-%02d", year, monthOfYear + 1, dayOfMonth)
+                                    selectedDate = formatted
                                 }, y, m, d).show()
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -560,10 +651,7 @@ fun TransactionFormScreen(
                     ) {
                         Text(
                             text = formatDateDisplay(selectedDate),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = MizanTheme.colors.text,
-                                fontSize = 14.sp
-                            )
+                            style = MaterialTheme.typography.bodyMedium.copy(color = MizanTheme.colors.text)
                         )
                     }
                 }
@@ -584,22 +672,20 @@ fun TransactionFormScreen(
                             .background(MizanTheme.colors.surface)
                             .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(6.dp))
                             .clickable {
-                                val parts = selectedTime.split(':')
-                                val h = parts.getOrNull(0)?.toIntOrNull() ?: 12
-                                val min = parts.getOrNull(1)?.toIntOrNull() ?: 0
-                                TimePickerDialog(context, { _, hourOfDay, minute ->
-                                    selectedTime = String.format(Locale.ROOT, "%02d:%02d", hourOfDay, minute)
-                                }, h, min, is24Hour).show()
+                                val parts = selectedTime.split(":")
+                                val hour = parts.getOrNull(0)?.toIntOrNull() ?: 12
+                                val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                                TimePickerDialog(context, { _, h, m ->
+                                    val formatted = String.format(Locale.ROOT, "%02d:%02d", h, m)
+                                    selectedTime = formatted
+                                }, hour, minute, is24Hour).show()
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
                             text = formatTimeDisplay(selectedTime, is24Hour),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = MizanTheme.colors.text,
-                                fontSize = 14.sp
-                            )
+                            style = MaterialTheme.typography.bodyMedium.copy(color = MizanTheme.colors.text)
                         )
                     }
                 }
@@ -607,47 +693,40 @@ fun TransactionFormScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 6. CATATAN & SARAN CATATAN LAMA
+            // CATATAN (Dengan saran catatan lama)
             Text(
                 text = stringResource(id = R.string.label_catatan),
                 style = MaterialTheme.typography.labelSmall.copy(color = MizanTheme.colors.textSecondary)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Box(
+            BasicTextField(
+                value = noteText,
+                onValueChange = { noteText = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 72.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .background(MizanTheme.colors.surface)
                     .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(6.dp))
-                    .padding(12.dp)
-            ) {
-                BasicTextField(
-                    value = noteText,
-                    onValueChange = { noteText = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(
-                        fontFamily = FontFamily.Default,
-                        fontSize = 14.sp,
-                        color = MizanTheme.colors.text
-                    ),
-                    cursorBrush = SolidColor(MizanTheme.colors.accent),
-                    minLines = 3,
-                    maxLines = 5,
-                    decorationBox = { innerTextField ->
-                        if (noteText.isEmpty()) {
-                            Text(
-                                text = stringResource(id = R.string.placeholder_note),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = MizanTheme.colors.textSecondary,
-                                    fontSize = 14.sp
-                                )
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = MizanTheme.colors.text,
+                    fontSize = 14.sp
+                ),
+                cursorBrush = SolidColor(MizanTheme.colors.accent),
+                decorationBox = { innerTextField ->
+                    if (noteText.isEmpty()) {
+                        Text(
+                            text = stringResource(id = R.string.placeholder_note),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = MizanTheme.colors.textSecondary,
+                                fontSize = 14.sp
                             )
-                        }
-                        innerTextField()
+                        )
                     }
-                )
-            }
+                    innerTextField()
+                }
+            )
 
             // Panel Saran Catatan Lama (Di bawah field Catatan)
             if (noteSuggestions.isNotEmpty()) {
@@ -723,10 +802,10 @@ fun TransactionFormScreen(
                         amount = parsedAmountCents,
                         date = selectedDate,
                         time = selectedTime,
-                        category = selectedCategory.takeIf { it.isNotBlank() },
-                        subcategory = selectedSubcategory?.takeIf { it.isNotBlank() },
+                        category = if (txType == "transfer") "Transfer" else selectedCategory.takeIf { it.isNotBlank() },
+                        subcategory = if (txType == "transfer") null else selectedSubcategory?.takeIf { it.isNotBlank() },
                         walletId = selectedWalletId,
-                        toWalletId = null,
+                        toWalletId = if (txType == "transfer") selectedToWalletId else null,
                         note = noteText.trim().takeIf { it.isNotBlank() },
                         createdAt = createdAt,
                         updatedAt = now,
@@ -760,5 +839,90 @@ fun TransactionFormScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun AmountInputField(
+    amountText: String,
+    onAmountChange: (String) -> Unit,
+    currency: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 48.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(MizanTheme.colors.surface)
+            .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(6.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = when (currency) {
+                "USD" -> "$ "
+                "JPY" -> "¥ "
+                else -> "Rp "
+            },
+            style = MaterialTheme.typography.titleLarge.copy(
+                color = MizanTheme.colors.textSecondary,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        BasicTextField(
+            value = amountText,
+            onValueChange = { input ->
+                if (currency == "USD") {
+                    // USD: Izinkan digit, satu koma/titik, dan maksimal 2 desimal
+                    val clean = input.filter { it.isDigit() || it == ',' || it == '.' }
+                    val sepIdx = clean.indexOfFirst { it == ',' || it == '.' }
+                    if (sepIdx != -1) {
+                        val intP = clean.substring(0, sepIdx).filter { it.isDigit() }
+                        val decP = clean.substring(sepIdx + 1).filter { it.isDigit() }.take(2)
+                        val intFormatted = if (intP.isNotEmpty()) Uang.formatNumber(intP.toLongOrNull() ?: 0L) else "0"
+                        onAmountChange("$intFormatted,$decP")
+                    } else {
+                        val digits = clean.filter { it.isDigit() }
+                        onAmountChange(if (digits.isNotEmpty()) Uang.formatNumber(digits.toLongOrNull() ?: 0L) else "")
+                    }
+                } else {
+                    // IDR / JPY: Hanya digit, format dengan titik pemisah ribuan
+                    val digits = input.filter { it.isDigit() }
+                    onAmountChange(
+                        if (digits.isNotEmpty()) {
+                            Uang.formatNumber(digits.toLongOrNull() ?: 0L)
+                        } else {
+                            ""
+                        }
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = MizanTheme.colors.text
+            ),
+            cursorBrush = SolidColor(MizanTheme.colors.accent),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = if (currency == "USD") KeyboardType.Decimal else KeyboardType.Number
+            ),
+            singleLine = true,
+            decorationBox = { innerTextField ->
+                if (amountText.isEmpty()) {
+                    Text(
+                        text = "0",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            color = MizanTheme.colors.textSecondary,
+                            fontSize = 20.sp
+                        )
+                    )
+                }
+                innerTextField()
+            }
+        )
     }
 }

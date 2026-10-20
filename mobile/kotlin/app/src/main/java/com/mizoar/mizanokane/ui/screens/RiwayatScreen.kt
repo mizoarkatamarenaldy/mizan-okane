@@ -136,18 +136,21 @@ fun RiwayatScreen(
 
     if (txToDelete != null) {
         val target = txToDelete!!
+        val isTransferTarget = target.type == "transfer"
         AlertDialog(
             onDismissRequest = { txToDelete = null },
             containerColor = MizanTheme.colors.surface,
             title = {
                 Text(
-                    text = stringResource(id = R.string.confirm_delete_title),
+                    text = if (isTransferTarget) stringResource(id = R.string.confirm_delete_transfer_title)
+                    else stringResource(id = R.string.confirm_delete_title),
                     style = MaterialTheme.typography.titleMedium.copy(color = MizanTheme.colors.text)
                 )
             },
             text = {
                 Text(
-                    text = stringResource(id = R.string.confirm_delete_message),
+                    text = if (isTransferTarget) stringResource(id = R.string.confirm_delete_transfer_message)
+                    else stringResource(id = R.string.confirm_delete_message),
                     style = MaterialTheme.typography.bodyMedium.copy(color = MizanTheme.colors.textSecondary)
                 )
             },

@@ -26,6 +26,7 @@ interface MizanRepository {
     suspend fun getAllWallets(): List<WalletEntity>
     suspend fun getWalletById(id: String): WalletEntity?
     suspend fun saveWallet(wallet: WalletEntity)
+    suspend fun saveWallets(wallets: List<WalletEntity>)
     suspend fun markWalletDeleted(id: String, updatedAt: Long = System.currentTimeMillis())
     suspend fun replaceAllWallets(wallets: List<WalletEntity>)
 

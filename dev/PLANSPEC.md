@@ -2043,3 +2043,39 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Edit lalu hapus transaksi: hilang dari Riwayat dan saldo Beranda, tetapi tetap ada sebagai soft delete di data.
 - Klik kartu dompet di Beranda: Riwayat terfilter ke dompet itu, klik lagi kembali ke Semua Dompet.
 - Pilih bulan di Riwayat: ringkasan pemasukan dan pengeluaran ikut bulan itu, transfer tidak dihitung.
+
+
+## Kotlin 4A: Dompet, transfer, mata uang
+
+Tujuan: Menulis ulang fitur dompet, transfer antar dompet, dan mata uang per dompet dari versi web ke Jetpack Compose, di atas layar Kotlin 3. Perilaku harus sama dengan web di desktop/src. Kategori dan sub kategori BUKAN bagian item ini (itu Kotlin 4B).
+
+Sumber acuan (web adalah acuan, baca seperlunya, jangan ubah):
+- Buka hanya bagian-bagian ini di dev/PLANSPEC.md: Beberapa dompet; Transfer antar dompet; Mata uang per dompet, tahap 1: Rupiah dan Yen; Mata uang per dompet, tahap 2: tambah USD dengan desimal; Mata uang opsional; Hapus dompet; Geser urutan dompet dan kategori (hanya bagian dompet); Dompet dipilih manual di form transaksi dan transfer; Perbaikan UI Mobile 1: Form Transaksi Layar Penuh; Perbaikan UI Mobile 2: Dropdown Kustom Mobile.
+- Baca juga kode di desktop/src yang terkait: tambah/ubah/hapus dompet, pilihan mata uang, form transfer, tampilan dan edit transfer di Riwayat, geser urutan dompet. Salin perilakunya, bukan gayanya.
+- Tampilan mengikuti dev/DESIGN.md dan tema Compose yang sudah ada. Jangan tambah warna, font, bayangan, atau animasi di luar itu.
+
+Tempat dan tampilan:
+- Form transaksi layar penuh dari Kotlin 3 mendapat tab ketiga "Transfer" dengan field Dari, Ke (keduanya kosong dan wajib dipilih manual, memakai CustomDropdown yang sudah ada), Jumlah, Tanggal, Waktu, Catatan, sama seperti web. Transfer yang sudah ada di Riwayat bisa diubah dan dihapus lewat form yang sama (mode edit membuka tab Transfer).
+- Layar Pengaturan di Kotlin masih placeholder. Di layar itu tambahkan SATU baris "Dompet" yang membuka layar Kelola Dompet. Jangan bangun bagian Pengaturan yang lain, itu Kotlin 7. Tambahkan rute baru di Screen.kt dan hubungkan di MainActivity.
+- Layar Kelola Dompet: daftar dompet dengan nama dan mata uang, tombol tambah dompet, ubah nama, hapus dompet, dan geser urutan memakai ikon garis tiga (≡) sebagai pegangan, semuanya mengikuti web (teks, konfirmasi, aturan mata uang, aturan hapus dompet dengan riwayat tetap aman).
+
+Aturan:
+- Sebelum menulis kode, buka dan baca ulang file yang akan diubah: MizanRepository.kt, RoomMizanRepository.kt, InMemoryMizanRepository.kt, WalletEntity.kt, TransactionEntity.kt, DefaultData.kt, Uang.kt, Screen.kt, MainActivity.kt, TransactionFormScreen.kt, RiwayatScreen.kt, BerandaCalculations.kt, RiwayatCalculations.kt, dan dev/SCHEMA.md. Pakai nama class, fungsi, dan field yang benar-benar ada. Cara transfer, urutan dompet, dan mata uang dompet disimpan harus persis mengikuti dev/SCHEMA.md dan web.
+- Kalau butuh fungsi repository baru (simpan/ubah/hapus dompet, simpan urutan, simpan/hapus transfer), tambahkan seminimal mungkin di interface dan kedua implementasinya, tanpa logika hitung saldo di repository.
+- Periksa BerandaCalculations.kt dan RiwayatCalculations.kt: perlakuan transfer (tidak dihitung sebagai pemasukan atau pengeluaran, tetap memindahkan saldo antar dompet, satu mata uang saja) harus sama dengan web. Ubah hanya kalau berbeda dari web.
+- Semua perhitungan dan tampilan uang lewat helper object Uang. Dilarang memakai Float, Double, atau BigDecimal di luar Uang. Satuan penyimpanan tetap Long seperseratus.
+- Geser urutan: pakai hanya API foundation Compose yang sudah ada (pointerInput dan detectDragGestures pada pegangan ≡), tanpa library atau dependensi baru. Pakai hanya API yang kamu yakini ada di versi Compose yang dikunci.
+- Tidak membuat unit test baru. Tidak mengubah kategori, sub kategori, budget, atau layar Statistik dan Timbangan. Dilarang menambah fitur yang tidak ada di web.
+- Kode harus benar saat dikompilasi pertama kali. Setelah selesai menulis, baca ulang SEMUA file Kotlin yang kamu tulis atau ubah, sampai baris terakhir, dan periksa: import lengkap, nama fungsi dan class benar-benar ada, tipe cocok, resource (string, drawable) benar-benar ada. Tambahkan drawable atau string baru bila perlu.
+- Dilarang menjalankan ./gradlew, gradle, atau perintah build apa pun. Tulis "belum dibuild" di entri CHANGELOG.
+- Dilarang mengubah desktop/, mobile/capacitor/, dan format data (dev/SCHEMA.md).
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Skema Room tetap versi 1, jadi folder app/schemas/ tidak boleh berubah.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Buat dompet baru dengan mata uang Yen, lalu USD: Yen tanpa desimal, USD dengan 2 desimal, tersimpan sebagai Long seperseratus.
+- Transfer Rp 100.000 dari dompet Rupiah A ke dompet Rupiah B: saldo A turun, saldo B naik, pemasukan dan pengeluaran bulan di Beranda tidak berubah.
+- Edit lalu hapus transfer dari Riwayat: saldo kedua dompet kembali benar, transfer hilang dari Riwayat.
+- Geser urutan dompet lewat ≡: urutan di Kelola Dompet, Beranda, dan dropdown dompet ikut berubah dan tetap setelah app ditutup.
+- Hapus dompet yang punya riwayat: perilaku sama dengan web (riwayat tetap aman).

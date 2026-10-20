@@ -43,4 +43,22 @@
     <string name="label_jumlah">Jumlah</string>
     <string name="label_catatan">Catatan</string>
     <string name="label_transaksi_terakhir">Transaksi Terakhir</string>
+    <string name="label_dari">Dari</string>
+    <string name="label_ke">Ke</string>
+    <string name="confirm_delete_transfer_title">Hapus transfer ini?</string>
+    <string name="confirm_delete_transfer_message">Transfer ini akan dihapus.</string>
+
+    <!-- Dompet & Pengaturan -->
+    <string name="title_dompet">Dompet</string>
+    <string name="desc_kelola_dompet">Kelola dompet dan rekening sumber dana</string>
+    <string name="desc_dompet_card">Kelola dompet atau rekening sumber dana (misal: Tunai, Rekening Bank, E-Wallet).</string>
+    <string name="empty_dompet">Belum ada dompet.</string>
+    <string name="placeholder_nama_dompet">Nama dompet baru...</string>
+    <string name="action_tambah_dompet">Tambah Dompet</string>
+    <string name="action_ubah">Ubah</string>
+    <string name="warn_min_one_wallet">Dompet tidak bisa dihapus karena minimal harus ada satu dompet.</string>
+    <string name="warn_wallet_empty_name">Nama dompet tidak boleh kosong.</string>
+    <string name="warn_wallet_exists">Dompet \"%1$s\" sudah ada.</string>
+    <string name="confirm_delete_wallet_title">Hapus dompet \"%1$s\" dengan sisa saldo %2$s?</string>
+    <string name="toast_wallet_deleted">Dompet \"%1$s\" berhasil dihapus.</string>
 </resources>

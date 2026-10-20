@@ -86,6 +86,10 @@ class RoomMizanRepository(private val db: AppDatabase) : MizanRepository {
         db.walletDao().insert(wallet)
     }
 
+    override suspend fun saveWallets(wallets: List<WalletEntity>) {
+        db.walletDao().insertAll(wallets)
+    }
+
     override suspend fun markWalletDeleted(id: String, updatedAt: Long) {
         db.walletDao().markDeleted(id, updatedAt)
     }

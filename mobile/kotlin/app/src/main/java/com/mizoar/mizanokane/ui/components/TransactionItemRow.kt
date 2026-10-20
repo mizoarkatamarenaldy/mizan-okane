@@ -14,10 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -119,6 +118,7 @@ fun TransactionItemRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Icon
+        val iconDrawableRes = if (isTransfer) R.drawable.ic_transfer else R.drawable.ic_category_default
         Box(
             modifier = Modifier
                 .size(36.dp)
@@ -127,7 +127,7 @@ fun TransactionItemRow(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_category_default),
+                painter = painterResource(id = iconDrawableRes),
                 contentDescription = null,
                 tint = iconTint,
                 modifier = Modifier.size(18.dp)
