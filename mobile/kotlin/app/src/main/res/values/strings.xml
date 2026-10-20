@@ -104,4 +104,44 @@
     <string name="warn_budget_parent_required">Atur budget kategori dulu.</string>
     <string name="warn_budget_sub_exceeds_parent">Total budget sub kategori tidak boleh melebihi budget kategori.</string>
     <string name="warn_select_budget_category">Pilih kategori atau sub kategori pengeluaran.</string>
+
+    <!-- Timbangan & Equilibrium -->
+    <string name="title_timbangan_page">Timbangan</string>
+    <string name="desc_timbangan_page">Keseimbangan keuangan dan simulasi belanja</string>
+    <string name="label_mata_uang">Mata Uang</string>
+    <string name="currency_rupiah">Rupiah</string>
+    <string name="currency_yen">Yen</string>
+    <string name="currency_dolar">Dolar</string>
+    <string name="title_timbangan_bulan_ini">Timbangan Bulan Ini</string>
+    <string name="empty_timbangan_month">Belum ada transaksi pada bulan ini.</string>
+    <string name="label_surplus">Surplus %1$s</string>
+    <string name="label_defisit">Defisit %1$s</string>
+    <string name="label_equilibrium">Equilibrium</string>
+    <string name="desc_equilibrium_bulan_ini">Penyesuaian saldo bulan ini</string>
+    <string name="title_timbang_sebelum_beli">Timbang Sebelum Beli</string>
+    <string name="desc_timbang_sebelum_beli">Simulasi dampak pengeluaran terhadap saldo dompet, budget, dan timbangan bulan ini.</string>
+    <string name="label_harga_barang">Harga Barang (%1$s)</string>
+    <string name="label_kategori_pengeluaran">Kategori Pengeluaran</string>
+    <string name="empty_kategori_option">Belum ada kategori</string>
+    <string name="label_dompet_sumber_dana">Dompet Sumber Dana</string>
+    <string name="empty_dompet_option">Belum ada dompet</string>
+    <string name="label_status_prefix">Status:</string>
+    <string name="status_aman">Aman</string>
+    <string name="status_pas">Pas</string>
+    <string name="status_berat">Berat</string>
+    <string name="label_saldo_setelah_beli">Saldo dompet setelah beli:</string>
+    <string name="label_sisa_budget_kategori">Sisa budget kategori:</string>
+    <string name="label_timbangan_setelah_beli">Timbangan bulan ini setelah beli:</string>
+    <string name="title_sesuaikan_saldo">Sesuaikan Saldo</string>
+    <string name="desc_sesuaikan_saldo">Samakan saldo dompet di aplikasi dengan saldo riil saat ada selisih.</string>
+    <string name="action_sesuaikan">Sesuaikan</string>
+    <string name="title_dialog_sesuaikan_saldo">Berapa saldo riil sekarang?</string>
+    <string name="label_saldo_di_app">Saldo di app:</string>
+    <string name="label_saldo_riil_sekarang">Saldo riil sekarang (%1$s)</string>
+    <string name="label_selisih">Selisih:</string>
+    <string name="msg_saldo_sudah_sama">Saldo sudah sama</string>
+    <string name="label_kategori_penyesuaian">Kategori Penyesuaian</string>
+    <string name="action_konfirmasi">Konfirmasi</string>
+    <string name="toast_adjust_success">Saldo berhasil disesuaikan.</string>
+    <string name="toast_adjust_error">Gagal menyimpan penyesuaian saldo.</string>
 </resources>

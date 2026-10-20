@@ -2149,3 +2149,35 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Atur budget sub kategori, lalu cek aturannya terhadap budget kategori sama dengan web.
 - Hapus sebuah budget, lalu cek hilang dari Beranda dan tidak muncul lagi setelah aplikasi dibuka ulang.
 - Geser urutan budget, lalu cek urutan bertahan setelah aplikasi dibuka ulang.
+
+## Kotlin 5B: Timbangan dan Equilibrium
+
+Tujuan: layar Timbangan (tombol tengah navigasi) dan penyesuaian saldo dompet lewat kategori Equilibrium pada aplikasi Kotlin, dengan perilaku sama persis dengan versi web.
+
+Sumber acuan: buka hanya bagian "Timbangan", "Penyesuaian saldo di Timbangan", "Kategori Equilibrium", "Tombol Timbangan di tengah navigasi", dan "Ikon neraca di header" di dev/PLANSPEC.md. Perilaku persisnya baca dari kode web di desktop/src (cari Timbangan dan Equilibrium di desktop/src/js/app.js dan desktop/src/index.html). Kalau spek dan kode web berbeda, kode web yang jadi acuan.
+
+Tempat dan tampilan:
+- Cek kondisi navigasi Kotlin sekarang (Screen.kt, MainActivity.kt). Kalau tombol tengah Timbangan belum ada atau masih placeholder, buat atau ganti isinya sesuai web. Layar Timbangan tampil dengan bottom bar, sama seperti layar utama lain.
+- Ikon neraca di header: ikuti web (letak, fungsi, dan apakah ada). Pakai ic_neraca.xml yang sudah ada.
+- Layar baru TimbanganScreen.kt: tampilan saldo per dompet, selisih, dan aksi penyesuaian saldo, persis seperti web. Teks, urutan elemen, dan kondisi kosong ikut web.
+- Dialog atau form penyesuaian saldo: ikut web (input saldo sebenarnya, tampil selisih, tombol simpan dan batal).
+- Semua teks pakai strings.xml bahasa Indonesia, sama dengan teks web.
+- Ikuti dev/DESIGN.md, jangan tambah warna, font, bayangan, atau animasi di luar itu.
+
+Aturan:
+- Perilaku sama dengan web: cara hitung saldo dompet, cara hitung selisih, transaksi apa yang dibuat saat penyesuaian (jenis, kategori Equilibrium, nominal, tanggal dan waktu, dompet, catatan), dan perlakuan multi mata uang. Semua ikut web.
+- Gunakan kategori Equilibrium yang sudah ada dari 4B. Id dan namanya tetap dan sama dengan web. Jangan ubah perilaku Kelola Kategori dan form transaksi.
+- Saldo dihitung lewat calculateWalletBalances yang sudah ada. Jangan tulis ulang rumus saldo.
+- Transaksi penyesuaian disimpan lewat saveTransaction yang sudah ada, dengan field dan id sesuai dev/SCHEMA.md.
+- Semua nominal uang Long seperseratus dan semua hitung dan tampil lewat object Uang. Dilarang Float, Double, BigDecimal di luar Uang.
+- Dilarang menambah fitur yang tidak ada di web. Kalau satu hal belum jelas di web, tiru web, jangan berimprovisasi.
+- TANPA BUILD. Kode harus benar saat dikompilasi pertama kali. Setelah selesai menulis, baca ulang SEMUA file Kotlin yang ditulis atau diubah sampai baris terakhir (import ada, nama fungsi dan class ada, tipe cocok, resource ada). Jangan pakai API yang tidak yakin. Kalau menambah dependensi, kunci versinya eksplisit di libs.versions.toml. Jangan jalankan ./gradlew, gradle, atau perintah build apa pun. Tulis "belum dibuild" di CHANGELOG.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Skema Room tetap versi 1.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Buka Timbangan lewat tombol tengah navigasi, lalu cek saldo per dompet sama dengan Beranda.
+- Sesuaikan saldo sebuah dompet ke angka yang berbeda, lalu cek muncul satu transaksi Equilibrium di Riwayat dan saldo dompet jadi sesuai angka itu.
+- Cek di dompet berbeda mata uang (Rupiah, Yen, USD) bahwa nominal dan desimal benar.
+- Tutup dan buka ulang aplikasi, lalu cek transaksi Equilibrium dan saldo tetap.
