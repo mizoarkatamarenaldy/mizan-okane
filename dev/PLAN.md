@@ -122,6 +122,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [ ] Konversi Kotlin
   - [x] Kotlin 1: Kerangka
   - [x] Kotlin 2: Data
+  - [x] Kotlin 3: Beranda, Riwayat, form transaksi
 - [ ] APK rilis
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik

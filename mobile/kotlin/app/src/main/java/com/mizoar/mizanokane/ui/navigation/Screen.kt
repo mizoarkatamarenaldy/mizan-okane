@@ -39,6 +39,12 @@ sealed class Screen(
         iconRes = R.drawable.ic_nav_pengaturan
     )
 
+    data object TransactionForm : Screen(
+        route = "transaction_form",
+        titleRes = R.string.title_tambah_transaksi,
+        iconRes = R.drawable.ic_plus
+    )
+
     companion object {
         val items = listOf(Beranda, Riwayat, Timbangan, Statistik, Pengaturan)
     }

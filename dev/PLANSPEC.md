@@ -2004,3 +2004,42 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama di akhir rangkaian
 - Ekspor JSON dari web (data contoh) lalu impor lewat fungsi Kotlin: jumlah transaksi, dompet, kategori, sub kategori, dan budget sama, termasuk data yang bertanda terhapus.
 - Nilai USD desimal tidak berubah setelah impor dan ekspor.
 - `git status --short` setelah sesi tidak memuat folder build, local.properties, atau file keystore.
+
+
+## Kotlin 3: Beranda, Riwayat, form transaksi
+
+Tujuan: Menulis ulang tiga layar inti versi web ke Jetpack Compose: Beranda, Riwayat, dan form tambah/edit transaksi (pemasukan dan pengeluaran), memakai data dari Kotlin 2. Perilaku harus sama dengan web di desktop/src.
+
+Sumber acuan (web adalah acuan, baca seperlunya, jangan ubah):
+- Buka hanya bagian-bagian ini di dev/PLANSPEC.md: v2.2 Beranda; v2.3 Riwayat dan form tambah/edit transaksi; Navigasi bulan di kartu saldo Beranda; Beranda: sembunyikan budget dan dompet bila tidak perlu; Warna kartu saldo multi mata uang; Klik dompet untuk filter riwayat; Filter bulan di Riwayat; Pencarian riwayat; Catatan di bawah angka; Dompet dipilih manual di form transaksi dan transfer; Perbaikan UI Mobile 1: Form Transaksi Layar Penuh; Perbaikan UI Mobile 2: Dropdown Kustom Mobile; Saran catatan lama; Mata uang opsional.
+- Baca juga kode di desktop/src yang terkait ketiga layar itu, terutama rumus saldo, pemasukan, pengeluaran, pengelompokan per tanggal, dan format angka/tanggal/jam. Salin perilakunya, bukan gayanya.
+- Tampilan mengikuti dev/DESIGN.md dan tema Compose yang sudah ada dari Kotlin 1. Jangan tambah warna, font, bayangan, atau animasi di luar itu.
+
+Tempat dan tampilan:
+- Layar Beranda dan Riwayat mengisi tempatnya di navigasi bawah yang sudah dibuat di Kotlin 1. Cek dulu file navigasi dan MainActivity yang ada, lalu ganti placeholder Beranda dan Riwayat saja. Layar lain tetap placeholder.
+- Beranda: kartu saldo dengan navigasi bulan, ringkasan pemasukan dan pengeluaran, kartu dompet (bisa diklik untuk filter Riwayat), bagian budget. Budget dan dompet disembunyikan dengan aturan yang sama seperti web.
+- Riwayat: daftar dikelompokkan per tanggal, dropdown dompet, dropdown bulan (opsi "Semua bulan") dengan ringkasan pemasukan dan pengeluaran di samping judul, kolom pencarian, catatan di bawah angka.
+- Form tambah/edit transaksi: layar penuh di mobile dengan tab Pemasukan dan Pengeluaran, field Tanggal, Waktu (wajib, mengikuti pilihan 12 jam atau 24 jam dari pengaturan), Dompet (kosong, wajib dipilih manual), Kategori dan sub kategori (opsional), Jumlah (titik pemisah ribuan, USD dengan desimal, Yen tanpa desimal), Catatan dengan saran catatan lama. Hapus transaksi lewat konfirmasi dan memakai soft delete.
+
+Aturan:
+- Sebelum menulis kode, buka dan baca MizanRepository.kt, RoomMizanRepository.kt, InMemoryMizanRepository.kt, AppDatabase.kt, Uang.kt, DefaultData.kt, dan semua file di data/model/. Pakai nama class, fungsi, dan field yang benar-benar ada. Kalau butuh fungsi repository yang belum ada (misalnya tambah/ubah/hapus transaksi, ambil daftar sebagai Flow), tambahkan seminimal mungkin di interface dan kedua implementasinya, tanpa logika hitung saldo atau budget di repository.
+- Logika hitung (saldo, total bulan, pengelompokan tanggal, filter, pencarian, saran catatan) ditaruh di file Kotlin terpisah berupa fungsi murni di package baru com.mizoar.mizanokane.domain, bukan di dalam composable. Hasilnya harus sama dengan rumus di web. Transfer tidak dihitung sebagai pemasukan atau pengeluaran.
+- Semua perhitungan dan tampilan uang lewat helper object Uang. Dilarang memakai Float, Double, atau BigDecimal di luar Uang. Satuan penyimpanan tetap Long seperseratus.
+- Transaksi transfer yang sudah ada tetap ditampilkan di Riwayat seperti web, tetapi membuat dan mengedit transfer BUKAN bagian item ini (itu Kotlin 4). Dompet, kategori, mata uang, dan sub kategori hanya dibaca, belum ada layar kelolanya.
+- Beranda tidak menampilkan data bila belum ada dompet, sama seperti perilaku web. Jangan tambah layar, fitur, atau animasi yang tidak ada di web.
+- Tidak membuat unit test baru di item ini.
+- Dilarang menambah dependensi baru kecuali benar-benar perlu (misalnya lifecycle-viewmodel-compose atau navigation-compose bila belum ada). Kalau menambah, versinya dikunci eksplisit di version catalog dan dicatat di CHANGELOG.
+- Kode harus benar saat dikompilasi pertama kali. Setelah selesai menulis, baca ulang SEMUA file Kotlin yang kamu tulis atau ubah dan periksa: import lengkap, nama fungsi dan class benar-benar ada, tipe cocok, resource (string, drawable) benar-benar ada. Jangan pakai API yang tidak kamu yakini ada di versi dependensi yang dikunci.
+- Dilarang menjalankan ./gradlew, gradle, atau perintah build apa pun. Tulis "belum dibuild" di entri CHANGELOG.
+- Dilarang mengubah desktop/, mobile/capacitor/, dan format data (dev/SCHEMA.md).
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Skema Room tetap versi 1, jadi folder app/schemas/ tidak boleh berubah.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Buka app dengan data kosong: Beranda tidak menampilkan kartu dompet atau budget, Riwayat kosong.
+- Impor JSON backup contoh lewat jalur yang ada (kalau belum ada UI impor, tes lewat InMemory repository dan catat di CHANGELOG): saldo dan ringkasan bulan di Beranda sama dengan yang tampil di web untuk data yang sama.
+- Tambah pengeluaran Rp 15.000 di dompet Rupiah, lalu USD 49,90: angka tampil "15.000" dan "49,90" dan tersimpan sebagai 1500000 dan 4990.
+- Edit lalu hapus transaksi: hilang dari Riwayat dan saldo Beranda, tetapi tetap ada sebagai soft delete di data.
+- Klik kartu dompet di Beranda: Riwayat terfilter ke dompet itu, klik lagi kembali ke Semua Dompet.
+- Pilih bulan di Riwayat: ringkasan pemasukan dan pengeluaran ikut bulan itu, transfer tidak dihitung.

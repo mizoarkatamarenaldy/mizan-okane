@@ -6,4 +6,41 @@
     <string name="nav_statistik">Statistik</string>
     <string name="nav_pengaturan">Pengaturan</string>
     <string name="desc_app_logo">Logo Mizan Okane</string>
+
+    <!-- Beranda & Riwayat -->
+    <string name="title_total_saldo">TOTAL SALDO</string>
+    <string name="label_pemasukan">Pemasukan</string>
+    <string name="label_pengeluaran">Pengeluaran</string>
+    <string name="label_semua_dompet">Semua Dompet</string>
+    <string name="label_semua_bulan">Semua bulan</string>
+    <string name="label_budget">Budget</string>
+    <string name="label_hari_ini">Hari ini</string>
+    <string name="label_kemarin">Kemarin</string>
+    <string name="label_transfer">Transfer</string>
+    <string name="label_penyesuaian">Penyesuaian</string>
+    <string name="empty_beranda_recent">Belum ada transaksi.</string>
+    <string name="empty_riwayat">Belum ada transaksi.</string>
+    <string name="empty_riwayat_search">Tidak ada transaksi yang cocok.</string>
+    <string name="placeholder_search">Cari transaksi...</string>
+
+    <!-- Form Transaksi -->
+    <string name="title_tambah_transaksi">Tambah Transaksi</string>
+    <string name="title_edit_transaksi">Edit Transaksi</string>
+    <string name="action_tambah_transaksi">Tambah Transaksi</string>
+    <string name="action_simpan">Simpan</string>
+    <string name="action_batal">Batal</string>
+    <string name="action_hapus">Hapus</string>
+    <string name="confirm_delete_title">Hapus transaksi ini?</string>
+    <string name="confirm_delete_message">Transaksi ini akan dihapus.</string>
+    <string name="placeholder_pilih_dompet">Pilih dompet</string>
+    <string name="placeholder_pilih_kategori">Pilih kategori</string>
+    <string name="placeholder_note">Catatan (opsional)</string>
+    <string name="label_dompet">Dompet</string>
+    <string name="label_kategori">Kategori</string>
+    <string name="label_subkategori">Sub Kategori</string>
+    <string name="label_tanggal">Tanggal</string>
+    <string name="label_waktu">Waktu</string>
+    <string name="label_jumlah">Jumlah</string>
+    <string name="label_catatan">Catatan</string>
+    <string name="label_transaksi_terakhir">Transaksi Terakhir</string>
 </resources>
