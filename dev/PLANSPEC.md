@@ -1972,3 +1972,35 @@ Cek manual:
 - `git status --short` setelah sesi tidak memuat folder build, local.properties, atau file keystore.
 
 
+## Kotlin 2: Data
+
+Tujuan: membuat lapisan data aplikasi Kotlin di mobile/kotlin/ (penyimpanan lokal Room, model, serta impor dan ekspor JSON) yang formatnya sama persis dengan versi web, supaya backup JSON dari web bisa diimpor di Kotlin dan sebaliknya.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Lapisan data belum disambungkan ke halaman mana pun. Tombol impor dan ekspor dikerjakan di item Pengaturan.
+
+Aturan:
+- Sumber kebenaran format data adalah dev/SCHEMA.md. Baca seluruh file itu. Untuk perilaku logika data, baca kode web di desktop/src hanya pada bagian yang berhubungan dengan data: penyimpanan, ekspor JSON, impor JSON, dan pembuatan kategori bawaan. Jangan ubah isi desktop/.
+- Buat entity Room untuk semua jenis data yang ada di dev/SCHEMA.md (misalnya transaksi, dompet, kategori, sub kategori, budget, pengaturan, penyesuaian saldo, sesuai isi SCHEMA.md). Nama field, tipe, dan arti tiap field mengikuti SCHEMA.md. Jangan menambah field yang tidak ada di sana.
+- Setiap data yang punya ID unik, waktu ubah, dan penanda terhapus (soft delete) di SCHEMA.md wajib menyimpannya persis sama. Jangan menghapus baris secara fisik untuk data yang di web memakai soft delete.
+- Tipe angka uang mengikuti SCHEMA.md dan cara web menyimpannya, termasuk USD dengan desimal. Dilarang memakai Float atau Double untuk uang kecuali SCHEMA.md memang menyebutnya. Kalau SCHEMA.md tidak jelas, berhenti, jangan menebak, dan laporkan ke pemilik.
+- Kategori induk tetap "Equilibrium" beserta sub kategorinya diperlakukan persis seperti di web (dibuat, disimpan, atau dihitung virtual sesuai kode web). Ikuti web.
+- Buat DAO dan satu repository untuk operasi dasar: baca, simpan, ubah, tandai terhapus, dan baca semua data. Jangan buat logika hitung saldo, budget, Timbangan, atau statistik. Itu dikerjakan di item lain.
+- Buat fungsi ekspor JSON (database ke teks JSON) dan fungsi impor JSON (teks JSON ke database) yang memakai format dan aturan penggabungan yang sama dengan web. Baca perilaku impor web di desktop/src dan tiru persis, termasuk aturan kalau ID yang sama sudah ada. Kalau aturannya tidak jelas, berhenti dan laporkan.
+- Buat fungsi "hapus semua dan kembalikan ke bawaan" di level data saja (tanpa tombol), mengikuti perilaku reset setelan pabrik di web untuk data lokal. Pembersihan Drive TIDAK dikerjakan di sini.
+- Gunakan kotlinx.serialization untuk JSON, Room dengan KSP untuk database. Versi KSP harus cocok dengan versi Kotlin yang sudah terpasang di proyek: baca versi Kotlin di version catalog (gradle/libs.versions.toml), pilih versi KSP yang kompatibel dengannya, dan tulis versi yang dipilih beserta alasannya di CHANGELOG. Semua versi dikunci eksplisit di version catalog, tidak boleh memakai "+" atau versi dinamis.
+- Database Room versi 1, exportSchema = true, folder skema di mobile/kotlin/app/schemas/ ikut di-commit.
+- Taruh kode data dalam package terpisah di bawah com.mizoar.mizanokane (misalnya data), terpisah dari kode tampilan Kotlin 1. Jangan ubah file tampilan dari Kotlin 1. Yang boleh diubah dari item sebelumnya hanya file Gradle untuk menambah dependensi dan plugin.
+- Buat unit test JVM biasa (bukan instrumented test) untuk fungsi JSON: baca file contoh dari folder test resources, impor, ekspor kembali, lalu bandingkan hasilnya. File contoh JSON wajib data fiktif buatan sendiri yang strukturnya sesuai SCHEMA.md, mencakup setiap jenis data, USD desimal, data terhapus, dan sub kategori. Dilarang memakai data transaksi asli milik pemilik di repo.
+- Sengaja TIDAK dilakukan: sinkron Drive, login Google, aturan gabung konflik antar perangkat, UI apa pun, ViewModel, injeksi dependensi (Hilt), dan perubahan di desktop/ atau mobile/capacitor/.
+
+Karena tidak ada build antar item sampai akhir rangkaian Kotlin, kodenya harus benar saat dikompilasi pertama kali. Sebelum melaporkan selesai, baca ulang setiap file Kotlin yang kamu tulis atau ubah dan periksa: import, nama fungsi dan class yang dipanggil benar-benar ada, tipe dan parameter cocok, anotasi Room valid, dan semua resource yang dirujuk sudah dibuat. Jangan memakai API yang kamu tidak yakin ada di versi dependensi yang terpasang. Jangan menjalankan Gradle atau perintah build apa pun. Tulis di CHANGELOG bagian yang kamu tidak yakin bisa dikompilasi.
+
+Data:
+- Tidak ada perubahan format data. Item ini hanya membaca dan menulis format yang sudah ada di dev/SCHEMA.md. Kalau ternyata ada ketidakcocokan antara SCHEMA.md dan perilaku web, jangan ubah salah satunya, laporkan ke pemilik. Sinkron Drive belum disentuh.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama di akhir rangkaian Kotlin):
+- Jalankan unit test JSON: semua lulus, dan data hasil impor lalu ekspor sama dengan file contoh.
+- Ekspor JSON dari web (data contoh) lalu impor lewat fungsi Kotlin: jumlah transaksi, dompet, kategori, sub kategori, dan budget sama, termasuk data yang bertanda terhapus.
+- Nilai USD desimal tidak berubah setelah impor dan ekspor.
+- `git status --short` setelah sesi tidak memuat folder build, local.properties, atau file keystore.

@@ -17,6 +17,7 @@ dist/
 build/
 www/
 .gradle/
+mobile/kotlin/app/release/
 
 # Log
 *.log

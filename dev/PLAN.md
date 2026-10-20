@@ -121,6 +121,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Konversi Tauri
 - [ ] Konversi Kotlin
   - [x] Kotlin 1: Kerangka
+  - [x] Kotlin 2: Data
 - [ ] APK rilis
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik

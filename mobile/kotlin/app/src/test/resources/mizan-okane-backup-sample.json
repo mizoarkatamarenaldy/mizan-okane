@@ -1,0 +1,257 @@
+{
+  "app": "mizan-okane",
+  "version": 2,
+  "schemaVersion": 2,
+  "exportedAt": "2026-10-20T10:00:00.000Z",
+  "transactions": [
+    {
+      "id": "tx_sample_01",
+      "type": "income",
+      "amount": 5000000,
+      "date": "2026-10-01",
+      "time": "09:00",
+      "category": "Gaji",
+      "subcategory": "Gaji Pokok",
+      "walletId": "wallet_bank",
+      "note": "Gaji awal bulan",
+      "createdAt": 1790845200000,
+      "updatedAt": 1790845200000,
+      "deleted": false
+    },
+    {
+      "id": "tx_sample_02",
+      "type": "expense",
+      "amount": 45000,
+      "date": "2026-10-02",
+      "time": "12:15",
+      "category": "Makan",
+      "subcategory": "Restoran",
+      "walletId": "wallet_kas",
+      "note": "Makan siang",
+      "createdAt": 1790943300000,
+      "updatedAt": 1790943300000,
+      "deleted": false
+    },
+    {
+      "id": "tx_sample_03",
+      "type": "transfer",
+      "amount": 500000,
+      "date": "2026-10-03",
+      "time": "10:00",
+      "category": "Transfer",
+      "walletId": "wallet_bank",
+      "toWalletId": "wallet_kas",
+      "note": "Tarik ATM",
+      "createdAt": 1791021600000,
+      "updatedAt": 1791021600000,
+      "deleted": false
+    },
+    {
+      "id": "tx_sample_04",
+      "type": "penyesuaian",
+      "amount": -5000,
+      "date": "2026-10-04",
+      "time": "20:00",
+      "category": "Equilibrium",
+      "subcategory": "Biaya admin",
+      "walletId": "wallet_bank",
+      "note": "Admin bank",
+      "createdAt": 1791144000000,
+      "updatedAt": 1791144000000,
+      "deleted": false
+    },
+    {
+      "id": "tx_sample_05",
+      "type": "expense",
+      "amount": 49.9,
+      "date": "2026-10-05",
+      "time": "14:00",
+      "category": "Belanja",
+      "subcategory": "Elektronik",
+      "walletId": "wallet_usd",
+      "note": "Flashdisk USD",
+      "createdAt": 1791230400000,
+      "updatedAt": 1791230400000,
+      "deleted": false
+    },
+    {
+      "id": "tx_sample_06",
+      "type": "expense",
+      "amount": 12.99,
+      "date": "2026-10-06",
+      "time": "15:30",
+      "category": "Tagihan",
+      "subcategory": "Langganan",
+      "walletId": "wallet_usd",
+      "note": "Server",
+      "createdAt": 1791316800000,
+      "updatedAt": 1791316800000,
+      "deleted": false
+    },
+    {
+      "id": "tx_sample_07",
+      "type": "expense",
+      "amount": 100,
+      "date": "2026-10-07",
+      "time": "16:00",
+      "category": "Belanja",
+      "walletId": "wallet_usd",
+      "note": "Buku",
+      "createdAt": 1791403200000,
+      "updatedAt": 1791403200000,
+      "deleted": false
+    },
+    {
+      "id": "tx_sample_08",
+      "type": "expense",
+      "amount": 0.01,
+      "date": "2026-10-08",
+      "time": "17:00",
+      "category": "Tagihan",
+      "walletId": "wallet_usd",
+      "note": "Uji verifikasi mikro",
+      "createdAt": 1791489600000,
+      "updatedAt": 1791489600000,
+      "deleted": false
+    },
+    {
+      "id": "tx_sample_09",
+      "type": "expense",
+      "amount": 25000,
+      "date": "2026-10-09",
+      "time": "18:00",
+      "category": "Makan",
+      "walletId": "wallet_kas",
+      "note": "Salah catat",
+      "createdAt": 1791576000000,
+      "updatedAt": 1791576100000,
+      "deleted": true
+    }
+  ],
+  "wallets": [
+    {
+      "id": "wallet_kas",
+      "name": "Kas Tunai",
+      "currency": "IDR",
+      "order": 0,
+      "createdAt": 1790800000000,
+      "updatedAt": 1790800000000,
+      "deleted": false
+    },
+    {
+      "id": "wallet_bank",
+      "name": "Rekening Bank",
+      "currency": "IDR",
+      "order": 1,
+      "createdAt": 1790800000000,
+      "updatedAt": 1790800000000,
+      "deleted": false
+    },
+    {
+      "id": "wallet_usd",
+      "name": "Akun USD",
+      "currency": "USD",
+      "order": 2,
+      "createdAt": 1790800000000,
+      "updatedAt": 1790800000000,
+      "deleted": false
+    },
+    {
+      "id": "wallet_del",
+      "name": "Dompet Lama",
+      "currency": "IDR",
+      "order": 3,
+      "createdAt": 1790800000000,
+      "updatedAt": 1790850000000,
+      "deleted": true
+    }
+  ],
+  "categories": {
+    "income": [
+      {
+        "name": "Gaji",
+        "order": 0,
+        "icon": "gaji"
+      },
+      {
+        "name": "Bonus",
+        "order": 1,
+        "icon": "bonus"
+      }
+    ],
+    "expense": [
+      {
+        "name": "Makan",
+        "order": 0,
+        "icon": "makan"
+      },
+      {
+        "name": "Transport",
+        "order": 1,
+        "icon": "mobil"
+      },
+      {
+        "name": "Tagihan",
+        "order": 2,
+        "icon": "tagihan"
+      },
+      {
+        "name": "Belanja",
+        "order": 3,
+        "icon": "belanja"
+      }
+    ],
+    "subcategories": {
+      "income": {
+        "Gaji": [
+          {
+            "name": "Gaji Pokok",
+            "order": 0,
+            "icon": "gaji"
+          }
+        ]
+      },
+      "expense": {
+        "Makan": [
+          {
+            "name": "Restoran",
+            "order": 0,
+            "icon": "makan"
+          }
+        ],
+        "Tagihan": [
+          {
+            "name": "Langganan",
+            "order": 0,
+            "icon": "tagihan"
+          }
+        ],
+        "Belanja": [
+          {
+            "name": "Elektronik",
+            "order": 0,
+            "icon": "elektronik"
+          }
+        ]
+      }
+    },
+    "updatedAt": 1790800000000
+  },
+  "budgets": {
+    "items": {
+      "Makan": 1500000,
+      "Transport": 500000
+    },
+    "subcategories": {
+      "Makan": {
+        "Restoran": 500000
+      }
+    },
+    "updatedAt": 1790800000000
+  },
+  "settings": {
+    "theme": "dark",
+    "timeFormat": "24",
+    "updatedAt": 1790800000000
+  }
+}
