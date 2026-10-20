@@ -86,4 +86,22 @@
     <string name="toast_subcategory_updated">Sub kategori \"%1$s\" berhasil diubah.</string>
     <string name="toast_subcategory_deleted">Sub kategori \"%1$s\" berhasil dihapus.</string>
     <string name="empty_kategori">Belum ada kategori.</string>
+
+    <!-- Budget -->
+    <string name="title_kelola_budget">Budget</string>
+    <string name="desc_kelola_budget">Batas pengeluaran bulanan per kategori</string>
+    <string name="title_budget_card">Budget Pengeluaran Bulanan</string>
+    <string name="empty_budget">Belum ada budget yang diatur.</string>
+    <string name="placeholder_pilih_budget_item">Pilih kategori atau sub kategori</string>
+    <string name="placeholder_nominal_budget">Batas bulanan (Rp)...</string>
+    <string name="action_simpan_budget">Simpan Budget</string>
+    <string name="budget_per_bulan">• %1$s / bulan</string>
+    <string name="budget_orphan_badge">(tidak ada di daftar kategori)</string>
+    <string name="confirm_delete_budget_title">Hapus budget untuk kategori \"%1$s\"?</string>
+    <string name="confirm_delete_sub_budget_title">Hapus budget untuk sub kategori \"%1$s\"?</string>
+    <string name="toast_sub_budget_deleted">Budget sub kategori \"%1$s\" berhasil dihapus.</string>
+    <string name="warn_budget_amount_invalid">Jumlah budget harus berupa angka lebih dari 0.</string>
+    <string name="warn_budget_parent_required">Atur budget kategori dulu.</string>
+    <string name="warn_budget_sub_exceeds_parent">Total budget sub kategori tidak boleh melebihi budget kategori.</string>
+    <string name="warn_select_budget_category">Pilih kategori atau sub kategori pengeluaran.</string>
 </resources>

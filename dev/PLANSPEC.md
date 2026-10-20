@@ -2118,3 +2118,34 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Hapus sub kategori lalu kategori yang punya transaksi: perilaku transaksi dan budget sama dengan web.
 - Kategori Equilibrium: tampil sebagai baris tetap tanpa tombol ubah, hapus, geser, dan tidak ada di dropdown Kategori form transaksi.
 - Ekspor JSON lalu impor lagi: ikon dan urutan kategori kembali sama.
+
+## Kotlin 5A: Kelola budget
+
+Tujuan: layar untuk mengatur budget per kategori dan per sub kategori pada aplikasi Kotlin, dengan perilaku sama persis dengan versi web. Tampilan budget di Beranda sudah ada sejak Kotlin 3 dan tidak diubah.
+
+Sumber acuan: buka hanya bagian "Budget per kategori", "Budget per sub kategori", dan "Geser urutan budget" di dev/PLANSPEC.md. Perilaku persisnya baca dari kode web di desktop/src (cari fungsi kelola budget di desktop/src/js/app.js). Kalau spek dan kode web berbeda, kode web yang jadi acuan.
+
+Tempat dan tampilan:
+- Cek di web di mana kelola budget berada dan teks apa yang tampil, lalu tiru. Kalau di web letaknya di Pengaturan, tambahkan satu baris pintu masuk di PengaturanScreen, tepat di bawah baris "Kategori", mengikuti pola baris "Dompet" dan "Kategori". Tambahkan rute baru di Screen.kt dan hubungkan di MainActivity.kt (tombol kembali dan bottom bar tersembunyi, sama seperti Kelola Kategori).
+- Layar baru KelolaBudgetScreen.kt: daftar budget per kategori pengeluaran, sub kategori di bawah kategorinya, form atur nominal, hapus budget, dan geser urutan lewat komponen ReorderDragHandle yang sudah ada (jangan ubah perilakunya).
+- Ikon kategori dan sub kategori pakai CategoryIcons.kt yang sudah ada.
+- Semua teks pakai strings.xml bahasa Indonesia, sama dengan teks web.
+- Ikuti dev/DESIGN.md, jangan tambah warna, font, bayangan, atau animasi di luar itu.
+
+Aturan:
+- Perilaku sama dengan web: kategori mana yang boleh punya budget, aturan budget sub kategori terhadap budget kategorinya, validasi nominal, dan efek hapus budget. Semua ikut web, termasuk perlakuan kategori Equilibrium.
+- Semua nominal uang disimpan sebagai Long seperseratus dan semua hitung dan tampil lewat object Uang. Dilarang Float, Double, BigDecimal di luar Uang.
+- Pakai BudgetEntity, SubcategoryBudgetEntity, BudgetData, BudgetDao, dan getBudgetsFlow yang sudah ada. Cek MizanRepository: kalau belum ada fungsi simpan budget, tambahkan (saveBudgets atau nama senada) di interface, RoomMizanRepository, dan InMemoryMizanRepository. Insert di BudgetDao wajib @Insert(onConflict = REPLACE). Budget yang dihapus harus benar-benar dihapus dari database (delete atau ganti seluruh isi dalam satu transaksi), jangan hanya menimpa.
+- Urutan budget tersimpan dan ikut format dev/SCHEMA.md. Format data tidak boleh berubah.
+- Tampilan budget di Beranda tidak diubah, kecuali satu-satunya perubahan yang memang diperlukan agar urutan baru terbaca.
+- Dilarang menambah fitur yang tidak ada di web. Rollover budget ditunda, jangan dikerjakan.
+- TANPA BUILD. Kode harus benar saat dikompilasi pertama kali. Setelah selesai menulis, baca ulang SEMUA file Kotlin yang ditulis atau diubah sampai baris terakhir (import ada, nama fungsi dan class ada, tipe cocok, resource ada). Jangan pakai API yang tidak yakin. Kalau menambah dependensi, kunci versinya eksplisit di libs.versions.toml. Jangan jalankan ./gradlew, gradle, atau perintah build apa pun. Tulis "belum dibuild" di CHANGELOG.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Skema Room tetap versi 1.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Atur budget sebuah kategori, lalu cek tampil sama di Beranda dan di layar kelola.
+- Atur budget sub kategori, lalu cek aturannya terhadap budget kategori sama dengan web.
+- Hapus sebuah budget, lalu cek hilang dari Beranda dan tidak muncul lagi setelah aplikasi dibuka ulang.
+- Geser urutan budget, lalu cek urutan bertahan setelah aplikasi dibuka ulang.

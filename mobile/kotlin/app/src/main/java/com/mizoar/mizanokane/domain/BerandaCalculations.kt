@@ -217,7 +217,7 @@ fun getBudgetSectionSummary(
     }
 
     // 2. Susun urutan kategori (kategori pengeluaran aktif dulu, lalu orphan)
-    val activeExpenseList = categories.expense.map { it.name }
+    val activeExpenseList = categories.expense.sortedBy { it.order }.map { it.name }
     val orderedCats = mutableListOf<String>()
     for (cat in activeExpenseList) {
         if (budgetMap.containsKey(cat)) {
@@ -243,7 +243,7 @@ fun getBudgetSectionSummary(
         val lebih = if (isOver) (terpakai - budgetAmount) else 0L
 
         // Sub kategori budget
-        val definedSubs = categories.subcategories.expense[cat]?.map { it.name } ?: emptyList()
+        val definedSubs = categories.subcategories.expense[cat]?.sortedBy { it.order }?.map { it.name } ?: emptyList()
         val subBudgetMap = budgets.subcategories[cat]?.filter { it.value > 0 } ?: emptyMap()
         val orderedSubs = mutableListOf<String>()
         for (s in definedSubs) {
