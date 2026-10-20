@@ -167,4 +167,21 @@
     <string name="nav_next_month">Bulan berikutnya</string>
     <string name="nav_prev_year">Tahun sebelumnya</string>
     <string name="nav_next_year">Tahun berikutnya</string>
+
+    <!-- Statistik Donut (Kotlin 6B) -->
+    <string name="title_donut_pengeluaran">Diagram Pengeluaran per Kategori</string>
+    <string name="title_donut_pemasukan">Diagram Pemasukan per Kategori</string>
+    <string name="empty_donut_message">Belum ada transaksi %1$s pada %2$s.</string>
+    <string name="donut_period_bulan_ini">bulan ini</string>
+    <string name="donut_period_tahun_ini">tahun ini</string>
+    <string name="donut_type_pengeluaran">pengeluaran</string>
+    <string name="donut_type_pemasukan">pemasukan</string>
+    <string name="donut_center_total">Total</string>
+    <string name="donut_center_kategori_count">%1$d kategori</string>
+    <string name="donut_subcat_section_title">Rincian Sub Kategori</string>
+    <string name="donut_tanpa_subkategori">Tanpa sub kategori</string>
+    <string name="donut_detail_count_format">(%1$s - %2$d transaksi)</string>
+    <string name="donut_subcat_count_format">%1$s (%2$d)</string>
+    <string name="cd_donut_chart">Diagram donut per kategori untuk %1$s</string>
+    <string name="cd_donut_segment">%1$s: %2$s (%3$s)</string>
 </resources>

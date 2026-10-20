@@ -73,3 +73,6 @@ val LightMizanColorPalette = MizanColors(
 )
 
 val LocalMizanColors = staticCompositionLocalOf { DarkMizanColorPalette }
+
+val MizanColors.danger: Color
+    get() = expense

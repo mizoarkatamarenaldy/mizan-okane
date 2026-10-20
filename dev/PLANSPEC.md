@@ -2214,3 +2214,39 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Tambah transfer dan penyesuaian Equilibrium, lalu cek keduanya diperlakukan sama seperti di web.
 - Cek dompet berbeda mata uang (Rupiah, Yen, USD) bahwa nominal dan desimal benar.
 - Cek kondisi tanpa transaksi: tampil sesuai web.
+
+
+## Kotlin 6B: Statistik, donut per kategori
+
+Tujuan: menambahkan diagram donut per kategori untuk bulan yang dipilih di layar Statistik Kotlin, beserta detail yang muncul lewat sentuhan, dengan perilaku sama persis dengan versi web. Tab, pemilih bulan, dan grafik batang sudah ada dari Kotlin 6A dan tidak diubah.
+
+Sumber acuan: buka hanya bagian "Diagram donut per kategori untuk bulan yang dipilih" dan "Perbaikan UI PC 5: Detail diagram Statistik lewat klik" di dev/PLANSPEC.md. Perilaku persisnya baca dari kode web di desktop/src (cari donut dan detail diagram di desktop/src/js/app.js, desktop/src/index.html, dan desktop/src/css/style.css). Kalau spek dan kode web berbeda, kode web yang jadi acuan. Kalau web membedakan perilaku klik di PC dan sentuhan di layar kecil, ikuti perilaku layar kecil.
+
+Tempat dan tampilan:
+- Di StatistikScreen.kt, tambahkan donut sebagai satu composable baru yang dipanggil di satu tempat, di posisi yang sama seperti di web (cek tab mana yang menampilkannya dan urutannya terhadap grafik batang).
+- Composable donut digambar dengan Canvas Compose bawaan (drawArc). Dilarang menambah library grafik atau dependensi baru.
+- Isi donut, legenda, teks tengah, dan urutan kategori ikut web: pembagian per kategori dan kategori di luar batas tampil, cara pengelompokan sisa, kondisi kosong, serta tampilan detail saat potongan atau legenda disentuh.
+- Perilaku pengeluaran dan pemasukan ikut web (apakah donut mengikuti toggle tipe grafik yang sudah ada, atau punya toggle sendiri).
+- Warna potongan hanya dari token di dev/DESIGN.md dan palet yang dipakai web. Dilarang menambah warna baru.
+- Ikon dan nama kategori pakai CategoryIcons.kt dan data kategori yang sudah ada (getCategoriesFlow). Kategori Equilibrium diperlakukan sama seperti di web.
+- Semua teks pakai strings.xml bahasa Indonesia, sama dengan teks web.
+- Ikuti dev/DESIGN.md, jangan tambah warna, font, bayangan, atau animasi di luar itu.
+
+Aturan:
+- Perilaku sama dengan web: transaksi mana yang dihitung (transfer, penyesuaian Equilibrium, transaksi terhapus), cara menjumlah per kategori dan sub kategori, pembulatan persentase dan cara menjaga total 100 persen, serta perlakuan multi mata uang (ikut pemilih mata uang yang sudah ada di Statistik).
+- Taruh hitungan donut di file domain baru StatistikDonutCalculations.kt sebagai fungsi murni. Pakai ulang isTxMatchingStatsType, getTxEffectiveAmount, dan hitungPersen yang sudah ada. Jangan menulis ulang fungsi yang sudah ada dan jangan ubah perilakunya.
+- Semua nominal uang Long seperseratus dan semua hitung dan tampil lewat object Uang. Dilarang Float, Double, BigDecimal untuk nominal. Float hanya boleh untuk sudut dan ukuran gambar di Canvas, dihitung dari Long di titik terakhir.
+- Perubahan di StatistikScreen.kt dibatasi pada pemanggilan composable donut dan state detail yang dibutuhkan. Jangan ubah grafik batang, tab, atau pemilih bulan.
+- Data diambil dari getAllTransactionsFlow, getCategoriesFlow, dan getSettingsFlow yang sudah ada. Jangan ubah repository.
+- Dilarang menambah fitur yang tidak ada di web. Kalau satu hal belum jelas di web, tiru web, jangan berimprovisasi.
+- TANPA BUILD. Kode harus benar saat dikompilasi pertama kali. Setelah selesai menulis, baca ulang SEMUA file Kotlin yang ditulis atau diubah sampai baris terakhir, termasuk setelah setiap edit (import ada, nama fungsi dan class ada, tipe cocok, resource ada, semua R.string dan R.drawable yang dipakai ada). Jangan pakai API yang tidak yakin. Kalau menggambar teks di Canvas, pakai API yang yakin benar dan impornya lengkap, atau taruh teks sebagai composable Text di luar Canvas. Kalau menambah dependensi, kunci versinya eksplisit di libs.versions.toml. Jangan jalankan ./gradlew, gradle, atau perintah build apa pun. Tulis "belum dibuild" di CHANGELOG.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Skema Room tetap versi 1.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Buka Statistik di bulan yang punya banyak transaksi, lalu cek donut dan legenda sama dengan web, dan total persen 100.
+- Sentuh satu potongan atau satu baris legenda, lalu cek detail yang muncul sama dengan web.
+- Ganti bulan dan ganti mata uang, lalu cek donut ikut berubah.
+- Bulan tanpa transaksi: tampil sesuai web.
+- Tambah transaksi Equilibrium dan transfer, lalu cek keduanya diperlakukan sama seperti di web.
