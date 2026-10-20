@@ -7,14 +7,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,23 +32,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mizoar.mizanokane.R
 import com.mizoar.mizanokane.ui.theme.MizanTheme
+import com.mizoar.mizanokane.ui.theme.danger
 
 /**
  * Layar Pengaturan aplikasi Mizan Okane.
- * Sesuai spek Kotlin 5A: memuat baris "Dompet", "Kategori", dan "Budget".
- * Bagian lain dibangun pada Kotlin 7.
+ * Sesuai spek Kotlin 7A:
+ * Menu utama Pengaturan dengan urutan dan teks judul serta deskripsi sama persis dengan web:
+ * 1. Tampilan: "Tema dan format jam"
+ * 2. Kategori: "Pengeluaran, pemasukan, dan sub kategori"
+ * 3. Dompet: "Kelola dompet dan rekening sumber dana"
+ * 4. Budget: "Batas pengeluaran bulanan per kategori"
+ * 5. Zona Bahaya (grup terpisah di paling bawah): "Hapus seluruh data transaksi"
  */
 @Composable
 fun PengaturanScreen(
-    onKelolaDompetClick: () -> Unit,
+    onTampilanClick: () -> Unit,
     onKelolaKategoriClick: () -> Unit,
+    onKelolaDompetClick: () -> Unit,
     onKelolaBudgetClick: () -> Unit,
+    onZonaBahayaClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MizanTheme.colors.bg)
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -57,170 +69,143 @@ fun PengaturanScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Baris "Dompet"
-        Row(
+        // Grup 1: Menu Pengaturan Utama
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
                 .background(MizanTheme.colors.surface)
                 .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(8.dp))
-                .clickable { onKelolaDompetClick() }
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
         ) {
+            // 1. Tampilan
+            SettingsMenuRow(
+                iconRes = R.drawable.ic_sun,
+                title = stringResource(id = R.string.title_tampilan),
+                desc = stringResource(id = R.string.desc_tampilan),
+                onClick = onTampilanClick
+            )
+
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MizanTheme.colors.surfaceRaised),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_wallet),
-                    contentDescription = null,
-                    tint = MizanTheme.colors.text,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MizanTheme.colors.border)
+            )
 
-            Spacer(modifier = Modifier.width(14.dp))
+            // 2. Kategori
+            SettingsMenuRow(
+                iconRes = R.drawable.ic_category_default,
+                title = stringResource(id = R.string.title_kategori),
+                desc = stringResource(id = R.string.desc_kelola_kategori),
+                onClick = onKelolaKategoriClick
+            )
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(id = R.string.title_dompet),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = MizanTheme.colors.text
-                    )
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = stringResource(id = R.string.desc_kelola_dompet),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = MizanTheme.colors.textSecondary,
-                        fontSize = 13.sp
-                    )
-                )
-            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MizanTheme.colors.border)
+            )
 
-            Icon(
-                painter = painterResource(id = R.drawable.ic_chevron_right),
-                contentDescription = null,
-                tint = MizanTheme.colors.textSecondary,
-                modifier = Modifier.size(20.dp)
+            // 3. Dompet
+            SettingsMenuRow(
+                iconRes = R.drawable.ic_wallet,
+                title = stringResource(id = R.string.title_dompet),
+                desc = stringResource(id = R.string.desc_kelola_dompet),
+                onClick = onKelolaDompetClick
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MizanTheme.colors.border)
+            )
+
+            // 4. Budget
+            SettingsMenuRow(
+                iconRes = R.drawable.ic_budget,
+                title = stringResource(id = R.string.title_kelola_budget),
+                desc = stringResource(id = R.string.desc_kelola_budget),
+                onClick = onKelolaBudgetClick
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        // Baris "Kategori"
-        Row(
+        // Grup 2: Zona Bahaya (terpisah di paling bawah)
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
                 .background(MizanTheme.colors.surface)
-                .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(8.dp))
-                .clickable { onKelolaKategoriClick() }
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .border(1.dp, MizanTheme.colors.danger.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MizanTheme.colors.surfaceRaised),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_category_default),
-                    contentDescription = null,
-                    tint = MizanTheme.colors.text,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            SettingsMenuRow(
+                iconRes = R.drawable.ic_danger,
+                title = stringResource(id = R.string.title_zona_bahaya),
+                desc = stringResource(id = R.string.desc_zona_bahaya),
+                iconTint = MizanTheme.colors.danger,
+                titleColor = MizanTheme.colors.danger,
+                onClick = onZonaBahayaClick
+            )
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.width(14.dp))
+@Composable
+private fun SettingsMenuRow(
+    iconRes: Int,
+    title: String,
+    desc: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    iconTint: Color = MizanTheme.colors.textSecondary,
+    titleColor: Color = MizanTheme.colors.text
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 56.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(20.dp)
+        )
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(id = R.string.title_kategori),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = MizanTheme.colors.text
-                    )
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = stringResource(id = R.string.desc_kelola_kategori),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = MizanTheme.colors.textSecondary,
-                        fontSize = 13.sp
-                    )
-                )
-            }
+        Spacer(modifier = Modifier.width(14.dp))
 
-            Icon(
-                painter = painterResource(id = R.drawable.ic_chevron_right),
-                contentDescription = null,
-                tint = MizanTheme.colors.textSecondary,
-                modifier = Modifier.size(20.dp)
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = titleColor
+                )
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = desc,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    color = MizanTheme.colors.textSecondary
+                )
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Baris "Budget"
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(MizanTheme.colors.surface)
-                .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(8.dp))
-                .clickable { onKelolaBudgetClick() }
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MizanTheme.colors.surfaceRaised),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_budget),
-                    contentDescription = null,
-                    tint = MizanTheme.colors.text,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(id = R.string.title_kelola_budget),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = MizanTheme.colors.text
-                    )
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = stringResource(id = R.string.desc_kelola_budget),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = MizanTheme.colors.textSecondary,
-                        fontSize = 13.sp
-                    )
-                )
-            }
-
-            Icon(
-                painter = painterResource(id = R.drawable.ic_chevron_right),
-                contentDescription = null,
-                tint = MizanTheme.colors.textSecondary,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+        Icon(
+            painter = painterResource(id = R.drawable.ic_chevron_right),
+            contentDescription = null,
+            tint = MizanTheme.colors.textSecondary,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

@@ -139,6 +139,13 @@ fun formatTimeDisplay(timeStr: String?, is24Hour: Boolean = true): String {
 }
 
 /**
+ * Format waktu tampilan berdasarkan nilai setting format jam ("24" atau "12").
+ */
+fun formatTimeDisplay(timeStr: String?, timeFormat: String?): String {
+    return formatTimeDisplay(timeStr, timeFormat != "12")
+}
+
+/**
  * Menggeser bulan sebanyak [delta], tidak boleh melewati [maxMonth] jika [delta] > 0.
  */
 fun shiftMonth(yearMonth: String, delta: Int, maxMonth: String? = getCurrentYearMonthString()): String {

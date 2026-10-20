@@ -5,10 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.mizoar.mizanokane.data.DefaultData
 import com.mizoar.mizanokane.data.local.AppDatabase
 import com.mizoar.mizanokane.data.repository.MizanRepository
 import com.mizoar.mizanokane.data.repository.RoomMizanRepository
@@ -36,6 +39,8 @@ import com.mizoar.mizanokane.ui.screens.KelolaKategoriScreen
 import com.mizoar.mizanokane.ui.screens.PengaturanScreen
 import com.mizoar.mizanokane.ui.screens.RiwayatScreen
 import com.mizoar.mizanokane.ui.screens.StatistikScreen
+import com.mizoar.mizanokane.ui.screens.SubmenuBahayaScreen
+import com.mizoar.mizanokane.ui.screens.SubmenuTampilanScreen
 import com.mizoar.mizanokane.ui.screens.TimbanganScreen
 import com.mizoar.mizanokane.ui.screens.TransactionFormScreen
 import com.mizoar.mizanokane.ui.theme.MizanOkaneTheme
@@ -48,7 +53,14 @@ class MainActivity : ComponentActivity() {
         val db = AppDatabase.getInstance(applicationContext)
         val repository = RoomMizanRepository(db)
         setContent {
-            MizanOkaneTheme {
+            val settings by repository.getSettingsFlow().collectAsState(initial = DefaultData.DEFAULT_SETTINGS)
+            val isSystemDark = isSystemInDarkTheme()
+            val darkTheme = when (settings.theme) {
+                "light" -> false
+                "dark" -> true
+                else -> isSystemDark
+            }
+            MizanOkaneTheme(darkTheme = darkTheme) {
                 MizanApp(repository = repository)
             }
         }
@@ -66,7 +78,9 @@ fun MizanApp(
     val isFullScreen = currentRoute.startsWith(Screen.TransactionForm.route) ||
             currentRoute == Screen.KelolaDompet.route ||
             currentRoute == Screen.KelolaKategori.route ||
-            currentRoute == Screen.KelolaBudget.route
+            currentRoute == Screen.KelolaBudget.route ||
+            currentRoute == Screen.SubmenuTampilan.route ||
+            currentRoute == Screen.SubmenuBahaya.route
 
     // State bulan & filter dompet yang dibagikan antara Beranda dan Riwayat
     val currentYearMonth = remember { getCurrentYearMonthString() }
@@ -190,15 +204,33 @@ fun MizanApp(
             }
             composable(Screen.Pengaturan.route) {
                 PengaturanScreen(
-                    onKelolaDompetClick = {
-                        navController.navigate(Screen.KelolaDompet.route)
+                    onTampilanClick = {
+                        navController.navigate(Screen.SubmenuTampilan.route)
                     },
                     onKelolaKategoriClick = {
                         navController.navigate(Screen.KelolaKategori.route)
                     },
+                    onKelolaDompetClick = {
+                        navController.navigate(Screen.KelolaDompet.route)
+                    },
                     onKelolaBudgetClick = {
                         navController.navigate(Screen.KelolaBudget.route)
+                    },
+                    onZonaBahayaClick = {
+                        navController.navigate(Screen.SubmenuBahaya.route)
                     }
+                )
+            }
+            composable(Screen.SubmenuTampilan.route) {
+                SubmenuTampilanScreen(
+                    repository = repository,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.SubmenuBahaya.route) {
+                SubmenuBahayaScreen(
+                    repository = repository,
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable(Screen.KelolaDompet.route) {

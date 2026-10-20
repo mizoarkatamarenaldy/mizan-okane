@@ -63,6 +63,18 @@ sealed class Screen(
         iconRes = R.drawable.ic_budget
     )
 
+    data object SubmenuTampilan : Screen(
+        route = "submenu_tampilan",
+        titleRes = R.string.title_tampilan,
+        iconRes = R.drawable.ic_sun
+    )
+
+    data object SubmenuBahaya : Screen(
+        route = "submenu_bahaya",
+        titleRes = R.string.title_zona_bahaya,
+        iconRes = R.drawable.ic_danger
+    )
+
     companion object {
         val items = listOf(Beranda, Riwayat, Timbangan, Statistik, Pengaturan)
     }

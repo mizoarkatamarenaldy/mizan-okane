@@ -64,7 +64,7 @@
 
     <!-- Kategori & Sub Kategori -->
     <string name="title_kategori">Kategori</string>
-    <string name="desc_kelola_kategori">Kelola kategori pengeluaran dan pemasukan</string>
+    <string name="desc_kelola_kategori">Pengeluaran, pemasukan, dan sub kategori</string>
     <string name="action_tambah_subkategori">+ Sub</string>
     <string name="placeholder_kategori_pengeluaran">Tambah kategori pengeluaran...</string>
     <string name="placeholder_kategori_pemasukan">Tambah kategori pemasukan...</string>
@@ -184,4 +184,32 @@
     <string name="donut_subcat_count_format">%1$s (%2$d)</string>
     <string name="cd_donut_chart">Diagram donut per kategori untuk %1$s</string>
     <string name="cd_donut_segment">%1$s: %2$s (%3$s)</string>
+
+    <!-- Pengaturan: Menu Utama & Submenu Tampilan, Zona Bahaya (Kotlin 7A) -->
+    <string name="title_tampilan">Tampilan</string>
+    <string name="desc_tampilan">Tema dan format jam</string>
+    <string name="title_zona_bahaya">Zona Bahaya</string>
+    <string name="desc_zona_bahaya">Hapus seluruh data transaksi</string>
+    <string name="desc_kembali_ke_pengaturan">Kembali ke Pengaturan</string>
+
+    <!-- Submenu Tampilan -->
+    <string name="title_tema">Tema</string>
+    <string name="desc_tema">Pilihan tema untuk tampilan di perangkat ini (disimpan lokal).</string>
+    <string name="theme_system">Ikuti sistem</string>
+    <string name="theme_light">Terang</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="title_format_jam">Format Jam</string>
+    <string name="desc_format_jam">Pilihan format waktu untuk formulir dan tampilan transaksi di perangkat ini.</string>
+    <string name="time_format_24">24 jam (contoh: 14:30)</string>
+    <string name="time_format_12">12 jam (contoh: 02:30 PM)</string>
+
+    <!-- Submenu Zona Bahaya -->
+    <string name="desc_zona_bahaya_card">Kembalikan aplikasi ke setelan awal pabrik. Seluruh data transaksi, dompet, kategori, sub kategori, budget, dan pengaturan akan dihapus. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="action_hapus_semua_data">Hapus Semua Data</string>
+    <string name="dialog_delete_all_title">Hapus Semua Data?</string>
+    <string name="dialog_delete_all_desc">Seluruh transaksi, dompet, kategori, sub kategori, budget, dan pengaturan akan dihapus dan dikembalikan ke bawaan awal. Jika Anda sedang login Google, data di Google Drive juga akan dikosongkan. Sangat disarankan untuk mengekspor cadangan (backup) data Anda terlebih dahulu.</string>
+    <string name="dialog_delete_all_prompt">Ketik HAPUS untuk mengonfirmasi:</string>
+    <string name="dialog_delete_all_placeholder">HAPUS</string>
+    <string name="toast_delete_all_success">Aplikasi berhasil dikembalikan ke setelan awal.</string>
+    <string name="toast_delete_all_error">Terjadi kesalahan saat mereset data: %1$s</string>
 </resources>

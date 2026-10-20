@@ -2250,3 +2250,43 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Ganti bulan dan ganti mata uang, lalu cek donut ikut berubah.
 - Bulan tanpa transaksi: tampil sesuai web.
 - Tambah transaksi Equilibrium dan transfer, lalu cek keduanya diperlakukan sama seperti di web.
+
+## Kotlin 7A: Pengaturan, tampilan dan zona bahaya
+
+Tujuan: Mengganti layar Pengaturan Kotlin yang masih sementara dengan menu Pengaturan yang sama dengan web, lengkap dengan submenu Tampilan dan Zona Bahaya. Submenu Data, Tentang, dan Akun dan Sinkron dikerjakan di item lain.
+
+Sumber acuan (baca, jangan diubah):
+- desktop/src/index.html: bagian #page-pengaturan, termasuk semua submenu "tampilan" dan "bahaya".
+- desktop/src/js/app.js: logika pengaturan, ganti tema, format jam, hapus semua data, reset setelan pabrik. Cari dengan grep, jangan baca seluruh file.
+- Buka hanya bagian yang relevan di dev/PLANSPEC.md: "Mode gelap", "Pilihan format jam", "Hapus semua data", "Reset setelan pabrik". Kalau judulnya berbeda, cari yang paling mirip.
+- dev/SCHEMA.md untuk format data.
+
+Tempat dan tampilan:
+- Halaman Pengaturan menampilkan daftar baris menu, urutan dan teks judul serta deskripsi sama persis dengan web:
+  - Tampilan: "Tema dan format jam"
+  - Kategori: "Pengeluaran, pemasukan, dan sub kategori" (membuka layar KelolaKategori yang sudah ada)
+  - Dompet: "Kelola dompet dan rekening sumber dana" (membuka KelolaDompet yang sudah ada)
+  - Budget: "Batas pengeluaran bulanan per kategori" (membuka KelolaBudget yang sudah ada)
+  - Grup terpisah di paling bawah: Zona Bahaya, "Hapus seluruh data transaksi"
+- Baris Data, Akun dan Sinkron, dan Tentang BELUM ditampilkan di item ini. Ditambahkan di item lain.
+- Submenu Tampilan: isi dan opsi persis seperti di web (tema dan format jam). Teks, urutan, dan label ikuti web.
+- Submenu Zona Bahaya: isi aksi, teks peringatan, dan dialog konfirmasi persis seperti di web (hapus semua data dan reset setelan pabrik, kalau memang keduanya ada di sana).
+- Ikon baris memakai vector drawable. Buat drawable baru seperlunya, bentuknya meniru ikon SVG di web. Ikon baris Zona Bahaya memakai warna danger yang sudah ada di tema.
+
+Aturan:
+- Perilaku sama dengan web. Dilarang menambah opsi, aksi, atau teks yang tidak ada di web.
+- Tema: pilihan disimpan lewat settings yang sudah ada (SettingsEntity dan SettingsDao), dan langsung berlaku ke seluruh aplikasi lewat Theme yang sudah ada. Tidak ada warna baru di luar dev/DESIGN.md.
+- Format jam: pilihan disimpan di settings, dan semua tampilan jam yang sudah ada (lewat DateTimeFormatters) mengikuti pilihan itu. Kalau DateTimeFormatters belum membaca pengaturan ini, sambungkan seperlunya tanpa mengubah perilaku lain.
+- Hapus semua data dan reset setelan pabrik: cakupan data yang dihapus atau dikembalikan, urutan, dan teks konfirmasi sama dengan web. Penghapusan harus benar-benar menghapus baris dari database dalam satu transaksi, bukan hanya menandai atau menimpa. Boleh menambah fungsi minimal di MizanRepository, RoomMizanRepository, InMemoryMizanRepository, dan DAO yang diperlukan. Tidak boleh mengubah fungsi yang sudah ada.
+- Dialog konfirmasi destruktif harus berupa dialog Compose, bukan Toast.
+- Semua perhitungan dan tampilan uang tetap lewat object Uang. Dilarang Float, Double, BigDecimal di luar Uang.
+- Hal yang sengaja TIDAK dilakukan: ekspor atau impor, data contoh, kebijakan privasi, syarat, tentang pengembang, login Google, sinkron Drive.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Hanya tambahan fungsi hapus dan reset di repository. Room tetap versi 1, jangan ubah skema.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Buka Pengaturan, baris menu tampil sesuai urutan dan teks di atas. Kategori, Dompet, Budget membuka layar yang benar.
+- Ganti tema di Tampilan, seluruh aplikasi berubah, tetap setelah aplikasi ditutup dan dibuka lagi.
+- Ganti format jam, jam di Riwayat dan form transaksi ikut berubah.
+- Zona Bahaya: dialog konfirmasi muncul dengan teks seperti web. Batal tidak menghapus apa pun. Konfirmasi menghapus data sesuai cakupan web.
