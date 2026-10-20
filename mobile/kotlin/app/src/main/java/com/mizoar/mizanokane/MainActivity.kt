@@ -35,6 +35,7 @@ import com.mizoar.mizanokane.ui.screens.KelolaDompetScreen
 import com.mizoar.mizanokane.ui.screens.KelolaKategoriScreen
 import com.mizoar.mizanokane.ui.screens.PengaturanScreen
 import com.mizoar.mizanokane.ui.screens.RiwayatScreen
+import com.mizoar.mizanokane.ui.screens.StatistikScreen
 import com.mizoar.mizanokane.ui.screens.TimbanganScreen
 import com.mizoar.mizanokane.ui.screens.TransactionFormScreen
 import com.mizoar.mizanokane.ui.theme.MizanOkaneTheme
@@ -180,7 +181,12 @@ fun MizanApp(
                 )
             }
             composable(Screen.Statistik.route) {
-                EmptyScreen(title = stringResource(id = R.string.nav_statistik))
+                StatistikScreen(
+                    repository = repository,
+                    onNavigateToTransactionForm = {
+                        navController.navigate(Screen.TransactionForm.route)
+                    }
+                )
             }
             composable(Screen.Pengaturan.route) {
                 PengaturanScreen(

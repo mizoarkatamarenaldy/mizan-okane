@@ -253,6 +253,73 @@ object Uang {
         if (tx == null) return "IDR"
         return getWalletCurrency(tx.walletId, wallets)
     }
+
+    /**
+     * Memformat angka kompak untuk label sumbu dan puncak batang grafik statistik
+     * sesuai web (lines 2922-2947 desktop/src/js/app.js).
+     *
+     * Contoh:
+     * - 0L -> "0"
+     * - 1_500_00L -> "1,5 rb"
+     * - 1_000_00L -> "1 rb"
+     * - 150_000_00L -> "150 rb"
+     * - 1_500_000_00L -> "1,5 jt"
+     * - 2_000_000_00L -> "2 jt"
+     * - 1_500_000_000_00L -> "1,5 M"
+     * - 2_500_000_000_000_00L -> "2,5 T"
+     * - 4990L (USD) -> "49,90"
+     * - 50000L -> "500"
+     */
+    fun formatCompactCurrency(cents: Long, currency: String = "IDR"): String {
+        if (cents == 0L) return "0"
+        val isNeg = cents < 0L
+        val absCents = if (cents == Long.MIN_VALUE) Long.MAX_VALUE else kotlin.math.abs(cents)
+        val sign = if (isNeg) "-" else ""
+
+        fun formatWithSuffix(divisorCents: Long, suffix: String): String {
+            val remainder = absCents % divisorCents
+            return if (remainder == 0L) {
+                val whole = absCents / divisorCents
+                "$sign$whole $suffix"
+            } else {
+                val roundedTimes10 = (absCents * 10L + divisorCents / 2L) / divisorCents
+                val whole = roundedTimes10 / 10L
+                val dec = roundedTimes10 % 10L
+                "$sign$whole,$dec $suffix"
+            }
+        }
+
+        val satuTriliun = 1_000_000_000_000_00L
+        if (absCents >= satuTriliun) {
+            return formatWithSuffix(satuTriliun, "T")
+        }
+
+        val satuMiliar = 1_000_000_000_00L
+        if (absCents >= satuMiliar) {
+            return formatWithSuffix(satuMiliar, "M")
+        }
+
+        val satuJuta = 1_000_000_00L
+        if (absCents >= satuJuta) {
+            return formatWithSuffix(satuJuta, "jt")
+        }
+
+        val satuRibu = 1_000_00L
+        if (absCents >= satuRibu) {
+            return formatWithSuffix(satuRibu, "rb")
+        }
+
+        val units = absCents / 100L
+        val dec = absCents % 100L
+        return if (dec != 0L) {
+            val intFormatted = formatNumber(units)
+            val decFormatted = String.format(Locale.ROOT, "%02d", dec)
+            "$sign$intFormatted,$decFormatted"
+        } else {
+            val intFormatted = formatNumber(units)
+            "$sign$intFormatted"
+        }
+    }
 }
 
 /**

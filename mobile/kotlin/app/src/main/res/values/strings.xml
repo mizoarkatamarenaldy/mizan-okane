@@ -144,4 +144,27 @@
     <string name="action_konfirmasi">Konfirmasi</string>
     <string name="toast_adjust_success">Saldo berhasil disesuaikan.</string>
     <string name="toast_adjust_error">Gagal menyimpan penyesuaian saldo.</string>
+
+    <!-- Statistik -->
+    <string name="tab_scale_harian">Harian</string>
+    <string name="tab_scale_bulanan">Bulanan</string>
+    <string name="tab_scale_tahunan">Tahunan</string>
+    <string name="title_grafik_pengeluaran_bulanan">Grafik Pengeluaran Bulanan</string>
+    <string name="title_grafik_pemasukan_bulanan">Grafik Pemasukan Bulanan</string>
+    <string name="title_grafik_pengeluaran_harian">Grafik Pengeluaran Harian</string>
+    <string name="title_grafik_pemasukan_harian">Grafik Pemasukan Harian</string>
+    <string name="title_grafik_pengeluaran_tahunan">Grafik Pengeluaran Tahunan</string>
+    <string name="title_grafik_pemasukan_tahunan">Grafik Pemasukan Tahunan</string>
+    <string name="summary_avg_bulan">Rata-rata: %1$s / bulan</string>
+    <string name="summary_avg_hari">Rata-rata: %1$s / hari</string>
+    <string name="summary_avg_tahun">Rata-rata: %1$s / tahun</string>
+    <string name="empty_chart_expense">Belum ada transaksi pengeluaran.</string>
+    <string name="empty_chart_income">Belum ada transaksi pemasukan.</string>
+    <string name="detail_count_transaksi">(%1$d transaksi)</string>
+    <string name="detail_empty_expense">(tidak ada pengeluaran)</string>
+    <string name="detail_empty_income">(tidak ada pemasukan)</string>
+    <string name="nav_prev_month">Bulan sebelumnya</string>
+    <string name="nav_next_month">Bulan berikutnya</string>
+    <string name="nav_prev_year">Tahun sebelumnya</string>
+    <string name="nav_next_year">Tahun berikutnya</string>
 </resources>

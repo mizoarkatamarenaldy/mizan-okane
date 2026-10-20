@@ -2181,3 +2181,36 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Sesuaikan saldo sebuah dompet ke angka yang berbeda, lalu cek muncul satu transaksi Equilibrium di Riwayat dan saldo dompet jadi sesuai angka itu.
 - Cek di dompet berbeda mata uang (Rupiah, Yen, USD) bahwa nominal dan desimal benar.
 - Tutup dan buka ulang aplikasi, lalu cek transaksi Equilibrium dan saldo tetap.
+
+## Kotlin 6A: Statistik, tab dan grafik
+
+Tujuan: layar Statistik pada aplikasi Kotlin dengan tab Harian, Bulanan, Tahunan, pemilih bulan, ringkasan, dan grafik pemasukan dan pengeluaran, dengan perilaku sama persis dengan versi web. Diagram donut per kategori dan detail diagram lewat klik dikerjakan di Kotlin 6B, jangan dikerjakan sekarang.
+
+Sumber acuan: buka hanya bagian "Statistik: satu bulan terpilih", "Statistik: tab Harian, Bulanan, Tahunan", "Grafik pengeluaran bulanan", "Grafik pemasukan bulanan", dan "Perbaikan UI: grafik bulanan Statistik" di dev/PLANSPEC.md. Perilaku persisnya baca dari kode web di desktop/src (cari Statistik di desktop/src/js/app.js dan desktop/src/index.html). Kalau spek dan kode web berbeda, kode web yang jadi acuan.
+
+Tempat dan tampilan:
+- Cek kondisi navigasi Kotlin sekarang (Screen.kt, MainActivity.kt, BottomNavigationBar.kt). Kalau tab Statistik belum ada atau masih placeholder, buat atau ganti isinya sesuai web. Layar Statistik tampil dengan bottom bar, sama seperti layar utama lain.
+- Layar baru StatistikScreen.kt: urutan elemen, teks, label sumbu, dan kondisi kosong ikut web. Tab Harian, Bulanan, Tahunan dan pemilih bulan ikut web, termasuk tab mana yang memakai pemilih bulan.
+- Grafik digambar dengan Canvas Compose bawaan. Dilarang menambah library grafik atau dependensi baru.
+- Bagian donut per kategori jangan ditampilkan sekarang. Susun layar supaya 6B bisa menambahkannya sebagai satu composable tambahan, tanpa teks atau placeholder di tempatnya.
+- Semua teks pakai strings.xml bahasa Indonesia, sama dengan teks web.
+- Ikuti dev/DESIGN.md, jangan tambah warna, font, bayangan, atau animasi di luar itu.
+
+Aturan:
+- Perilaku sama dengan web: transaksi mana yang dihitung dan mana yang tidak (transfer, penyesuaian Equilibrium, transaksi terhapus), cara kelompok per hari, bulan, dan tahun, dan perlakuan multi mata uang (cek apakah web memisah per mata uang atau memakai pemilih mata uang, lalu tiru).
+- Taruh semua hitungan di file domain baru StatistikCalculations.kt sebagai fungsi murni. Jangan menulis ulang fungsi yang sudah ada (calculateWalletBalances, getRiwayatSummary, filterAndGroupTransactions, DateTimeFormatters). Pakai ulang kalau cocok.
+- Semua nominal uang Long seperseratus dan semua hitung dan tampil lewat object Uang. Dilarang Float, Double, BigDecimal untuk nominal. Float hanya boleh untuk ukuran gambar di Canvas, dihitung dari Long di titik terakhir.
+- Data diambil dari getAllTransactionsFlow dan getSettingsFlow yang sudah ada. Jangan ubah repository kecuali benar-benar perlu, dan kalau perlu, ubah di interface, RoomMizanRepository, dan InMemoryMizanRepository sekaligus.
+- Dilarang menambah fitur yang tidak ada di web. Kalau satu hal belum jelas di web, tiru web, jangan berimprovisasi.
+- TANPA BUILD. Kode harus benar saat dikompilasi pertama kali. Setelah selesai menulis, baca ulang SEMUA file Kotlin yang ditulis atau diubah sampai baris terakhir, termasuk setelah setiap edit (import ada, nama fungsi dan class ada, tipe cocok, resource ada, semua R.string dan R.drawable yang dipakai ada). Jangan pakai API yang tidak yakin. Kalau menambah dependensi, kunci versinya eksplisit di libs.versions.toml. Jangan jalankan ./gradlew, gradle, atau perintah build apa pun. Tulis "belum dibuild" di CHANGELOG.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Skema Room tetap versi 1.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Buka Statistik, lalu cek total pemasukan dan pengeluaran bulan terpilih sama dengan Beranda dan Riwayat.
+- Pindah ke tab Harian, Bulanan, Tahunan, lalu cek angka tiap batang grafik sama dengan jumlah transaksi di Riwayat.
+- Ganti bulan, lalu cek grafik dan ringkasan ikut berubah.
+- Tambah transfer dan penyesuaian Equilibrium, lalu cek keduanya diperlakukan sama seperti di web.
+- Cek dompet berbeda mata uang (Rupiah, Yen, USD) bahwa nominal dan desimal benar.
+- Cek kondisi tanpa transaksi: tampil sesuai web.
