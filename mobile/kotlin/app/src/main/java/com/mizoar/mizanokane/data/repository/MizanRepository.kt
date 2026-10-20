@@ -5,6 +5,7 @@ import com.mizoar.mizanokane.data.model.CategoriesData
 import com.mizoar.mizanokane.data.model.SettingsEntity
 import com.mizoar.mizanokane.data.model.TransactionEntity
 import com.mizoar.mizanokane.data.model.WalletEntity
+import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -49,6 +50,17 @@ interface MizanRepository {
     suspend fun getMeta(key: String): String?
     suspend fun setMeta(key: String, value: String)
     suspend fun deleteMeta(key: String)
+
+    // --- Mode Data Contoh (Demo) & Data Asli ---
+    fun isDemoModeFlow(): Flow<Boolean>
+    suspend fun isDemoMode(): Boolean
+    suspend fun activateSampleData(referenceDate: LocalDate = LocalDate.now())
+    suspend fun clearSampleData()
+
+    suspend fun getRealTransactions(): List<TransactionEntity>
+    suspend fun getRealWallets(): List<WalletEntity>
+    suspend fun getRealCategories(): CategoriesData
+    suspend fun getRealBudgets(): BudgetsData
 
     // --- Kembalikan ke bawaan (Factory Reset level data) ---
     suspend fun resetToDefaults()

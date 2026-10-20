@@ -51,15 +51,15 @@ object JsonBackupManager {
      * Transaksi dummy tidak diikutsertakan.
      */
     suspend fun exportToJson(repository: MizanRepository, exportedAt: String? = null): String {
-        val realTransactions = repository.getAllTransactions()
+        val realTransactions = repository.getRealTransactions()
             .filter { !it.dummy }
             .map { TransactionDto.fromEntity(it) }
 
-        val realWallets = repository.getAllWallets()
+        val realWallets = repository.getRealWallets()
             .map { WalletDto.fromEntity(it) }
 
-        val realCategories = repository.getCategories()
-        val realBudgets = BudgetDto.fromBudgetsData(repository.getBudgets())
+        val realCategories = repository.getRealCategories()
+        val realBudgets = BudgetDto.fromBudgetsData(repository.getRealBudgets())
         val realSettings = SettingsDto.fromEntity(repository.getSettings())
 
         val rootDto = BackupRootDto(
@@ -83,6 +83,13 @@ object JsonBackupManager {
      * Mengikuti aturan penggabungan Last-Write-Wins (updatedAt) sesuai web.
      */
     suspend fun importFromJson(jsonContent: String, repository: MizanRepository): ImportResult {
+        if (repository.isDemoMode()) {
+            return ImportResult(
+                success = false,
+                message = "Tidak dapat mengimpor saat dalam mode data contoh. Silakan keluar dari mode data contoh terlebih dahulu."
+            )
+        }
+
         val trimmed = jsonContent.trim()
         if (trimmed.isEmpty()) {
             return ImportResult(success = false, message = "Konten JSON kosong")

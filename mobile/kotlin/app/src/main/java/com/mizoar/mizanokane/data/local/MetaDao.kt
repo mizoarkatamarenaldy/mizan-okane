@@ -5,12 +5,16 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.mizoar.mizanokane.data.model.MetaEntity
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Data Access Object untuk operasi tabel metadata kunci-nilai.
  */
 @Dao
 interface MetaDao {
+    @Query("SELECT value FROM meta WHERE `key` = :key LIMIT 1")
+    fun getFlow(key: String): Flow<String?>
+
     @Query("SELECT value FROM meta WHERE `key` = :key LIMIT 1")
     suspend fun get(key: String): String?
 

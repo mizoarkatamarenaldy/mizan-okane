@@ -212,4 +212,99 @@
     <string name="dialog_delete_all_placeholder">HAPUS</string>
     <string name="toast_delete_all_success">Aplikasi berhasil dikembalikan ke setelan awal.</string>
     <string name="toast_delete_all_error">Terjadi kesalahan saat mereset data: %1$s</string>
+
+    <!-- Submenu Data (Kotlin 7B) -->
+    <string name="title_data">Data</string>
+    <string name="desc_data">Ekspor CSV dan JSON, impor JSON, data contoh</string>
+    <string name="title_cadangan_pemulihan">Cadangan dan Pemulihan</string>
+    <string name="desc_cadangan_pemulihan">Ekspor dan impor data transaksi lokal dalam format JSON atau CSV.</string>
+    <string name="action_ekspor_json">Ekspor JSON</string>
+    <string name="action_ekspor_csv">Ekspor CSV</string>
+    <string name="action_impor_json">Impor JSON</string>
+    <string name="title_data_contoh">Data Contoh</string>
+    <string name="desc_data_contoh">Coba semua fitur aplikasi dengan satu set data contoh lengkap, atau kembali ke data asli kapan saja.</string>
+    <string name="action_isi_data_contoh">Isi Data Contoh</string>
+    <string name="action_keluar_mode_data_contoh">Keluar Mode Data Contoh</string>
+    <string name="dialog_activate_dummy_title">Aktifkan mode data contoh? Satu set data lengkap (dompet Rupiah, Yen, USD, kategori, budget, dan transaksi) akan dimuat untuk mencoba fitur. Data asli Anda aman dan tidak tertimpa.</string>
+    <string name="dialog_reload_dummy_title">Muat ulang data contoh? Seluruh data contoh akan dikembalikan ke setelan awal. Data asli Anda tetap aman.</string>
+    <string name="dialog_exit_dummy_title">Keluar dari mode data contoh? Aplikasi akan kembali menampilkan data asli Anda.</string>
+    <string name="action_aktifkan">Aktifkan</string>
+    <string name="action_muat_ulang">Muat Ulang</string>
+    <string name="action_keluar">Keluar</string>
+    <string name="msg_dummy_active">Mode data contoh aktif. Data asli aman dan terpisah.</string>
+    <string name="msg_dummy_exit_success">Kembali ke data asli.</string>
+    <string name="msg_not_in_dummy_mode">Aplikasi sedang tidak dalam mode data contoh.</string>
+    <string name="msg_cannot_import_in_dummy_mode">Tidak dapat mengimpor saat dalam mode data contoh. Silakan keluar dari mode data contoh terlebih dahulu.</string>
+    <string name="msg_export_json_success">Ekspor cadangan JSON berhasil diunduh.</string>
+    <string name="msg_export_csv_success">File CSV berhasil disimpan.</string>
+    <string name="msg_export_error">Terjadi kesalahan saat mengekspor data.</string>
+    <string name="msg_csv_empty">Belum ada transaksi untuk diekspor.</string>
+    <string name="msg_import_empty_or_invalid">File tidak valid atau bukan format JSON.</string>
+    <string name="msg_import_no_changes">Semua data pada file cadangan sudah sesuai dengan data saat ini (tidak ada perubahan).</string>
+
+    <!-- Banner Mode Data Contoh -->
+    <string name="banner_demo_badge">Mode Data Contoh</string>
+    <string name="banner_demo_desc">Data asli aman</string>
+    <string name="banner_demo_action_exit">Keluar</string>
+
+    <!-- Submenu Tentang (Kotlin 7B) -->
+    <string name="title_tentang">Tentang</string>
+    <string name="desc_tentang">Kebijakan privasi, syarat ketentuan, dan pengembang</string>
+    <string name="about_app_name">Mizan Okane</string>
+    <string name="about_app_desc">Aplikasi pencatat keuangan pribadi offline-first yang aman, tanpa server pihak ketiga, dan data tersimpan di perangkat Anda sendiri.</string>
+    <string name="about_link_privacy">Kebijakan Privasi</string>
+    <string name="about_link_terms">Syarat dan Ketentuan</string>
+    <string name="about_link_developer">Tentang Pengembang</string>
+
+    <!-- Halaman Kebijakan Privasi -->
+    <string name="privacy_title">Kebijakan Privasi</string>
+    <string name="privacy_updated">Terakhir diperbarui: 11 Oktober 2026</string>
+    <string name="privacy_sec1_title">1. Penyimpanan Data</string>
+    <string name="privacy_sec1_intro">Mizan Okane dirancang dengan prinsip bahwa data keuangan Anda adalah milik pribadi Anda sepenuhnya. Data disimpan dengan cara berikut:</string>
+    <string name="privacy_sec1_p1">Penyimpanan Lokal (IndexedDB): Seluruh data transaksi, dompet, kategori, dan budget disimpan langsung di perangkat Anda menggunakan IndexedDB browser. Data ini memungkinkan aplikasi berfungsi penuh saat offline (tanpa koneksi internet).</string>
+    <string name="privacy_sec1_p2">Folder Tersembunyi Google Drive (appDataFolder): Jika Anda mengaktifkan sinkronisasi Google Drive, berkas data cadangan disimpan di folder khusus aplikasi yang tersembunyi (appDataFolder) di akun Google Drive milik Anda sendiri.</string>
+    <string name="privacy_sec2_title">2. Tidak Ada Server Pihak Ketiga</string>
+    <string name="privacy_sec2_p1">Aplikasi ini berjalan sepenuhnya di sisi klien (client-side) tanpa server perantara atau server pihak ketiga.</string>
+    <string name="privacy_sec2_p2">Pengembang aplikasi tidak dapat melihat, menyimpan, mengumpulkan, ataupun mengirim data keuangan pengguna ke mana pun. Semua proses pengolahan data transaksi berlangsung langsung di perangkat Anda.</string>
+    <string name="privacy_sec3_title">3. Penggunaan Akun Google dan Izin (Scope)</string>
+    <string name="privacy_sec3_p1">Login Google bersifat opsional dan hanya dipakai untuk keperluan sinkronisasi data antar perangkat Anda.</string>
+    <string name="privacy_sec3_p2">Izin (OAuth scope) yang diminta oleh aplikasi:\nhttps://www.googleapis.com/auth/drive.appdata</string>
+    <string name="privacy_sec3_p3">Fungsi scope dalam bahasa awam: Izin ini hanya memberikan akses ke folder tersembunyi khusus aplikasi (Application Data folder) di dalam Google Drive Anda. Aplikasi hanya dapat membaca, membuat, dan memperbarui berkas cadangannya sendiri di folder khusus tersebut. Aplikasi sama sekali tidak memiliki izin untuk melihat, membaca, mengakses, mengubah, ataupun menghapus berkas, foto, dokumen, atau folder lain di Google Drive Anda.</string>
+    <string name="privacy_sec3_p4">Alamat email Google Anda hanya dibaca untuk menampilkan informasi akun yang sedang terhubung di aplikasi dan mempermudah proses masuk kembali. Token otorisasi hanya disimpan sementara di memori peramban selama aplikasi dibuka dan tidak disimpan secara permanen di penyimpanan perangkat.</string>
+    <string name="privacy_sec4_title">4. Tanpa Iklan, Pelacak, atau Analitik</string>
+    <string name="privacy_sec4_p1">Aplikasi ini bebas dari segala bentuk iklan, pelacak (trackers), maupun layanan analitik pihak ketiga (seperti Google Analytics). Tidak ada aktivitas penelusuran perilaku atau pengumpulan data statistik penggunaan aplikasi.</string>
+    <string name="privacy_sec5_title">5. Cara Menghapus Data</string>
+    <string name="privacy_sec5_intro">Karena seluruh data hanya berada di perangkat Anda dan di Google Drive pribadi Anda, Anda dapat menghapus data sepenuhnya kapan saja:</string>
+    <string name="privacy_sec5_step1">1. Hapus data lokal di perangkat: Hapus data penjelajahan dan penyimpanan situs untuk Mizan Okane melalui pengaturan peramban (browser) Anda. Jika diinstal sebagai aplikasi (PWA), Anda dapat menghapus penyimpanan aplikasi melalui pengaturan perangkat atau melakukan uninstall (copot pemasangan) aplikasi.</string>
+    <string name="privacy_sec5_step2">2. Hapus data cadangan di Google Drive: Buka Google Drive di komputer atau browser (drive.google.com) \u2192 klik ikon Gerigi (Setelan) \u2192 pilih Setelan \u2192 pilih Kelola Aplikasi (Manage Apps) \u2192 cari Mizan Okane \u2192 klik Opsi \u2192 pilih Hapus data aplikasi tersembunyi (Delete hidden app data).</string>
+    <string name="privacy_sec5_step3">3. Cabut akses aplikasi dari akun Google: Buka halaman keamanan akun Google di myaccount.google.com/connections \u2192 pilih Mizan Okane \u2192 klik Hapus Akses atau Cabut Akses.</string>
+    <string name="privacy_sec6_title">6. Kepatuhan Kebijakan Data Pengguna Google API</string>
+    <string name="privacy_sec6_p1">The app\'s use and transfer of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements.</string>
+    <string name="privacy_sec7_title">7. Kontak</string>
+    <string name="privacy_sec7_p1">Jika Anda memiliki pertanyaan atau kendala terkait privasi, silakan buka laporan atau diskusi melalui halaman Issues repositori GitHub proyek ini:\nhttps://github.com/mizoarkatamarenaldy/mizan-okane/issues</string>
+
+    <!-- Halaman Syarat dan Ketentuan -->
+    <string name="terms_title">Syarat dan Ketentuan</string>
+    <string name="terms_updated">Terakhir diperbarui: 11 Oktober 2026</string>
+    <string name="terms_sec1_title">1. Layanan Pencatat Keuangan Pribadi</string>
+    <string name="terms_sec1_p1">Mizan Okane adalah aplikasi pencatat keuangan pribadi gratis yang berjalan langsung di peramban (browser) perangkat Anda. Aplikasi ini disediakan \u201Capa adanya\u201D (as is) dan \u201Csebagaimana tersedia\u201D tanpa jaminan apa pun, baik tersurat maupun tersirat.</string>
+    <string name="terms_sec2_title">2. Bukan Layanan atau Nasihat Keuangan</string>
+    <string name="terms_sec2_p1">Mizan Okane adalah alat bantu pencatatan mandiri, bukan lembaga perbankan, bukan penyedia layanan keuangan, dan bukan penasihat keuangan. Perhitungan, ringkasan anggaran, saldo, dan grafik yang ditampilkan di aplikasi ini murni diolah dari data yang Anda masukkan sendiri dan tidak boleh dianggap sebagai nasihat keuangan atau rekomendasi profesional.</string>
+    <string name="terms_sec2_p2">Pengguna bertanggung jawab penuh atas segala keputusan keuangan pribadi serta keakuratan data transaksi yang dicatat.</string>
+    <string name="terms_sec3_title">3. Penyimpanan Data</string>
+    <string name="terms_sec3_p1">Seluruh data transaksi, dompet, kategori, dan anggaran disimpan langsung di perangkat pengguna menggunakan IndexedDB browser. Jika Anda menggunakan fitur sinkronisasi akun Google, berkas data disimpan di folder aplikasi tersembunyi (appDataFolder) di Google Drive milik Anda sendiri.</string>
+    <string name="terms_sec3_p2">Pengembang tidak memiliki server pihak ketiga dan tidak menyimpan, membaca, atau mengumpulkan data keuangan Anda.</string>
+    <string name="terms_sec4_title">4. Pencadangan dan Tanggung Jawab Data</string>
+    <string name="terms_sec4_p1">Aplikasi menyediakan fitur ekspor (format JSON dan CSV) untuk mengunduh cadangan data Anda secara mandiri. Pengguna bertanggung jawab secara berkala membuat cadangan datanya sendiri.</string>
+    <string name="terms_sec4_p2">Pengembang tidak bertanggung jawab atas kehilangan, kerusakan, atau kegagalan pemulihan data keuangan yang diakibatkan oleh penghapusan data peramban, kerusakan perangkat, atau kesalahan penggunaan.</string>
+    <string name="terms_sec5_title">5. Penggunaan Akun Google Bersifat Opsional</string>
+    <string name="terms_sec5_p1">Login menggunakan akun Google bersifat sepenuhnya opsional. Aplikasi tetap dapat digunakan secara penuh dan normal tanpa melakukan login Google.</string>
+    <string name="terms_sec6_title">6. Batasan Penggunaan</string>
+    <string name="terms_sec6_p1">Pengguna dilarang memakai aplikasi ini untuk tujuan apa pun yang melanggar hukum, merugikan pihak lain, atau bertentangan dengan peraturan yang berlaku.</string>
+    <string name="terms_sec7_title">7. Perubahan Syarat dan Ketentuan</string>
+    <string name="terms_sec7_p1">Syarat dan ketentuan ini dapat diperbarui sewaktu-waktu. Versi terbaru akan selalu tersedia di halaman ini. Dengan terus menggunakan aplikasi setelah adanya perubahan, Anda dianggap menyetujui syarat dan ketentuan versi terbaru.</string>
+    <string name="terms_sec8_title">8. Kebijakan Privasi</string>
+    <string name="terms_sec8_p1">Informasi lebih lengkap mengenai perlakuan terhadap data dan izin Google Drive dapat dibaca di halaman Kebijakan Privasi.</string>
+    <string name="terms_sec9_title">9. Kontak</string>
+    <string name="terms_sec9_p1">Pertanyaan, kendala, atau saran terkait aplikasi dapat disampaikan melalui halaman Issues repositori GitHub resmi proyek ini:\nhttps://github.com/mizoarkatamarenaldy/mizan-okane/issues</string>
 </resources>

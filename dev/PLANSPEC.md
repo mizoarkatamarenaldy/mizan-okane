@@ -2290,3 +2290,45 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Ganti tema di Tampilan, seluruh aplikasi berubah, tetap setelah aplikasi ditutup dan dibuka lagi.
 - Ganti format jam, jam di Riwayat dan form transaksi ikut berubah.
 - Zona Bahaya: dialog konfirmasi muncul dengan teks seperti web. Batal tidak menghapus apa pun. Konfirmasi menghapus data sesuai cakupan web.
+
+## Kotlin 7B: Pengaturan, data dan tentang
+
+Tujuan: Melengkapi menu Pengaturan Kotlin dengan submenu Data dan Tentang, sama dengan web. Baris Akun dan Sinkron dikerjakan di Kotlin 8.
+
+Sumber acuan (baca, jangan diubah):
+- desktop/src/index.html: bagian #page-pengaturan, khusus submenu "data" dan "tentang" (cari dengan grep, jangan baca seluruh file). Termasuk halaman atau dialog Kebijakan Privasi, Syarat dan Ketentuan, dan Tentang Pengembang.
+- desktop/src/js/app.js dan file JS terkait: logika ekspor CSV, ekspor JSON, impor JSON, data contoh, dan tampilan Tentang. Cari dengan grep.
+- Buka hanya bagian yang relevan di dev/PLANSPEC.md: "Ekspor CSV", "Impor JSON", "Backup lengkap", "Data contoh", "Data contoh lengkap", "Halaman kebijakan privasi", "Halaman syarat dan ketentuan", "Tentang Pengembang". Kalau judulnya berbeda, cari yang paling mirip.
+- dev/SCHEMA.md untuk format data.
+- Kode Kotlin yang sudah ada dan harus dipakai ulang: JsonBackupManager (exportToJson, importFromJson, gabung Last-Write-Wins), DefaultData, MizanRepository, SubmenuTampilanScreen dan SubmenuBahayaScreen (sebagai contoh pola layar submenu), PengaturanScreen, Screen.kt, MainActivity.
+
+Tempat dan tampilan:
+- Di PengaturanScreen, tambahkan baris menu dengan urutan, teks judul, deskripsi, dan ikon sama dengan web:
+  - Data: "Ekspor CSV dan JSON, impor JSON, data contoh"
+  - Tentang: "Kebijakan privasi, syarat ketentuan, dan pengembang"
+- Posisi baris mengikuti urutan web: Tampilan, Kategori, Dompet, Budget, Data, (Akun dan Sinkron, belum ditampilkan di item ini), Tentang, lalu grup Zona Bahaya terpisah di bawah.
+- Submenu Data: isi, tombol, teks, urutan, dan dialog konfirmasi persis seperti web.
+- Submenu Tentang: isi persis seperti web. Kebijakan Privasi, Syarat dan Ketentuan, dan Tentang Pengembang memakai teks yang sama dengan web, disimpan di strings.xml atau file resource teks. Kalau di web teksnya panjang, taruh sebagai resource, jangan ditulis langsung di kode Composable.
+- Ikon baris memakai vector drawable. Buat drawable baru seperlunya, bentuknya meniru ikon SVG di web.
+
+Aturan:
+- Perilaku sama dengan web. Dilarang menambah opsi, aksi, atau teks yang tidak ada di web.
+- Ekspor dan impor di Android memakai Storage Access Framework (ActivityResultContracts.CreateDocument untuk ekspor, OpenDocument untuk impor), bukan izin penyimpanan lama. Nama file ekspor mengikuti web.
+- Ekspor JSON memakai JsonBackupManager.exportToJson. Impor JSON memakai JsonBackupManager.importFromJson dengan aturan gabung dan dialog konfirmasi yang sama dengan web. File impor yang tidak valid harus menampilkan pesan error seperti web dan tidak boleh mengubah data apa pun.
+- Ekspor CSV: kolom, urutan kolom, format tanggal dan jam, dan format angka sama dengan web. Semua angka uang lewat object Uang. Dilarang Float, Double, BigDecimal di luar Uang.
+- Data contoh: isi, jumlah, dan perilaku (termasuk kalau sudah ada data, banner data contoh, dan cara menghapusnya) sama dengan web. Boleh menambah fungsi minimal di MizanRepository, RoomMizanRepository, InMemoryMizanRepository, dan DAO. Tidak boleh mengubah fungsi yang sudah ada. Perubahan data harus dalam satu transaksi.
+- Kebijakan Privasi dan Syarat dan Ketentuan: kalau teks web menyebut hal yang khusus web (misalnya PWA atau IndexedDB), salin persis apa adanya dan laporkan di akhir sebagai catatan untuk pemilik, jangan diedit sendiri.
+- Hal yang sengaja TIDAK dilakukan: login Google, sinkron Drive, baris Akun dan Sinkron.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Format file JSON dan CSV tetap sama dengan web dan dev/SCHEMA.md. Room tetap versi 1, jangan ubah skema. Hanya boleh ada tambahan fungsi repository untuk data contoh bila diperlukan.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Buka Pengaturan, baris Data dan Tentang tampil di posisi yang benar dengan teks seperti web.
+- Ekspor JSON, lalu impor file itu di instalasi kosong: semua transaksi, dompet, kategori, budget, dan setelan kembali sama.
+- Impor file JSON dari versi web (mizan-okane-backup-sample.json): data masuk dengan benar.
+- Impor file yang bukan JSON atau rusak: muncul pesan error, data tidak berubah.
+- Ekspor CSV: buka di spreadsheet, kolom dan angka sama dengan hasil web.
+- Data contoh: tombol memunculkan data seperti web, dan bisa dihapus seperti web.
+- Tentang: Kebijakan Privasi, Syarat dan Ketentuan, dan Tentang Pengembang terbuka dan bisa kembali dengan tombol back.
+

@@ -33,6 +33,7 @@ import com.mizoar.mizanokane.ui.components.BottomNavigationBar
 import com.mizoar.mizanokane.ui.navigation.Screen
 import com.mizoar.mizanokane.ui.screens.BerandaScreen
 import com.mizoar.mizanokane.ui.screens.EmptyScreen
+import com.mizoar.mizanokane.ui.screens.KebijakanPrivasiScreen
 import com.mizoar.mizanokane.ui.screens.KelolaBudgetScreen
 import com.mizoar.mizanokane.ui.screens.KelolaDompetScreen
 import com.mizoar.mizanokane.ui.screens.KelolaKategoriScreen
@@ -40,11 +41,45 @@ import com.mizoar.mizanokane.ui.screens.PengaturanScreen
 import com.mizoar.mizanokane.ui.screens.RiwayatScreen
 import com.mizoar.mizanokane.ui.screens.StatistikScreen
 import com.mizoar.mizanokane.ui.screens.SubmenuBahayaScreen
+import com.mizoar.mizanokane.ui.screens.SubmenuDataScreen
 import com.mizoar.mizanokane.ui.screens.SubmenuTampilanScreen
+import com.mizoar.mizanokane.ui.screens.SubmenuTentangScreen
+import com.mizoar.mizanokane.ui.screens.SyaratKetentuanScreen
 import com.mizoar.mizanokane.ui.screens.TimbanganScreen
 import com.mizoar.mizanokane.ui.screens.TransactionFormScreen
 import com.mizoar.mizanokane.ui.theme.MizanOkaneTheme
 import com.mizoar.mizanokane.ui.theme.MizanTheme
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +106,8 @@ class MainActivity : ComponentActivity() {
 fun MizanApp(
     repository: MizanRepository
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Beranda.route
@@ -80,7 +117,57 @@ fun MizanApp(
             currentRoute == Screen.KelolaKategori.route ||
             currentRoute == Screen.KelolaBudget.route ||
             currentRoute == Screen.SubmenuTampilan.route ||
-            currentRoute == Screen.SubmenuBahaya.route
+            currentRoute == Screen.SubmenuBahaya.route ||
+            currentRoute == Screen.SubmenuData.route ||
+            currentRoute == Screen.SubmenuTentang.route ||
+            currentRoute == Screen.KebijakanPrivasi.route ||
+            currentRoute == Screen.SyaratKetentuan.route
+
+    val isDemo by repository.isDemoModeFlow().collectAsState(initial = false)
+    var showBannerExitConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showBannerExitConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showBannerExitConfirmDialog = false },
+            containerColor = MizanTheme.colors.surface,
+            shape = RoundedCornerShape(8.dp),
+            title = {
+                Text(
+                    text = stringResource(id = R.string.dialog_exit_dummy_title),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = MizanTheme.colors.text
+                    )
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showBannerExitConfirmDialog = false
+                        coroutineScope.launch {
+                            repository.clearSampleData()
+                            Toast.makeText(context, context.getString(R.string.msg_dummy_exit_success), Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MizanTheme.colors.accent,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(text = stringResource(id = R.string.action_keluar))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBannerExitConfirmDialog = false }) {
+                    Text(
+                        text = stringResource(id = R.string.action_batal),
+                        color = MizanTheme.colors.textSecondary
+                    )
+                }
+            }
+        )
+    }
 
     // State bulan & filter dompet yang dibagikan antara Beranda dan Riwayat
     val currentYearMonth = remember { getCurrentYearMonthString() }
@@ -119,7 +206,12 @@ fun MizanApp(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             if (!isFullScreen) {
-                AppHeader()
+                Column {
+                    AppHeader()
+                    if (isDemo) {
+                        DemoModeBanner(onExitClick = { showBannerExitConfirmDialog = true })
+                    }
+                }
             }
         },
         bottomBar = {
@@ -216,6 +308,12 @@ fun MizanApp(
                     onKelolaBudgetClick = {
                         navController.navigate(Screen.KelolaBudget.route)
                     },
+                    onDataClick = {
+                        navController.navigate(Screen.SubmenuData.route)
+                    },
+                    onTentangClick = {
+                        navController.navigate(Screen.SubmenuTentang.route)
+                    },
                     onZonaBahayaClick = {
                         navController.navigate(Screen.SubmenuBahaya.route)
                     }
@@ -230,6 +328,33 @@ fun MizanApp(
             composable(Screen.SubmenuBahaya.route) {
                 SubmenuBahayaScreen(
                     repository = repository,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.SubmenuData.route) {
+                SubmenuDataScreen(
+                    repository = repository,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.SubmenuTentang.route) {
+                SubmenuTentangScreen(
+                    onKebijakanPrivasiClick = {
+                        navController.navigate(Screen.KebijakanPrivasi.route)
+                    },
+                    onSyaratKetentuanClick = {
+                        navController.navigate(Screen.SyaratKetentuan.route)
+                    },
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.KebijakanPrivasi.route) {
+                KebijakanPrivasiScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.SyaratKetentuan.route) {
+                SyaratKetentuanScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
@@ -269,6 +394,73 @@ fun MizanApp(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun DemoModeBanner(
+    onExitClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0x1FF5A623))
+            .border(1.dp, Color(0x52F5A623), RoundedCornerShape(8.dp))
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f, fill = false)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_info),
+                contentDescription = null,
+                tint = Color(0xFFF5A623),
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = stringResource(id = R.string.banner_demo_badge),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFF5A623)
+                )
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = stringResource(id = R.string.banner_demo_desc),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 11.sp,
+                    color = MizanTheme.colors.textSecondary
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(MizanTheme.colors.surface)
+                .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(6.dp))
+                .clickable(onClick = onExitClick)
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.banner_demo_action_exit),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MizanTheme.colors.text
+                )
+            )
         }
     }
 }

@@ -75,6 +75,30 @@ sealed class Screen(
         iconRes = R.drawable.ic_danger
     )
 
+    data object SubmenuData : Screen(
+        route = "submenu_data",
+        titleRes = R.string.title_data,
+        iconRes = R.drawable.ic_data
+    )
+
+    data object SubmenuTentang : Screen(
+        route = "submenu_tentang",
+        titleRes = R.string.title_tentang,
+        iconRes = R.drawable.ic_info
+    )
+
+    data object KebijakanPrivasi : Screen(
+        route = "kebijakan_privasi",
+        titleRes = R.string.privacy_title,
+        iconRes = R.drawable.ic_arrow_back
+    )
+
+    data object SyaratKetentuan : Screen(
+        route = "syarat_ketentuan",
+        titleRes = R.string.terms_title,
+        iconRes = R.drawable.ic_arrow_back
+    )
+
     companion object {
         val items = listOf(Beranda, Riwayat, Timbangan, Statistik, Pengaturan)
     }

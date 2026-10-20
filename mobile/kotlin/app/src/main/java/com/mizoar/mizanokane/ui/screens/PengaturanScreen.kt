@@ -36,13 +36,15 @@ import com.mizoar.mizanokane.ui.theme.danger
 
 /**
  * Layar Pengaturan aplikasi Mizan Okane.
- * Sesuai spek Kotlin 7A:
+ * Sesuai spek Kotlin 7A dan 7B:
  * Menu utama Pengaturan dengan urutan dan teks judul serta deskripsi sama persis dengan web:
  * 1. Tampilan: "Tema dan format jam"
  * 2. Kategori: "Pengeluaran, pemasukan, dan sub kategori"
  * 3. Dompet: "Kelola dompet dan rekening sumber dana"
  * 4. Budget: "Batas pengeluaran bulanan per kategori"
- * 5. Zona Bahaya (grup terpisah di paling bawah): "Hapus seluruh data transaksi"
+ * 5. Data: "Ekspor CSV dan JSON, impor JSON, data contoh"
+ * 6. Tentang: "Kebijakan privasi, syarat ketentuan, dan pengembang"
+ * 7. Zona Bahaya (grup terpisah di paling bawah): "Hapus seluruh data transaksi"
  */
 @Composable
 fun PengaturanScreen(
@@ -50,6 +52,8 @@ fun PengaturanScreen(
     onKelolaKategoriClick: () -> Unit,
     onKelolaDompetClick: () -> Unit,
     onKelolaBudgetClick: () -> Unit,
+    onDataClick: () -> Unit,
+    onTentangClick: () -> Unit,
     onZonaBahayaClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -128,6 +132,36 @@ fun PengaturanScreen(
                 title = stringResource(id = R.string.title_kelola_budget),
                 desc = stringResource(id = R.string.desc_kelola_budget),
                 onClick = onKelolaBudgetClick
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MizanTheme.colors.border)
+            )
+
+            // 5. Data
+            SettingsMenuRow(
+                iconRes = R.drawable.ic_data,
+                title = stringResource(id = R.string.title_data),
+                desc = stringResource(id = R.string.desc_data),
+                onClick = onDataClick
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MizanTheme.colors.border)
+            )
+
+            // 6. Tentang
+            SettingsMenuRow(
+                iconRes = R.drawable.ic_info,
+                title = stringResource(id = R.string.title_tentang),
+                desc = stringResource(id = R.string.desc_tentang),
+                onClick = onTentangClick
             )
         }
 

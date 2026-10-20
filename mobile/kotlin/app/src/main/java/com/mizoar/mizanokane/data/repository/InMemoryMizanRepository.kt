@@ -1,11 +1,13 @@
 package com.mizoar.mizanokane.data.repository
 
 import com.mizoar.mizanokane.data.DefaultData
+import com.mizoar.mizanokane.data.SampleData
 import com.mizoar.mizanokane.data.model.BudgetsData
 import com.mizoar.mizanokane.data.model.CategoriesData
 import com.mizoar.mizanokane.data.model.SettingsEntity
 import com.mizoar.mizanokane.data.model.TransactionEntity
 import com.mizoar.mizanokane.data.model.WalletEntity
+import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +35,15 @@ class InMemoryMizanRepository : MizanRepository {
 
     private val metaMap = HashMap<String, String>()
 
+    // Mode Data Contoh (Demo)
+    private var demoMode = false
+    private val demoModeFlow = MutableStateFlow(false)
+
+    private val demoTransactionsMap = LinkedHashMap<String, TransactionEntity>()
+    private val demoWalletsMap = LinkedHashMap<String, WalletEntity>()
+    private var demoCategoriesData = SampleData.SAMPLE_CATEGORIES
+    private var demoBudgetsData = SampleData.SAMPLE_BUDGETS
+
     init {
         DefaultData.DEFAULT_WALLETS.forEach { walletsMap[it.id] = it }
         walletsFlow.value = walletsMap.values.toList()
@@ -43,31 +54,50 @@ class InMemoryMizanRepository : MizanRepository {
     override fun getAllTransactionsFlow(): Flow<List<TransactionEntity>> = transactionsFlow.asStateFlow()
 
     override suspend fun getAllTransactions(): List<TransactionEntity> {
-        return transactionsMap.values.toList()
+        return if (demoMode) demoTransactionsMap.values.toList() else transactionsMap.values.toList()
     }
 
     override suspend fun getTransactionById(id: String): TransactionEntity? {
-        return transactionsMap[id]
+        return if (demoMode) demoTransactionsMap[id] else transactionsMap[id]
     }
 
     override suspend fun saveTransaction(tx: TransactionEntity) {
-        transactionsMap[tx.id] = tx
-        transactionsFlow.value = transactionsMap.values.toList()
-    }
-
-    override suspend fun markTransactionDeleted(id: String, updatedAt: Long) {
-        val existing = transactionsMap[id]
-        if (existing != null) {
-            val updated = existing.copy(deleted = true, updatedAt = updatedAt)
-            transactionsMap[id] = updated
+        if (demoMode) {
+            demoTransactionsMap[tx.id] = tx
+            transactionsFlow.value = demoTransactionsMap.values.toList()
+        } else {
+            transactionsMap[tx.id] = tx
             transactionsFlow.value = transactionsMap.values.toList()
         }
     }
 
+    override suspend fun markTransactionDeleted(id: String, updatedAt: Long) {
+        if (demoMode) {
+            val existing = demoTransactionsMap[id]
+            if (existing != null) {
+                demoTransactionsMap[id] = existing.copy(deleted = true, updatedAt = updatedAt)
+                transactionsFlow.value = demoTransactionsMap.values.toList()
+            }
+        } else {
+            val existing = transactionsMap[id]
+            if (existing != null) {
+                val updated = existing.copy(deleted = true, updatedAt = updatedAt)
+                transactionsMap[id] = updated
+                transactionsFlow.value = transactionsMap.values.toList()
+            }
+        }
+    }
+
     override suspend fun replaceAllTransactions(transactions: List<TransactionEntity>) {
-        transactionsMap.clear()
-        transactions.forEach { transactionsMap[it.id] = it }
-        transactionsFlow.value = transactionsMap.values.toList()
+        if (demoMode) {
+            demoTransactionsMap.clear()
+            transactions.forEach { demoTransactionsMap[it.id] = it }
+            transactionsFlow.value = demoTransactionsMap.values.toList()
+        } else {
+            transactionsMap.clear()
+            transactions.forEach { transactionsMap[it.id] = it }
+            transactionsFlow.value = transactionsMap.values.toList()
+        }
     }
 
     // --- Dompet ---
@@ -75,60 +105,94 @@ class InMemoryMizanRepository : MizanRepository {
     override fun getAllWalletsFlow(): Flow<List<WalletEntity>> = walletsFlow.asStateFlow()
 
     override suspend fun getAllWallets(): List<WalletEntity> {
-        return walletsMap.values.sortedBy { it.order }
+        return if (demoMode) demoWalletsMap.values.sortedBy { it.order } else walletsMap.values.sortedBy { it.order }
     }
 
     override suspend fun getWalletById(id: String): WalletEntity? {
-        return walletsMap[id]
+        return if (demoMode) demoWalletsMap[id] else walletsMap[id]
     }
 
     override suspend fun saveWallet(wallet: WalletEntity) {
-        walletsMap[wallet.id] = wallet
-        walletsFlow.value = walletsMap.values.sortedBy { it.order }
-    }
-
-    override suspend fun saveWallets(wallets: List<WalletEntity>) {
-        wallets.forEach { walletsMap[it.id] = it }
-        walletsFlow.value = walletsMap.values.sortedBy { it.order }
-    }
-
-    override suspend fun markWalletDeleted(id: String, updatedAt: Long) {
-        val existing = walletsMap[id]
-        if (existing != null) {
-            val updated = existing.copy(deleted = true, updatedAt = updatedAt)
-            walletsMap[id] = updated
+        if (demoMode) {
+            demoWalletsMap[wallet.id] = wallet
+            walletsFlow.value = demoWalletsMap.values.sortedBy { it.order }
+        } else {
+            walletsMap[wallet.id] = wallet
             walletsFlow.value = walletsMap.values.sortedBy { it.order }
         }
     }
 
+    override suspend fun saveWallets(wallets: List<WalletEntity>) {
+        if (demoMode) {
+            wallets.forEach { demoWalletsMap[it.id] = it }
+            walletsFlow.value = demoWalletsMap.values.sortedBy { it.order }
+        } else {
+            wallets.forEach { walletsMap[it.id] = it }
+            walletsFlow.value = walletsMap.values.sortedBy { it.order }
+        }
+    }
+
+    override suspend fun markWalletDeleted(id: String, updatedAt: Long) {
+        if (demoMode) {
+            val existing = demoWalletsMap[id]
+            if (existing != null) {
+                demoWalletsMap[id] = existing.copy(deleted = true, updatedAt = updatedAt)
+                walletsFlow.value = demoWalletsMap.values.sortedBy { it.order }
+            }
+        } else {
+            val existing = walletsMap[id]
+            if (existing != null) {
+                val updated = existing.copy(deleted = true, updatedAt = updatedAt)
+                walletsMap[id] = updated
+                walletsFlow.value = walletsMap.values.sortedBy { it.order }
+            }
+        }
+    }
+
     override suspend fun replaceAllWallets(wallets: List<WalletEntity>) {
-        walletsMap.clear()
-        wallets.forEach { walletsMap[it.id] = it }
-        walletsFlow.value = walletsMap.values.sortedBy { it.order }
+        if (demoMode) {
+            demoWalletsMap.clear()
+            wallets.forEach { demoWalletsMap[it.id] = it }
+            walletsFlow.value = demoWalletsMap.values.sortedBy { it.order }
+        } else {
+            walletsMap.clear()
+            wallets.forEach { walletsMap[it.id] = it }
+            walletsFlow.value = walletsMap.values.sortedBy { it.order }
+        }
     }
 
     // --- Kategori & Sub Kategori ---
 
     override fun getCategoriesFlow(): Flow<CategoriesData> = categoriesFlow.asStateFlow()
 
-    override suspend fun getCategories(): CategoriesData = categoriesData
+    override suspend fun getCategories(): CategoriesData = if (demoMode) demoCategoriesData else categoriesData
 
     override suspend fun saveCategories(categories: CategoriesData) {
-        categoriesData = categories
-        categoriesFlow.value = categories
-        metaMap["categories_updated_at"] = categories.updatedAt.toString()
+        if (demoMode) {
+            demoCategoriesData = categories
+            categoriesFlow.value = categories
+        } else {
+            categoriesData = categories
+            categoriesFlow.value = categories
+            metaMap["categories_updated_at"] = categories.updatedAt.toString()
+        }
     }
 
     // --- Anggaran (Budget) ---
 
     override fun getBudgetsFlow(): Flow<BudgetsData> = budgetsFlow.asStateFlow()
 
-    override suspend fun getBudgets(): BudgetsData = budgetsData
+    override suspend fun getBudgets(): BudgetsData = if (demoMode) demoBudgetsData else budgetsData
 
     override suspend fun saveBudgets(budgets: BudgetsData) {
-        budgetsData = budgets
-        budgetsFlow.value = budgets
-        metaMap["budgets_updated_at"] = budgets.updatedAt.toString()
+        if (demoMode) {
+            demoBudgetsData = budgets
+            budgetsFlow.value = budgets
+        } else {
+            budgetsData = budgets
+            budgetsFlow.value = budgets
+            metaMap["budgets_updated_at"] = budgets.updatedAt.toString()
+        }
     }
 
     // --- Pengaturan (Settings) ---
@@ -154,9 +218,58 @@ class InMemoryMizanRepository : MizanRepository {
         metaMap.remove(key)
     }
 
+    // --- Mode Data Contoh (Demo) & Data Asli ---
+
+    override fun isDemoModeFlow(): Flow<Boolean> = demoModeFlow.asStateFlow()
+
+    override suspend fun isDemoMode(): Boolean = demoMode
+
+    override suspend fun activateSampleData(referenceDate: LocalDate) {
+        demoMode = true
+        demoTransactionsMap.clear()
+        SampleData.getSampleTransactions(referenceDate).forEach { demoTransactionsMap[it.id] = it }
+
+        demoWalletsMap.clear()
+        SampleData.SAMPLE_WALLETS.forEach { demoWalletsMap[it.id] = it }
+
+        demoCategoriesData = SampleData.SAMPLE_CATEGORIES
+        demoBudgetsData = SampleData.SAMPLE_BUDGETS
+
+        demoModeFlow.value = true
+        transactionsFlow.value = demoTransactionsMap.values.toList()
+        walletsFlow.value = demoWalletsMap.values.sortedBy { it.order }
+        categoriesFlow.value = demoCategoriesData
+        budgetsFlow.value = demoBudgetsData
+    }
+
+    override suspend fun clearSampleData() {
+        demoMode = false
+        demoTransactionsMap.clear()
+        demoWalletsMap.clear()
+        demoModeFlow.value = false
+
+        transactionsFlow.value = transactionsMap.values.toList()
+        walletsFlow.value = walletsMap.values.sortedBy { it.order }
+        categoriesFlow.value = categoriesData
+        budgetsFlow.value = budgetsData
+    }
+
+    override suspend fun getRealTransactions(): List<TransactionEntity> = transactionsMap.values.toList()
+
+    override suspend fun getRealWallets(): List<WalletEntity> = walletsMap.values.sortedBy { it.order }
+
+    override suspend fun getRealCategories(): CategoriesData = categoriesData
+
+    override suspend fun getRealBudgets(): BudgetsData = budgetsData
+
     // --- Kembalikan ke bawaan (Factory Reset level data) ---
 
     override suspend fun resetToDefaults() {
+        demoMode = false
+        demoTransactionsMap.clear()
+        demoWalletsMap.clear()
+        demoModeFlow.value = false
+
         transactionsMap.clear()
         transactionsFlow.value = emptyList()
 
