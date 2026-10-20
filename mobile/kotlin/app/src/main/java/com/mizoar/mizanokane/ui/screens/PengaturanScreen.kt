@@ -32,12 +32,13 @@ import com.mizoar.mizanokane.ui.theme.MizanTheme
 
 /**
  * Layar Pengaturan aplikasi Mizan Okane.
- * Sesuai spek Kotlin 4A: masih placeholder dengan SATU baris "Dompet"
- * yang membuka layar Kelola Dompet. Bagian lain dibangun pada Kotlin 7.
+ * Sesuai spek Kotlin 4B: memuat baris "Dompet" dan baris "Kategori".
+ * Bagian lain dibangun pada Kotlin 7.
  */
 @Composable
 fun PengaturanScreen(
     onKelolaDompetClick: () -> Unit,
+    onKelolaKategoriClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -55,7 +56,7 @@ fun PengaturanScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // SATU baris "Dompet"
+        // Baris "Dompet"
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -94,6 +95,62 @@ fun PengaturanScreen(
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = stringResource(id = R.string.desc_kelola_dompet),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MizanTheme.colors.textSecondary,
+                        fontSize = 13.sp
+                    )
+                )
+            }
+
+            Icon(
+                painter = painterResource(id = R.drawable.ic_chevron_right),
+                contentDescription = null,
+                tint = MizanTheme.colors.textSecondary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Baris "Kategori"
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(MizanTheme.colors.surface)
+                .border(1.dp, MizanTheme.colors.border, RoundedCornerShape(8.dp))
+                .clickable { onKelolaKategoriClick() }
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MizanTheme.colors.surfaceRaised),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_category_default),
+                    contentDescription = null,
+                    tint = MizanTheme.colors.text,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(id = R.string.title_kategori),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = MizanTheme.colors.text
+                    )
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = stringResource(id = R.string.desc_kelola_kategori),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MizanTheme.colors.textSecondary,
                         fontSize = 13.sp

@@ -432,6 +432,7 @@ fun BerandaScreen(
                             TransactionItemRow(
                                 tx = tx,
                                 wallets = wallets,
+                                categories = categories,
                                 is24Hour = settings.timeFormat != "12",
                                 onEditClick = { onEditTransactionClick(it.id) },
                                 onDeleteClick = { txToDelete = it }

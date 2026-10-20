@@ -31,6 +31,7 @@ import com.mizoar.mizanokane.ui.navigation.Screen
 import com.mizoar.mizanokane.ui.screens.BerandaScreen
 import com.mizoar.mizanokane.ui.screens.EmptyScreen
 import com.mizoar.mizanokane.ui.screens.KelolaDompetScreen
+import com.mizoar.mizanokane.ui.screens.KelolaKategoriScreen
 import com.mizoar.mizanokane.ui.screens.PengaturanScreen
 import com.mizoar.mizanokane.ui.screens.RiwayatScreen
 import com.mizoar.mizanokane.ui.screens.TransactionFormScreen
@@ -59,7 +60,9 @@ fun MizanApp(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Beranda.route
 
-    val isFullScreen = currentRoute.startsWith(Screen.TransactionForm.route) || currentRoute == Screen.KelolaDompet.route
+    val isFullScreen = currentRoute.startsWith(Screen.TransactionForm.route) ||
+            currentRoute == Screen.KelolaDompet.route ||
+            currentRoute == Screen.KelolaKategori.route
 
     // State bulan & filter dompet yang dibagikan antara Beranda dan Riwayat
     val currentYearMonth = remember { getCurrentYearMonthString() }
@@ -175,11 +178,20 @@ fun MizanApp(
                 PengaturanScreen(
                     onKelolaDompetClick = {
                         navController.navigate(Screen.KelolaDompet.route)
+                    },
+                    onKelolaKategoriClick = {
+                        navController.navigate(Screen.KelolaKategori.route)
                     }
                 )
             }
             composable(Screen.KelolaDompet.route) {
                 KelolaDompetScreen(
+                    repository = repository,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.KelolaKategori.route) {
+                KelolaKategoriScreen(
                     repository = repository,
                     onNavigateBack = { navController.popBackStack() }
                 )

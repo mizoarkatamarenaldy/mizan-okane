@@ -77,6 +77,7 @@ fun RiwayatScreen(
     val coroutineScope = rememberCoroutineScope()
     val transactions by repository.getAllTransactionsFlow().collectAsState(initial = emptyList())
     val wallets by repository.getAllWalletsFlow().collectAsState(initial = emptyList())
+    val categories by repository.getCategoriesFlow().collectAsState(initial = com.mizoar.mizanokane.data.DefaultData.DEFAULT_CATEGORIES)
     val settings by repository.getSettingsFlow().collectAsState(initial = com.mizoar.mizanokane.data.DefaultData.DEFAULT_SETTINGS)
 
     var searchQuery by remember { mutableStateOf("") }
@@ -396,6 +397,7 @@ fun RiwayatScreen(
                             TransactionItemRow(
                                 tx = tx,
                                 wallets = wallets,
+                                categories = categories,
                                 is24Hour = settings.timeFormat != "12",
                                 onEditClick = { onEditTransactionClick(it.id) },
                                 onDeleteClick = { txToDelete = it }

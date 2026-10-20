@@ -61,4 +61,29 @@
     <string name="warn_wallet_exists">Dompet \"%1$s\" sudah ada.</string>
     <string name="confirm_delete_wallet_title">Hapus dompet \"%1$s\" dengan sisa saldo %2$s?</string>
     <string name="toast_wallet_deleted">Dompet \"%1$s\" berhasil dihapus.</string>
+
+    <!-- Kategori & Sub Kategori -->
+    <string name="title_kategori">Kategori</string>
+    <string name="desc_kelola_kategori">Kelola kategori pengeluaran dan pemasukan</string>
+    <string name="action_tambah_subkategori">+ Sub</string>
+    <string name="placeholder_kategori_pengeluaran">Tambah kategori pengeluaran...</string>
+    <string name="placeholder_kategori_pemasukan">Tambah kategori pemasukan...</string>
+    <string name="placeholder_subkategori">Tambah sub kategori %1$s...</string>
+    <string name="title_pilih_ikon_kategori">Pilih Ikon Kategori</string>
+    <string name="title_pilih_ikon_subkategori">Pilih Ikon Sub Kategori</string>
+    <string name="warn_category_empty">Nama kategori tidak boleh kosong.</string>
+    <string name="warn_category_equilibrium">Nama \"Equilibrium\" adalah nama kategori bawaan sistem.</string>
+    <string name="warn_category_exists_expense">Kategori \"%1$s\" sudah ada di daftar pengeluaran.</string>
+    <string name="warn_category_exists_income">Kategori \"%1$s\" sudah ada di daftar pemasukan.</string>
+    <string name="warn_subcategory_empty">Nama sub kategori tidak boleh kosong.</string>
+    <string name="warn_subcategory_exists">Sub kategori \"%1$s\" sudah ada di kategori \"%2$s\".</string>
+    <string name="confirm_delete_category_title">Hapus kategori \"%1$s\"?</string>
+    <string name="confirm_delete_subcategory_title">Hapus sub kategori \"%1$s\"?</string>
+    <string name="toast_category_added">Kategori \"%1$s\" berhasil ditambahkan.</string>
+    <string name="toast_category_updated">Kategori \"%1$s\" berhasil diubah.</string>
+    <string name="toast_category_deleted">Kategori \"%1$s\" berhasil dihapus.</string>
+    <string name="toast_subcategory_added">Sub kategori \"%1$s\" berhasil ditambahkan.</string>
+    <string name="toast_subcategory_updated">Sub kategori \"%1$s\" berhasil diubah.</string>
+    <string name="toast_subcategory_deleted">Sub kategori \"%1$s\" berhasil dihapus.</string>
+    <string name="empty_kategori">Belum ada kategori.</string>
 </resources>

@@ -70,6 +70,7 @@ import com.mizoar.mizanokane.domain.getActiveWallets
 import com.mizoar.mizanokane.domain.getCurrentDateString
 import com.mizoar.mizanokane.domain.getCurrentTimeString
 import com.mizoar.mizanokane.domain.getNoteSuggestions
+import com.mizoar.mizanokane.ui.CategoryIcons
 import com.mizoar.mizanokane.ui.components.CustomDropdown
 import com.mizoar.mizanokane.ui.components.DropdownOption
 import com.mizoar.mizanokane.ui.theme.MizanTheme
@@ -203,13 +204,19 @@ fun TransactionFormScreen(
         list
     }
 
-    // Pilihan Kategori sesuai tipe aktif (Pengeluaran & Pemasukan)
+    // Pilihan Kategori sesuai tipe aktif (Pengeluaran & Pemasukan, tanpa Equilibrium)
     val categoryList = remember(txType, categories) {
-        if (txType == "income") categories.income.map { it.name }
-        else categories.expense.map { it.name }
+        val raw = if (txType == "income") categories.income else categories.expense
+        raw.filter { !it.name.trim().equals("Equilibrium", ignoreCase = true) }
     }
     val categoryOptions = remember(categoryList) {
-        categoryList.map { DropdownOption(it, it) }
+        categoryList.map {
+            DropdownOption(
+                id = it.name,
+                label = it.name,
+                iconRes = CategoryIcons.getIconRes(it.icon)
+            )
+        }
     }
 
     // Pilihan Sub Kategori untuk kategori terpilih
@@ -601,14 +608,24 @@ fun TransactionFormScreen(
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = sub,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontSize = 13.sp,
-                                        fontWeight = if (isSubSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                        color = if (isSubSelected) MizanTheme.colors.accent else MizanTheme.colors.text
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    val subIconRes = CategoryIcons.getSubcategoryIconRes(selectedCategory, sub, txType, categories)
+                                    Icon(
+                                        painter = painterResource(id = subIconRes),
+                                        contentDescription = null,
+                                        tint = if (isSubSelected) MizanTheme.colors.accent else MizanTheme.colors.textSecondary,
+                                        modifier = Modifier.size(16.dp)
                                     )
-                                )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = sub,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 13.sp,
+                                            fontWeight = if (isSubSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                            color = if (isSubSelected) MizanTheme.colors.accent else MizanTheme.colors.text
+                                        )
+                                    )
+                                }
                             }
                         }
                     }

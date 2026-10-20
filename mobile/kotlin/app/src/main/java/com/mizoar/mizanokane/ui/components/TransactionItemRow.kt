@@ -33,15 +33,18 @@ import androidx.compose.ui.unit.sp
 import com.mizoar.mizanokane.R
 import com.mizoar.mizanokane.data.DefaultData
 import com.mizoar.mizanokane.data.Uang
+import com.mizoar.mizanokane.data.model.CategoriesData
 import com.mizoar.mizanokane.data.model.TransactionEntity
 import com.mizoar.mizanokane.data.model.WalletEntity
 import com.mizoar.mizanokane.domain.formatTimeDisplay
+import com.mizoar.mizanokane.ui.CategoryIcons
 import com.mizoar.mizanokane.ui.theme.MizanTheme
 
 @Composable
 fun TransactionItemRow(
     tx: TransactionEntity,
     wallets: List<WalletEntity>,
+    categories: CategoriesData? = null,
     is24Hour: Boolean = true,
     onEditClick: (TransactionEntity) -> Unit,
     onDeleteClick: (TransactionEntity) -> Unit,
@@ -118,7 +121,7 @@ fun TransactionItemRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Icon
-        val iconDrawableRes = if (isTransfer) R.drawable.ic_transfer else R.drawable.ic_category_default
+        val iconDrawableRes = CategoryIcons.getTransactionIconRes(tx, categories)
         Box(
             modifier = Modifier
                 .size(36.dp)

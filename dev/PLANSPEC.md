@@ -2079,3 +2079,42 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Edit lalu hapus transfer dari Riwayat: saldo kedua dompet kembali benar, transfer hilang dari Riwayat.
 - Geser urutan dompet lewat ≡: urutan di Kelola Dompet, Beranda, dan dropdown dompet ikut berubah dan tetap setelah app ditutup.
 - Hapus dompet yang punya riwayat: perilaku sama dengan web (riwayat tetap aman).
+
+
+## Kotlin 4B: Kategori, sub kategori, ikon
+
+Tujuan: Menulis ulang pengelolaan kategori, sub kategori, dan ikon kategori dari versi web ke Jetpack Compose, di atas layar Kotlin 3 dan 4A. Perilaku harus sama dengan web di desktop/src. Budget, Timbangan, dan penyesuaian saldo Equilibrium BUKAN bagian item ini (itu Kotlin 5).
+
+Sumber acuan (web adalah acuan, baca seperlunya, jangan ubah):
+- Buka hanya bagian-bagian ini di dev/PLANSPEC.md: Pisah kategori pemasukan dan pengeluaran; Sub kategori; Ikon kategori kustom; Ikon sub kategori; Perbaikan: dialog Pilih Ikon muncul sendiri di Pengaturan; Geser urutan dompet dan kategori (hanya bagian kategori); Kategori Equilibrium (hanya aturan bahwa kategori induk Equilibrium dan sub-nya tetap, tidak bisa diedit, dihapus, digeser, atau dipilih di form transaksi); Pengaturan per kategori (hanya bagian kategori).
+- Baca juga kode di desktop/src yang terkait: tambah/ubah/hapus kategori dan sub kategori, dialog Pilih Ikon, daftar ikon dan ikon bawaan per kategori (getCategoryIconSvg dan sejenisnya), geser urutan kategori, dan apa yang terjadi pada transaksi dan budget saat kategori atau sub kategori dihapus. Salin perilakunya, bukan gayanya.
+- Tampilan mengikuti dev/DESIGN.md dan tema Compose yang sudah ada. Jangan tambah warna, font, bayangan, atau animasi di luar itu.
+
+Tempat dan tampilan:
+- Di layar Pengaturan Kotlin (PengaturanScreen.kt, yang sekarang hanya punya baris "Dompet"), tambahkan satu baris "Kategori" di bawahnya yang membuka layar Kelola Kategori. Jangan bangun bagian Pengaturan yang lain, itu Kotlin 7. Tambahkan rute baru di Screen.kt dan hubungkan di MainActivity.
+- Layar Kelola Kategori: pisah dua daftar, Pengeluaran dan Pemasukan, seperti web. Tiap kategori punya ikon, nama, tombol tambah sub kategori, ubah, hapus, geser urutan lewat ikon garis tiga (≡), dan daftar sub kategori di bawahnya dengan ikon, ubah, hapus, dan geser. Dialog Pilih Ikon dibuka dari ikon kategori atau sub kategori, daftar ikonnya sama dengan web.
+- Kategori induk Equilibrium dan sub-nya tampil sebagai baris tetap sesuai aturan web (tidak ada tombol ubah, hapus, geser) dan tidak muncul di dropdown Kategori pada form transaksi.
+- Di Riwayat, Beranda, dan form transaksi, ikon kategori dan sub kategori memakai ikon yang tersimpan (atau ikon bawaan per kategori seperti web), bukan lagi ic_category_default untuk semua. Ubah TransactionItemRow.kt dan dropdown Kategori di TransactionFormScreen.kt seperlunya untuk ini.
+
+Aturan:
+- Sebelum menulis kode, buka dan baca ulang file yang akan diubah: MizanRepository.kt, RoomMizanRepository.kt, InMemoryMizanRepository.kt, CategoryEntity.kt, SubcategoryEntity.kt, CategoryData.kt, CategoryDao.kt, DefaultData.kt, Screen.kt, MainActivity.kt, PengaturanScreen.kt, KelolaDompetScreen.kt, TransactionFormScreen.kt, TransactionItemRow.kt, dan dev/SCHEMA.md. Pakai nama class, fungsi, dan field yang benar-benar ada. Cara ikon, urutan, jenis kategori (pemasukan atau pengeluaran), dan sub kategori disimpan harus persis mengikuti dev/SCHEMA.md dan web. Id ikon yang tersimpan harus sama dengan web supaya impor dan ekspor JSON tetap kompatibel.
+- Kalau butuh fungsi repository baru (simpan, ubah, hapus kategori dan sub kategori, simpan urutan), tambahkan seminimal mungkin di interface dan kedua implementasinya, tanpa logika hitung. Pastikan @Insert di CategoryDao yang dipakai untuk simpan ulang berstrategi REPLACE.
+- Aturan data saat hapus kategori atau sub kategori (nasib transaksi, budget yang ikut hilang, dan sebagainya) harus persis sama dengan web. Jangan menambah aturan baru.
+- Ikon: ubah SVG ikon dari web menjadi vector drawable XML (nama ic_cat_<id ikon>) dan buat satu file Kotlin (misalnya CategoryIcons.kt di ui/) berisi pemetaan id ikon ke resource drawable beserta aturan ikon bawaan seperti web. Id yang tidak dikenal jatuh ke ic_category_default. Pastikan setiap drawable yang dirujuk benar-benar dibuat.
+- Pegangan geser dari KelolaDompetScreen (WalletReorderHandle dan pola drag-nya) diekstrak menjadi komponen bersama di ui/components dan dipakai ulang oleh Kelola Kategori. Perilaku Kelola Dompet tidak boleh berubah. Tanpa library atau dependensi baru, pakai hanya API foundation Compose yang kamu yakini ada di versi yang dikunci.
+- Nama kategori dan sub kategori memakai validasi yang sama dengan web (kosong, duplikat, batas panjang, dan seterusnya).
+- Tidak membuat unit test baru. Tidak mengubah budget, Statistik, Timbangan, dompet, atau transfer, kecuali sentuhan kecil yang tak terhindarkan untuk ikon. Dilarang menambah fitur yang tidak ada di web.
+- Kode harus benar saat dikompilasi pertama kali. Setelah selesai menulis, baca ulang SEMUA file Kotlin yang kamu tulis atau ubah, sampai baris terakhir, dan periksa: import lengkap, nama fungsi dan class benar-benar ada, tipe cocok, resource (string, drawable) benar-benar ada.
+- Dilarang menjalankan ./gradlew, gradle, atau perintah build apa pun. Tulis "belum dibuild" di entri CHANGELOG.
+- Dilarang mengubah desktop/, mobile/capacitor/, dan format data (dev/SCHEMA.md).
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Skema Room tetap versi 1, jadi folder app/schemas/ tidak boleh berubah.
+
+Cek manual (ditunda, dijalankan pemilik setelah build pertama):
+- Buka Pengaturan lalu Kategori: dua daftar (Pengeluaran dan Pemasukan) tampil dengan ikon sesuai data, urutan sama dengan web untuk data yang sama.
+- Tambah kategori pengeluaran baru dengan ikon pilihan sendiri: muncul di Kelola Kategori dan di dropdown Kategori form transaksi dengan ikon itu. Tambah sub kategori di bawahnya, ikon sub kategori juga bisa diganti.
+- Geser urutan kategori lewat ≡: urutan di Kelola Kategori dan dropdown form ikut berubah dan tetap setelah app ditutup.
+- Hapus sub kategori lalu kategori yang punya transaksi: perilaku transaksi dan budget sama dengan web.
+- Kategori Equilibrium: tampil sebagai baris tetap tanpa tombol ubah, hapus, geser, dan tidak ada di dropdown Kategori form transaksi.
+- Ekspor JSON lalu impor lagi: ikon dan urutan kategori kembali sama.

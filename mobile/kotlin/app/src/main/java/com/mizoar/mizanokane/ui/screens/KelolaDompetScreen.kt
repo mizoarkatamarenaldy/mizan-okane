@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +63,7 @@ import com.mizoar.mizanokane.domain.calculateWalletBalances
 import com.mizoar.mizanokane.domain.getActiveWallets
 import com.mizoar.mizanokane.ui.components.CustomDropdown
 import com.mizoar.mizanokane.ui.components.DropdownOption
+import com.mizoar.mizanokane.ui.components.ReorderDragHandle
 import com.mizoar.mizanokane.ui.theme.MizanTheme
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -429,71 +429,56 @@ fun KelolaDompetScreen(
                                         )
                                     }
 
-                                    // Pegangan geser urutan (≡) dengan pointerInput & detectDragGestures
-                                    Box(
-                                        modifier = Modifier
-                                            .size(44.dp)
-                                            .pointerInput(wallet.id) {
-                                                detectDragGestures(
-                                                    onDragStart = {
-                                                        draggingWalletId = wallet.id
-                                                        dragOffsetY = 0f
-                                                    },
-                                                    onDrag = { change, dragAmount ->
-                                                        change.consume()
-                                                        dragOffsetY += dragAmount.y
-                                                        val currentIndex = activeWalletsList.indexOfFirst { it.id == draggingWalletId }
-                                                        if (currentIndex != -1) {
-                                                            if (dragOffsetY > itemHeightThreshold && currentIndex < activeWalletsList.size - 1) {
-                                                                val mutable = activeWalletsList.toMutableList()
-                                                                val item = mutable.removeAt(currentIndex)
-                                                                mutable.add(currentIndex + 1, item)
-                                                                activeWalletsList = mutable
-                                                                dragOffsetY -= itemHeightThreshold
-                                                            } else if (dragOffsetY < -itemHeightThreshold && currentIndex > 0) {
-                                                                val mutable = activeWalletsList.toMutableList()
-                                                                val item = mutable.removeAt(currentIndex)
-                                                                mutable.add(currentIndex - 1, item)
-                                                                activeWalletsList = mutable
-                                                                dragOffsetY += itemHeightThreshold
-                                                            }
+                                    // Pegangan geser urutan (≡) dengan ReorderDragHandle
+                                    ReorderDragHandle(
+                                        isDragging = isDraggingThis,
+                                        key = wallet.id,
+                                        onDragStart = {
+                                            draggingWalletId = wallet.id
+                                            dragOffsetY = 0f
+                                        },
+                                        onDrag = { dragAmountY ->
+                                            dragOffsetY += dragAmountY
+                                            val currentIndex = activeWalletsList.indexOfFirst { it.id == draggingWalletId }
+                                            if (currentIndex != -1) {
+                                                if (dragOffsetY > itemHeightThreshold && currentIndex < activeWalletsList.size - 1) {
+                                                    val mutable = activeWalletsList.toMutableList()
+                                                    val item = mutable.removeAt(currentIndex)
+                                                    mutable.add(currentIndex + 1, item)
+                                                    activeWalletsList = mutable
+                                                    dragOffsetY -= itemHeightThreshold
+                                                } else if (dragOffsetY < -itemHeightThreshold && currentIndex > 0) {
+                                                    val mutable = activeWalletsList.toMutableList()
+                                                    val item = mutable.removeAt(currentIndex)
+                                                    mutable.add(currentIndex - 1, item)
+                                                    activeWalletsList = mutable
+                                                    dragOffsetY += itemHeightThreshold
+                                                }
+                                            }
+                                        },
+                                        onDragEnd = {
+                                            val draggedId = draggingWalletId
+                                            draggingWalletId = null
+                                            dragOffsetY = 0f
+                                            if (draggedId != null) {
+                                                coroutineScope.launch {
+                                                    val now = System.currentTimeMillis()
+                                                    val updated = activeWalletsList.mapIndexed { index, w ->
+                                                        if (w.order != index) {
+                                                            w.copy(order = index, updatedAt = now)
+                                                        } else {
+                                                            w
                                                         }
-                                                    },
-                                                    onDragEnd = {
-                                                        val draggedId = draggingWalletId
-                                                        draggingWalletId = null
-                                                        dragOffsetY = 0f
-                                                        if (draggedId != null) {
-                                                            coroutineScope.launch {
-                                                                val now = System.currentTimeMillis()
-                                                                val updated = activeWalletsList.mapIndexed { index, w ->
-                                                                    if (w.order != index) {
-                                                                        w.copy(order = index, updatedAt = now)
-                                                                    } else {
-                                                                        w
-                                                                    }
-                                                                }
-                                                                repository.saveWallets(updated)
-                                                            }
-                                                        }
-                                                    },
-                                                    onDragCancel = {
-                                                        draggingWalletId = null
-                                                        dragOffsetY = 0f
                                                     }
-                                                )
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "≡",
-                                            style = MaterialTheme.typography.titleLarge.copy(
-                                                color = if (isDraggingThis) MizanTheme.colors.accent else MizanTheme.colors.textSecondary,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 22.sp
-                                            )
-                                        )
-                                    }
+                                                    repository.saveWallets(updated)
+                                                }
+                                            }
+                                        },
+                                        onDragCancel = {
+                                            draggingWalletId = null
+                                            dragOffsetY = 0f
+                                        }
+                                    )
                                 }
                             }
                         }

@@ -51,6 +51,12 @@ sealed class Screen(
         iconRes = R.drawable.ic_wallet
     )
 
+    data object KelolaKategori : Screen(
+        route = "kelola_kategori",
+        titleRes = R.string.title_kategori,
+        iconRes = R.drawable.ic_category_default
+    )
+
     companion object {
         val items = listOf(Beranda, Riwayat, Timbangan, Statistik, Pengaturan)
     }

@@ -124,6 +124,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
   - [x] Kotlin 2: Data
   - [x] Kotlin 3: Beranda, Riwayat, form transaksi
   - [x] Kotlin 4A: Dompet, transfer, mata uang
+  - [x] Kotlin 4B: Kategori, sub kategori, ikon
 - [ ] APK rilis
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik
