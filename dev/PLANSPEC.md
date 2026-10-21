@@ -2361,3 +2361,28 @@ Data:
 Cek manual:
 - Ditunda, dijalankan pemilik setelah build ulang (Build > Make Project). Hasilnya: error 'danger', 'budgetWarn', dan type mismatch di TimbanganScreen.kt:200 hilang. Error baru yang muncul dilaporkan pemilik untuk 10B.
 
+## Kotlin 10B: Matikan minify R8
+
+Tujuan: app langsung force close saat dibuka. Logcat: java.lang.IllegalAccessError: Class kotlin.collections.b extended by class rc is inaccessible, dengan stack trace berisi nama class hasil acak R8 (r8-map-id). Penyebabnya R8 (minify dan pengacakan nama) merusak class Kotlin saat runtime. Perbaikannya mematikan minify dan shrink di build type yang dipakai pemilik, sementara.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Aturan:
+- Buka mobile/kotlin/app/build.gradle.kts (atau build.gradle kalau itu yang ada). Di blok buildTypes, untuk build type "release": set isMinifyEnabled = false dan isShrinkResources = false. Kalau ada properti sejenis di build type "debug", pastikan juga false.
+- Cek juga mobile/kotlin/gradle.properties: kalau ada pengaturan R8 yang aktif (misalnya android.enableR8.fullMode atau flag sejenis yang mengaktifkan optimasi agresif), laporkan saja di akhir, jangan diubah.
+- Jangan hapus file proguard-rules.pro dan jangan ubah isinya.
+- Jangan ubah versi dependensi, plugin, libs.versions.toml, atau signingConfigs. Jangan buat atau ubah file keystore.
+- Jangan ubah kode Kotlin. Cuma file build.gradle.kts aplikasi.
+- Tambahkan komentar satu baris di atas baris yang diubah: "// Minify dimatikan sementara karena R8 merusak kotlin.collections saat runtime (Kotlin 10B). Hidupkan lagi di item APK rilis dengan aturan keep yang benar."
+- Dilarang menjalankan ./gradlew, gradle, atau perintah build apa pun. Baca ulang seluruh file build yang diubah sampai baris terakhir, pastikan sintaks Kotlin DSL benar dan tidak ada blok dobel.
+- Izin dari pemilik: untuk item ini saja, boleh mengubah satu file build.gradle.kts aplikasi di mobile/kotlin/app/. Tidak boleh mengubah file build lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Ditunda, dijalankan pemilik. Pemilik build ulang (Build > Make Project), uninstall app lama dari HP, install ulang. Hasil yang diharapkan: app terbuka ke Beranda tanpa force close.
+- Kalau masih force close, pemilik kirim log Logcat baru. Nama class di stack trace sekarang sudah terbaca (tanpa r8-map-id), jadi bisa dilacak ke kode.
+
+

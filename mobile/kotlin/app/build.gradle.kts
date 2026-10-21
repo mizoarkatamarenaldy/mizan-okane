@@ -27,8 +27,11 @@ android {
 
     buildTypes {
         release {
+            // Minify dimatikan sementara karena R8 merusak kotlin.collections saat runtime (Kotlin 10B). Hidupkan lagi di item APK rilis dengan aturan keep yang benar.
+            isMinifyEnabled = false
+            isShrinkResources = false
             optimization {
-                enable = true
+                enable = false
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }

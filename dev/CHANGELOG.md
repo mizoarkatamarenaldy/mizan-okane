@@ -11,6 +11,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 ```
 
 
+## 2026-10-21: Kotlin 10B: Matikan minify R8 (belum dibuild)
+- Diubah: Blok `buildTypes.release` pada `mobile/kotlin/app/build.gradle.kts` dengan mematikan minifikasi dan reduksi resource (`isMinifyEnabled = false`, `isShrinkResources = false`, serta `optimization { enable = false }`) dan menyematkan komentar penjelasan sesuai instruksi agar R8 tidak merusak `kotlin.collections` saat runtime (`mobile/kotlin/app/build.gradle.kts`).
+- Diubah: Menambahkan opsi `android.disallowKotlinSourceSets=false` pada `gradle.properties` serta menaikkan versi dependensi Room ke `2.8.4` pada `libs.versions.toml` dari perbaikan build lokal pemilik (`mobile/kotlin/gradle.properties`, `mobile/kotlin/gradle/libs.versions.toml`).
+- Ditambah: Berkas artefak skema Room database versi 1 hasil generate KSP oleh pemilik (`mobile/kotlin/app/schemas/com.mizoar.mizanokane.data.local.AppDatabase/1.json`).
+- Diubah: Menambahkan spesifikasi dan mencentang item "Kotlin 10B: Matikan minify R8" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+- Catatan kompilasi: Seluruh berkas build yang diubah telah diverifikasi sintaks Kotlin DSL-nya hingga baris terakhir dan tidak ada duplikasi blok. Proyek ini belum dibuild melalui gradle sesuai aturan ("belum dibuild", pemilik yang build ulang).
+
 ## 2026-10-21: Kotlin 10A: Perbaikan build (belum dibuild)
 - Diperbaiki: Properti warna `danger` (merujuk ke token `expense`) dan `budgetWarn` (merujuk ke token `budgetWarning` `#F5A623`) pada class `MizanColors` di `Color.kt` untuk mengatasi error kompilasi unresolved reference pada `StatistikScreen.kt` (baris 530, 809, 921) dan `TimbanganScreen.kt` (baris 686-689) (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/theme/Color.kt`).
 - Diperbaiki: Pemanggilan fungsi `CategoryIcons.getCategoryIconRes` pada pembuatan `DropdownOption` kategori pengeluaran di `TimbanganScreen.kt` baris 200 dengan menyertakan argumen parameter `type = "expense"` sehingga cocok dengan signature fungsi (`String?, String, CategoriesData?`) dan mengatasi error kompilasi argument type mismatch (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
