@@ -2454,3 +2454,26 @@ Cek manual (ditunda, dijalankan pemilik, wajib ada OAuth Client ID Android buata
 - Tekan keluar: kembali ke keadaan belum login, data transaksi tetap ada.
 - Batalkan dialog login: muncul pesan, app tidak crash.
 
+## Kotlin 10D: Tampilkan error login asli
+
+Tujuan: saat login Google gagal, app sekarang menampilkan "login dibatalkan" untuk semua jenis kegagalan, sehingga penyebab asli (konfigurasi Client ID, tidak ada kredensial, otorisasi ditolak) tidak terlihat. Bedakan jenis error dan tampilkan detailnya supaya pemilik bisa mendiagnosis.
+
+Tempat dan tampilan:
+- Hanya di alur login pada mobile/kotlin/ (SubmenuAkunScreen.kt dan file pendukung login dari 8A). Tidak ada elemen tampilan baru, hanya isi pesan gagal yang sudah ada.
+
+Aturan:
+- Pisahkan penanganan error login Credential Manager: GetCredentialCancellationException (benar-benar dibatalkan pengguna) tetap memakai pesan "login dibatalkan" yang ada. Semua GetCredentialException lain (misalnya NoCredentialException, GetCredentialProviderConfigurationException, GetCredentialUnsupportedException, GetCredentialInterruptedException, dan GetCredentialException umum) memakai pesan baru: teks umum gagal login diikuti nama kelas exception dan e.message.
+- Pisahkan juga error penguraian token Google ID (GoogleIdTokenParsingException) dan error tahap otorisasi scope Drive (kegagalan Identity.getAuthorizationClient, termasuk ApiException dengan kode status), masing-masing dengan pesan yang menyebut tahap yang gagal (identitas atau otorisasi), nama kelas exception, dan pesannya.
+- Tulis juga setiap error ke Logcat memakai android.util.Log.e dengan tag "MizanAuth", berisi tahap, kelas exception, dan pesannya.
+- Pesan boleh dipotong maksimal 200 karakter agar muat di Snackbar. Semua teks tetap lewat strings.xml dengan format argumen yang benar, perhatikan escape apostrof, tanda %, dan &.
+- Alur login yang berhasil tidak boleh berubah sama sekali.
+- Sengaja TIDAK dilakukan: perubahan alur login yang berhasil, penambahan dependensi, perubahan Client ID, perubahan data, fitur sinkron.
+- Aturan tanpa build: jangan jalankan Gradle atau perintah build apa pun. Kode harus benar saat dikompilasi pertama. Setelah selesai, baca ulang SEMUA file Kotlin yang diubah sampai baris terakhir. Jangan pakai API yang tidak yakin. Tulis "belum dibuild" di CHANGELOG.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual (ditunda, dijalankan pemilik):
+- Tekan login lalu batalkan dengan tombol back di picker: pesan "login dibatalkan" tampil.
+- Tekan login dan pilih akun saat konfigurasi Client ID bermasalah: pesan tampil dengan nama kelas exception, dan Logcat tag MizanAuth berisi detailnya.
+- Login normal dengan konfigurasi benar: berhasil seperti di 8A.

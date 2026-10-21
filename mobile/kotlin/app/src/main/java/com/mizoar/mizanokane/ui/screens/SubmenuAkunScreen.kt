@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -57,11 +58,14 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.mizoar.mizanokane.R
 import com.mizoar.mizanokane.data.auth.AuthPreferences
 import com.mizoar.mizanokane.data.auth.GoogleAuthConfig
@@ -255,7 +259,12 @@ fun SubmenuAkunScreen(
                         onClick = {
                             if (isLoading) return@Button
                             val act = activity ?: run {
-                                Toast.makeText(context, context.getString(R.string.msg_login_failed), Toast.LENGTH_SHORT).show()
+                                handleAuthError(
+                                    context = context,
+                                    stage = "kredensial",
+                                    exception = IllegalStateException("Activity tidak ditemukan"),
+                                    formatResId = R.string.msg_login_failed_credential
+                                )
                                 return@Button
                             }
                             isLoading = true
@@ -300,7 +309,12 @@ fun SubmenuAkunScreen(
                                                         authResultLauncher.launch(intentSenderRequest)
                                                     } else {
                                                         isLoading = false
-                                                        Toast.makeText(context, context.getString(R.string.msg_login_failed), Toast.LENGTH_SHORT).show()
+                                                        handleAuthError(
+                                                            context = context,
+                                                            stage = "otorisasi",
+                                                            exception = IllegalStateException("PendingIntent resolusi otorisasi null"),
+                                                            formatResId = R.string.msg_login_failed_authorization
+                                                        )
                                                     }
                                                 } else {
                                                     // Izin sudah pernah diberikan sebelumnya
@@ -311,20 +325,52 @@ fun SubmenuAkunScreen(
                                                     }
                                                 }
                                             }
-                                            .addOnFailureListener {
+                                            .addOnFailureListener { e ->
                                                 isLoading = false
-                                                Toast.makeText(context, context.getString(R.string.msg_login_failed), Toast.LENGTH_SHORT).show()
+                                                handleAuthError(
+                                                    context = context,
+                                                    stage = "otorisasi",
+                                                    exception = e,
+                                                    formatResId = R.string.msg_login_failed_authorization
+                                                )
                                             }
                                     } else {
                                         isLoading = false
-                                        Toast.makeText(context, context.getString(R.string.msg_login_failed), Toast.LENGTH_SHORT).show()
+                                        val ex = IllegalArgumentException("Tipe kredensial tidak sesuai: ${credential.type}")
+                                        handleAuthError(
+                                            context = context,
+                                            stage = "identitas",
+                                            exception = ex,
+                                            formatResId = R.string.msg_login_failed_identity
+                                        )
                                     }
                                 } catch (_: GetCredentialCancellationException) {
                                     isLoading = false
                                     Toast.makeText(context, context.getString(R.string.msg_login_cancelled), Toast.LENGTH_SHORT).show()
-                                } catch (_: Exception) {
+                                } catch (e: GoogleIdTokenParsingException) {
                                     isLoading = false
-                                    Toast.makeText(context, context.getString(R.string.msg_login_failed), Toast.LENGTH_SHORT).show()
+                                    handleAuthError(
+                                        context = context,
+                                        stage = "identitas",
+                                        exception = e,
+                                        formatResId = R.string.msg_login_failed_identity
+                                    )
+                                } catch (e: GetCredentialException) {
+                                    isLoading = false
+                                    handleAuthError(
+                                        context = context,
+                                        stage = "kredensial",
+                                        exception = e,
+                                        formatResId = R.string.msg_login_failed_credential
+                                    )
+                                } catch (e: Exception) {
+                                    isLoading = false
+                                    handleAuthError(
+                                        context = context,
+                                        stage = "login",
+                                        exception = e,
+                                        formatResId = R.string.msg_login_failed_credential
+                                    )
                                 }
                             }
                         },
@@ -392,4 +438,46 @@ private fun findActivity(context: Context): Activity? {
         ctx = ctx.baseContext
     }
     return null
+}
+
+private const val TAG_AUTH = "MizanAuth"
+
+/**
+ * Menangani error login autentikasi:
+ * - Menentukan kelas exception dan kode status (jika ApiException)
+ * - Menulis ke Logcat dengan tag "MizanAuth" (berisi tahap, kelas exception, dan pesan)
+ * - Memformat pesan dari strings.xml dan memotong maksimal 200 karakter
+ * - Menampilkan Toast
+ */
+private fun handleAuthError(
+    context: Context,
+    stage: String,
+    exception: Throwable,
+    formatResId: Int
+) {
+    val apiEx = (exception as? ApiException) ?: (exception.cause as? ApiException)
+    val className = if (apiEx != null && exception !is ApiException) {
+        "${exception.javaClass.simpleName} (status ${apiEx.statusCode})"
+    } else if (exception is ApiException) {
+        "${exception.javaClass.simpleName} (status ${exception.statusCode})"
+    } else {
+        exception.javaClass.simpleName.ifEmpty { exception.javaClass.name }
+    }
+
+    val rawMsg = exception.message?.trim()?.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
+        ?: exception.cause?.message?.trim()?.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
+    val msg = rawMsg ?: "-"
+
+    // Tulis ke Logcat tag MizanAuth
+    Log.e(TAG_AUTH, "Tahap $stage: $className - $msg", exception)
+
+    // Format pesan dan potong maksimal 200 karakter
+    val formatted = context.getString(formatResId, className, msg)
+    val displayMessage = if (formatted.length > 200) {
+        formatted.take(197) + "..."
+    } else {
+        formatted
+    }
+
+    Toast.makeText(context, displayMessage, Toast.LENGTH_LONG).show()
 }

@@ -11,6 +11,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 ```
 
 
+## 2026-10-21: Kotlin 10D: Tampilkan error login asli (belum dibuild)
+- Ditambah: Resource string `msg_login_failed_credential`, `msg_login_failed_identity`, dan `msg_login_failed_authorization` di `strings.xml` dengan placeholder format argumen `%1$s` (nama kelas exception beserta kode status jika ada) dan `%2$s` (pesan error) (`mobile/kotlin/app/src/main/res/values/strings.xml`).
+- Diperbaiki: Alur penanganan error login pada `SubmenuAkunScreen.kt` dengan memisahkan `GetCredentialCancellationException` (tetap menampilkan pesan "login dibatalkan"), `GoogleIdTokenParsingException` (tahap identitas), semua variasi `GetCredentialException` lain (tahap kredensial), kegagalan otorisasi scope Drive via `Identity.getAuthorizationClient` termasuk `ApiException` dengan kode status (tahap otorisasi), dan error tak terduga lainnya (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/SubmenuAkunScreen.kt`).
+- Ditambah: Fungsi helper `handleAuthError` di `SubmenuAkunScreen.kt` yang mencatat detail error ke Logcat dengan tag `"MizanAuth"` (memuat tahap, kelas exception, kode status, dan pesan error lengkap beserta stack trace), memformat pesan teks antarmuka, dan membatasi panjang teks maksimal 200 karakter (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/SubmenuAkunScreen.kt`).
+- Diubah: Menambahkan spesifikasi dan mencentang item "Kotlin 10D: Tampilkan error login asli" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+- Catatan kompilasi: Seluruh berkas Kotlin dan resource yang diubah telah diverifikasi sintaks hingga baris terakhir. Proyek ini belum dibuild melalui gradle sesuai aturan ("belum dibuild"), dan pengujian manual ("ditunda, dijalankan pemilik").
+
 ## 2026-10-21: Kotlin 8A: Login Google native dan baris Akun (belum dibuild)
 - Ditambah: Berkas vector drawable `ic_cloud.xml` (ikon awan sinkronisasi) yang dikonversi langsung dari SVG versi web (`mobile/kotlin/app/src/main/res/drawable/ic_cloud.xml`).
 - Ditambah: Objek konfigurasi autentikasi Google `GoogleAuthConfig.kt` yang memuat konstanta OAuth Client ID Web publik dari web desktop dan scope `DRIVE_APPDATA_SCOPE` tanpa Client ID Android di kode (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/auth/GoogleAuthConfig.kt`).

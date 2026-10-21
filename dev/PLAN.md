@@ -135,6 +135,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
   - [x] Kotlin 10B: Matikan minify R8
   - [x] Kotlin 10C: Perbaikan crash BottomNavigationBar
   - [x] Kotlin 8A: Login Google native dan baris Akun
+  - [x] Kotlin 10D: Tampilkan error login asli
 - [ ] APK rilis
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik

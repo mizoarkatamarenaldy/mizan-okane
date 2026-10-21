@@ -323,4 +323,9 @@
     <string name="msg_auth_cancelled">Izin Google Drive dibatalkan.</string>
     <string name="msg_login_failed">Gagal login Google.</string>
     <string name="msg_logout_success">Berhasil logout dari akun Google.</string>
+
+    <!-- Error login asli (Kotlin 10D) -->
+    <string name="msg_login_failed_credential">Gagal login: %1$s - %2$s</string>
+    <string name="msg_login_failed_identity">Gagal tahap identitas: %1$s - %2$s</string>
+    <string name="msg_login_failed_authorization">Gagal tahap otorisasi: %1$s - %2$s</string>
 </resources>
