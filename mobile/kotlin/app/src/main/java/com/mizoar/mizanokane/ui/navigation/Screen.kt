@@ -81,6 +81,12 @@ sealed class Screen(
         iconRes = R.drawable.ic_data
     )
 
+    data object SubmenuAkun : Screen(
+        route = "submenu_akun",
+        titleRes = R.string.title_akun_sinkron,
+        iconRes = R.drawable.ic_cloud
+    )
+
     data object SubmenuTentang : Screen(
         route = "submenu_tentang",
         titleRes = R.string.title_tentang,

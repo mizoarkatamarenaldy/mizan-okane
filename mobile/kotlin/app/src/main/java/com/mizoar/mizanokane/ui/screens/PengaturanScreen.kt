@@ -43,8 +43,9 @@ import com.mizoar.mizanokane.ui.theme.danger
  * 3. Dompet: "Kelola dompet dan rekening sumber dana"
  * 4. Budget: "Batas pengeluaran bulanan per kategori"
  * 5. Data: "Ekspor CSV dan JSON, impor JSON, data contoh"
- * 6. Tentang: "Kebijakan privasi, syarat ketentuan, dan pengembang"
- * 7. Zona Bahaya (grup terpisah di paling bawah): "Hapus seluruh data transaksi"
+ * 6. Akun dan Sinkron: "Google Drive dan status sinkronisasi"
+ * 7. Tentang: "Kebijakan privasi, syarat ketentuan, dan pengembang"
+ * 8. Zona Bahaya (grup terpisah di paling bawah): "Hapus seluruh data transaksi"
  */
 @Composable
 fun PengaturanScreen(
@@ -53,6 +54,7 @@ fun PengaturanScreen(
     onKelolaDompetClick: () -> Unit,
     onKelolaBudgetClick: () -> Unit,
     onDataClick: () -> Unit,
+    onAkunSinkronClick: () -> Unit,
     onTentangClick: () -> Unit,
     onZonaBahayaClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -156,7 +158,22 @@ fun PengaturanScreen(
                     .background(MizanTheme.colors.border)
             )
 
-            // 6. Tentang
+            // 6. Akun dan Sinkron
+            SettingsMenuRow(
+                iconRes = R.drawable.ic_cloud,
+                title = stringResource(id = R.string.title_akun_sinkron),
+                desc = stringResource(id = R.string.desc_akun_sinkron),
+                onClick = onAkunSinkronClick
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MizanTheme.colors.border)
+            )
+
+            // 7. Tentang
             SettingsMenuRow(
                 iconRes = R.drawable.ic_info,
                 title = stringResource(id = R.string.title_tentang),

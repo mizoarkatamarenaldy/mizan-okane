@@ -42,6 +42,7 @@ import com.mizoar.mizanokane.ui.screens.RiwayatScreen
 import com.mizoar.mizanokane.ui.screens.StatistikScreen
 import com.mizoar.mizanokane.ui.screens.SubmenuBahayaScreen
 import com.mizoar.mizanokane.ui.screens.SubmenuDataScreen
+import com.mizoar.mizanokane.ui.screens.SubmenuAkunScreen
 import com.mizoar.mizanokane.ui.screens.SubmenuTampilanScreen
 import com.mizoar.mizanokane.ui.screens.SubmenuTentangScreen
 import com.mizoar.mizanokane.ui.screens.SyaratKetentuanScreen
@@ -49,6 +50,7 @@ import com.mizoar.mizanokane.ui.screens.TimbanganScreen
 import com.mizoar.mizanokane.ui.screens.TransactionFormScreen
 import com.mizoar.mizanokane.ui.theme.MizanOkaneTheme
 import com.mizoar.mizanokane.ui.theme.MizanTheme
+import com.mizoar.mizanokane.data.auth.AuthPreferences
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -87,6 +89,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val db = AppDatabase.getInstance(applicationContext)
         val repository = RoomMizanRepository(db)
+        val authPreferences = AuthPreferences(applicationContext)
         setContent {
             val settings by repository.getSettingsFlow().collectAsState(initial = DefaultData.DEFAULT_SETTINGS)
             val isSystemDark = isSystemInDarkTheme()
@@ -96,7 +99,7 @@ class MainActivity : ComponentActivity() {
                 else -> isSystemDark
             }
             MizanOkaneTheme(darkTheme = darkTheme) {
-                MizanApp(repository = repository)
+                MizanApp(repository = repository, authPreferences = authPreferences)
             }
         }
     }
@@ -104,7 +107,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MizanApp(
-    repository: MizanRepository
+    repository: MizanRepository,
+    authPreferences: AuthPreferences
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -119,6 +123,7 @@ fun MizanApp(
             currentRoute == Screen.SubmenuTampilan.route ||
             currentRoute == Screen.SubmenuBahaya.route ||
             currentRoute == Screen.SubmenuData.route ||
+            currentRoute == Screen.SubmenuAkun.route ||
             currentRoute == Screen.SubmenuTentang.route ||
             currentRoute == Screen.KebijakanPrivasi.route ||
             currentRoute == Screen.SyaratKetentuan.route
@@ -311,6 +316,9 @@ fun MizanApp(
                     onDataClick = {
                         navController.navigate(Screen.SubmenuData.route)
                     },
+                    onAkunSinkronClick = {
+                        navController.navigate(Screen.SubmenuAkun.route)
+                    },
                     onTentangClick = {
                         navController.navigate(Screen.SubmenuTentang.route)
                     },
@@ -334,6 +342,12 @@ fun MizanApp(
             composable(Screen.SubmenuData.route) {
                 SubmenuDataScreen(
                     repository = repository,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.SubmenuAkun.route) {
+                SubmenuAkunScreen(
+                    authPreferences = authPreferences,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

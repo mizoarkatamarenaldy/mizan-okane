@@ -2413,3 +2413,44 @@ Data:
 Cek manual:
 - Ditunda, dijalankan pemilik. Build ulang (Build > Make Project), jalankan app. Hasil yang diharapkan: app terbuka ke Beranda, bottom navigation tampil dengan 5 item, semua tab bisa dibuka tanpa force close.
 - Kalau masih crash, pemilik kirim log Logcat baru untuk 10D.
+
+
+## Kotlin 8A: Login Google native dan baris Akun
+
+Tujuan: pemilik bisa login dengan akun Google di APK lewat jalur native Android, dan Pengaturan menampilkan status akunnya. Hanya login, otorisasi scope Drive appDataFolder, dan tampilan status. Sinkron dikerjakan di 8B, bukan di sini.
+
+Sumber acuan:
+- Buka hanya bagian Pengaturan di desktop/src, khususnya grup "Akun dan Sinkron" (Google Drive dan status sinkronisasi): label, urutan, dan teks status akun. Tulis ulang perilakunya di Kotlin mengikuti web. Dilarang menambah fitur yang tidak ada di web.
+- Dari desktop/src, ambil OAuth Client ID Web (nilainya publik, bukan rahasia). Jangan ubah nilainya.
+- Baca kode Pengaturan Kotlin yang sudah ada (Kotlin 7A dan 7B) di mobile/kotlin/ supaya baris baru mengikuti pola yang sama.
+- Kalau isi web tidak jelas, baca sendiri dari desktop/src dan tulis perilakunya di spek ini mengikuti web.
+
+Tempat dan tampilan:
+- Halaman Pengaturan, grup nomor 6 "Akun dan Sinkron", di antara grup Data dan Tentang, sebelum grup terpisah Zona Bahaya. Judul grup dan teks mengikuti web.
+- Belum login: satu tombol masuk dengan Google, plus teks status "belum login" seperti di web.
+- Sudah login: tampilkan email akun dan tombol keluar. Bagian status sinkron hanya menampilkan teks "belum pernah sinkron" seperti di web. TIDAK ada tombol sinkron (itu 8B).
+- Gagal atau dibatalkan: tampil pesan singkat (Snackbar atau pola pesan yang sudah dipakai di app), tidak crash.
+- Semua teks lewat strings.xml. Perhatikan escape apostrof, tanda %, dan &.
+- Tampilan baru wajib mengikuti dev/DESIGN.md, jangan tambah warna, font, bayangan, atau animasi di luar itu.
+
+Aturan:
+- Identitas: Credential Manager (androidx.credentials) dengan opsi Sign in with Google (googleid), memakai OAuth Client ID Web sebagai serverClientId. Client ID Android TIDAK ditulis di kode: Android dikenali lewat package com.mizoar.mizanokane dan SHA-1 yang didaftarkan pemilik sendiri di Google Cloud Console.
+- Otorisasi: minta scope https://www.googleapis.com/auth/drive.appdata lewat Identity.getAuthorizationClient dari Google Play services. Sekarang cukup memastikan otorisasi bisa diberikan. Access token tidak disimpan permanen dan tidak ditulis ke file mana pun (8B yang memakainya).
+- Status akun (email) disimpan di penyimpanan lokal terpisah (DataStore Preferences), BUKAN di Room dan tidak ikut ekspor, impor, atau sinkron.
+- Keluar: hapus status akun lokal dan panggil clearCredentialState. Data transaksi lokal tidak dihapus.
+- App tetap jalan penuh tanpa login (mode tanpa login seperti web).
+- Tambahan dependensi dan plugin yang dibutuhkan masuk ke version catalog dengan versi dikunci. Pilih versi yang kamu yakin ada, jangan menebak.
+- Sengaja TIDAK dilakukan: upload atau download Drive, gabung data, tombol sinkron, perubahan Room, perubahan dev/SCHEMA.md, perubahan Client ID Web.
+- Izin dari pemilik: boleh menambah dependensi androidx.credentials, androidx.credentials-play-services-auth, googleid, dan play-services-auth beserta entri version catalog dan build.gradle.kts di mobile/kotlin/. Boleh memakai OAuth Client ID Web yang sudah ada di desktop/src sebagai konstanta di kode Kotlin tanpa mengubah nilainya. Client ID Android baru tidak boleh ditulis di kode atau repo.
+- Aturan tanpa build: jangan jalankan Gradle atau perintah build apa pun. Kode harus benar saat dikompilasi pertama. Setelah selesai, baca ulang SEMUA file Kotlin yang diubah sampai baris terakhir. Jangan pakai API yang tidak yakin. Tulis "belum dibuild" di CHANGELOG.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Status akun disimpan terpisah dan tidak masuk ekspor.
+
+Cek manual (ditunda, dijalankan pemilik, wajib ada OAuth Client ID Android buatan pemilik):
+- Belum login, buka Pengaturan: grup Akun dan Sinkron menampilkan tombol masuk dan status belum login.
+- Tekan masuk, pilih akun, setujui izin Drive appDataFolder: email tampil, status "belum pernah sinkron", tidak ada tombol sinkron.
+- Tutup app, buka lagi: email akun masih tampil.
+- Tekan keluar: kembali ke keadaan belum login, data transaksi tetap ada.
+- Batalkan dialog login: muncul pesan, app tidak crash.
+

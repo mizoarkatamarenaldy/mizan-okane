@@ -307,4 +307,20 @@
     <string name="terms_sec8_p1">Informasi lebih lengkap mengenai perlakuan terhadap data dan izin Google Drive dapat dibaca di halaman Kebijakan Privasi.</string>
     <string name="terms_sec9_title">9. Kontak</string>
     <string name="terms_sec9_p1">Pertanyaan, kendala, atau saran terkait aplikasi dapat disampaikan melalui halaman Issues repositori GitHub resmi proyek ini:\nhttps://github.com/mizoarkatamarenaldy/mizan-okane/issues</string>
+
+    <!-- Submenu Akun dan Sinkron (Kotlin 8A) -->
+    <string name="title_akun_sinkron">Akun dan Sinkron</string>
+    <string name="desc_akun_sinkron">Google Drive dan status sinkronisasi</string>
+    <string name="title_akun_sinkronisasi">Akun dan Sinkronisasi</string>
+    <string name="desc_akun_sinkronisasi">Cadangan data lokal dan sinkronisasi otomatis dengan Google Drive.</string>
+    <string name="sync_status_signed_out">Belum login. Data hanya tersimpan di perangkat ini.</string>
+    <string name="sync_status_never_synced">belum pernah sinkron</string>
+    <string name="action_login_google">Login Google</string>
+    <string name="action_logout_google">Logout</string>
+    <string name="confirm_logout_title">Logout dari Google? Data di perangkat ini tetap ada, tapi tidak disinkronkan lagi sampai login ulang.</string>
+    <string name="msg_login_google_success">Berhasil masuk dengan akun Google.</string>
+    <string name="msg_login_cancelled">Login dibatalkan.</string>
+    <string name="msg_auth_cancelled">Izin Google Drive dibatalkan.</string>
+    <string name="msg_login_failed">Gagal login Google.</string>
+    <string name="msg_logout_success">Berhasil logout dari akun Google.</string>
 </resources>
