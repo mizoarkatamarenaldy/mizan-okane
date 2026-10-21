@@ -42,7 +42,13 @@ data class MizanColors(
     val expense: Color,
     val transfer: Color,
     val budgetWarning: Color
-)
+) {
+    val danger: Color
+        get() = expense
+
+    val budgetWarn: Color
+        get() = budgetWarning
+}
 
 val DarkMizanColorPalette = MizanColors(
     bg = DarkBg,
@@ -76,3 +82,7 @@ val LocalMizanColors = staticCompositionLocalOf { DarkMizanColorPalette }
 
 val MizanColors.danger: Color
     get() = expense
+
+val MizanColors.budgetWarn: Color
+    get() = budgetWarning
+

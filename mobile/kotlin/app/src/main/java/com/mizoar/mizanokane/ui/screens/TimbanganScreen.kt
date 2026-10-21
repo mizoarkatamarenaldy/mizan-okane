@@ -197,7 +197,7 @@ fun TimbanganScreen(
                 DropdownOption(
                     id = cat,
                     label = "$cat$budgetSuffix",
-                    iconRes = CategoryIcons.getCategoryIconRes(cat, categories)
+                    iconRes = CategoryIcons.getCategoryIconRes(cat, "expense", categories)
                 )
             }
         }

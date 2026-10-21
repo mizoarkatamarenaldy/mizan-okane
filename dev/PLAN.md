@@ -131,6 +131,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
   - [x] Kotlin 6B: Statistik, donut per kategori
   - [x] Kotlin 7A: Pengaturan, tampilan dan zona bahaya
   - [x] Kotlin 7B: Pengaturan, data dan tentang
+  - [x] Kotlin 10A: Perbaikan build
 - [ ] APK rilis
 - [ ] APK Item A: login Google native
 - [ ] Persiapan rilis publik

@@ -2332,3 +2332,32 @@ Cek manual (ditunda, dijalankan pemilik setelah build pertama):
 - Data contoh: tombol memunculkan data seperti web, dan bisa dihapus seperti web.
 - Tentang: Kebijakan Privasi, Syarat dan Ketentuan, dan Tentang Pengembang terbuka dan bisa kembali dengan tombol back.
 
+## Kotlin 10A: Perbaikan build
+
+Tujuan: memperbaiki error kompilasi yang dilaporkan pemilik dari build pertama di Android Studio. Hanya yang tercantum di bawah, tidak lebih.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Warna hanya memakai token yang sudah ada di dev/DESIGN.md.
+
+Daftar error (semua di mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/):
+1. ui/screens/StatistikScreen.kt baris 530 kolom 61, baris 809 kolom 113, baris 921 kolom 27: Unresolved reference 'danger'.
+2. ui/screens/TimbanganScreen.kt baris 686, 687, 688, 689 (kolom 47): Unresolved reference 'budgetWarn'.
+3. ui/screens/TimbanganScreen.kt baris 200 kolom 69: Argument type mismatch, actual 'CategoriesData' tapi 'String' diminta. Baca baris 180 sampai 220 dan deklarasi fungsi yang dipanggil di situ (terkait transaksi penyesuaian Equilibrium), lalu perbaiki pemanggilnya supaya tipe argumen cocok. Jangan ubah signature fungsi kalau pemanggil lain ikut rusak. Kalau perlu ubah signature, cek semua pemanggil.
+
+Aturan:
+- Dugaan akar masalah 1 dan 2: object MizanColors di ui/theme/Color.kt tidak punya properti danger dan budgetWarn, padahal dipakai. Baca Color.kt dan dev/DESIGN.md dulu.
+- danger harus merujuk ke warna token expense yang sudah ada di MizanColors (jangan buat hex baru).
+- budgetWarn harus memakai warna peringatan budget yang tertulis di dev/DESIGN.md dan sama dengan warna peringatan budget di web (desktop/src). Kalau DESIGN.md dan web tidak punya warna itu, JANGAN mengarang hex. Berhenti dan laporkan.
+- Sebelum menambah properti, grep MizanColors di seluruh mobile/kotlin untuk memastikan tidak ada properti lain yang dipakai tapi belum didefinisikan (misalnya MizanColors.xxx). Kalau ada, laporkan di akhir, jangan perbaiki yang tidak ada di daftar kecuali itu properti warna yang hilang dari Color.kt.
+- Jangan sentuh gradle.properties, libs.versions.toml, atau file build lain. Pemilik sudah mengaturnya.
+- Jangan refactor, jangan rapikan, jangan ubah perilaku di luar daftar error.
+- Dilarang menjalankan ./gradlew, gradle, atau perintah build apa pun. Kode harus benar saat dikompilasi pertama kali. Baca ulang SEMUA file Kotlin yang diubah sampai baris terakhir. Jangan pakai API yang tidak yakin.
+- Aturan uang tetap: dilarang Float, Double, BigDecimal di luar object Uang (Float hanya untuk ukuran atau sudut Canvas).
+- Error lain yang kamu lihat saat membaca file tapi tidak ada di daftar: catat di laporan akhir, jangan diperbaiki.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Ditunda, dijalankan pemilik setelah build ulang (Build > Make Project). Hasilnya: error 'danger', 'budgetWarn', dan type mismatch di TimbanganScreen.kt:200 hilang. Error baru yang muncul dilaporkan pemilik untuk 10B.
+

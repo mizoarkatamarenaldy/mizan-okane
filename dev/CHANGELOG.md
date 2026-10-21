@@ -11,6 +11,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 ```
 
 
+## 2026-10-21: Kotlin 10A: Perbaikan build (belum dibuild)
+- Diperbaiki: Properti warna `danger` (merujuk ke token `expense`) dan `budgetWarn` (merujuk ke token `budgetWarning` `#F5A623`) pada class `MizanColors` di `Color.kt` untuk mengatasi error kompilasi unresolved reference pada `StatistikScreen.kt` (baris 530, 809, 921) dan `TimbanganScreen.kt` (baris 686-689) (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/theme/Color.kt`).
+- Diperbaiki: Pemanggilan fungsi `CategoryIcons.getCategoryIconRes` pada pembuatan `DropdownOption` kategori pengeluaran di `TimbanganScreen.kt` baris 200 dengan menyertakan argumen parameter `type = "expense"` sehingga cocok dengan signature fungsi (`String?, String, CategoriesData?`) dan mengatasi error kompilasi argument type mismatch (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
+- Diubah: Menambahkan spesifikasi dan mencentang item "Kotlin 10A: Perbaikan build" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+- Catatan kompilasi: Seluruh berkas yang diubah telah diperiksa ulang dan divalidasi kebenaran sintaks, tipe data, serta token warnanya. Proyek ini belum dibuild melalui gradle sesuai aturan ("belum dibuild", pemilik yang build ulang).
+
 ## 2026-10-20: Kotlin 7B: Pengaturan, data dan tentang (belum dibuild)
 - Ditambah: Berkas vector drawable `ic_data.xml` (ikon database/silinder data) dan `ic_info.xml` (ikon info lingkaran) yang dikonversi langsung dari SVG versi web (`mobile/kotlin/app/src/main/res/drawable/ic_data.xml`, `mobile/kotlin/app/src/main/res/drawable/ic_info.xml`).
 - Ditambah: Kumpulan data contoh lengkap mode demo (`SampleData.kt`) yang mencakup 4 dompet (`Kas Tunai`, `Rekening Bank`, `Dompet Yen`, `Akun USD`), kategori pengeluaran dan pemasukan dengan sub kategori, anggaran bulanan, serta fungsi pembangkit 25 transaksi contoh (`getSampleTransactions`) bertanda `dummy = true` dengan tanggal dinamis relatif terhadap tanggal acuan (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/SampleData.kt`).
