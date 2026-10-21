@@ -2386,3 +2386,30 @@ Cek manual:
 - Kalau masih force close, pemilik kirim log Logcat baru. Nama class di stack trace sekarang sudah terbaca (tanpa r8-map-id), jadi bisa dilacak ke kode.
 
 
+## Kotlin 10C: Perbaikan crash BottomNavigationBar
+
+Tujuan: app langsung force close saat dibuka. Logcat:
+java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.String com.mizoar.mizanokane.ui.navigation.Screen.getRoute()' on a null object reference
+  at com.mizoar.mizanokane.ui.components.BottomNavigationBarKt.BottomNavigationBar(BottomNavigationBar.kt:62)
+  at com.mizoar.mizanokane.MainActivityKt.MizanApp(MainActivity.kt:219)
+Artinya ada objek Screen yang bernilai null saat BottomNavigationBar dikomposisi. Dugaan akar masalah: urutan inisialisasi. Daftar item navigasi (misalnya listOf(Screen.Beranda, Screen.Riwayat, ...)) dibuat di dalam sealed class Screen, companion object-nya, atau top-level di Screen.kt, sehingga saat class Screen belum selesai diinisialisasi, objek turunannya masih null. Dugaan lain: daftar berisi elemen null atau route dibaca dari objek yang belum ada. Buktikan dulu dari kode, jangan menebak.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Urutan dan isi item navigasi bawah tidak berubah (tetap sama dengan versi sebelumnya dan versi web, termasuk tombol Timbangan di tengah).
+
+Aturan:
+- Baca penuh: ui/navigation/Screen.kt, ui/components/BottomNavigationBar.kt, dan MainActivity.kt sekitar baris 190 sampai 240 (pemanggil BottomNavigationBar). Tulis di laporan akhir penyebab sebenarnya, lengkap dengan baris kodenya.
+- Perbaiki sesempit mungkin. Kalau penyebabnya siklus inisialisasi: pindahkan daftar item navigasi keluar dari sealed class atau companion Screen (misalnya fungsi atau val top-level terpisah, atau pakai get() atau by lazy), supaya tidak dibuat saat Screen masih diinisialisasi. Kalau penyebabnya lain, perbaiki penyebab itu.
+- Setelah itu, cek seluruh mobile/kotlin untuk pola serupa: val atau list yang berisi object turunan Screen dan dibuat di dalam Screen itu sendiri. Kalau ada yang sama berisiko, laporkan di akhir. Perbaiki hanya yang berada di jalur BottomNavigationBar dan MainActivity.
+- Jangan ubah rute, nama rute, atau perilaku navigasi lain. Jangan tambah fitur.
+- Hanya ubah file yang perlu di antara Screen.kt, BottomNavigationBar.kt, MainActivity.kt. Jangan sentuh file build, gradle.properties, libs.versions.toml.
+- Dilarang menjalankan ./gradlew, gradle, atau perintah build apa pun. Kode harus benar saat dikompilasi pertama kali. Baca ulang SEMUA file Kotlin yang diubah sampai baris terakhir. Jangan pakai API yang tidak yakin.
+- Aturan uang tetap: dilarang Float, Double, BigDecimal di luar object Uang (Float hanya untuk ukuran atau sudut Canvas).
+- Masalah lain yang kamu lihat saat membaca file tapi bukan bagian crash ini: catat di laporan akhir, jangan diperbaiki.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Ditunda, dijalankan pemilik. Build ulang (Build > Make Project), jalankan app. Hasil yang diharapkan: app terbuka ke Beranda, bottom navigation tampil dengan 5 item, semua tab bisa dibuka tanpa force close.
+- Kalau masih crash, pemilik kirim log Logcat baru untuk 10D.

@@ -100,6 +100,17 @@ sealed class Screen(
     )
 
     companion object {
-        val items = listOf(Beranda, Riwayat, Timbangan, Statistik, Pengaturan)
+        val items: List<Screen>
+            get() = bottomNavItems
     }
+}
+
+val bottomNavItems: List<Screen> by lazy {
+    listOf(
+        Screen.Beranda,
+        Screen.Riwayat,
+        Screen.Timbangan,
+        Screen.Statistik,
+        Screen.Pengaturan
+    )
 }

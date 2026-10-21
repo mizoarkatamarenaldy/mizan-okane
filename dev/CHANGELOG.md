@@ -11,6 +11,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 ```
 
 
+## 2026-10-21: Kotlin 10C: Perbaikan crash BottomNavigationBar (belum dibuild)
+- Diperbaiki: Masalah siklus inisialisasi class pada `Screen.kt` yang menyebabkan `Screen.items` berisi objek `null` saat runtime (`NullPointerException` saat `screen.route` dibaca di `BottomNavigationBar.kt:62`). Daftar item navigasi bawah dipindahkan ke properti top-level `bottomNavItems` dengan inisialisasi `by lazy`, sementara properti `Screen.items` di `companion object` didelegasikan melalui custom getter `get() = bottomNavItems` sehingga tidak lagi dievaluasi saat class `Screen` sedang dalam proses inisialisasi (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/navigation/Screen.kt`).
+- Diubah: Menambahkan spesifikasi dan mencentang item "Kotlin 10C: Perbaikan crash BottomNavigationBar" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+- Catatan kompilasi: Berkas Kotlin yang diubah telah diperiksa dan divalidasi kebenaran sintaks hingga baris terakhir. Proyek ini belum dibuild melalui gradle sesuai aturan ("belum dibuild", pemilik yang build ulang).
+
 ## 2026-10-21: Kotlin 10B: Matikan minify R8 (belum dibuild)
 - Diubah: Blok `buildTypes.release` pada `mobile/kotlin/app/build.gradle.kts` dengan mematikan minifikasi dan reduksi resource (`isMinifyEnabled = false`, `isShrinkResources = false`, serta `optimization { enable = false }`) dan menyematkan komentar penjelasan sesuai instruksi agar R8 tidak merusak `kotlin.collections` saat runtime (`mobile/kotlin/app/build.gradle.kts`).
 - Diubah: Menambahkan opsi `android.disallowKotlinSourceSets=false` pada `gradle.properties` serta menaikkan versi dependensi Room ke `2.8.4` pada `libs.versions.toml` dari perbaikan build lokal pemilik (`mobile/kotlin/gradle.properties`, `mobile/kotlin/gradle/libs.versions.toml`).
