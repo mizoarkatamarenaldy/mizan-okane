@@ -394,17 +394,52 @@ object DriveSyncManager {
         )
     }
 
+    /**
+     * Mengonversi [JsonPrimitive] nilai uang ke [Long] satuan seperseratus.
+     * Jika nilai menyebabkan overflow [Long] atau format tidak valid setelah fallback double,
+     * mencatat ke Logcat dengan tag "MizanSync" (Log.e dengan exception) dan melempar
+     * [IllegalStateException] yang menghentikan sinkron.
+     *
+     * Tidak mencatat nominal uang ke log.
+     *
+     * @param elem Nilai JSON primitif dari field uang.
+     * @param fieldName Nama field (untuk pesan error dan log).
+     * @param recordId ID record (untuk pesan error dan log).
+     */
+    private fun parseAmountSafe(elem: JsonPrimitive, fieldName: String, recordId: String): Long {
+        // Coba konversi langsung melalui Uang (mendukung max 2 desimal)
+        return try {
+            Uang.dariJsonPrimitive(elem)
+        } catch (e: ArithmeticException) {
+            Log.e("MizanSync", "Overflow field '$fieldName' pada record '$recordId'. Sinkron dihentikan.", e)
+            throw IllegalStateException("Overflow field '$fieldName' pada record '$recordId'.", e)
+        } catch (_: IllegalArgumentException) {
+            // Fallback: lebih dari 2 desimal – coba via Double (sama seperti web yang pakai parseFloat)
+            val amtDouble = elem.content.toDoubleOrNull()
+                ?: run {
+                    val ex = IllegalArgumentException("Field '$fieldName' pada record '$recordId' bukan angka valid: '${elem.content}'")
+                    Log.e("MizanSync", "Format field '$fieldName' tidak valid pada record '$recordId'. Sinkron dihentikan.", ex)
+                    throw IllegalStateException("Format field '$fieldName' tidak valid pada record '$recordId'.", ex)
+                }
+            val cents = try {
+                BigDecimal.valueOf(amtDouble)
+                    .multiply(BigDecimal("100"))
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .longValueExact()
+            } catch (e: ArithmeticException) {
+                Log.e("MizanSync", "Overflow field '$fieldName' pada record '$recordId'. Sinkron dihentikan.", e)
+                throw IllegalStateException("Overflow field '$fieldName' pada record '$recordId'.", e)
+            }
+            cents
+        }
+    }
+
     private fun parseTransactionElementSafely(obj: JsonObject): TransactionDto? {
         val id = (obj["id"] as? JsonPrimitive)?.contentOrNull?.trim() ?: return null
         if (id.isEmpty()) return null
         val type = (obj["type"] as? JsonPrimitive)?.contentOrNull?.trim() ?: return null
         val amountElem = obj["amount"] as? JsonPrimitive ?: return null
-        val amount = try {
-            Uang.dariJsonPrimitive(amountElem)
-        } catch (_: Exception) {
-            val amtDouble = amountElem.content.toDoubleOrNull() ?: return null
-            BigDecimal.valueOf(amtDouble).multiply(BigDecimal("100")).setScale(0, RoundingMode.HALF_UP).longValueExact()
-        }
+        val amount = parseAmountSafe(amountElem, "amount", id)
         val date = (obj["date"] as? JsonPrimitive)?.contentOrNull?.trim() ?: return null
         val time = (obj["time"] as? JsonPrimitive)?.contentOrNull?.trim()
         val category = (obj["category"] as? JsonPrimitive)?.contentOrNull?.trim()
@@ -500,10 +535,18 @@ object DriveSyncManager {
             if (elem is JsonPrimitive) {
                 try {
                     itemsMap[k] = Uang.dariJsonPrimitive(elem)
-                } catch (_: Exception) {
+                } catch (e: ArithmeticException) {
+                    Log.e("MizanSync", "Overflow field 'amount' di budget item '$k'. Sinkron dihentikan.", e)
+                    throw IllegalStateException("Overflow field 'amount' di budget item '$k'.", e)
+                } catch (_: IllegalArgumentException) {
                     elem.content.toDoubleOrNull()?.let {
-                        val cents = BigDecimal.valueOf(it).multiply(BigDecimal("100")).setScale(0, RoundingMode.HALF_UP).longValueExact()
-                        itemsMap[k] = cents
+                        try {
+                            val cents = BigDecimal.valueOf(it).multiply(BigDecimal("100")).setScale(0, RoundingMode.HALF_UP).longValueExact()
+                            itemsMap[k] = cents
+                        } catch (e: ArithmeticException) {
+                            Log.e("MizanSync", "Overflow field 'amount' di budget item '$k'. Sinkron dihentikan.", e)
+                            throw IllegalStateException("Overflow field 'amount' di budget item '$k'.", e)
+                        }
                     }
                 }
             }
@@ -518,10 +561,18 @@ object DriveSyncManager {
                     if (elem is JsonPrimitive) {
                         try {
                             subItems[subKey] = Uang.dariJsonPrimitive(elem)
-                        } catch (_: Exception) {
+                        } catch (e: ArithmeticException) {
+                            Log.e("MizanSync", "Overflow field 'amount' di budget subkategori '$cat/$subKey'. Sinkron dihentikan.", e)
+                            throw IllegalStateException("Overflow field 'amount' di budget subkategori '$cat/$subKey'.", e)
+                        } catch (_: IllegalArgumentException) {
                             elem.content.toDoubleOrNull()?.let {
-                                val cents = BigDecimal.valueOf(it).multiply(BigDecimal("100")).setScale(0, RoundingMode.HALF_UP).longValueExact()
-                                subItems[subKey] = cents
+                                try {
+                                    val cents = BigDecimal.valueOf(it).multiply(BigDecimal("100")).setScale(0, RoundingMode.HALF_UP).longValueExact()
+                                    subItems[subKey] = cents
+                                } catch (e: ArithmeticException) {
+                                    Log.e("MizanSync", "Overflow field 'amount' di budget subkategori '$cat/$subKey'. Sinkron dihentikan.", e)
+                                    throw IllegalStateException("Overflow field 'amount' di budget subkategori '$cat/$subKey'.", e)
+                                }
                             }
                         }
                     }

@@ -2536,3 +2536,24 @@ Cek manual:
 - Desktop punya data di Drive. Di APK tekan "Sinkron sekarang": tidak ada error, data desktop muncul di APK, dan teks "belum pernah sinkron" berganti waktu sinkron terakhir.
 - Tambah satu transaksi di APK, sinkron, lalu sinkron di desktop: transaksi muncul di desktop dan desktop tidak error saat membaca file.
 
+## Kotlin 10H: Perbaikan overflow sinkron
+
+Tujuan: memperbaiki sinkron Drive di APK yang gagal dengan pesan "Gagal sinkron: ArithmeticException - Overflow" saat file sinkron dari web sudah berhasil dibaca (setelah Kotlin 10G).
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Aturan:
+- Cari semua pemakaian longValueExact, intValueExact, toIntExact, addExact, multiplyExact, dan konversi angka sejenis di jalur sinkron dan konversi data: DriveSyncManager, DriveApiClient, JsonBackupManager, JsonDto, Uang.kt, dan pemetaan ke Room.
+- Tentukan field mana dari file sinkron web yang nilainya di luar rentang tipe Kotlin (uang, waktu ubah, ID, atau lainnya). Bandingkan dengan cara web membaca field itu di desktop/src/js/sync.js dan app.js, serta dengan jalur Impor JSON di Kotlin.
+- Ubah konversi di Kotlin supaya hasilnya sama dengan web dan data desktop lolos. Aturan penyimpanan uang (Long satuan seperseratus) tidak berubah.
+- Catat ke Logcat dengan tag "MizanSync" menggunakan Log.e dengan objek exception (supaya stack trace lengkap tampil), plus nama field dan ID record yang bermasalah. Jangan catat nominal uang.
+- Kalau ada nilai yang memang tidak wajar, jangan dibuang atau diubah diam-diam. Hentikan sinkron dengan pesan error yang menyebut nama field dan ID record, lalu laporkan ke pemilik.
+- Perbaiki hanya penyebab error ini. Jangan ubah logika gabung, UI, web, atau format data.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Desktop punya data di Drive. Di APK tekan "Sinkron sekarang": tidak ada error, data desktop muncul di APK dengan nominal yang sama seperti di desktop, dan teks "belum pernah sinkron" berganti waktu sinkron terakhir.
+- Tambah satu transaksi di APK, sinkron, lalu sinkron di desktop: transaksi muncul di desktop dengan nominal yang benar.

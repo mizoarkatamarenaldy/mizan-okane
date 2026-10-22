@@ -138,6 +138,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
   - [x] Kotlin 10D: Tampilkan error login asli
   - [x] Kotlin 8B: Sinkron Drive
   - [x] Kotlin 10G: Perbaikan format file sinkron
+  - [x] Kotlin 10H: Perbaikan overflow sinkron
 - [ ] APK rilis
 - [x] APK Item A: login Google native
 - [ ] Persiapan rilis publik
