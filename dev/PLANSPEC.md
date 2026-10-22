@@ -2513,3 +2513,26 @@ Cek manual:
 - APK dan desktop sama-sama punya data berbeda sebelum sinkron pertama: setelah sinkron keduanya berisi gabungan, tidak ada yang hilang.
 - Matikan internet lalu tekan "Sinkron sekarang": muncul pesan error asli, data lokal utuh, waktu sinkron terakhir tidak berubah.
 - Logout: data lokal tetap ada.
+
+## Kotlin 10G: Perbaikan format file sinkron
+
+Tujuan: memperbaiki sinkron Drive di APK yang gagal dengan pesan "Gagal sinkron: IllegalStateException - Format file sinkron di Drive tidak dikenali." Login dan akses Drive sudah berhasil, file sinkron dari web sudah ada di appDataFolder, tapi pembacaan isinya ditolak.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Aturan:
+- Cari di mobile/kotlin tempat pesan "Format file sinkron di Drive tidak dikenali" dilempar, dan pahami syarat yang membuatnya dilempar.
+- Baca di desktop/src/js/sync.js bagaimana web menulis file ke Drive (nama file, struktur tingkat atas, pembungkus, field versi, penamaan field) dan cocokkan dengan dev/SCHEMA.md.
+- Ubah pembacaan di Kotlin supaya menerima persis format yang ditulis web. Unggahan dari Kotlin juga harus menulis struktur yang sama persis dengan web, supaya desktop bisa membacanya kembali.
+- Saat format tidak dikenali, catat ke Logcat dengan tag "MizanSync": daftar kunci tingkat atas file dan nilai field versi. Jangan catat isi data keuangan.
+- Perbaiki hanya penyebab error ini. Jangan ubah logika gabung, UI, atau hal lain.
+- Kalau perbaikan ternyata butuh mengubah web, format data, atau SCHEMA.md, berhenti dan laporkan ke pemilik.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Kotlin yang disesuaikan dengan format web, bukan sebaliknya.
+
+Cek manual:
+- Desktop punya data di Drive. Di APK tekan "Sinkron sekarang": tidak ada error, data desktop muncul di APK, dan teks "belum pernah sinkron" berganti waktu sinkron terakhir.
+- Tambah satu transaksi di APK, sinkron, lalu sinkron di desktop: transaksi muncul di desktop dan desktop tidak error saat membaca file.
+

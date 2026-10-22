@@ -11,6 +11,14 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 ```
 
 
+## 2026-10-22: Kotlin 10G: Perbaikan format file sinkron (belum dibuild)
+- Diperbaiki: Pembacaan berkas sinkronisasi Google Drive (`mizan-okane-data.json`) pada `DriveSyncManager.kt` agar toleran dan kompatibel penuh dengan berbagai variasi format data yang dihasilkan versi web desktop (`desktop/src/js/sync.js`). Validasi awal kini menyamai web (memastikan objek JSON memiliki array `transactions` dengan setiap elemen berupa objek ber-`id` string non-kosong).
+- Diperbaiki: Penanganan pembacaan `categories` yang mendukung format string nama kategori langsung maupun format objek tanpa atribut `order`/`icon`, `budgets` yang mendukung ketiadaan atau kelengkapan `subcategories`, serta `wallets` yang mendukung fallback field `urutan` dan penomoran indeks otomatis (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/sync/DriveSyncManager.kt`).
+- Diperbaiki: Penjagaan pada proses penggabungan dompet agar dompet lokal tidak terhapus jika daftar dompet dari remote Drive kosong atau tidak ada (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/sync/DriveSyncManager.kt`).
+- Ditambah: Pencatatan log peringatan ke Logcat dengan tag `"MizanSync"` saat format berkas sinkronisasi tidak dikenali, mencakup daftar kunci tingkat atas dan nilai field versi (`version`, `schemaVersion`) tanpa mencatat isi data keuangan (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/sync/DriveSyncManager.kt`).
+- Diubah: Menambahkan spesifikasi dan mencentang item "Kotlin 10G: Perbaikan format file sinkron" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+- Catatan kompilasi: Berkas Kotlin yang diubah telah diverifikasi kebenaran sintaks hingga baris terakhir. Proyek ini belum dibuild melalui gradle sesuai aturan RULES.md ("belum dibuild"), dan pengujian ("ditunda, dijalankan pemilik").
+
 ## 2026-10-22: Kotlin 8B: Sinkron Drive (belum dibuild)
 - Ditambah: Izin jaringan `android.permission.INTERNET` dan `android.permission.ACCESS_NETWORK_STATE` pada manifes aplikasi (`mobile/kotlin/app/src/main/AndroidManifest.xml`).
 - Ditambah: Klien Google Drive REST API v3 `DriveApiClient.kt` berbasis `HttpURLConnection` murni untuk operasi berkas `mizan-okane-data.json` di `appDataFolder` Google Drive (pencarian berkas via `findRemoteFile`, pengunduhan konten via `downloadRemote`, dan pengunggahan berkas baru via multipart POST atau pembaruan berkas via POST dengan header `X-HTTP-Method-Override: PATCH`) lengkap dengan exception khusus `AuthRequiredException` dan `DriveApiException` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/sync/DriveApiClient.kt`).
