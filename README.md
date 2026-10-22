@@ -1,34 +1,55 @@
-# mizan-okane
+# Mizan Okane
 
-Money manager pribadi berbasis PWA. Jalan di HP dan PC, bisa offline, data sinkron otomatis lewat Google Drive.
+Money manager pribadi untuk mencatat pemasukan dan pengeluaran. Jalan di Android, Windows, dan web, data bisa disinkronkan lewat Google Drive milikmu sendiri.
 
 *Mizan* berarti keseimbangan, *okane* berarti uang. Tujuannya sederhana: menjaga pemasukan dan pengeluaran tetap seimbang.
 
 ## Status
-Dalam pengembangan. Rencana dan progres ada di [`PLAN.md`](PLAN.md) dan [`CHANGELOG.md`](CHANGELOG.md).
+Pre-release **v0.1.0**. Aplikasi sudah bisa dipakai, tapi tampilan di Android masih dalam penyempurnaan karena baru dikonversi ke Kotlin. Rencana dan progres ada di [`dev/PLAN.md`](dev/PLAN.md) dan [`dev/CHANGELOG.md`](dev/CHANGELOG.md).
 
-## Fitur (target versi 1)
-- Catat pemasukan dan pengeluaran
-- Kategori transaksi
-- Riwayat transaksi dan total saldo
+## Unduh
+- **Android (APK):** lewat [GitHub Releases](https://github.com/mizoarkatamarenaldy/mizan-okane/releases/tag/v0.1.0). Tidak tersedia di Play Store.
+- **Windows:** lewat [GitHub Releases](https://github.com/mizoarkatamarenaldy/mizan-okane/releases/tag/v0.1.0).
+- **Web (PWA):** [Buka di browser](https://mizoarkatamarenaldy.github.io/mizan-okane/). Bisa di-install di HP dan PC.
+
+## Fitur
+- Catat pemasukan dan pengeluaran, lengkap dengan waktu
+- Kategori dan sub kategori, dengan ikon kustom
+- Beberapa dompet, transfer antar dompet, dan mata uang per dompet (Rupiah, Yen, USD)
+- Budget per kategori dan sub kategori
+- Riwayat dengan pencarian dan filter bulan
+- Statistik harian, bulanan, dan tahunan, termasuk diagram per kategori
+- Timbangan: ringkasan keseimbangan pemasukan dan pengeluaran
+- Mode gelap
+- Ekspor CSV dan JSON, impor JSON
 - Jalan offline
-- Sinkron antar perangkat lewat Google Drive
+- Bisa dipakai tanpa login
 
 ## Cara kerja data
-- Data disimpan lokal di perangkat (IndexedDB).
-- Sinkron ke folder khusus aplikasi di Google Drive milik pengguna (`appDataFolder`).
-- Tidak ada server pihak ketiga.
+- Data disimpan lokal di perangkat (IndexedDB di web, Room di Android).
+- Sinkron opsional ke folder khusus aplikasi di Google Drive milikmu (`appDataFolder`) lewat Google Sign-In.
+- Tidak ada server pihak ketiga, tidak ada iklan, tidak ada analitik.
 - Repo ini hanya berisi kode dan dokumen, tidak berisi data keuangan.
+- Format data dicatat di [`dev/SCHEMA.md`](dev/SCHEMA.md).
+
+## Struktur repo
+- `desktop/`: versi web (PWA) dan Windows (Tauri)
+- `mobile/kotlin/`: aplikasi Android native (Kotlin, Jetpack Compose, Room)
+- `dev/`: rencana, aturan, desain, skema data, dan changelog
 
 ## Teknologi
-- PWA (HTML, CSS, JavaScript)
-- IndexedDB
-- Google Drive API dan Google OAuth
-- GitHub Pages
+- Web: HTML, CSS, JavaScript, IndexedDB, GitHub Pages
+- Windows: Tauri
+- Android: Kotlin, Jetpack Compose, Room
+- Sinkron: Google Drive API dan Google OAuth
 
-## Dokumen
-- [`PLAN.md`](PLAN.md): rencana tahap dan keputusan desain
-- [`CHANGELOG.md`](CHANGELOG.md): riwayat fitur dan perbaikan
+## Privasi
+Kebijakan privasi: [https://mizoarkatamarenaldy.github.io/mizan-okane/privasi.html]
+
+## Dukung Pengembang
+Aplikasi ini gratis dan dikembangkan sendiri (dan AI seperti Claude juga Gemini). Kalau terasa bermanfaat, kamu bisa mendukung lewat:
+- [Ko-fi](https://ko-fi.com/mizoarkatamarenaldy)
+- [Trakteer](https://trakteer.id/MizoArkatamaRenaldy)
 
 ## Pembuat
-Dibuat oleh Mizo.
+Dibuat oleh Mizo Arkatama Renaldy.
