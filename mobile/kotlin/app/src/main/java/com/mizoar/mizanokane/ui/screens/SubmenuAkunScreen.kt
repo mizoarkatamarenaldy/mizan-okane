@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -69,22 +71,29 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingExcept
 import com.mizoar.mizanokane.R
 import com.mizoar.mizanokane.data.auth.AuthPreferences
 import com.mizoar.mizanokane.data.auth.GoogleAuthConfig
+import com.mizoar.mizanokane.data.repository.MizanRepository
+import com.mizoar.mizanokane.data.sync.DriveSyncManager
 import com.mizoar.mizanokane.ui.theme.MizanTheme
+import java.util.Calendar
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 /**
  * Layar Submenu Akun dan Sinkron aplikasi Mizan Okane.
- * Sesuai spek Kotlin 8A:
+ * Sesuai spek Kotlin 8A dan 8B:
  * - Menampilkan status akun Google Drive
  * - Belum login: tombol "Login Google" dan status "belum login"
- * - Sudah login: menampilkan email akun dan tombol "Logout", status "belum pernah sinkron"
+ * - Sudah login: menampilkan email akun, tombol "Sinkron sekarang", dan tombol "Logout"
+ * - Status teks: "belum pernah sinkron", "Menyinkronkan dengan Drive...", atau "Tersinkron dengan Drive, pukul HH.mm."
  * - Credential Manager (androidx.credentials) + googleid dengan OAuth Client ID Web
  * - Otorisasi scope drive.appdata lewat Identity.getAuthorizationClient
+ * - Sinkronisasi dua arah Google Drive appDataFolder (Last-Write-Wins berdasarkan updatedAt)
  * - Status akun disimpan di DataStore Preferences (terpisah dari Room)
  * - Keluar: hapus status akun lokal dan panggil clearCredentialState (data lokal aman)
  */
 @Composable
 fun SubmenuAkunScreen(
+    repository: MizanRepository,
     authPreferences: AuthPreferences,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -94,9 +103,13 @@ fun SubmenuAkunScreen(
     val activity = remember(context) { findActivity(context) }
 
     val accountEmail by authPreferences.accountEmailFlow.collectAsState(initial = null)
+    val lastSyncAt by authPreferences.lastSyncAtFlow.collectAsState(initial = null)
 
     var isLoading by remember { mutableStateOf(false) }
+    var isSyncing by remember { mutableStateOf(false) }
     var pendingEmail by remember { mutableStateOf<String?>(null) }
+    var pendingSyncAfterAuth by remember { mutableStateOf(false) }
+    var syncErrorMessage by remember { mutableStateOf<String?>(null) }
     var showLogoutConfirmDialog by remember { mutableStateOf(false) }
 
     val authResultLauncher = rememberLauncherForActivityResult(
@@ -104,16 +117,51 @@ fun SubmenuAkunScreen(
     ) { activityResult ->
         isLoading = false
         if (activityResult.resultCode == Activity.RESULT_OK) {
+            val email = pendingEmail
+            val shouldSync = pendingSyncAfterAuth
+            pendingEmail = null
+            pendingSyncAfterAuth = false
             coroutineScope.launch {
-                val email = pendingEmail
                 if (email != null) {
                     authPreferences.setAccountEmail(email)
-                    Toast.makeText(context, context.getString(R.string.msg_login_google_success), Toast.LENGTH_SHORT).show()
                 }
-                pendingEmail = null
+                try {
+                    val authResult = Identity.getAuthorizationClient(context)
+                        .getAuthorizationResultFromIntent(activityResult.data)
+                    val token = authResult?.accessToken
+                    if (token != null) {
+                        DriveSyncManager.setMemoryToken(token)
+                        if (shouldSync) {
+                            isSyncing = true
+                            syncErrorMessage = null
+                            try {
+                                DriveSyncManager.performSync(
+                                    accessToken = token,
+                                    repository = repository,
+                                    authPreferences = authPreferences
+                                )
+                                Toast.makeText(context, context.getString(R.string.msg_sync_success), Toast.LENGTH_SHORT).show()
+                            } catch (e: Exception) {
+                                handleSyncError(context, e) { msg -> syncErrorMessage = msg }
+                            } finally {
+                                isSyncing = false
+                            }
+                        } else {
+                            Toast.makeText(context, context.getString(R.string.msg_login_google_success), Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    if (shouldSync) {
+                        handleSyncError(context, e) { msg -> syncErrorMessage = msg }
+                    } else {
+                        handleAuthError(context, "otorisasi", e, R.string.msg_login_failed_authorization)
+                    }
+                }
             }
         } else {
             pendingEmail = null
+            pendingSyncAfterAuth = false
+            isSyncing = false
             Toast.makeText(context, context.getString(R.string.msg_auth_cancelled), Toast.LENGTH_SHORT).show()
         }
     }
@@ -142,7 +190,9 @@ fun SubmenuAkunScreen(
                                 credentialManager.clearCredentialState(ClearCredentialStateRequest())
                             } catch (_: Exception) {
                             }
+                            DriveSyncManager.clearMemoryToken()
                             authPreferences.clearAccount()
+                            syncErrorMessage = null
                             Toast.makeText(context, context.getString(R.string.msg_logout_success), Toast.LENGTH_SHORT).show()
                         }
                     },
@@ -257,7 +307,7 @@ fun SubmenuAkunScreen(
 
                     Button(
                         onClick = {
-                            if (isLoading) return@Button
+                            if (isLoading || isSyncing) return@Button
                             val act = activity ?: run {
                                 handleAuthError(
                                     context = context,
@@ -268,6 +318,7 @@ fun SubmenuAkunScreen(
                                 return@Button
                             }
                             isLoading = true
+                            syncErrorMessage = null
                             coroutineScope.launch {
                                 try {
                                     val credentialManager = CredentialManager.create(act)
@@ -305,6 +356,7 @@ fun SubmenuAkunScreen(
                                                     val pendingIntent = authResult.pendingIntent
                                                     if (pendingIntent != null) {
                                                         pendingEmail = email
+                                                        pendingSyncAfterAuth = false
                                                         val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
                                                         authResultLauncher.launch(intentSenderRequest)
                                                     } else {
@@ -319,6 +371,10 @@ fun SubmenuAkunScreen(
                                                 } else {
                                                     // Izin sudah pernah diberikan sebelumnya
                                                     isLoading = false
+                                                    val token = authResult.accessToken
+                                                    if (token != null) {
+                                                        DriveSyncManager.setMemoryToken(token)
+                                                    }
                                                     coroutineScope.launch {
                                                         authPreferences.setAccountEmail(email)
                                                         Toast.makeText(context, context.getString(R.string.msg_login_google_success), Toast.LENGTH_SHORT).show()
@@ -374,7 +430,7 @@ fun SubmenuAkunScreen(
                                 }
                             }
                         },
-                        enabled = !isLoading,
+                        enabled = !isLoading && !isSyncing,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MizanTheme.colors.accent,
                             contentColor = Color.White
@@ -399,36 +455,133 @@ fun SubmenuAkunScreen(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    val statusText = when {
+                        isSyncing -> stringResource(id = R.string.sync_status_syncing)
+                        lastSyncAt != null && lastSyncAt!! > 0L -> stringResource(
+                            id = R.string.sync_status_synced,
+                            formatSyncTime(lastSyncAt!!)
+                        )
+                        else -> stringResource(id = R.string.sync_status_never_synced)
+                    }
+
                     Text(
-                        text = stringResource(id = R.string.sync_status_never_synced),
+                        text = statusText,
                         style = MaterialTheme.typography.bodySmall.copy(
                             color = MizanTheme.colors.textSecondary,
                             fontSize = 13.sp
                         )
                     )
 
+                    if (!syncErrorMessage.isNullOrBlank() && !isSyncing) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = syncErrorMessage!!,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = MizanTheme.colors.danger,
+                                fontSize = 12.sp
+                            )
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
-                        onClick = { showLogoutConfirmDialog = true },
-                        enabled = !isLoading,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MizanTheme.colors.surface,
-                            contentColor = MizanTheme.colors.text
-                        ),
-                        border = BorderStroke(1.dp, MizanTheme.colors.border),
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.defaultMinSize(minHeight = 44.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(id = R.string.action_logout_google),
-                            fontWeight = FontWeight.Medium
-                        )
+                        Button(
+                            onClick = {
+                                if (isLoading || isSyncing) return@Button
+                                syncErrorMessage = null
+                                val act = activity ?: run {
+                                    handleSyncError(context, IllegalStateException("Activity tidak ditemukan")) {
+                                        syncErrorMessage = it
+                                    }
+                                    return@Button
+                                }
+                                isSyncing = true
+                                coroutineScope.launch {
+                                    try {
+                                        val token = DriveSyncManager.getOrRequestAccessToken(
+                                            activity = act,
+                                            email = currentEmail,
+                                            onResolutionRequired = { pendingIntent ->
+                                                pendingEmail = currentEmail
+                                                pendingSyncAfterAuth = true
+                                                val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+                                                authResultLauncher.launch(intentSenderRequest)
+                                            }
+                                        )
+                                        if (token != null) {
+                                            DriveSyncManager.performSync(
+                                                accessToken = token,
+                                                repository = repository,
+                                                authPreferences = authPreferences
+                                            )
+                                            Toast.makeText(context, context.getString(R.string.msg_sync_success), Toast.LENGTH_SHORT).show()
+                                        }
+                                    } catch (e: Exception) {
+                                        handleSyncError(context, e) { msg ->
+                                            syncErrorMessage = msg
+                                        }
+                                    } finally {
+                                        if (!pendingSyncAfterAuth) {
+                                            isSyncing = false
+                                        }
+                                    }
+                                }
+                            },
+                            enabled = !isLoading && !isSyncing,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MizanTheme.colors.accent,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.defaultMinSize(minHeight = 44.dp)
+                        ) {
+                            if (isSyncing) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = stringResource(id = R.string.action_sync_now),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        Button(
+                            onClick = { showLogoutConfirmDialog = true },
+                            enabled = !isLoading && !isSyncing,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MizanTheme.colors.surface,
+                                contentColor = MizanTheme.colors.text
+                            ),
+                            border = BorderStroke(1.dp, MizanTheme.colors.border),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.defaultMinSize(minHeight = 44.dp)
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.action_logout_google),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
             }
         }
     }
+}
+
+private fun formatSyncTime(timestamp: Long): String {
+    val cal = Calendar.getInstance()
+    cal.timeInMillis = timestamp
+    val h = cal.get(Calendar.HOUR_OF_DAY)
+    val m = cal.get(Calendar.MINUTE)
+    return String.format(Locale.ROOT, "%02d.%02d", h, m)
 }
 
 private fun findActivity(context: Context): Activity? {
@@ -441,6 +594,47 @@ private fun findActivity(context: Context): Activity? {
 }
 
 private const val TAG_AUTH = "MizanAuth"
+private const val TAG_SYNC = "MizanSync"
+
+/**
+ * Menangani error sinkronisasi Google Drive:
+ * - Menentukan kelas exception dan kode status (jika ApiException)
+ * - Menulis ke Logcat dengan tag "MizanSync" (berisi kelas exception dan pesan lengkap)
+ * - Memformat pesan dari strings.xml (R.string.msg_sync_failed) dan memotong maksimal 200 karakter
+ * - Menampilkan Toast dan menyetel pesan error tampilan
+ */
+private fun handleSyncError(
+    context: Context,
+    exception: Throwable,
+    onSetErrorMessage: (String) -> Unit = {}
+) {
+    val apiEx = (exception as? ApiException) ?: (exception.cause as? ApiException)
+    val className = if (apiEx != null && exception !is ApiException) {
+        "${exception.javaClass.simpleName} (status ${apiEx.statusCode})"
+    } else if (exception is ApiException) {
+        "${exception.javaClass.simpleName} (status ${exception.statusCode})"
+    } else {
+        exception.javaClass.simpleName.ifEmpty { exception.javaClass.name }
+    }
+
+    val rawMsg = exception.message?.trim()?.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
+        ?: exception.cause?.message?.trim()?.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
+    val msg = rawMsg ?: "-"
+
+    // Tulis ke Logcat tag MizanSync
+    Log.e(TAG_SYNC, "Tahap sinkron: $className - $msg", exception)
+
+    // Format pesan dan potong maksimal 200 karakter
+    val formatted = context.getString(R.string.msg_sync_failed, className, msg)
+    val displayMessage = if (formatted.length > 200) {
+        formatted.take(197) + "..."
+    } else {
+        formatted
+    }
+
+    onSetErrorMessage(displayMessage)
+    Toast.makeText(context, displayMessage, Toast.LENGTH_LONG).show()
+}
 
 /**
  * Menangani error login autentikasi:

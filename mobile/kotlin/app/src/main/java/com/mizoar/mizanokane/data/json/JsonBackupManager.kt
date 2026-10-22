@@ -276,7 +276,7 @@ object JsonBackupManager {
         )
     }
 
-    private fun isValidTransaction(dto: TransactionDto): Boolean {
+    fun isValidTransaction(dto: TransactionDto): Boolean {
         if (dto.id.trim().isEmpty()) return false
         if (dto.type != "income" && dto.type != "expense" && dto.type != "transfer" && dto.type != "penyesuaian") {
             return false
@@ -304,7 +304,7 @@ object JsonBackupManager {
         return result.sortedBy { it.order }
     }
 
-    private fun sanitizeCategories(data: CategoriesData): CategoriesData {
+    fun sanitizeCategories(data: CategoriesData): CategoriesData {
         val cleanIncome = sanitizeCategoryList(data.income, DefaultData.DEFAULT_CATEGORIES.income)
         val cleanExpense = sanitizeCategoryList(data.expense, DefaultData.DEFAULT_CATEGORIES.expense)
 

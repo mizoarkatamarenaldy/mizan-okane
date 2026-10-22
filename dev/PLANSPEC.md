@@ -2477,3 +2477,39 @@ Cek manual (ditunda, dijalankan pemilik):
 - Tekan login lalu batalkan dengan tombol back di picker: pesan "login dibatalkan" tampil.
 - Tekan login dan pilih akun saat konfigurasi Client ID bermasalah: pesan tampil dengan nama kelas exception, dan Logcat tag MizanAuth berisi detailnya.
 - Login normal dengan konfigurasi benar: berhasil seperti di 8A.
+
+
+## Kotlin 8B: Sinkron Drive
+
+Tujuan: APK Kotlin bisa menyinkronkan data dengan Google Drive appDataFolder, menggabung data lokal dan data di Drive (bukan saling menimpa), dengan perilaku yang sama seperti web. Ini melengkapi login native dari Kotlin 8A.
+
+Tempat dan tampilan:
+- Halaman "Akun dan Sinkron" (yang sudah menampilkan email, teks sinkron terakhir, dan tombol Logout) ditambah tombol "Sinkron sekarang".
+- Teks "belum pernah sinkron" diganti waktu sinkron terakhir yang berhasil setelah sinkron pertama. Teks dan format waktu ikut web kalau web punya padanannya.
+- Saat sinkron berjalan, tombol nonaktif dan tampil indikator proses. Saat gagal, tampilkan pesan error asli (seperti yang dilakukan di Kotlin 10D), bukan pesan generik.
+- Tampilan baru wajib mengikuti dev/DESIGN.md.
+
+Aturan:
+- Sebelum menulis apa pun, baca logika sinkron di desktop/src (nama file di Drive, struktur isi, urutan langkah, pemicu sinkron). Web adalah acuan. Kalau detail tidak tertulis di spek ini, ikuti web. Kalau spek ini bertentangan dengan web, berhenti dan laporkan ke pemilik.
+- Penyimpanan di Drive: file JSON di appDataFolder, scope drive.appdata. Nama file dan struktur isi persis seperti web dan dev/SCHEMA.md.
+- Akses Drive memakai jalur otorisasi native yang sudah ada dari Kotlin 8A. Client ID Android tidak boleh ditulis di kode. OAuth Client ID Web tidak berubah.
+- Alur satu kali sinkron: ambil file dari Drive (kalau belum ada, anggap kosong), gabungkan dengan data lokal, simpan hasil gabungan ke Room, lalu unggah hasil gabungan ke Drive.
+- Aturan gabung: per ID, data dengan waktu ubah terbaru menang. Data yang hanya ada di satu sisi masuk ke hasil gabungan. Soft delete (penanda terhapus) ikut digabung dengan aturan waktu ubah yang sama, jadi hapusan di satu perangkat menyebar ke perangkat lain. Tidak ada data yang dibuang langsung.
+- Cakupan data yang disinkron sama persis dengan web. Data contoh tidak pernah ikut sinkron.
+- Pemicu sinkron ikut web. Minimal tombol manual "Sinkron sekarang" harus ada.
+- Kalau belum login, tombol sinkron tidak muncul atau nonaktif, dan aplikasi tetap jalan penuh secara lokal.
+- Kalau sinkron gagal di tengah jalan (jaringan putus, token ditolak, dll), data lokal tidak boleh rusak atau berkurang, dan waktu sinkron terakhir tidak diubah.
+- Logout tidak menghapus data lokal.
+- Sengaja TIDAK dilakukan: mengubah format data, menambah fitur yang tidak ada di web, menambah Client ID, atau menjalankan build.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Format tetap mengikuti dev/SCHEMA.md. Waktu sinkron terakhir disimpan di penyimpanan setelan lokal yang sudah ada, bukan lewat perubahan skema Room.
+
+Cek manual:
+- Desktop punya data, APK masih kosong. Login di APK, tekan "Sinkron sekarang": semua data desktop muncul di APK, dan waktu sinkron terakhir tampil.
+- Tambah satu transaksi di APK, sinkron, lalu sinkron di desktop: transaksi itu muncul di desktop.
+- Edit transaksi yang sama di dua sisi dengan waktu ubah berbeda, lalu sinkron di keduanya: versi dengan waktu ubah terbaru yang bertahan di dua sisi.
+- Hapus satu transaksi di APK, sinkron, lalu sinkron di desktop: transaksi itu terhapus juga di desktop dan tidak muncul lagi.
+- APK dan desktop sama-sama punya data berbeda sebelum sinkron pertama: setelah sinkron keduanya berisi gabungan, tidak ada yang hilang.
+- Matikan internet lalu tekan "Sinkron sekarang": muncul pesan error asli, data lokal utuh, waktu sinkron terakhir tidak berubah.
+- Logout: data lokal tetap ada.

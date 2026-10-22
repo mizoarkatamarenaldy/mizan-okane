@@ -249,7 +249,7 @@ data class BackupRootDto(
     val app: String = "mizan-okane",
     val version: Int = 2,
     val schemaVersion: Int = 2,
-    val exportedAt: String,
+    val exportedAt: String = "",
     val transactions: List<TransactionDto> = emptyList(),
     val wallets: List<WalletDto> = emptyList(),
     val categories: CategoriesData? = null,

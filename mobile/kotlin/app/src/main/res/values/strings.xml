@@ -328,4 +328,11 @@
     <string name="msg_login_failed_credential">Gagal login: %1$s - %2$s</string>
     <string name="msg_login_failed_identity">Gagal tahap identitas: %1$s - %2$s</string>
     <string name="msg_login_failed_authorization">Gagal tahap otorisasi: %1$s - %2$s</string>
+
+    <!-- Sinkron Drive (Kotlin 8B) -->
+    <string name="action_sync_now">Sinkron sekarang</string>
+    <string name="sync_status_syncing">Menyinkronkan dengan Drive&#8230;</string>
+    <string name="sync_status_synced">Tersinkron dengan Drive, pukul %1$s.</string>
+    <string name="msg_sync_success">Sinkronisasi berhasil.</string>
+    <string name="msg_sync_failed">Gagal sinkron: %1$s - %2$s</string>
 </resources>

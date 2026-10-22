@@ -347,6 +347,7 @@ fun MizanApp(
             }
             composable(Screen.SubmenuAkun.route) {
                 SubmenuAkunScreen(
+                    repository = repository,
                     authPreferences = authPreferences,
                     onNavigateBack = { navController.popBackStack() }
                 )
