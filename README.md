@@ -44,12 +44,17 @@ Pre-release **v0.1.0**. Aplikasi sudah bisa dipakai, tapi tampilan di Android ma
 - Sinkron: Google Drive API dan Google OAuth
 
 ## Privasi
-Kebijakan privasi: [https://mizoarkatamarenaldy.github.io/mizan-okane/privasi.html]
+Kebijakan privasi: [Privasi](https://mizoarkatamarenaldy.github.io/mizan-okane/privasi.html)
 
 ## Dukung Pengembang
 Aplikasi ini gratis dan dikembangkan sendiri (dan AI seperti Claude juga Gemini). Kalau terasa bermanfaat, kamu bisa mendukung lewat:
-- [Ko-fi](https://ko-fi.com/mizoarkatamarenaldy)
-- [Trakteer](https://trakteer.id/MizoArkatamaRenaldy)
+
+<a href="https://ko-fi.com/mizoarkatamarenaldy">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" height="40" alt="Dukung di Ko-fi" />
+</a>
+<a href="https://trakteer.id/MizoArkatamaRenaldy">
+  <img src="https://edge-cdn.trakteer.id/images/embed/trbtn-red-1.png?v=24-01-2025" height="40" alt="Trakteer Saya" />
+</a>
 
 ## Pembuat
-Dibuat oleh Mizo Arkatama Renaldy.
+Dibuat oleh [Mizo Arkatama Renaldy](mizoarkatamarenaldy.github.io).
