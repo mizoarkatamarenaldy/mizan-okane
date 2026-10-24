@@ -2627,3 +2627,38 @@ Cek manual:
 - Pemilik menghapus satu sub kategori. Setelah aplikasi dibuka ulang, sub kategori itu tetap hilang.
 - Pemilik menggeser urutan budget. Setelah aplikasi dibuka ulang, urutannya bertahan dan sama dengan cara web menyimpannya.
 - Pemilik memilih ikon kustom untuk satu kategori. Setelah dibuka ulang, ikon yang sama tampil.
+
+## Kotlin 9C: Audit Timbangan dan Statistik
+
+Tujuan: Memastikan layar Timbangan dan Statistik di mobile/kotlin sama dengan versi web. Acuan: desktop/src dan dev/SCHEMA.md. Dilarang menambah fitur. Ketidaksamaan yang jelas diperbaiki di mobile/kotlin. Yang ragu tidak diubah, cukup dicatat di entri CHANGELOG.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Perbaikan tampilan hanya untuk menyamakan dengan web dan dev/DESIGN.md.
+
+Aturan:
+- Sudah terbukti beres, jangan diaudit lagi: versi KSP, MizanColors.danger dan budgetWarn, JsonUnquotedLiteral dan OptIn, laporan 4B, 5A, 5B, 6A.
+- Hanya audit item di bawah ini. Jangan menyentuh Beranda, Riwayat, form transaksi, dompet, kategori, budget, pengaturan, data, atau reset.
+
+Daftar audit:
+- #13 TimbanganScreen.kt (sekitar 1196 baris): semua R.string yang dipakai ada di strings.xml.
+- #15 Semua R.string dan R.drawable yang dipakai di kode 5A, 5B, 6A, 6B ada.
+- #16 Transaksi penyesuaian Equilibrium: id kategori sama dengan web. Surplus dicatat sebagai pemasukan, defisit sebagai pengeluaran. Sub kategori chip (Bunga, Cashback, Koreksi, Biaya admin, Lupa catat) punya id yang sama dengan web. Penyimpanan lewat saveTransaction. TimbanganScreen memanggil calculateWalletBalances.
+- #18 Bandingkan dengan web: kartu "Timbang Sebelum Beli", tombol "Tambah Transaksi" di Statistik kosong, bar detail periode terpilih, batas periode berjalan, jendela geser 3 sampai 6 bulan. Kalau web tidak punya, catat di CHANGELOG, jangan dihapus tanpa yakin.
+- #19 Aturan hitung Statistik sama dengan web (desktop/src/app.js sekitar baris 3040 sampai 3550): transaksi Equilibrium ikut dihitung, transfer dikeluarkan.
+- #20 Baca ulang penuh StatistikScreen.kt, StatistikCalculations.kt, MainActivity.kt, strings.xml (edit terakhir di 6A belum dibaca ulang).
+- #21 Teks di Canvas (StatistikChartCanvas, TimbanganScaleCanvas): memakai TextMeasurer/drawText, atau nativeCanvas dengan impor yang benar.
+- #22 Uang.formatCompactCurrency: periksa hasil untuk angka kecil, angka besar, dan USD. Fungsi lama tidak berubah perilakunya.
+- #25 StatistikScreen.kt (sekitar 1685 baris): cari kode dobel atau terpotong.
+- #27 formatDonutPercent, getTxStatsCategory, getTxSubcategory dibanding web (desktop/src/app.js sekitar baris 4040 sampai 4060). Total persen donut harus 100.
+- #29 Semua R.string baru dari 6B ada. Teks di tengah donut digambar di Canvas.
+- #30 getCategoriesFlow dan getSettingsFlow di StatistikScreen: collectAsState dan tipe datanya cocok.
+- Warna donut: hex DONUT_* sama dengan dev/DESIGN.md.
+- #28 Grep Double|Float|BigDecimal di StatistikDonutCalculations.kt harus kosong. Kalau tidak kosong, perbaiki ke Long/Int sesuai aturan uang di RULES.md dan SCHEMA.md. Float hanya boleh untuk Canvas.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual (dilakukan pemilik setelah build, bukan oleh Agy):
+- Buka Timbangan, timbang satu dompet, buat penyesuaian surplus lalu defisit. Hasil: transaksi pemasukan dan pengeluaran Equilibrium muncul di Riwayat dengan sub kategori yang dipilih, saldo dompet sesuai.
+- Buka Statistik dengan data contoh, pindah antar tab dan geser bulan. Hasil: angka dan persen donut sama dengan web, total persen 100, teks di grafik dan tengah donut tampil.
+- Buka Statistik dengan data kosong. Hasil: tampil tombol "Tambah Transaksi" seperti di web.

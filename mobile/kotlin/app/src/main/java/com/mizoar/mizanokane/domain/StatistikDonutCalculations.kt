@@ -71,7 +71,6 @@ data class DonutCategoryItem(
     val amount: Long,
     val count: Int,
     val percentInt: Int,
-    val percentageDouble: Double,
     val percentageFormatted: String,
     val color: Color,
     val startAngle: Float,
@@ -130,14 +129,19 @@ fun getTxSubcategory(tx: TransactionEntity?): String {
  * Jika pct < 0.1 && pct > 0: "< 0.1%"
  * Jika desimal 0: tanpa koma desimal ("25%")
  * Jika ada desimal: satu desimal ("33.3%")
+ * Menggunakan perhitungan presisi integer Long murni untuk uang.
  * Sama persis dengan formatPercent di desktop/src/js/app.js lines 4043-4046.
  */
-fun formatDonutPercent(pct: Double): String {
-    if (pct < 0.1 && pct > 0.0) return "< 0.1%"
-    return if (pct % 1.0 == 0.0) {
-        "${pct.toLong()}%"
+fun formatDonutPercent(amount: Long, totalAmount: Long): String {
+    if (totalAmount <= 0L || amount <= 0L) return "0%"
+    if (amount * 1000L < totalAmount) return "< 0.1%"
+    val roundedTenths = (amount * 1000L + totalAmount / 2L) / totalAmount
+    val whole = roundedTenths / 10L
+    val dec = roundedTenths % 10L
+    return if (dec == 0L) {
+        "$whole%"
     } else {
-        String.format(Locale.US, "%.1f%%", pct)
+        "$whole.$dec%"
     }
 }
 
@@ -211,14 +215,13 @@ fun getDonutChartData(
     }
 
     val n = sortedCategories.size
-    val circumference = 2.0 * Math.PI * 75.0 // r = 75 sesuai web
-    val gapInDegrees = if (n > 1) ((2.0 / circumference) * 360.0).toFloat() else 0f
+    val circumference = 2f * 3.14159265f * 75f // r = 75 sesuai web
+    val gapInDegrees = if (n > 1) (2f / circumference) * 360f else 0f
     var accumulatedAngle = -90f // Mulai dari arah jam 12 (-90 derajat)
 
     // 5. Susun item kategori beserta rincian sub kategori
     val items = sortedCategories.mapIndexed { index, (catName, catData) ->
-        val pctDouble = if (totalAmount > 0L) (catData.amount.toDouble() / totalAmount.toDouble()) * 100.0 else 0.0
-        val pctFormatted = formatDonutPercent(pctDouble)
+        val pctFormatted = formatDonutPercent(catData.amount, totalAmount)
         val percentInt = Uang.hitungPersen(catData.amount, totalAmount)
         val color = activePalette[index % activePalette.size]
 
@@ -254,8 +257,7 @@ fun getDonutChartData(
         val subItems = mutableListOf<DonutSubcategoryItem>()
         if (subMap.isNotEmpty()) {
             for ((subName, subData) in sortedSubs) {
-                val subPctDouble = if (catData.amount > 0L) (subData.amount.toDouble() / catData.amount.toDouble()) * 100.0 else 0.0
-                val subPctStr = formatDonutPercent(subPctDouble)
+                val subPctStr = formatDonutPercent(subData.amount, catData.amount)
                 subItems.add(
                     DonutSubcategoryItem(
                         subName = subName,
@@ -267,8 +269,7 @@ fun getDonutChartData(
                 )
             }
             if (noSubAmount > 0L) {
-                val noSubPctDouble = if (catData.amount > 0L) (noSubAmount.toDouble() / catData.amount.toDouble()) * 100.0 else 0.0
-                val noSubPctStr = formatDonutPercent(noSubPctDouble)
+                val noSubPctStr = formatDonutPercent(noSubAmount, catData.amount)
                 subItems.add(
                     DonutSubcategoryItem(
                         subName = "Tanpa sub kategori",
@@ -294,7 +295,6 @@ fun getDonutChartData(
             amount = catData.amount,
             count = catData.count,
             percentInt = percentInt,
-            percentageDouble = pctDouble,
             percentageFormatted = pctFormatted,
             color = color,
             startAngle = startAngle,
