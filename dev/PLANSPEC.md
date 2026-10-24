@@ -2662,3 +2662,34 @@ Cek manual (dilakukan pemilik setelah build, bukan oleh Agy):
 - Buka Timbangan, timbang satu dompet, buat penyesuaian surplus lalu defisit. Hasil: transaksi pemasukan dan pengeluaran Equilibrium muncul di Riwayat dengan sub kategori yang dipilih, saldo dompet sesuai.
 - Buka Statistik dengan data contoh, pindah antar tab dan geser bulan. Hasil: angka dan persen donut sama dengan web, total persen 100, teks di grafik dan tengah donut tampil.
 - Buka Statistik dengan data kosong. Hasil: tampil tombol "Tambah Transaksi" seperti di web.
+
+
+## Kotlin 9A: Audit Beranda, Riwayat, Form Transaksi, Komponen Umum
+
+Tujuan: Memastikan layar Beranda, Riwayat, form transaksi, dan komponen umum di mobile/kotlin sama dengan versi web. Acuan: desktop/src dan dev/SCHEMA.md. Dilarang menambah fitur. Ketidaksamaan yang jelas diperbaiki di mobile/kotlin. Yang ragu tidak diubah, cukup dicatat di entri CHANGELOG.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru. Perbaikan tampilan hanya untuk menyamakan dengan web dan dev/DESIGN.md.
+
+Aturan:
+- Sudah terbukti beres, jangan diaudit lagi: versi KSP, MizanColors.danger dan budgetWarn, JsonUnquotedLiteral dan OptIn, laporan 4B, 5A, 5B, 6A, serta seluruh item Gelombang B, C, dan D.
+- Hanya audit item di bawah ini. Jangan menyentuh Timbangan, Statistik, dompet, kategori, budget, pengaturan, data, atau reset, kecuali file yang sama memang tercantum di daftar.
+
+Daftar audit:
+- #5 Baca ulang penuh file yang belum dibaca ulang sejak Kotlin 3: TransactionItemRow, WalletBalanceItem, MonthSelector, BudgetCard, CustomDropdown, BerandaScreen, RiwayatScreen, MainActivity, dan sisa TransactionFormScreen. Cari kode dobel atau terpotong, import hilang, R.string atau R.drawable yang tidak ada, dan tipe yang tidak cocok.
+- #6 Beranda: kartu dompet disembunyikan kalau jumlah dompet kurang dari 2. Cocokkan dengan web.
+- #8 File yang diedit sebagian di 4B: TransactionFormScreen, BerandaScreen, RiwayatScreen, MainActivity, CustomDropdown. Pastikan edit terakhir tidak meninggalkan kode setengah jadi.
+- #14 Duplikat AmountInputField (di ui/components dan di TransactionFormScreen). Pastikan hanya satu yang dipakai dan perilakunya sama dengan input nominal di web. Kalau salah satu tidak dipakai sama sekali, hapus yang tidak dipakai. Kalau keduanya dipakai dan berbeda, catat di CHANGELOG, jangan digabung tanpa yakin.
+- #17 Ikon neraca di header: cek apakah web punya. Kalau web punya dan Kotlin belum, atau sebaliknya, samakan dengan web. Kalau ragu, catat.
+- #34 MainActivity: rute SubmenuTampilan, SubmenuBahaya, KelolaDompet, KelolaKategori, KelolaBudget terhubung ke layar yang benar. isFullScreen dan tombol back berperilaku benar untuk tiap rute.
+- #35 formatTimeDisplay(timeStr, timeFormat): semua pemanggil lama sudah memakai pengaturan format jam (12 jam atau 24 jam) dari settings, tidak ada yang masih memakai nilai tetap.
+- Untuk semua item, aturan uang tetap: nominal pakai Long/Int, jangan ada Double, Float, atau BigDecimal di logika uang. Float hanya boleh untuk Canvas.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual (dilakukan pemilik setelah build, bukan oleh Agy):
+- Buka Beranda dengan 1 dompet lalu dengan 2 dompet atau lebih. Hasil: kartu dompet hanya tampil saat dompet 2 atau lebih.
+- Tambah transaksi dari form, isi nominal dan waktu, simpan. Hasil: transaksi muncul di Riwayat dengan format jam sesuai pengaturan.
+- Ganti format jam di Pengaturan, buka Beranda dan Riwayat. Hasil: semua jam ikut berubah.
+- Buka tiap submenu Pengaturan lalu tekan back. Hasil: kembali ke layar sebelumnya tanpa keluar aplikasi.

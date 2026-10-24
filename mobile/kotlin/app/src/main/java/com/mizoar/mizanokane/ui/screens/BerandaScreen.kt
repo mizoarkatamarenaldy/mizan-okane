@@ -168,7 +168,7 @@ fun BerandaScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Belum ada dompet.",
+                text = stringResource(id = R.string.empty_dompet),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MizanTheme.colors.textSecondary,
                     textAlign = TextAlign.Center

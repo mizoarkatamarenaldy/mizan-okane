@@ -12,6 +12,23 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 
 
 
+## 2026-10-25: Kotlin 9A: Audit Beranda, Riwayat, Form Transaksi, Komponen Umum (belum dibuild)
+- Diperbaiki:
+  - #14: Menghapus duplikasi fungsi privat `AmountInputField` pada `TransactionFormScreen.kt` dan menggantikannya dengan impor komponen bersama `com.mizoar.mizanokane.ui.components.AmountInputField` yang dipakai di seluruh aplikasi; membersihkan import yang tidak terpakai (`KeyboardOptions`, `KeyboardType`, `FontFamily`, `TextStyle`) (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TransactionFormScreen.kt`).
+  - #5: Mengubah teks hardcoded pada kondisi dompet kosong di `BerandaScreen.kt` agar menggunakan resource string `R.string.empty_dompet` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/BerandaScreen.kt`).
+  - #5: Mengubah `contentDescription` tombol navigasi bulan sebelumnya dan bulan berikutnya pada `MonthSelector.kt` agar menggunakan resource string `R.string.nav_prev_month` dan `R.string.nav_next_month` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/MonthSelector.kt`).
+- Diverifikasi:
+  - #5: Seluruh file komponen dan layar yang belum dibaca penuh sejak Kotlin 3 (`TransactionItemRow.kt`, `WalletBalanceItem.kt`, `MonthSelector.kt`, `BudgetCard.kt`, `CustomDropdown.kt`, `BerandaScreen.kt`, `RiwayatScreen.kt`, `MainActivity.kt`, dan `TransactionFormScreen.kt`) telah dibaca ulang secara menyeluruh; tidak ditemukan kode dobel, blok terpotong, resource `R.string` atau `R.drawable` yang hilang, maupun ketidakcocokan tipe data.
+  - #6: Tampilan kartu/deretan saldo dompet pada `BerandaScreen.kt` terverifikasi disembunyikan jika jumlah dompet aktif kurang dari 2 (`if (activeWallets.size >= 2)`), identik dengan perilaku versi web (`if (activeWallets.length < 2) walletsSection.classList.add('hidden')`).
+  - #8: File yang diedit sebagian pada Kotlin 4B (`TransactionFormScreen.kt`, `BerandaScreen.kt`, `RiwayatScreen.kt`, `MainActivity.kt`, `CustomDropdown.kt`) terverifikasi selesai sepenuhnya dan tidak menyisakan kode setengah jadi; dukungan ikon kustom dan subkategori pada formulir serta dropdown berjalan utuh.
+  - #17: Ikon neraca (scale balance) di header terkonfirmasi ada di versi web (`desktop/src/index.html` pada elemen `.app-brand-icon`) dan versi Kotlin sudah memiliki dan menampilkannya melalui `AppHeader.kt` (`R.drawable.ic_neraca`) dengan path data SVG yang identik.
+  - #34: Navigasi rute `SubmenuTampilan`, `SubmenuBahaya`, `KelolaDompet`, `KelolaKategori`, dan `KelolaBudget` di `MainActivity.kt` terhubung ke layar yang tepat; seluruhnya terdaftar pada kondisi `isFullScreen` sehingga header dan navigation bar disembunyikan, dan tombol back (baik in-screen maupun sistem Android via `BackHandler`) memanggil `navController.popBackStack()` untuk kembali ke menu Pengaturan tanpa keluar aplikasi.
+  - #35: Seluruh pemanggilan format waktu tampilan pada `TransactionItemRow.kt` (dipanggil di `BerandaScreen.kt` dan `RiwayatScreen.kt`) serta pada `TransactionFormScreen.kt` terverifikasi menggunakan pengaturan format jam dinamis (`settings.timeFormat != "12"`) dari repository, tanpa ada nilai statis/konstan.
+  - Aturan uang: Seluruh representasi dan kalkulasi nominal uang pada seluruh berkas yang diaudit menggunakan integer `Long` murni (satuan sen), tanpa tipe `Double`, `Float`, atau `BigDecimal`.
+- Catatan temuan yang ragu dan tidak diubah: Tidak ada temuan yang meragukan; seluruh butir audit telah diselaraskan dengan versi web dan spesifikasi desain.
+- Diubah: Menambahkan spesifikasi dan mencentang item "Kotlin 9A: Audit Beranda, Riwayat, Form Transaksi, Komponen Umum" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+- Catatan kompilasi: Seluruh berkas Kotlin yang diubah telah diverifikasi kebenaran sintaks hingga baris terakhir. Proyek ini belum dibuild melalui gradle sesuai aturan RULES.md ("belum dibuild"), dan pengujian ("ditunda, dijalankan pemilik").
+
 ## 2026-10-25: Kotlin 9C: Audit Timbangan dan Statistik (belum dibuild)
 - Diperbaiki:
   - #28: Menghapus seluruh penggunaan tipe `Double` dan konversi `.toDouble()` pada `StatistikDonutCalculations.kt`. Properti `percentageDouble` di `DonutCategoryItem` dihapus karena redundan dengan `percentageFormatted`, fungsi `formatDonutPercent` diubah menggunakan perhitungan integer `Long` murni (satuan seperseribu / tenths of percent) dengan pembulatan presisi tanpa konversi uang ke `Double`, serta konstanta keliling lingkaran dan celah busur dikonversi ke `Float` khusus penggambaran Canvas (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/domain/StatistikDonutCalculations.kt`).

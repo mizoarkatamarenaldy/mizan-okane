@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +39,7 @@ fun MonthSelector(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_chevron_left),
-                contentDescription = "Bulan sebelumnya",
+                contentDescription = stringResource(id = R.string.nav_prev_month),
                 tint = MizanTheme.colors.textSecondary,
                 modifier = Modifier.size(20.dp)
             )
@@ -61,7 +62,7 @@ fun MonthSelector(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_chevron_right),
-                contentDescription = "Bulan sesudahnya",
+                contentDescription = stringResource(id = R.string.nav_next_month),
                 tint = MizanTheme.colors.textSecondary,
                 modifier = Modifier
                     .size(20.dp)
