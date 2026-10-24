@@ -2557,3 +2557,43 @@ Data:
 Cek manual:
 - Desktop punya data di Drive. Di APK tekan "Sinkron sekarang": tidak ada error, data desktop muncul di APK dengan nominal yang sama seperti di desktop, dan teks "belum pernah sinkron" berganti waktu sinkron terakhir.
 - Tambah satu transaksi di APK, sinkron, lalu sinkron di desktop: transaksi muncul di desktop dengan nominal yang benar.
+
+## Kotlin 9D: Audit data dan reset
+
+Tujuan: Memastikan bagian Pengaturan, data, CSV, mode contoh, dan reset di Kotlin berperilaku sama dengan web. Bagian ini paling berisiko ke data pemilik, jadi diaudit lebih dulu.
+
+Tidak ada elemen tampilan baru.
+
+Aturan:
+- Folder kerja: mobile/. Acuan: desktop/src (web) dan dev/SCHEMA.md. Jangan ubah desktop/ dan mobile/capacitor/. Kalau web dan Kotlin beda, web yang benar.
+- Dilarang menambah fitur. Hanya samakan perilaku Kotlin dengan web.
+- Ketidaksamaan yang jelas diperbaiki di mobile/kotlin. Temuan yang tidak pasti jangan diubah, catat saja di entri CHANGELOG.
+- Dilarang menjalankan build, gradlew, atau test. Pengecekan test dilakukan dengan membaca kode.
+- Audit hal-hal berikut:
+  - #31: Dialog "ketik HAPUS" dua langkah di SubmenuBahayaScreen dibandingkan web (app.js sekitar baris 9580 sampai 9675). Kalau web tidak meminta mengetik, hapus langkah itu di Kotlin.
+  - #32 dan #40: Cakupan resetToDefaults() dibandingkan resetDatabase di db.js (sekitar baris 840 sampai 874). Termasuk flag data contoh di MetaEntity dan semua kunci demo_*.
+  - #33: Pastikan web memang punya "Reset setelan pabrik" yang terpisah dari "Hapus semua data".
+  - #36: ic_sun.xml dan ic_danger.xml valid, dan semua R.string baru dari 7A ada di strings.xml.
+  - #37: Setelah reset, tema kembali ke bawaan web dan tampilan langsung ikut berubah.
+  - #38: Saat mode contoh aktif, semua penulisan masuk ke penyimpanan demo, bukan data asli.
+  - #39: Data demo disimpan sebagai string di MetaEntity (demo_mode, demo_transactions, dan seterusnya). Cek serialisasi dan ukuran, samakan dengan web.
+  - #41: Baca JsonBackupManager sampai habis (sebelumnya hanya sampai baris 100). Cek JsonBackupManagerTest dan fixture-nya masih cocok dengan InMemoryMizanRepository.
+  - #42: Impor ditolak saat mode contoh. Pesan dan teks dialog konfirmasi sama dengan web (app.js sekitar baris 9110 sampai 9295).
+  - #43: CSV dibandingkan web (app.js sekitar baris 9325 sampai 9385): transaksi terhapus, transfer, flag dummy, urutan baris, escape, angka USD dan Yen.
+  - #44: SampleData.kt dibandingkan db.js: 25 transaksi, 4 dompet, kategori, budget, flag dummy.
+  - #45: "Muat ulang data contoh", "Keluar dari data contoh", dan DemoModeBanner memang ada di web.
+  - #48: Semua fungsi interface MizanRepository terimplementasi di RoomMizanRepository dan InMemoryMizanRepository dengan signature sama. withTransaction (room-ktx) dipakai benar. flatMapLatest punya @OptIn(ExperimentalCoroutinesApi::class).
+  - #49: SubmenuDataScreen: CreateDocument (mime type), OpenDocument (array mime), rememberLauncherForActivityResult, serta baca dan tulis stream di Dispatchers.IO dan ditutup.
+  - #50: RoomMizanRepository.kt (sekitar 593 baris) tidak ada kode dobel atau terpotong. Cek fungsi getReal*.
+  - #51: PengaturanScreen.kt baris 1 sampai 50 dibaca ulang setelah edit terakhir.
+  - #52: URL Tentang Pengembang sama dengan web.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Format tetap mengikuti dev/SCHEMA.md dan tidak boleh diubah.
+
+Cek manual:
+- Aplikasi berisi data asli, mode contoh mati. Pemilik membuka "Hapus semua data". Dialog meminta konfirmasi persis seperti web, dan setelah selesai data asli kosong.
+- Mode contoh aktif, pemilik menambah transaksi. Transaksi itu hanya ada di data contoh. Setelah keluar dari mode contoh, data asli tidak berubah.
+- Mode contoh aktif, pemilik mencoba impor JSON. Impor ditolak dengan pesan yang sama seperti web.
+- Pemilik menjalankan "Reset setelan pabrik". Tema kembali ke bawaan web dan flag serta kunci demo_* bersih.
+- Pemilik ekspor CSV dari data yang berisi transaksi terhapus, transfer, dan dompet USD atau Yen. Isi dan urutan baris sama dengan CSV dari web.

@@ -213,8 +213,17 @@ class JsonBackupManagerTest {
 
         assertTrue(repo.getAllTransactions().isNotEmpty())
 
+        repo.activateSampleData()
+        assertTrue(repo.isDemoMode())
+
         repo.resetToDefaults()
 
+        assertEquals(false, repo.isDemoMode())
+        assertEquals(null, repo.getMeta("demo_mode"))
+        assertEquals(null, repo.getMeta("demo_transactions"))
+        assertEquals(null, repo.getMeta("demo_wallets"))
+        assertEquals(null, repo.getMeta("demo_categories"))
+        assertEquals(null, repo.getMeta("demo_budgets"))
         assertEquals(0, repo.getAllTransactions().size)
         assertEquals(1, repo.getAllWallets().size)
         assertEquals("default", repo.getAllWallets().first().id)

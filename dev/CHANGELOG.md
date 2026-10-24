@@ -12,6 +12,30 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 
 
 
+## 2026-10-25: Kotlin 9D: Audit data dan reset (belum dibuild)
+- Diperbaiki: Operasi SAF (Storage Access Framework) pada `SubmenuDataScreen.kt` untuk ekspor berkas JSON (`CreateDocument("application/json")`), ekspor CSV (`CreateDocument("text/csv")`), dan impor JSON (`OpenDocument()` dengan mime `application/json` dan `text/*`) agar pembacaan dan penulisan stream dilakukan di `Dispatchers.IO` melalui `withContext(Dispatchers.IO)` dan stream ditutup otomatis dengan ekstensi `.use { ... }` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/SubmenuDataScreen.kt`).
+- Diperbaiki: Pembersihan data demo pada `clearSampleData()` dan `resetToDefaults()` di `InMemoryMizanRepository.kt` agar mereset `demoCategoriesData` dan `demoBudgetsData` ke nilai sample bawaan serta menghapus semua kunci `demo_*` (`demo_wallets`, `demo_categories`, `demo_budgets`, `demo_transactions`, `demo_mode`) dari `metaMap`, selaras dengan perilaku `RoomMizanRepository.kt` dan `desktop/src/js/db.js` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/repository/InMemoryMizanRepository.kt`).
+- Diperbaiki: Pengujian `testResetToDefaults()` pada `JsonBackupManagerTest.kt` ditambahkan verifikasi bahwa mode contoh aktif dibersihkan dan semua kunci demo hilang setelah `resetToDefaults()` (`mobile/kotlin/app/src/test/java/com/mizoar/mizanokane/data/JsonBackupManagerTest.kt`).
+- Diverifikasi: Seluruh 17 butir audit spek Kotlin 9D telah diaudit terhadap acuan web `desktop/src/` dan `dev/SCHEMA.md`:
+  - #31: Dialog "ketik HAPUS" dua langkah di `SubmenuBahayaScreen.kt` dikonfirmasi identik dengan web (`app.js` baris 9623 dan `index.html` baris 1181) sehingga tetap dipertahankan.
+  - #32 & #40: Cakupan `resetToDefaults()` di `RoomMizanRepository.kt` telah dibandingkan dengan `resetDatabase()` di `db.js`: seluruh transaksi dihapus, kategori, budget, dompet, dan pengaturan dikembalikan ke default awal, `localRev = 0`, serta seluruh kunci `demo_*` dan flag `demo_mode` dibersihkan dalam satu transaksi Room.
+  - #33: Dikonfirmasi web tidak memiliki aksi "Reset setelan pabrik" yang terpisah dari "Hapus semua data"; keduanya adalah aksi yang sama di Zona Bahaya (`btn-delete-all-data`).
+  - #36: `ic_sun.xml` dan `ic_danger.xml` diverifikasi sebagai XML vektor yang valid, serta seluruh `R.string.*` dari 7A dan 7B terbukti ada dan valid di `strings.xml`.
+  - #37: Setelah `resetToDefaults()`, tema kembali ke "system" dan `MainActivity.kt` langsung merekomposisi tema aplikasi secara reaktif.
+  - #38 & #39: Saat mode demo aktif, seluruh mutasi data masuk ke entitas demo di `MetaEntity` dan tidak mengubah data riil. Ukuran serialisasi JSON string di SQLite ringan (~4-5 KB) dan DTO sesuai skema web.
+  - #41: `JsonBackupManager.kt` dibaca utuh 363 baris; logika merge dan LWW sesuai web, dan `JsonBackupManagerTest.kt` cocok dengan fixture `mizan-okane-backup-sample.json`.
+  - #42: Impor ditolak saat mode demo dengan pesan identik web di `JsonBackupManager` dan `SubmenuDataScreen`.
+  - #43: `CsvExporter.kt` cocok penuh dengan web: filter transaksi non-deleted dan non-dummy, dompet transfer format `A -> B`, pengurutan tanggal/jam/createdAt descending, escaping karakter kutip/koma/newline, format nominal angka USD/Yen/IDR via `Uang.kePlainString`, serta header UTF-8 BOM.
+  - #44: `SampleData.kt` identik dengan `db.js`: 4 dompet, kategori lengkap, 5 budget, dan 25 transaksi berflag `dummy = true`.
+  - #45: Konfirmasi bahwa "Muat ulang data contoh", "Keluar dari data contoh", dan banner penanda mode contoh memang ada di web.
+  - #48: Semua 34 fungsi `MizanRepository` terimplementasi di `RoomMizanRepository` dan `InMemoryMizanRepository` dengan signature identik; `withTransaction` dan `@OptIn(ExperimentalCoroutinesApi::class)` digunakan dengan benar.
+  - #49: SAF `SubmenuDataScreen` CreateDocument/OpenDocument dan stream `Dispatchers.IO` ditutup dengan aman.
+  - #50: `RoomMizanRepository.kt` (593 baris) utuh tanpa kode terpotong atau dobel; fungsi `getReal*` independen dari demo.
+  - #51: Baris 1-50 `PengaturanScreen.kt` dibaca ulang dan rapi.
+  - #52: URL tautan Tentang Pengembang sama dengan web (`https://mizoarkatamarenaldy.github.io`).
+- Diubah: Menambahkan spesifikasi dan mencentang item "Kotlin 9D: Audit data dan reset" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+- Catatan kompilasi: Berkas Kotlin yang diubah telah diverifikasi kebenaran sintaks hingga baris terakhir. Proyek ini belum dibuild melalui gradle sesuai aturan RULES.md ("belum dibuild"), dan pengujian ("ditunda, dijalankan pemilik").
+
 ## 2026-10-22: Kotlin 10H: Perbaikan overflow sinkron (belum dibuild)
 - Diperbaiki: Penanganan overflow `ArithmeticException` pada konversi field `amount` di jalur sinkron Google Drive. Sebelumnya, jika nilai `amount` transaksi atau budget menyebabkan overflow `Long` saat dikalikan 100 (konversi satuan seperseratus), exception propagate tanpa log dan ditampilkan sebagai pesan "Gagal sinkron: ArithmeticException - Overflow" yang tidak informatif.
 - Diperbaiki: Fungsi `parseTransactionElementSafely` pada `DriveSyncManager.kt` diubah agar menggunakan helper baru `parseAmountSafe` yang menangkap `ArithmeticException` secara eksplisit, mencatat ke Logcat tag `"MizanSync"` via `Log.e` dengan objek exception (stack trace lengkap) beserta nama field dan ID record tanpa mencatat nominal uang, lalu melempar `IllegalStateException` yang menghentikan sinkron dengan pesan yang menyebut field `"amount"` dan ID transaksi yang bermasalah (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/sync/DriveSyncManager.kt`).

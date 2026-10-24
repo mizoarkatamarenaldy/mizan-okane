@@ -246,7 +246,14 @@ class InMemoryMizanRepository : MizanRepository {
         demoMode = false
         demoTransactionsMap.clear()
         demoWalletsMap.clear()
+        demoCategoriesData = SampleData.SAMPLE_CATEGORIES
+        demoBudgetsData = SampleData.SAMPLE_BUDGETS
         demoModeFlow.value = false
+        metaMap.remove("demo_wallets")
+        metaMap.remove("demo_categories")
+        metaMap.remove("demo_budgets")
+        metaMap.remove("demo_transactions")
+        metaMap.remove("demo_mode")
 
         transactionsFlow.value = transactionsMap.values.toList()
         walletsFlow.value = walletsMap.values.sortedBy { it.order }
@@ -268,7 +275,14 @@ class InMemoryMizanRepository : MizanRepository {
         demoMode = false
         demoTransactionsMap.clear()
         demoWalletsMap.clear()
+        demoCategoriesData = SampleData.SAMPLE_CATEGORIES
+        demoBudgetsData = SampleData.SAMPLE_BUDGETS
         demoModeFlow.value = false
+        metaMap.remove("demo_wallets")
+        metaMap.remove("demo_categories")
+        metaMap.remove("demo_budgets")
+        metaMap.remove("demo_transactions")
+        metaMap.remove("demo_mode")
 
         transactionsMap.clear()
         transactionsFlow.value = emptyList()

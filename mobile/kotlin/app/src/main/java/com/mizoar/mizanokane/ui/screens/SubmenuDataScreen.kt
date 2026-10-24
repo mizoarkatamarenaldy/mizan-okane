@@ -56,7 +56,9 @@ import com.mizoar.mizanokane.data.repository.MizanRepository
 import com.mizoar.mizanokane.domain.CsvExporter
 import com.mizoar.mizanokane.ui.theme.MizanTheme
 import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Layar Submenu Data aplikasi Mizan Okane.
@@ -87,8 +89,10 @@ fun SubmenuDataScreen(
             coroutineScope.launch {
                 try {
                     val jsonContent = JsonBackupManager.exportToJson(repository)
-                    context.contentResolver.openOutputStream(uri)?.use { stream ->
-                        stream.write(jsonContent.toByteArray(Charsets.UTF_8))
+                    withContext(Dispatchers.IO) {
+                        context.contentResolver.openOutputStream(uri)?.use { stream ->
+                            stream.write(jsonContent.toByteArray(Charsets.UTF_8))
+                        }
                     }
                     Toast.makeText(context, context.getString(R.string.msg_export_json_success), Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
@@ -107,8 +111,10 @@ fun SubmenuDataScreen(
                     val txs = repository.getRealTransactions()
                     val wallets = repository.getRealWallets()
                     val csvContent = CsvExporter.generateCsv(txs, wallets)
-                    context.contentResolver.openOutputStream(uri)?.use { stream ->
-                        stream.write(csvContent.toByteArray(Charsets.UTF_8))
+                    withContext(Dispatchers.IO) {
+                        context.contentResolver.openOutputStream(uri)?.use { stream ->
+                            stream.write(csvContent.toByteArray(Charsets.UTF_8))
+                        }
                     }
                     Toast.makeText(context, context.getString(R.string.msg_export_csv_success), Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
@@ -124,7 +130,9 @@ fun SubmenuDataScreen(
         if (uri != null) {
             coroutineScope.launch {
                 try {
-                    val content = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                    val content = withContext(Dispatchers.IO) {
+                        context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                    }
                     if (content.isNullOrBlank()) {
                         Toast.makeText(context, context.getString(R.string.msg_import_empty_or_invalid), Toast.LENGTH_LONG).show()
                         return@launch
