@@ -295,3 +295,16 @@ fun getBudgetSectionSummary(
         totalTerpakai = totalTerpakai
     )
 }
+
+/**
+ * Alias untuk getBudgetSectionSummary agar pemanggilan dengan nama calculateBudgetSectionSummary
+ * tetap memiliki nama dan signature yang sama persis di semua pemanggil.
+ */
+fun calculateBudgetSectionSummary(
+    budgets: BudgetsData,
+    categories: CategoriesData,
+    transactions: List<TransactionEntity>,
+    targetMonthKey: String,
+    wallets: List<WalletEntity>
+): BudgetSectionSummary? = getBudgetSectionSummary(budgets, categories, transactions, targetMonthKey, wallets)
+

@@ -2597,3 +2597,33 @@ Cek manual:
 - Mode contoh aktif, pemilik mencoba impor JSON. Impor ditolak dengan pesan yang sama seperti web.
 - Pemilik menjalankan "Reset setelan pabrik". Tema kembali ke bawaan web dan flag serta kunci demo_* bersih.
 - Pemilik ekspor CSV dari data yang berisi transaksi terhapus, transfer, dan dompet USD atau Yen. Isi dan urutan baris sama dengan CSV dari web.
+
+## Kotlin 9B: Audit dompet, kategori, budget
+
+Tujuan: Memastikan pengelolaan dompet, kategori, sub kategori, dan budget di Kotlin berperilaku sama dengan web, terutama saat menyimpan dan menghapus data.
+
+Tidak ada elemen tampilan baru.
+
+Aturan:
+- Folder kerja: mobile/. Acuan: desktop/src (web) dan dev/SCHEMA.md. Jangan ubah desktop/ dan mobile/capacitor/. Kalau web dan Kotlin beda, web yang benar.
+- Dilarang menambah fitur. Hanya samakan perilaku Kotlin dengan web.
+- Ketidaksamaan yang jelas diperbaiki di mobile/kotlin. Temuan yang tidak pasti jangan diubah, catat saja di entri CHANGELOG.
+- Dilarang menjalankan build, gradlew, atau test. Pengecekan dilakukan dengan membaca kode.
+- Audit hal-hal berikut:
+  - #3: Semua @Insert di WalletDao, CategoryDao, dan BudgetDao memakai OnConflictStrategy.REPLACE. Menghapus dompet, kategori, sub kategori, dan budget benar-benar menghapus barisnya dari database. Cek lewat saveWallets, saveCategories, dan saveBudgets.
+  - #4: Aturan "minimal 1 dompet aktif" saat hapus dompet sama dengan web.
+  - #7: KelolaKategoriScreen.kt tidak ada kode dobel atau terpotong. Berkas ini dulu sempat terpotong karena error API 500, jadi baca sampai habis.
+  - #9: Hapus kategori menghapus transaksi dan budget terkait dengan cara yang sama seperti web. Ikon kategori tersimpan dengan id string yang sama seperti web.
+  - #10: Baca KelolaBudgetScreen.kt (sekitar 1097 baris) sampai habis. Tidak ada kode dobel atau terpotong, dan perilakunya sama dengan web.
+  - #11: Fungsi calculateBudgetSectionSummary dipanggil dengan nama dan signature yang benar di semua pemanggil.
+  - #12: Urutan budget. Cek apakah yang digeser urutan budget atau urutan kategori, bandingkan dengan web dan dev/SCHEMA.md. Cek juga apakah sub kategori bisa digeser di web, lalu samakan di Kotlin.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. Format tetap mengikuti dev/SCHEMA.md dan tidak boleh diubah.
+
+Cek manual:
+- Pemilik punya 2 dompet aktif. Hapus satu dompet, berhasil. Hapus dompet terakhir, hasilnya sama dengan web.
+- Pemilik punya kategori yang berisi transaksi dan budget. Hapus kategori itu. Transaksi dan budget terkait ikut terhapus seperti di web, dan setelah aplikasi ditutup lalu dibuka lagi datanya tidak muncul kembali.
+- Pemilik menghapus satu sub kategori. Setelah aplikasi dibuka ulang, sub kategori itu tetap hilang.
+- Pemilik menggeser urutan budget. Setelah aplikasi dibuka ulang, urutannya bertahan dan sama dengan cara web menyimpannya.
+- Pemilik memilih ikon kustom untuk satu kategori. Setelah dibuka ulang, ikon yang sama tampil.
