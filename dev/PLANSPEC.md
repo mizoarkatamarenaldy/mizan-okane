@@ -2693,3 +2693,32 @@ Cek manual (dilakukan pemilik setelah build, bukan oleh Agy):
 - Tambah transaksi dari form, isi nominal dan waktu, simpan. Hasil: transaksi muncul di Riwayat dengan format jam sesuai pengaturan.
 - Ganti format jam di Pengaturan, buka Beranda dan Riwayat. Hasil: semua jam ikut berubah.
 - Buka tiap submenu Pengaturan lalu tekan back. Hasil: kembali ke layar sebelumnya tanpa keluar aplikasi.
+
+## Kotlin 9E: Audit Lintas File
+
+Tujuan: Menyapu bersih sisa masalah lintas file di mobile/kotlin lewat grep dan pembacaan kode, sebagai penutup audit Kotlin 9. Acuan: desktop/src dan dev/SCHEMA.md. Dilarang menambah fitur. Ketidaksamaan atau kesalahan yang jelas diperbaiki di mobile/kotlin. Yang ragu tidak diubah, cukup dicatat di entri CHANGELOG.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Aturan:
+- Sudah terbukti beres, jangan diaudit ulang: versi KSP, MizanColors.danger dan budgetWarn, JsonUnquotedLiteral dan OptIn, serta seluruh item Gelombang A, B, C, dan D yang sudah selesai.
+- Hanya kerjakan tiga item di bawah ini. Jangan membaca ulang layar satu per satu.
+
+Daftar audit:
+- #23 Grep Double|Float|BigDecimal di semua file di folder domain dan ui/components (mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/). Hasil harus kosong, kecuali Float yang dipakai khusus untuk Canvas (sudut, jari-jari, koordinat gambar). Kalau ada Double, Float, atau BigDecimal di logika uang (nominal, saldo, total, persen yang mempengaruhi angka uang), perbaiki ke Long atau Int sesuai aturan uang di RULES.md dan SCHEMA.md. Kalau ada pemakaian di luar uang yang bukan Canvas dan kamu ragu, jangan diubah, catat di CHANGELOG lengkap dengan nama file dan barisnya.
+- #47 Periksa mobile/kotlin/app/src/main/res/values/strings.xml:
+  - apostrof (') tanpa escape (harus \')
+  - tanda % tanpa penulisan %% (kecuali format argumen seperti %1$s, %1$d)
+  - tanda & tanpa penulisan &amp;
+  - nama string dobel (satu name dipakai lebih dari sekali)
+  Perbaiki yang jelas salah. Jangan mengubah teks yang sudah benar dan jangan mengganti nama string yang sudah dipakai di kode.
+- Pola inisialisasi seperti Kotlin 10C: buka hanya bagian Kotlin 10C di dev/PLANSPEC.md dan entri Kotlin 10C di dev/CHANGELOG.md (pengecualian dari aturan 5 entri teratas, hanya untuk memahami polanya). Cari object atau class lain di mobile/kotlin yang punya pola serupa, yaitu daftar atau properti yang diinisialisasi di dalam sealed class atau companion object dan bisa memicu urutan inisialisasi bermasalah atau crash. Perbaiki hanya kalau polanya jelas sama dengan 10C. Kalau mirip tapi ragu, catat di CHANGELOG.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual (dilakukan pemilik setelah build, bukan oleh Agy):
+- Build ulang dan buka aplikasi. Hasil: tidak ada error resource atau crash saat start.
+- Buka Beranda, Riwayat, Statistik, dan Timbangan dengan data contoh. Hasil: semua angka uang tampil sama seperti sebelumnya dan tidak ada teks aneh atau terpotong akibat perbaikan strings.xml.
+

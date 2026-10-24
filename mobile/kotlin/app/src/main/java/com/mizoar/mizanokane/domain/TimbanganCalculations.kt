@@ -68,10 +68,15 @@ fun calculateScaleTiltDy(
 ): Int {
     val total = income + expense
     if (total <= 0L) return 0
-    val ratio = diff.toDouble() / total.toDouble()
     return when {
-        diff > 0L -> kotlin.math.max(3, kotlin.math.min(maxTilt, kotlin.math.round(ratio * maxTilt).toInt()))
-        diff < 0L -> kotlin.math.min(-3, kotlin.math.max(-maxTilt, kotlin.math.round(ratio * maxTilt).toInt()))
+        diff > 0L -> {
+            val tilt = ((diff * maxTilt + total / 2L) / total).toInt()
+            kotlin.math.max(3, kotlin.math.min(maxTilt, tilt))
+        }
+        diff < 0L -> {
+            val tilt = ((diff * maxTilt - total / 2L) / total).toInt()
+            kotlin.math.min(-3, kotlin.math.max(-maxTilt, tilt))
+        }
         else -> 0
     }
 }
@@ -161,7 +166,11 @@ fun calculateTimbangSebelumBeli(
         val newSpent = currentSpent + price
         remainingBudget = budgetAmount - newSpent
         remainingPercent = if (budgetAmount > 0L) {
-            ((remainingBudget.toDouble() / budgetAmount.toDouble()) * 100).toInt()
+            if (remainingBudget >= 0L) {
+                ((remainingBudget * 100L + budgetAmount / 2L) / budgetAmount).toInt()
+            } else {
+                ((remainingBudget * 100L - budgetAmount / 2L) / budgetAmount).toInt()
+            }
         } else 0
     }
 
@@ -209,8 +218,8 @@ fun calculateTimbangSebelumBeli(
         } else if (
             newMonthDiff == 0L ||
             newWalletBal == 0L ||
-            (monthIncome > 0L && (newMonthDiff.toDouble() / monthIncome.toDouble()) <= 0.20) ||
-            (walletBal > 0L && (newWalletBal.toDouble() / walletBal.toDouble()) <= 0.20)
+            (monthIncome > 0L && newMonthDiff * 100L <= monthIncome * 20L) ||
+            (walletBal > 0L && newWalletBal * 100L <= walletBal * 20L)
         ) {
             status = TimbangStatus.PAS
             statusBadge = "Pas"
