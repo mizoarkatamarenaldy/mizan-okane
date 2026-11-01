@@ -2722,3 +2722,29 @@ Cek manual (dilakukan pemilik setelah build, bukan oleh Agy):
 - Build ulang dan buka aplikasi. Hasil: tidak ada error resource atau crash saat start.
 - Buka Beranda, Riwayat, Statistik, dan Timbangan dengan data contoh. Hasil: semua angka uang tampil sama seperti sebelumnya dan tidak ada teks aneh atau terpotong akibat perbaikan strings.xml.
 
+## Form transaksi ikut filter dompet
+
+Tujuan: Saat Riwayat sedang difilter ke satu dompet (misalnya lewat klik dompet di Beranda), tombol tambah transaksi langsung memakai dompet itu, jadi pengguna tidak perlu memilih dompet lagi.
+
+Tempat dan tampilan:
+- Di halaman Riwayat, tombol tambah (plus) yang sudah ada membuka form tambah transaksi dengan field Dompet sudah terisi dompet yang sedang difilter.
+- Tidak ada tombol, teks, atau elemen baru.
+
+Aturan:
+- Kalau filter dompet di Riwayat aktif, field Dompet di form tambah transaksi terisi dompet itu.
+- Pengguna tetap bisa mengganti dompet secara manual di form, seperti sekarang.
+- Kalau tidak ada filter dompet (semua dompet), form berperilaku seperti sebelumnya.
+- Mata uang di form mengikuti dompet yang terisi, memakai aturan mata uang per dompet yang sudah ada.
+- Berlaku hanya untuk form tambah transaksi dari Riwayat. Form edit, form transfer, dan filter dompet tidak diubah.
+- Fitur ini sengaja tidak mengubah filter dompet itu sendiri dan tidak menyimpan dompet terakhir.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Di Beranda klik dompet "A" lalu masuk ke Riwayat terfilter dompet A. Tekan tombol plus. Hasil: field Dompet di form berisi A.
+- Dari kondisi yang sama, ganti dompet di form ke B lalu simpan. Hasil: transaksi tersimpan di dompet B.
+- Hapus filter dompet di Riwayat (semua dompet), lalu tekan plus. Hasil: form berperilaku seperti sebelumnya.
+- Filter dompet bermata uang Yen, tekan plus. Hasil: form memakai Yen.
+- Buka form edit dan form transfer saat filter aktif. Hasil: tidak ada perubahan perilaku.
+

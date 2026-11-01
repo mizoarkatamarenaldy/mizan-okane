@@ -1928,6 +1928,16 @@ export function handleWalletCardClick(walletId) {
     switchTab('riwayat');
 }
 
+export function getInitialWalletForAdd() {
+    if (currentActiveTab === 'riwayat' && currentWalletFilter && currentWalletFilter !== 'all') {
+        const active = getActiveWallets();
+        if (active.some(w => w.id === currentWalletFilter)) {
+            return currentWalletFilter;
+        }
+    }
+    return null;
+}
+
 // Formatter angka dan uang (titik pemisah ribuan)
 export function formatNumber(val) {
     if (val === null || val === undefined || val === '') return '';
@@ -5753,7 +5763,7 @@ function render() {
                 const btnEmptyRiwayat = document.getElementById('btn-empty-riwayat-add');
                 if (btnEmptyRiwayat) {
                     btnEmptyRiwayat.addEventListener('click', () => {
-                        resetForm();
+                        resetForm(getInitialWalletForAdd());
                         openFormScreen();
                     });
                 }
@@ -7864,7 +7874,7 @@ async function performDeleteSubcategoryBudget(cat, sub) {
 }
 
 
-function resetForm() {
+function resetForm(initialWalletId = null) {
     closeCategoryPcDropdown();
     closeWalletPcDropdown();
     closeToWalletPcDropdown();
@@ -7901,7 +7911,7 @@ function resetForm() {
     // Default to expense
     txTypeInputs[0].checked = true;
     updateTypeUI('expense');
-    populateWalletOptions();
+    populateWalletOptions(initialWalletId);
 }
 
 async function handleSubmit(e) {
@@ -9843,7 +9853,7 @@ async function init() {
 
     if (btnFabAdd) {
         btnFabAdd.addEventListener('click', () => {
-            resetForm();
+            resetForm(getInitialWalletForAdd());
             openFormScreen();
         });
     }

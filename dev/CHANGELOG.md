@@ -12,6 +12,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 
 
 
+## 2026-11-01: Form transaksi ikut filter dompet
+- Ditambah: Helper `getInitialWalletForAdd` untuk mendeteksi filter dompet aktif saat form tambah transaksi dibuka dari halaman Riwayat (`desktop/src/js/app.js`).
+- Diubah: `resetForm` menerima parameter opsional `initialWalletId` untuk mengisi dompet awal dan menyesuaikan mata uang form secara otomatis saat filter dompet di Riwayat sedang aktif (`desktop/src/js/app.js`).
+- Diubah: Tombol tambah (plus) `btnFabAdd` dan tombol tambah transaksi pada state kosong Riwayat `btn-empty-riwayat-add` mengisi dompet awal form tambah transaksi sesuai filter dompet Riwayat yang aktif (`desktop/src/js/app.js`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Form transaksi ikut filter dompet" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-10-25: Kotlin 9E: Audit Lintas File (belum dibuild)
 - Diperbaiki:
   - #23: Menghapus seluruh penggunaan tipe `Double` dan pemanggilan `.toDouble()` pada `TimbanganCalculations.kt`. Perhitungan kemiringan lengan timbangan `calculateScaleTiltDy` diubah ke aritmatika integer `Long` murni dengan pembulatan terdekat (`diff * maxTilt +/- total / 2L`) tanpa floating point. Perhitungan `remainingPercent` pada simulasi belanja "Timbang Sebelum Beli" diubah ke integer `Long` murni dengan pembulatan presisi. Perbandingan ambang surplus/saldo pas-pasan 20% (`<= 0.20`) diubah dari pembagian `Double` ke perkalian silang integer `Long` murni (`newMonthDiff * 100L <= monthIncome * 20L` dan `newWalletBal * 100L <= walletBal * 20L`) sesuai aturan representasi uang di `RULES.md` dan `dev/SCHEMA.md` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/domain/TimbanganCalculations.kt`).
