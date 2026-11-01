@@ -179,9 +179,11 @@ fun MizanApp(
     var berandaMonth by remember { mutableStateOf(currentYearMonth) }
     var riwayatMonthFilter by remember { mutableStateOf(currentYearMonth) }
     var selectedWalletFilter by remember { mutableStateOf("all") }
+    var formInitialWalletId by remember { mutableStateOf<String?>(null) }
 
     BackHandler(enabled = currentRoute != Screen.Beranda.route) {
         if (isFullScreen) {
+            formInitialWalletId = null
             navController.popBackStack()
         } else {
             navController.navigate(Screen.Beranda.route) {
@@ -254,9 +256,11 @@ fun MizanApp(
                         }
                     },
                     onAddTransactionClick = {
+                        formInitialWalletId = null
                         navController.navigate(Screen.TransactionForm.route)
                     },
                     onEditTransactionClick = { txId ->
+                        formInitialWalletId = null
                         navController.navigate("${Screen.TransactionForm.route}/$txId")
                     }
                 )
@@ -276,9 +280,11 @@ fun MizanApp(
                         selectedWalletFilter = newWallet
                     },
                     onAddTransactionClick = {
+                        formInitialWalletId = if (selectedWalletFilter != "all") selectedWalletFilter else null
                         navController.navigate(Screen.TransactionForm.route)
                     },
                     onEditTransactionClick = { txId ->
+                        formInitialWalletId = null
                         navController.navigate("${Screen.TransactionForm.route}/$txId")
                     }
                 )
@@ -287,6 +293,7 @@ fun MizanApp(
                 TimbanganScreen(
                     repository = repository,
                     onNavigateToTransactionForm = {
+                        formInitialWalletId = null
                         navController.navigate(Screen.TransactionForm.route)
                     }
                 )
@@ -295,6 +302,7 @@ fun MizanApp(
                 StatistikScreen(
                     repository = repository,
                     onNavigateToTransactionForm = {
+                        formInitialWalletId = null
                         navController.navigate(Screen.TransactionForm.route)
                     }
                 )
@@ -395,7 +403,11 @@ fun MizanApp(
                 TransactionFormScreen(
                     repository = repository,
                     txId = null,
-                    onNavigateBack = { navController.popBackStack() }
+                    initialWalletId = formInitialWalletId,
+                    onNavigateBack = {
+                        formInitialWalletId = null
+                        navController.popBackStack()
+                    }
                 )
             }
             composable(
@@ -406,7 +418,11 @@ fun MizanApp(
                 TransactionFormScreen(
                     repository = repository,
                     txId = txId,
-                    onNavigateBack = { navController.popBackStack() }
+                    initialWalletId = null,
+                    onNavigateBack = {
+                        formInitialWalletId = null
+                        navController.popBackStack()
+                    }
                 )
             }
         }

@@ -12,6 +12,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 
 
 
+## 2026-11-01: Kotlin 11: Form transaksi ikut filter dompet
+- Ditambah: Parameter opsional `initialWalletId` pada `TransactionFormScreen` untuk mengisi dompet awal form tambah transaksi saat dibuka dengan filter dompet aktif (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TransactionFormScreen.kt`).
+- Diubah: State `formInitialWalletId` di `MainActivity` menyimpan dompet aktif dari filter Riwayat saat tombol tambah diklik dan meneruskannya ke form tambah transaksi (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/MainActivity.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 11: Form transaksi ikut filter dompet" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-01: Form transaksi ikut filter dompet
 - Ditambah: Helper `getInitialWalletForAdd` untuk mendeteksi filter dompet aktif saat form tambah transaksi dibuka dari halaman Riwayat (`desktop/src/js/app.js`).
 - Diubah: `resetForm` menerima parameter opsional `initialWalletId` untuk mengisi dompet awal dan menyesuaikan mata uang form secara otomatis saat filter dompet di Riwayat sedang aktif (`desktop/src/js/app.js`).

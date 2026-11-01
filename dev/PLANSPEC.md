@@ -2748,3 +2748,29 @@ Cek manual:
 - Filter dompet bermata uang Yen, tekan plus. Hasil: form memakai Yen.
 - Buka form edit dan form transfer saat filter aktif. Hasil: tidak ada perubahan perilaku.
 
+## Kotlin 11: Form transaksi ikut filter dompet
+
+Tujuan: Menyamakan perilaku versi Android dengan versi web. Saat Riwayat sedang difilter ke satu dompet, tombol tambah transaksi langsung memakai dompet itu.
+
+Tidak ada elemen tampilan baru.
+
+Aturan:
+- Perilaku harus sama dengan bagian "Form transaksi ikut filter dompet" versi web di dev/PLANSPEC.md. Kalau ragu, web yang jadi acuan.
+- Kalau filter dompet di Riwayat aktif, field Dompet di form tambah transaksi terisi dompet itu.
+- Pengguna tetap bisa mengganti dompet secara manual di form.
+- Kalau tidak ada filter dompet (semua dompet), form berperilaku seperti sebelumnya.
+- Mata uang di form mengikuti dompet yang terisi, memakai aturan mata uang per dompet yang sudah ada.
+- Berlaku hanya untuk form tambah transaksi dari Riwayat. Form edit, form transfer, dan filter dompet tidak diubah.
+- Fitur ini sengaja tidak mengubah filter dompet itu sendiri, tidak menyimpan dompet terakhir, dan tidak menambah fitur yang tidak ada di web.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Di Beranda tekan dompet "A" lalu masuk ke Riwayat terfilter dompet A. Tekan tombol tambah. Hasil: field Dompet di form berisi A.
+- Dari kondisi yang sama, ganti dompet di form ke B lalu simpan. Hasil: transaksi tersimpan di dompet B.
+- Hapus filter dompet di Riwayat (semua dompet), lalu tekan tambah. Hasil: form berperilaku seperti sebelumnya.
+- Filter dompet bermata uang Yen, tekan tambah. Hasil: form memakai Yen.
+- Buka form edit dan form transfer saat filter aktif. Hasil: tidak ada perubahan perilaku.
+
+

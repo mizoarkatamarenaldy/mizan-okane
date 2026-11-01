@@ -80,6 +80,7 @@ import kotlinx.coroutines.launch
 fun TransactionFormScreen(
     repository: MizanRepository,
     txId: String?,
+    initialWalletId: String? = null,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -112,7 +113,7 @@ fun TransactionFormScreen(
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
 
     // Inisialisasi awal saat mode edit atau tambah baru
-    LaunchedEffect(txId, transactions, wallets) {
+    LaunchedEffect(txId, initialWalletId, transactions, wallets) {
         if (isLoaded) return@LaunchedEffect
         if (isEditMode) {
             val existing = transactions.find { it.id == txId }
@@ -134,15 +135,24 @@ fun TransactionFormScreen(
         } else {
             // Mode tambah baru:
             // Sesuai spek: kolom dompet awalnya kosong. Kalau cuma punya 1 dompet (pada expense/income), langsung terpilih.
-            if (txType != "transfer" && activeWallets.size == 1) {
-                selectedWalletId = activeWallets[0].id
-            } else {
-                selectedWalletId = ""
+            // Jika filter dompet Riwayat aktif, field Dompet terisi dompet itu.
+            val targetWallet = initialWalletId?.takeIf { id ->
+                id.isNotBlank() && id != "all" && activeWallets.any { it.id == id }
+            }
+            if (targetWallet != null) {
+                selectedWalletId = targetWallet
+                isLoaded = true
+            } else if (wallets.isNotEmpty()) {
+                if (txType != "transfer" && activeWallets.size == 1) {
+                    selectedWalletId = activeWallets[0].id
+                } else {
+                    selectedWalletId = ""
+                }
+                isLoaded = true
             }
             selectedToWalletId = ""
             selectedDate = getCurrentDateString()
             selectedTime = getCurrentTimeString()
-            isLoaded = true
         }
     }
 
