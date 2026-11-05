@@ -12,6 +12,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-05: Kotlin 10K: Perbaikan build widget 2
+- Diperbaiki: Menambahkan import `androidx.glance.color.ColorProvider` di samping `androidx.glance.unit.ColorProvider` pada `BalanceSummaryWidget.kt` agar fungsi `ColorProvider(day, night)` dapat diselesaikan oleh kompilator Kotlin (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
+- Diubah: Kenaikan versi aplikasi desktop ke 0.2.0 untuk persiapan rilis atas izin pemilik (`desktop/tauri/package.json`, `desktop/tauri/src-tauri/Cargo.toml`, `desktop/tauri/src-tauri/tauri.conf.json`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 10K: Perbaikan build widget 2" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-05: Kotlin 10J: Perbaikan build widget
 - Diperbaiki: Mengubah import `androidx.glance.color.ColorProvider` menjadi `androidx.glance.unit.ColorProvider` pada `BalanceSummaryWidget.kt` agar tipe parameter `ColorProvider` dapat diselesaikan oleh kompilator Kotlin (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
 - Diperbaiki: Menghapus import `androidx.glance.layout.defaultWeight` yang tidak valid karena `defaultWeight()` merupakan fungsi ekstensi lingkup (`ColumnScope` dan `RowScope`) sehingga tidak memerlukan import fungsi tingkat paket (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).

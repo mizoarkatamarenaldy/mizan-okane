@@ -464,3 +464,23 @@ Cek manual:
 - Pemilik membangun ulang proyek. Hasil: dua error di atas tidak muncul lagi.
 - Kalau muncul error baru, pemilik melaporkannya terpisah. Jangan diperbaiki di sesi ini.
 
+## Kotlin 10K: Perbaikan build widget 2
+
+Tujuan: Memperbaiki empat error kompilasi yang dilaporkan pemilik saat build release, supaya widget bisa dibangun.
+
+Tidak ada elemen tampilan baru.
+
+Aturan:
+- Perbaiki hanya empat error ini di mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt, baris 49 sampai 52 (TextColor, TextSecondaryColor, IncomeColor, ExpenseColor): "None of the following candidates is applicable: fun ColorProvider(color: Color), fun ColorProvider(resId: Int)".
+- Penyebab: di Glance, tipe ColorProvider ada di androidx.glance.unit, sedangkan fungsi ColorProvider(day, night) ada di androidx.glance.color. Keduanya bernama sama dan butuh import sendiri-sendiri. Import androidx.glance.unit.ColorProvider tetap dipertahankan, lalu tambahkan import androidx.glance.color.ColorProvider.
+- Jangan ubah perilaku, tampilan, warna, atau logika hitung widget.
+- Jangan perbaiki peringatan atau pesan lain di log build.
+- Jangan ubah file lain.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Pemilik membangun ulang proyek. Hasil: empat error di atas tidak muncul lagi.
+- Kalau muncul error baru, pemilik melaporkannya terpisah. Jangan diperbaiki di sesi ini.
+

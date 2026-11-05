@@ -161,6 +161,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Arsip CHANGELOG dan PLANSPEC
 - [x] Widget Kotlin: ringkasan saldo
 - [x] Kotlin 10J: Perbaikan build widget
+- [x] Kotlin 10K: Perbaikan build widget 2
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.
