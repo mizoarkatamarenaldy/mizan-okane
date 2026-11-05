@@ -12,6 +12,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-05: Kotlin 10L: Perbaikan kursor input nominal
+- Diperbaiki: Menggunakan `TextFieldValue` dengan seleksi kursor selalu berada di akhir teks (`TextRange(formatted.length)`) pada komponen `AmountInputField` sehingga kursor tidak lagi melompat ke tengah angka saat titik pemisah ribuan muncul ketika mengetik atau menghapus nominal transaksi, transfer, penyesuaian saldo, dan simulasi timbangan (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/AmountInputField.kt`).
+- Diperbaiki: Memperbaiki posisi kursor pada ketiga kolom input budget (edit inline budget kategori, edit inline budget sub kategori, dan form modal atur budget) di `KelolaBudgetScreen` menggunakan `TextFieldValue` agar kursor konsisten tetap di akhir angka (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/KelolaBudgetScreen.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 10L: Perbaikan kursor input nominal" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-05: Kotlin 10K: Perbaikan build widget 2
 - Diperbaiki: Menambahkan import `androidx.glance.color.ColorProvider` di samping `androidx.glance.unit.ColorProvider` pada `BalanceSummaryWidget.kt` agar fungsi `ColorProvider(day, night)` dapat diselesaikan oleh kompilator Kotlin (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
 - Diubah: Kenaikan versi aplikasi desktop ke 0.2.0 untuk persiapan rilis atas izin pemilik (`desktop/tauri/package.json`, `desktop/tauri/src-tauri/Cargo.toml`, `desktop/tauri/src-tauri/tauri.conf.json`).

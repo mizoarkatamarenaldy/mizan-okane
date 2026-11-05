@@ -50,10 +50,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -136,14 +138,14 @@ fun KelolaBudgetScreen(
 
     // State inline edit
     var editingCategoryName by remember { mutableStateOf<String?>(null) }
-    var editingCategoryAmountText by remember { mutableStateOf("") }
+    var editingCategoryAmountText by remember { mutableStateOf(TextFieldValue("")) }
 
     var editingSubcategory by remember { mutableStateOf<Pair<String, String>?>(null) }
-    var editingSubcategoryAmountText by remember { mutableStateOf("") }
+    var editingSubcategoryAmountText by remember { mutableStateOf(TextFieldValue("")) }
 
     // State form tambah/atur budget
     var selectedDropdownId by remember { mutableStateOf<String?>(null) }
-    var formAmountText by remember { mutableStateOf("") }
+    var formAmountText by remember { mutableStateOf(TextFieldValue("")) }
 
     // Dialog konfirmasi hapus budget
     var pendingDeleteCategory by remember { mutableStateOf<String?>(null) }
@@ -440,12 +442,16 @@ fun KelolaBudgetScreen(
                                                     BasicTextField(
                                                         value = editingCategoryAmountText,
                                                         onValueChange = { input ->
-                                                            val digits = input.filter { it.isDigit() }
-                                                            editingCategoryAmountText = if (digits.isNotEmpty()) {
+                                                            val digits = input.text.filter { it.isDigit() }
+                                                            val formatted = if (digits.isNotEmpty()) {
                                                                 Uang.formatNumber(digits.toLongOrNull() ?: 0L)
                                                             } else {
                                                                 ""
                                                             }
+                                                            editingCategoryAmountText = TextFieldValue(
+                                                                text = formatted,
+                                                                selection = TextRange(formatted.length)
+                                                            )
                                                         },
                                                         modifier = Modifier.fillMaxWidth(),
                                                         textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -463,7 +469,7 @@ fun KelolaBudgetScreen(
 
                                             TextButton(
                                                 onClick = {
-                                                    val parsed = Uang.parseAmountInput(editingCategoryAmountText, "IDR")
+                                                    val parsed = Uang.parseAmountInput(editingCategoryAmountText.text, "IDR")
                                                     if (parsed <= 0L) {
                                                         Toast.makeText(
                                                             context,
@@ -563,7 +569,8 @@ fun KelolaBudgetScreen(
                                             TextButton(
                                                 onClick = {
                                                     editingCategoryName = cat
-                                                    editingCategoryAmountText = Uang.formatAmountForInput(amount, "IDR")
+                                                    val formatted = Uang.formatAmountForInput(amount, "IDR")
+                                                    editingCategoryAmountText = TextFieldValue(formatted, TextRange(formatted.length))
                                                     editingSubcategory = null
                                                 }
                                             ) {
@@ -732,12 +739,16 @@ fun KelolaBudgetScreen(
                                                                 BasicTextField(
                                                                     value = editingSubcategoryAmountText,
                                                                     onValueChange = { input ->
-                                                                        val digits = input.filter { it.isDigit() }
-                                                                        editingSubcategoryAmountText = if (digits.isNotEmpty()) {
+                                                                        val digits = input.text.filter { it.isDigit() }
+                                                                        val formatted = if (digits.isNotEmpty()) {
                                                                             Uang.formatNumber(digits.toLongOrNull() ?: 0L)
                                                                         } else {
                                                                             ""
                                                                         }
+                                                                        editingSubcategoryAmountText = TextFieldValue(
+                                                                            text = formatted,
+                                                                            selection = TextRange(formatted.length)
+                                                                        )
                                                                     },
                                                                     modifier = Modifier.fillMaxWidth(),
                                                                     textStyle = MaterialTheme.typography.bodySmall.copy(
@@ -755,7 +766,7 @@ fun KelolaBudgetScreen(
 
                                                         TextButton(
                                                             onClick = {
-                                                                val parsed = Uang.parseAmountInput(editingSubcategoryAmountText, "IDR")
+                                                                val parsed = Uang.parseAmountInput(editingSubcategoryAmountText.text, "IDR")
                                                                 if (parsed <= 0L) {
                                                                     Toast.makeText(
                                                                         context,
@@ -855,7 +866,8 @@ fun KelolaBudgetScreen(
                                                         TextButton(
                                                             onClick = {
                                                                 editingSubcategory = Pair(cat, sub)
-                                                                editingSubcategoryAmountText = Uang.formatAmountForInput(subAmount, "IDR")
+                                                                val formatted = Uang.formatAmountForInput(subAmount, "IDR")
+                                                                editingSubcategoryAmountText = TextFieldValue(formatted, TextRange(formatted.length))
                                                                 editingCategoryName = null
                                                             }
                                                         ) {
@@ -919,13 +931,15 @@ fun KelolaBudgetScreen(
                                 if (id.startsWith("cat:")) {
                                     val cat = id.removePrefix("cat:")
                                     val b = budgets.items[cat]
-                                    formAmountText = if (b != null && b > 0L) Uang.formatAmountForInput(b, "IDR") else ""
+                                    val formatted = if (b != null && b > 0L) Uang.formatAmountForInput(b, "IDR") else ""
+                                    formAmountText = TextFieldValue(formatted, TextRange(formatted.length))
                                 } else if (id.startsWith("sub:")) {
                                     val parts = id.removePrefix("sub:").split(":")
                                     val cat = parts[0]
                                     val sub = parts.getOrNull(1) ?: ""
                                     val b = budgets.subcategories[cat]?.get(sub)
-                                    formAmountText = if (b != null && b > 0L) Uang.formatAmountForInput(b, "IDR") else ""
+                                    val formatted = if (b != null && b > 0L) Uang.formatAmountForInput(b, "IDR") else ""
+                                    formAmountText = TextFieldValue(formatted, TextRange(formatted.length))
                                 }
                             }
                         )
@@ -955,12 +969,16 @@ fun KelolaBudgetScreen(
                                 BasicTextField(
                                     value = formAmountText,
                                     onValueChange = { input ->
-                                        val digits = input.filter { it.isDigit() }
-                                        formAmountText = if (digits.isNotEmpty()) {
+                                        val digits = input.text.filter { it.isDigit() }
+                                        val formatted = if (digits.isNotEmpty()) {
                                             Uang.formatNumber(digits.toLongOrNull() ?: 0L)
                                         } else {
                                             ""
                                         }
+                                        formAmountText = TextFieldValue(
+                                            text = formatted,
+                                            selection = TextRange(formatted.length)
+                                        )
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     textStyle = TextStyle(
@@ -973,7 +991,7 @@ fun KelolaBudgetScreen(
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     singleLine = true,
                                     decorationBox = { innerTextField ->
-                                        if (formAmountText.isEmpty()) {
+                                        if (formAmountText.text.isEmpty()) {
                                             Text(
                                                 text = stringResource(id = R.string.placeholder_nominal_budget),
                                                 style = TextStyle(
@@ -1000,7 +1018,7 @@ fun KelolaBudgetScreen(
                                     ).show()
                                     return@Button
                                 }
-                                val amount = Uang.parseAmountInput(formAmountText, "IDR")
+                                val amount = Uang.parseAmountInput(formAmountText.text, "IDR")
                                 if (amount <= 0L) {
                                     Toast.makeText(
                                         context,
@@ -1028,7 +1046,7 @@ fun KelolaBudgetScreen(
                                         val newItems = budgets.items.toMutableMap()
                                         newItems[cat] = amount
                                         repository.saveBudgets(budgets.copy(items = newItems, updatedAt = now))
-                                        formAmountText = ""
+                                        formAmountText = TextFieldValue("")
                                         selectedDropdownId = null
                                     }
                                 } else if (optId.startsWith("sub:")) {
@@ -1067,7 +1085,7 @@ fun KelolaBudgetScreen(
                                         val newSubBudgets = budgets.subcategories.toMutableMap()
                                         newSubBudgets[cat] = parentSubBudgets
                                         repository.saveBudgets(budgets.copy(subcategories = newSubBudgets, updatedAt = now))
-                                        formAmountText = ""
+                                        formAmountText = TextFieldValue("")
                                         selectedDropdownId = null
                                     }
                                 }

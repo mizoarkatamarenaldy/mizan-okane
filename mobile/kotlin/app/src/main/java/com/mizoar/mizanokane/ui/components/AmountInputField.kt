@@ -14,14 +14,20 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mizoar.mizanokane.data.Uang
@@ -35,6 +41,22 @@ fun AmountInputField(
     modifier: Modifier = Modifier,
     placeholder: String = "0"
 ) {
+    var textFieldValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = amountText,
+                selection = TextRange(amountText.length)
+            )
+        )
+    }
+
+    if (textFieldValue.text != amountText) {
+        textFieldValue = TextFieldValue(
+            text = amountText,
+            selection = TextRange(amountText.length)
+        )
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -58,29 +80,34 @@ fun AmountInputField(
         )
         Spacer(modifier = Modifier.width(6.dp))
         BasicTextField(
-            value = amountText,
+            value = textFieldValue,
             onValueChange = { input ->
-                if (currency == "USD") {
-                    val clean = input.filter { it.isDigit() || it == ',' || it == '.' }
+                val formatted = if (currency == "USD") {
+                    val clean = input.text.filter { it.isDigit() || it == ',' || it == '.' }
                     val sepIdx = clean.indexOfFirst { it == ',' || it == '.' }
                     if (sepIdx != -1) {
                         val intP = clean.substring(0, sepIdx).filter { it.isDigit() }
                         val decP = clean.substring(sepIdx + 1).filter { it.isDigit() }.take(2)
                         val intFormatted = if (intP.isNotEmpty()) Uang.formatNumber(intP.toLongOrNull() ?: 0L) else "0"
-                        onAmountChange("$intFormatted,$decP")
+                        "$intFormatted,$decP"
                     } else {
                         val digits = clean.filter { it.isDigit() }
-                        onAmountChange(if (digits.isNotEmpty()) Uang.formatNumber(digits.toLongOrNull() ?: 0L) else "")
+                        if (digits.isNotEmpty()) Uang.formatNumber(digits.toLongOrNull() ?: 0L) else ""
                     }
                 } else {
-                    val digits = input.filter { it.isDigit() }
-                    onAmountChange(
-                        if (digits.isNotEmpty()) {
-                            Uang.formatNumber(digits.toLongOrNull() ?: 0L)
-                        } else {
-                            ""
-                        }
-                    )
+                    val digits = input.text.filter { it.isDigit() }
+                    if (digits.isNotEmpty()) {
+                        Uang.formatNumber(digits.toLongOrNull() ?: 0L)
+                    } else {
+                        ""
+                    }
+                }
+                textFieldValue = TextFieldValue(
+                    text = formatted,
+                    selection = TextRange(formatted.length)
+                )
+                if (formatted != amountText) {
+                    onAmountChange(formatted)
                 }
             },
             modifier = Modifier.fillMaxWidth(),

@@ -484,3 +484,26 @@ Cek manual:
 - Pemilik membangun ulang proyek. Hasil: empat error di atas tidak muncul lagi.
 - Kalau muncul error baru, pemilik melaporkannya terpisah. Jangan diperbaiki di sesi ini.
 
+## Kotlin 10L: Perbaikan kursor input nominal
+
+Tujuan: Saat mengetik nominal di aplikasi Kotlin, kursor selalu tetap di akhir angka walau titik pemisah ribuan muncul. Sekarang kursor melompat ke tengah angka sehingga sering salah input.
+
+Tidak ada elemen tampilan baru.
+
+Aturan:
+- Folder kerja: mobile/. Hanya ubah file di mobile/kotlin/. Jangan ubah desktop/ dan mobile/capacitor/.
+- Setiap kali angka diformat ulang dengan titik pemisah ribuan, kursor ditaruh di akhir teks.
+- Bug yang diperbaiki: mengetik 1, 0, 0, 0 menghasilkan "1.00|0" (kursor di depan angka 0 terakhir). Yang benar: "1.000|".
+- Berlaku untuk semua kolom input nominal di aplikasi Kotlin yang memakai pemisah ribuan.
+- Hasil format angka dan nilai yang disimpan tidak berubah. Hanya posisi kursor yang diperbaiki.
+- Sengaja TIDAK dilakukan: mengubah format angka, menambah fitur memindahkan kursor ke tengah angka, atau mengubah perilaku di versi web.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka form tambah transaksi, ketik 1, 0, 0, 0 satu per satu. Hasil tiap ketikan: "1|", "10|", "100|", "1.000|". Kursor selalu di akhir.
+- Dari "1.000|", ketik 0 lalu 0. Hasil: "10.000|" lalu "100.000|", kursor di akhir.
+- Dari "100.000|", tekan hapus satu kali. Hasil: "10.000|", kursor di akhir.
+- Ulangi di kolom nominal lain (transfer, budget, penyesuaian saldo) dan hasilnya sama.
+

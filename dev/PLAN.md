@@ -162,6 +162,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Widget Kotlin: ringkasan saldo
 - [x] Kotlin 10J: Perbaikan build widget
 - [x] Kotlin 10K: Perbaikan build widget 2
+- [x] Kotlin 10L: Perbaikan kursor input nominal
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.
