@@ -156,6 +156,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Form transaksi ikut filter dompet
 - [x] Animasi Timbangan (Desktop)
 - [x] Animasi Timbangan (Kotlin)
+- [x] Pintasan mode gelap (Desktop)
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

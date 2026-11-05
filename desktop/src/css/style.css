@@ -573,6 +573,73 @@ p {
     flex-shrink: 0;
 }
 
+/* Kontainer Aksi Header (Pintasan Tema & Status Sinkron) */
+.header-actions {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Pintasan Mode Gelap / Terang di Header */
+.header-theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-card, 8px);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.header-theme-btn:hover {
+    background-color: var(--surface-raised);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.header-theme-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+/* Mode gelap aktif (atau default gelap): tampilkan matahari (ganti ke mode terang), sembunyikan bulan */
+.header-theme-btn .icon-moon {
+    display: none;
+}
+
+.header-theme-btn .icon-sun {
+    display: inline-flex;
+}
+
+[data-theme="dark"] .header-theme-btn .icon-moon {
+    display: none;
+}
+
+[data-theme="dark"] .header-theme-btn .icon-sun {
+    display: inline-flex;
+}
+
+/* Mode terang aktif: tampilkan bulan (ganti ke mode gelap), sembunyikan matahari */
+[data-theme="light"] .header-theme-btn .icon-sun {
+    display: none;
+}
+
+[data-theme="light"] .header-theme-btn .icon-moon {
+    display: inline-flex;
+}
+
 /* Status Sinkronisasi Header (Ikon Kecil di Header) */
 .header-sync-wrapper {
     position: relative;

@@ -281,6 +281,14 @@ function resolveIsDark(themeSetting) {
     return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 }
 
+function updateHeaderThemeBtn(isDark) {
+    const btn = document.getElementById('header-theme-toggle-btn');
+    if (!btn) return;
+    const label = isDark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap';
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('title', label);
+}
+
 function applyTheme(themeSetting) {
     const isDark = resolveIsDark(themeSetting);
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -288,6 +296,7 @@ function applyTheme(themeSetting) {
     if (metaThemeColor) {
         metaThemeColor.setAttribute('content', isDark ? '#0F1117' : '#F5F5F7');
     }
+    updateHeaderThemeBtn(isDark);
 }
 
 function applyThemeUI(themeSetting) {
@@ -10585,31 +10594,43 @@ async function init() {
     const initialTheme = getStoredTheme();
     applyThemeUI(initialTheme);
 
+    async function persistAndApplyTheme(newTheme) {
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+        } catch (err) {
+            console.warn('Gagal menyimpan tema:', err);
+        }
+        applyThemeUI(newTheme);
+        if (currentTransactions && currentTransactions.length > 0) {
+            renderStatsChart(currentTransactions);
+            renderDonutChart(currentTransactions);
+            renderTimbangan();
+        }
+        try {
+            await saveSettings({ theme: newTheme, timeFormat: currentTimeFormat, updatedAt: Date.now() });
+        } catch (err) {
+            console.warn('Gagal menyimpan pengaturan tema ke IndexedDB:', err);
+        }
+        markDirty().catch(err => console.error("Gagal menandai perubahan tema untuk sinkron", err));
+    }
+
     if (themeRadios) {
         for (const radio of themeRadios) {
             radio.addEventListener('change', async (e) => {
                 if (e.target.checked) {
-                    const newTheme = e.target.value;
-                    try {
-                        localStorage.setItem(THEME_STORAGE_KEY, newTheme);
-                    } catch (err) {
-                        console.warn('Gagal menyimpan tema:', err);
-                    }
-                    applyThemeUI(newTheme);
-                    if (currentTransactions && currentTransactions.length > 0) {
-                        renderStatsChart(currentTransactions);
-                        renderDonutChart(currentTransactions);
-                        renderTimbangan();
-                    }
-                    try {
-                        await saveSettings({ theme: newTheme, timeFormat: currentTimeFormat, updatedAt: Date.now() });
-                    } catch (err) {
-                        console.warn('Gagal menyimpan pengaturan tema ke IndexedDB:', err);
-                    }
-                    markDirty().catch(err => console.error("Gagal menandai perubahan tema untuk sinkron", err));
+                    await persistAndApplyTheme(e.target.value);
                 }
             });
         }
+    }
+
+    const headerThemeBtn = document.getElementById('header-theme-toggle-btn');
+    if (headerThemeBtn) {
+        headerThemeBtn.addEventListener('click', async () => {
+            const currentDark = resolveIsDark(getStoredTheme());
+            const nextTheme = currentDark ? 'light' : 'dark';
+            await persistAndApplyTheme(nextTheme);
+        });
     }
 
     if (window.matchMedia) {
