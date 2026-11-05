@@ -2827,3 +2827,32 @@ Cek manual:
 - Di Timbangan, ganti bulan lewat navigasi bulan: lengan bergerak dari posisi lama ke posisi baru.
 - Tambah satu transaksi pengeluaran besar lalu buka Timbangan: kemiringan sesuai dan animasinya jalan.
 - Buka halaman lain (Beranda, Riwayat, Statistik, Pengaturan): tidak ada animasi baru.
+
+## Animasi Timbangan (Kotlin)
+
+Tujuan: Menyamakan animasi gambar timbangan di versi Kotlin dengan versi web di desktop/src, supaya perilaku kedua versi sama.
+
+Tempat dan tampilan:
+- Layar Timbangan di mobile/kotlin/, pada gambar timbangan Bulan Ini (pemasukan vs pengeluaran) yang sudah ada.
+- Tidak ada teks, tombol, atau kartu baru.
+
+Aturan:
+- Saat layar Timbangan dibuka, lengan timbangan bergerak dari posisi seimbang (datar) ke posisi miring sesuai kondisi yang sudah ada sekarang.
+- Saat nilai berubah (ganti bulan lewat navigasi bulan, atau data transaksi berubah), lengan bergerak dari posisi lama ke posisi baru, bukan lompat langsung.
+- Arah, besar kemiringan, durasi, dan jenis gerak mengikuti versi web di desktop/src. Kalau ragu, web yang jadi acuan.
+- Arah dan besar kemiringan memakai logika yang sudah ada. Fitur ini tidak mengubah cara kemiringan dihitung.
+- Animasi hanya berlaku di gambar timbangan Bulan Ini. Elemen lain di layar Timbangan dan layar lain tidak dianimasikan.
+- Izin dari pemilik: boleh menambah animasi pada gambar timbangan sesuai spek ini, walau animasinya tidak tercantum di dev/DESIGN.md. Dilarang menambah animasi di tempat lain, dan dilarang menambah warna, font, atau bayangan baru.
+- Pakai API animasi bawaan Jetpack Compose yang sudah tersedia di proyek. Tidak ada dependensi baru di build.gradle.
+- Fitur ini sengaja TIDAK mengubah logika perhitungan, tampilan nominal, dan Kalkulator "Timbang sebelum beli".
+- Dilarang menjalankan ./gradlew, gradle, atau perintah build apa pun. Pemilik yang membangun.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka layar Timbangan dari layar lain: lengan bergerak halus ke posisi miring yang sesuai, tanpa lompat.
+- Di Timbangan, ganti bulan lewat navigasi bulan: lengan bergerak dari posisi lama ke posisi baru.
+- Tambah satu transaksi pengeluaran besar lalu buka Timbangan: kemiringan sesuai dan animasinya jalan.
+- Bandingkan dengan versi web: arah, kemiringan, dan kesan geraknya sama.
+- Buka layar lain (Beranda, Riwayat, Statistik, Pengaturan): tidak ada animasi baru.

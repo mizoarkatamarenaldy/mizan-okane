@@ -155,6 +155,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Perbaikan Tauri: fitur form reqwest
 - [x] Form transaksi ikut filter dompet
 - [x] Animasi Timbangan (Desktop)
+- [x] Animasi Timbangan (Kotlin)
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

@@ -1,6 +1,9 @@
 package com.mizoar.mizanokane.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -1040,9 +1043,23 @@ private fun TimbanganScaleCanvas(
     val textSecondaryColor = MizanTheme.colors.textSecondary
     val surfaceColor = MizanTheme.colors.surface
 
-    val dy = remember(income, expense, diff) {
+    val targetDy = remember(income, expense, diff) {
         calculateScaleTiltDy(income, expense, diff)
     }
+
+    val animatedDy = remember { Animatable(0f) }
+
+    LaunchedEffect(targetDy) {
+        animatedDy.animateTo(
+            targetValue = targetDy.toFloat(),
+            animationSpec = tween(
+                durationMillis = 450,
+                easing = EaseOutCubic
+            )
+        )
+    }
+
+    val dy = animatedDy.value
 
     Canvas(
         modifier = modifier

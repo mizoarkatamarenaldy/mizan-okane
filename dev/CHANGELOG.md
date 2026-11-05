@@ -12,6 +12,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 
 
 
+## 2026-11-05: Animasi Timbangan (Kotlin)
+- Ditambah: Animasi halus pergerakan lengan timbangan Bulan Ini dari posisi seimbang (datar, dy = 0) ke posisi kemiringan target saat layar Timbangan dibuka menggunakan API animasi bawaan Jetpack Compose `Animatable`, `tween` durasi 450 ms, dan perlambatan kubik `EaseOutCubic` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
+- Ditambah: Transisi kemiringan dinamis dan mulus dari posisi lama ke posisi baru saat berganti bulan lewat navigasi bulan, saat data transaksi berubah, atau saat pilihan mata uang berganti (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
+- Diubah: Komponen gambar timbangan `TimbanganScaleCanvas` menggerakkan lengan dan kedua piringan timbangan sesuai nilai animasi kemiringan tanpa mengubah logika perhitungan `calculateScaleTiltDy` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Animasi Timbangan (Kotlin)" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-05: Animasi Timbangan (Desktop)
 - Ditambah: Animasi halus pergerakan lengan timbangan Bulan Ini menggunakan requestAnimationFrame dengan perlambatan kubik (ease-out cubic) dari posisi seimbang (datar) saat halaman Timbangan dibuka (`desktop/src/js/app.js`).
 - Ditambah: Transisi kemiringan dinamis dari posisi lama ke posisi baru saat berganti bulan pada pemilih bulan, mengubah pilihan mata uang, atau saat data transaksi diperbarui (`desktop/src/js/app.js`).
