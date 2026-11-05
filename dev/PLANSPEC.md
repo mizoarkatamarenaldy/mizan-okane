@@ -2886,3 +2886,35 @@ Cek manual:
 - Ganti tema lewat Pengaturan, lalu lihat header. Hasil: ikon tombol ikut berubah.
 - Ganti tema lewat tombol, tutup dan buka lagi aplikasi. Hasil: tema tetap seperti pilihan terakhir.
 - Lihat header di lebar jendela sempit dan lebar. Hasil: tombol dan ikon cloud sama-sama terlihat, tidak saling menimpa.
+
+## Pintasan mode gelap (Kotlin)
+
+Tujuan: pemilik bisa ganti mode gelap dan terang langsung dari header aplikasi Android, tanpa masuk ke Pengaturan, dengan perilaku yang sama seperti versi web.
+
+Tempat dan tampilan:
+- Header, pojok kanan atas, satu tombol ikon di sebelah kiri ikon cloud (status sinkron).
+- Tombol tampil di semua layar yang memakai header.
+- Ikon menunjukkan mode yang akan dituju: tampil ikon matahari saat mode gelap aktif, ikon bulan saat mode terang aktif.
+- Tombol punya deskripsi aksesibilitas "Ganti ke mode terang" atau "Ganti ke mode gelap" sesuai mode yang akan dituju.
+- Target sentuh minimal 44 px.
+
+Aturan:
+- Satu ketukan langsung mengganti tema, tanpa dialog.
+- Memakai mekanisme dan penyimpanan tema yang sudah ada di Pengaturan Kotlin, bukan yang baru.
+- Pengaturan tema di Pengaturan dan tombol ini selalu menunjukkan keadaan yang sama, tanpa perlu menutup dan membuka layar.
+- Pilihan tetap tersimpan setelah aplikasi ditutup dan dibuka lagi.
+- Tidak menambah pilihan tema baru dan tidak mengubah isi layar Pengaturan.
+- Tidak mengubah posisi atau perilaku ikon cloud.
+- Tidak menambah perilaku yang tidak ada di versi web.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Kondisi awal mode terang. Ketuk tombol di header. Hasil: tampilan jadi gelap dan ikon berubah jadi matahari.
+- Kondisi awal mode gelap. Ketuk tombol di header. Hasil: tampilan jadi terang dan ikon berubah jadi bulan.
+- Ganti tema lewat tombol, lalu buka Pengaturan. Hasil: pilihan tema di Pengaturan sama dengan tampilan sekarang.
+- Ganti tema lewat Pengaturan, lalu lihat header. Hasil: ikon tombol ikut berubah.
+- Ganti tema lewat tombol, tutup aplikasi sepenuhnya, lalu buka lagi. Hasil: tema tetap seperti pilihan terakhir.
+- Lihat header di layar sempit. Hasil: tombol dan ikon cloud sama-sama terlihat, tidak saling menimpa.
+

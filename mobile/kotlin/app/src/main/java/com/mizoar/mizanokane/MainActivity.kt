@@ -99,7 +99,11 @@ class MainActivity : ComponentActivity() {
                 else -> isSystemDark
             }
             MizanOkaneTheme(darkTheme = darkTheme) {
-                MizanApp(repository = repository, authPreferences = authPreferences)
+                MizanApp(
+                    repository = repository,
+                    authPreferences = authPreferences,
+                    isDark = darkTheme
+                )
             }
         }
     }
@@ -108,7 +112,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MizanApp(
     repository: MizanRepository,
-    authPreferences: AuthPreferences
+    authPreferences: AuthPreferences,
+    isDark: Boolean = false
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -214,7 +219,21 @@ fun MizanApp(
         topBar = {
             if (!isFullScreen) {
                 Column {
-                    AppHeader()
+                    AppHeader(
+                        isDark = isDark,
+                        onToggleTheme = {
+                            val nextTheme = if (isDark) "light" else "dark"
+                            coroutineScope.launch {
+                                val currentSettings = repository.getSettings()
+                                repository.saveSettings(
+                                    currentSettings.copy(
+                                        theme = nextTheme,
+                                        updatedAt = System.currentTimeMillis()
+                                    )
+                                )
+                            }
+                        }
+                    )
                     if (isDemo) {
                         DemoModeBanner(onExitClick = { showBannerExitConfirmDialog = true })
                     }

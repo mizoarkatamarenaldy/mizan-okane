@@ -10,7 +10,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
-
+## 2026-11-05: Pintasan mode gelap (Kotlin)
+- Ditambah: Tombol pintasan ganti mode gelap dan terang di header aplikasi Android dengan target sentuh minimal 44 px dan deskripsi aksesibilitas sesuai mode yang akan dituju (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/AppHeader.kt`, `mobile/kotlin/app/src/main/res/values/strings.xml`).
+- Ditambah: Vector drawable ikon bulan garis `ic_moon.xml` yang konsisten dengan ikon matahari `ic_sun.xml` (`mobile/kotlin/app/src/main/res/drawable/ic_moon.xml`).
+- Ditambah: Alur pergantian tema langsung sekali ketuk di header yang tersinkronisasi dua arah seketika dengan Pengaturan dan tersimpan permanen lewat Room `SettingsEntity` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/MainActivity.kt`, `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/AppHeader.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Pintasan mode gelap (Kotlin)" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
 
 ## 2026-11-05: Pintasan mode gelap (Desktop)
 - Ditambah: Tombol pintasan ganti mode gelap dan terang di header pojok kanan atas, di sebelah kiri ikon cloud status sinkron, dengan target sentuh minimal 44 px dan label aksesibilitas sesuai mode yang akan dituju (`desktop/src/index.html`, `desktop/src/css/style.css`).

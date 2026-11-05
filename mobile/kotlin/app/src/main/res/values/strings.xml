@@ -335,4 +335,8 @@
     <string name="sync_status_synced">Tersinkron dengan Drive, pukul %1$s.</string>
     <string name="msg_sync_success">Sinkronisasi berhasil.</string>
     <string name="msg_sync_failed">Gagal sinkron: %1$s - %2$s</string>
+
+    <!-- Pintasan mode gelap / terang -->
+    <string name="desc_switch_to_light_mode">Ganti ke mode terang</string>
+    <string name="desc_switch_to_dark_mode">Ganti ke mode gelap</string>
 </resources>

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +25,11 @@ import com.mizoar.mizanokane.R
 import com.mizoar.mizanokane.ui.theme.MizanTheme
 
 @Composable
-fun AppHeader(modifier: Modifier = Modifier) {
+fun AppHeader(
+    modifier: Modifier = Modifier,
+    isDark: Boolean = false,
+    onToggleTheme: () -> Unit = {}
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -35,7 +40,7 @@ fun AppHeader(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .padding(horizontal = 16.dp),
+                .padding(start = 16.dp, end = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -51,6 +56,22 @@ fun AppHeader(modifier: Modifier = Modifier) {
                 color = MizanTheme.colors.text,
                 maxLines = 1
             )
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                onClick = onToggleTheme,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    painter = painterResource(
+                        id = if (isDark) R.drawable.ic_sun else R.drawable.ic_moon
+                    ),
+                    contentDescription = stringResource(
+                        id = if (isDark) R.string.desc_switch_to_light_mode else R.string.desc_switch_to_dark_mode
+                    ),
+                    modifier = Modifier.size(20.dp),
+                    tint = MizanTheme.colors.text
+                )
+            }
         }
         HorizontalDivider(
             thickness = 1.dp,
