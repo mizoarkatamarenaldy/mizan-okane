@@ -158,6 +158,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Animasi Timbangan (Kotlin)
 - [x] Pintasan mode gelap (Desktop)
 - [x] Pintasan mode gelap (Kotlin)
+- [x] Arsip CHANGELOG dan PLANSPEC
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

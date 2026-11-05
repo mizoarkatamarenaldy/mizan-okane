@@ -11,6 +11,7 @@
 - Jangan pernah menaruh data transaksi asli, token, kunci, atau file `.env` di repo. Repo ini publik, isinya hanya kode dan dokumen.
 - Di akhir tahap atau fitur, centang tahap atau fitur itu di dev/PLAN.md dan tambahkan satu entri di paling atas `dev/CHANGELOG.md` sesuai format di file itu. Tahap 5 baru dicentang setelah semua fiturnya tercentang. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
 - Di awal sesi, baca hanya 5 entri paling atas dev/CHANGELOG.md, jangan seluruh file.
+- Baca hanya dev/CHANGELOG.md dan dev/PLANSPEC.md yang aktif. Folder dev/arsip/ tidak dibaca, kecuali Mizo memintanya atau fitur yang dikerjakan menyentuh fitur lama; dalam kasus itu buka hanya bagian yang terkait.
 - Untuk tugas tampilan, baca dev/DESIGN.md dulu dan ikuti. Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
 
 ## Alur commit dan push
