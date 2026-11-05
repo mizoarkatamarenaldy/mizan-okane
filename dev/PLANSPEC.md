@@ -442,3 +442,25 @@ Cek manual:
 - Ketuk widget. Hasil: aplikasi terbuka.
 - Pasang widget saat tidak ada transaksi bulan ini. Hasil: ketiga angka nol, widget tidak error.
 
+## Kotlin 10J: Perbaikan build widget
+
+Tujuan: Memperbaiki dua error kompilasi yang dilaporkan pemilik saat build release, supaya widget dari item "Widget Kotlin: ringkasan saldo" bisa dibangun.
+
+Tidak ada elemen tampilan baru.
+
+Aturan:
+- Perbaiki hanya dua error ini, keduanya di mobile/kotlin/app/src/main/java/.../BalanceSummaryWidget.kt:
+  - Baris 21: Unresolved reference 'defaultWeight'
+  - Baris 222: Unresolved reference 'ColorProvider'
+- Cari penyebab di kode, lalu perbaiki dengan perubahan sekecil mungkin.
+- Jangan ubah perilaku, tampilan, atau logika hitung widget.
+- Jangan perbaiki peringatan atau pesan lain di log build, termasuk soal 'android.disallowKotlinSourceSets' dan versi Gradle.
+- Jangan ubah file lain kecuali perbaikannya memang menuntut itu. Kalau menuntut, sebutkan alasannya di entri CHANGELOG.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Pemilik membangun ulang proyek. Hasil: dua error di atas tidak muncul lagi.
+- Kalau muncul error baru, pemilik melaporkannya terpisah. Jangan diperbaiki di sesi ini.
+

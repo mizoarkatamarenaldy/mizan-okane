@@ -12,6 +12,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-05: Kotlin 10J: Perbaikan build widget
+- Diperbaiki: Mengubah import `androidx.glance.color.ColorProvider` menjadi `androidx.glance.unit.ColorProvider` pada `BalanceSummaryWidget.kt` agar tipe parameter `ColorProvider` dapat diselesaikan oleh kompilator Kotlin (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
+- Diperbaiki: Menghapus import `androidx.glance.layout.defaultWeight` yang tidak valid karena `defaultWeight()` merupakan fungsi ekstensi lingkup (`ColumnScope` dan `RowScope`) sehingga tidak memerlukan import fungsi tingkat paket (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
+- Diubah: Kenaikan `versionCode` dari 1 menjadi 2 dan `versionName` dari "0.1.0" menjadi "0.2.0" untuk persiapan rilis atas izin pemilik (`mobile/kotlin/app/build.gradle.kts`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 10J: Perbaikan build widget" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-05: Widget Kotlin: ringkasan saldo
 - Ditambah: Dependensi Jetpack Glance `androidx.glance:glance-appwidget` dan `androidx.glance:glance-material3` versi 1.1.1 pada file dependensi Gradle (`mobile/kotlin/gradle/libs.versions.toml`, `mobile/kotlin/app/build.gradle.kts`).
 - Ditambah: Implementasi widget layar utama Android satu ukuran berbasis Jetpack Glance `BalanceSummaryWidget` yang menampilkan nama bulan berjalan kecil di bagian atas serta tiga baris ringkasan saldo: "Pemasukan", "Pengeluaran", dan "Saldo" dengan warna dan tipografi sesuai `dev/DESIGN.md` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
