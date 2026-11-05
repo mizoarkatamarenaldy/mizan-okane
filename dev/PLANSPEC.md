@@ -415,3 +415,30 @@ Cek manual:
 - dev/CHANGELOG.md aktif hanya berisi entri bertanggal setelah 2026-10-22 dan entri item ini, dan ukurannya jauh lebih kecil dari sebelumnya.
 - dev/RULES.md memuat aturan baru soal arsip.
 
+## Widget Kotlin: ringkasan saldo
+
+Tujuan: Menampilkan pemasukan, pengeluaran, dan saldo bulan berjalan langsung di layar utama HP, supaya pemilik bisa melihat ringkasan tanpa membuka aplikasi.
+
+Tempat dan tampilan:
+- Widget layar utama Android (Jetpack Glance), satu ukuran, muncul di daftar widget dengan nama "Mizan Okane".
+- Isi widget tiga baris: "Pemasukan", "Pengeluaran", "Saldo", masing-masing dengan angkanya.
+- Nama bulan berjalan tampil kecil di bagian atas widget.
+- Warna dan font hanya dari dev/DESIGN.md.
+
+Aturan:
+- Angka widget sama persis dengan kartu saldo Beranda Kotlin untuk bulan berjalan, termasuk cara menangani mata uang. Pakai logika hitung yang sudah ada, jangan tulis logika hitung baru.
+- Widget hanya membaca data dari Room. Widget tidak menulis atau mengubah data apa pun.
+- Widget diperbarui setelah transaksi ditambah, diubah, atau dihapus di aplikasi.
+- Mengetuk widget membuka aplikasi.
+- Bila belum ada transaksi bulan ini, ketiga angka tampil sebagai nol.
+- Fitur ini sengaja TIDAK punya tombol tambah transaksi, tidak punya pengaturan widget, dan tidak punya versi desktop.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor. dev/SCHEMA.md tidak diubah.
+
+Cek manual:
+- Pasang widget di layar utama saat ada transaksi bulan ini. Hasil: pemasukan, pengeluaran, dan saldo sama dengan kartu saldo Beranda bulan berjalan.
+- Dengan widget terpasang, tambah satu pengeluaran di aplikasi lalu kembali ke layar utama. Hasil: angka pengeluaran dan saldo di widget ikut berubah.
+- Ketuk widget. Hasil: aplikasi terbuka.
+- Pasang widget saat tidak ada transaksi bulan ini. Hasil: ketiga angka nol, widget tidak error.
+

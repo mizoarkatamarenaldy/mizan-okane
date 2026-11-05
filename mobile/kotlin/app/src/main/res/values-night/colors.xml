@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget Tokens (Dark Mode) -->
+    <color name="widget_surface">@color/dark_surface</color>
+    <color name="widget_border">@color/dark_border</color>
+</resources>

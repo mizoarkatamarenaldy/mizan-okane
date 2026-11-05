@@ -12,6 +12,15 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-05: Widget Kotlin: ringkasan saldo
+- Ditambah: Dependensi Jetpack Glance `androidx.glance:glance-appwidget` dan `androidx.glance:glance-material3` versi 1.1.1 pada file dependensi Gradle (`mobile/kotlin/gradle/libs.versions.toml`, `mobile/kotlin/app/build.gradle.kts`).
+- Ditambah: Implementasi widget layar utama Android satu ukuran berbasis Jetpack Glance `BalanceSummaryWidget` yang menampilkan nama bulan berjalan kecil di bagian atas serta tiga baris ringkasan saldo: "Pemasukan", "Pengeluaran", dan "Saldo" dengan warna dan tipografi sesuai `dev/DESIGN.md` (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
+- Ditambah: Broadcast receiver `BalanceSummaryWidgetReceiver` serta konfigurasi XML widget provider `balance_summary_widget_info.xml` dan pendaftaran pada manifest aplikasi dengan label "Mizan Okane" (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidgetReceiver.kt`, `mobile/kotlin/app/src/main/res/xml/balance_summary_widget_info.xml`, `mobile/kotlin/app/src/main/AndroidManifest.xml`).
+- Ditambah: Drawable background kartu widget `bg_widget.xml` serta token warna mode terang dan gelap `widget_surface` dan `widget_border` dengan radius 8dp dan border 1px tanpa bayangan (`mobile/kotlin/app/src/main/res/drawable/bg_widget.xml`, `mobile/kotlin/app/src/main/res/values/colors.xml`, `mobile/kotlin/app/src/main/res/values-night/colors.xml`).
+- Ditambah: Resource string `label_saldo` dan `widget_saldo_description` (`mobile/kotlin/app/src/main/res/values/strings.xml`).
+- Diubah: `RoomMizanRepository` dan `MainActivity` memicu pembaruan widget secara otomatis setiap kali transaksi ditambah, diubah, atau dihapus, serta saat aplikasi ditutup/kembali ke layar utama HP (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/data/repository/RoomMizanRepository.kt`, `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/MainActivity.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Widget Kotlin: ringkasan saldo" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-05: Arsip CHANGELOG dan PLANSPEC
 - Ditambah: Folder arsip `dev/arsip/` beserta file arsip `dev/arsip/CHANGELOG-sampai-v0.1.0.md` dan `dev/arsip/PLANSPEC-sampai-v0.1.0.md` untuk menyimpan riwayat lama hingga titik potong rilis v0.1.0 bertanggal 2026-10-22 (`dev/arsip/CHANGELOG-sampai-v0.1.0.md`, `dev/arsip/PLANSPEC-sampai-v0.1.0.md`).
 - Ditambah: Aturan baru pada `dev/RULES.md` bahwa agen hanya membaca `dev/CHANGELOG.md` dan `dev/PLANSPEC.md` yang aktif, serta tidak membaca folder `dev/arsip/` kecuali diminta pemilik atau terkait fitur lama (`dev/RULES.md`).

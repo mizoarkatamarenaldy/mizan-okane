@@ -67,6 +67,8 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.play.services.auth)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

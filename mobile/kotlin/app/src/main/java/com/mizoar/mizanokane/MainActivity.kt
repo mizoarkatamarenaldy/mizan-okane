@@ -33,6 +33,9 @@ import com.mizoar.mizanokane.ui.components.BottomNavigationBar
 import com.mizoar.mizanokane.ui.navigation.Screen
 import com.mizoar.mizanokane.ui.screens.BerandaScreen
 import com.mizoar.mizanokane.ui.screens.EmptyScreen
+import com.mizoar.mizanokane.widget.BalanceSummaryWidgetReceiver
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
 import com.mizoar.mizanokane.ui.screens.KebijakanPrivasiScreen
 import com.mizoar.mizanokane.ui.screens.KelolaBudgetScreen
 import com.mizoar.mizanokane.ui.screens.KelolaDompetScreen
@@ -88,7 +91,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val db = AppDatabase.getInstance(applicationContext)
-        val repository = RoomMizanRepository(db)
+        val repository = RoomMizanRepository(db, applicationContext)
         val authPreferences = AuthPreferences(applicationContext)
         setContent {
             val settings by repository.getSettingsFlow().collectAsState(initial = DefaultData.DEFAULT_SETTINGS)
@@ -105,6 +108,13 @@ class MainActivity : ComponentActivity() {
                     isDark = darkTheme
                 )
             }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        lifecycleScope.launch(Dispatchers.IO) {
+            BalanceSummaryWidgetReceiver.updateAll(applicationContext)
         }
     }
 }

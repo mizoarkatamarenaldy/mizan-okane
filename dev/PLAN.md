@@ -159,6 +159,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Pintasan mode gelap (Desktop)
 - [x] Pintasan mode gelap (Kotlin)
 - [x] Arsip CHANGELOG dan PLANSPEC
+- [x] Widget Kotlin: ringkasan saldo
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

@@ -1,5 +1,6 @@
 package com.mizoar.mizanokane.data.repository
 
+import android.content.Context
 import androidx.room.withTransaction
 import com.mizoar.mizanokane.data.DefaultData
 import com.mizoar.mizanokane.data.SampleData
@@ -20,6 +21,7 @@ import com.mizoar.mizanokane.data.model.SubcategoryBudgetEntity
 import com.mizoar.mizanokane.data.model.SubcategoryEntity
 import com.mizoar.mizanokane.data.model.TransactionEntity
 import com.mizoar.mizanokane.data.model.WalletEntity
+import com.mizoar.mizanokane.widget.BalanceSummaryWidgetReceiver
 import java.time.LocalDate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +33,16 @@ import kotlinx.serialization.builtins.ListSerializer
 /**
  * Implementasi [MizanRepository] berbasis Room Database.
  */
-class RoomMizanRepository(private val db: AppDatabase) : MizanRepository {
+class RoomMizanRepository(
+    private val db: AppDatabase,
+    private val context: Context? = null
+) : MizanRepository {
+
+    private suspend fun notifyWidgetUpdate() {
+        context?.let { ctx ->
+            BalanceSummaryWidgetReceiver.updateAll(ctx)
+        }
+    }
 
     // --- Transaksi ---
 
@@ -77,6 +88,7 @@ class RoomMizanRepository(private val db: AppDatabase) : MizanRepository {
         } else {
             db.transactionDao().insert(tx)
         }
+        notifyWidgetUpdate()
     }
 
     override suspend fun markTransactionDeleted(id: String, updatedAt: Long) {
@@ -94,6 +106,7 @@ class RoomMizanRepository(private val db: AppDatabase) : MizanRepository {
         } else {
             db.transactionDao().markDeleted(id, updatedAt)
         }
+        notifyWidgetUpdate()
     }
 
     override suspend fun replaceAllTransactions(transactions: List<TransactionEntity>) {
@@ -109,6 +122,7 @@ class RoomMizanRepository(private val db: AppDatabase) : MizanRepository {
                 db.transactionDao().insertAll(transactions)
             }
         }
+        notifyWidgetUpdate()
     }
 
     // --- Dompet ---
@@ -466,6 +480,7 @@ class RoomMizanRepository(private val db: AppDatabase) : MizanRepository {
             db.metaDao().set(MetaEntity("demo_transactions", txsJson))
             db.metaDao().set(MetaEntity("demo_mode", "true"))
         }
+        notifyWidgetUpdate()
     }
 
     override suspend fun clearSampleData() {
@@ -476,6 +491,7 @@ class RoomMizanRepository(private val db: AppDatabase) : MizanRepository {
             db.metaDao().delete("demo_transactions")
             db.metaDao().delete("demo_mode")
         }
+        notifyWidgetUpdate()
     }
 
     override suspend fun getRealTransactions(): List<TransactionEntity> {
@@ -589,5 +605,6 @@ class RoomMizanRepository(private val db: AppDatabase) : MizanRepository {
             db.metaDao().delete("demo_transactions")
             db.metaDao().delete("demo_mode")
         }
+        notifyWidgetUpdate()
     }
 }

@@ -11,6 +11,8 @@
     <string name="title_total_saldo">TOTAL SALDO</string>
     <string name="label_pemasukan">Pemasukan</string>
     <string name="label_pengeluaran">Pengeluaran</string>
+    <string name="label_saldo">Saldo</string>
+    <string name="widget_saldo_description">Ringkasan pemasukan, pengeluaran, dan saldo bulan berjalan.</string>
     <string name="label_semua_dompet">Semua Dompet</string>
     <string name="label_semua_bulan">Semua bulan</string>
     <string name="label_budget">Budget</string>

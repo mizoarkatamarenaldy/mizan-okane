@@ -22,4 +22,8 @@
     <color name="expense">#FFFF453A</color>
     <color name="transfer">#FF4A9EFF</color>
     <color name="budget_warning">#FFF5A623</color>
+
+    <!-- Widget Tokens (Light Mode default) -->
+    <color name="widget_surface">@color/light_surface</color>
+    <color name="widget_border">@color/light_border</color>
 </resources>
