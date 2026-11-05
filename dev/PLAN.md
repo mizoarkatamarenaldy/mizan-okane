@@ -145,6 +145,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
   - [x] Kotlin 9A: Audit Beranda, Riwayat, Form Transaksi, Komponen Umum
   - [x] Kotlin 9E: Audit Lintas File
   - [x] Kotlin 11: Form transaksi ikut filter dompet
+  - [x] Kotlin 10I: Perbaikan label navigasi Timbangan
 - [ ] APK rilis
 - [x] APK Item A: login Google native
 - [ ] Persiapan rilis publik

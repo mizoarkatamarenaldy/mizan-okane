@@ -2774,3 +2774,30 @@ Cek manual:
 - Buka form edit dan form transfer saat filter aktif. Hasil: tidak ada perubahan perilaku.
 
 
+
+## Kotlin 10I: Perbaikan label navigasi Timbangan
+
+Tujuan: Label "Timbangan" di bawah tombol bulat tengah pada navigasi bawah versi Kotlin terpotong, hanya sebagian huruf yang terlihat. Label harus tampil utuh seperti label tab lain.
+
+Tempat dan tampilan:
+- Bar navigasi bawah (BottomNavigationBar), tombol tengah Timbangan. Muncul di semua halaman, bukan hanya halaman Timbangan.
+- Gejala: tombol hijau bulat menonjol ke atas, tapi teks "Timbangan" di bawahnya terpotong di tepi bawah bar sehingga yang terlihat hanya potongan atas huruf berwarna hijau.
+- Hasil yang diinginkan: teks "Timbangan" terlihat penuh, ukuran dan gaya teks sama dengan label Beranda, Riwayat, Statistik, Pengaturan, dan sejajar dengan label-label itu di garis dasar yang sama.
+- Tombol bulat tetap menonjol ke atas seperti sekarang. Warna, ukuran tombol, dan ikon tidak berubah.
+- Tinggi bar boleh disesuaikan seperlunya saja supaya label muat, tanpa mengubah tampilan tab lain.
+
+Aturan:
+- Cari penyebab terpotongnya label di komponen navigasi bawah, lalu perbaiki di penyebabnya, jangan ditutup dengan trik sementara.
+- Label tidak boleh dipotong atau ditimpa oleh area gesture bar atau tombol navigasi sistem Android (perhatikan window insets).
+- Label di mode aktif (hijau) dan tidak aktif sama-sama harus utuh.
+- Tidak menambah warna, font, bayangan, atau animasi.
+- Sengaja TIDAK mengubah isi halaman Timbangan, dropdown kategori, atau komponen lain di luar navigasi bawah.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka aplikasi, masuk ke tab Timbangan: label "Timbangan" terlihat penuh di bawah tombol bulat, tidak terpotong.
+- Pindah ke tab Beranda, Riwayat, Statistik, Pengaturan: label "Timbangan" tetap utuh dan semua label sejajar di garis dasar yang sama.
+- Coba dengan navigasi gesture dan navigasi 3 tombol: label tidak tertutup area sistem.
+- Coba mode gelap dan mode terang: tampilan sama benar.

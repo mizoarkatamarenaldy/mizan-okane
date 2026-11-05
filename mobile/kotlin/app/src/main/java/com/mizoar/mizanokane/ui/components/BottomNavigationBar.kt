@@ -55,7 +55,7 @@ fun BottomNavigationBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp),
+                    .height(72.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Screen.items.forEach { screen ->
@@ -98,9 +98,10 @@ private fun StandardNavItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
-            ),
+            )
+            .padding(bottom = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Bottom
     ) {
         Icon(
             painter = painterResource(id = screen.iconRes),
@@ -131,42 +132,39 @@ private fun CenterNavItem(
     val circleBg = if (isSelected) colors.accent else colors.surfaceRaised
     val circleBorder = if (isSelected) colors.accent else colors.border
 
-    Box(
+    Column(
         modifier = modifier
             .fillMaxHeight()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick
-            ),
-        contentAlignment = Alignment.BottomCenter
+            )
+            .padding(bottom = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom
     ) {
-        Column(
-            modifier = Modifier.padding(bottom = 9.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(circleBg)
+                .border(width = 1.dp, color = circleBorder, shape = CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(circleBg)
-                    .border(width = 1.dp, color = circleBorder, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = screen.iconRes),
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = iconTint
-                )
-            }
-            Spacer(modifier = Modifier.height(3.dp))
-            Text(
-                text = stringResource(id = screen.titleRes),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = labelColor
+            Icon(
+                painter = painterResource(id = screen.iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = iconTint
             )
         }
+        Spacer(modifier = Modifier.height(3.dp))
+        Text(
+            text = stringResource(id = screen.titleRes),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = labelColor
+        )
     }
 }

@@ -12,6 +12,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 
 
 
+## 2026-11-05: Kotlin 10I: Perbaikan label navigasi Timbangan (belum dibuild)
+- Diperbaiki: Menyesuaikan tinggi bar navigasi bawah dari 60.dp menjadi 72.dp dan merapikan perataan vertikal pada komponen navigasi agar label "Timbangan" tampil utuh tanpa terpotong batas layout (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/BottomNavigationBar.kt`).
+- Diperbaiki: Menyelaraskan garis dasar (baseline) teks label seluruh 5 tab navigasi bawah (Beranda, Riwayat, Timbangan, Statistik, Pengaturan) menggunakan perataan bawah `Arrangement.Bottom` dan padding bawah 8.dp yang seragam (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/BottomNavigationBar.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 10I: Perbaikan label navigasi Timbangan" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-01: Kotlin 11: Form transaksi ikut filter dompet
 - Ditambah: Parameter opsional `initialWalletId` pada `TransactionFormScreen` untuk mengisi dompet awal form tambah transaksi saat dibuka dengan filter dompet aktif (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TransactionFormScreen.kt`).
 - Diubah: State `formInitialWalletId` di `MainActivity` menyimpan dompet aktif dari filter Riwayat saat tombol tambah diklik dan meneruskannya ke form tambah transaksi (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/MainActivity.kt`).
