@@ -259,6 +259,9 @@ let currentStatsCurrency = 'IDR';
 let currentBudgetCurrency = 'IDR';
 let currentTimbanganCurrency = 'IDR';
 let selectedTimbanganMonth = '';
+let currentScaleTiltDy = 0;
+let scaleAnimId = null;
+let isScaleJustOpened = false;
 
 const THEME_STORAGE_KEY = 'mizan-theme';
 const VALID_THEMES = ['system', 'light', 'dark'];
@@ -355,6 +358,15 @@ function recordTabNavigation(tabId) {
 function switchTab(tabId) {
     if (!VALID_TABS.includes(tabId)) {
         tabId = 'beranda';
+    }
+
+    const pageTimbanganEl = document.getElementById('page-timbangan');
+    const wasTimbanganHidden = pageTimbanganEl ? pageTimbanganEl.classList.contains('hidden') : true;
+
+    if (tabId === 'timbangan' && wasTimbanganHidden) {
+        isScaleJustOpened = true;
+    } else if (tabId !== 'timbangan' && !wasTimbanganHidden) {
+        cancelScaleTiltAnimation();
     }
 
     currentActiveTab = tabId;
@@ -4461,7 +4473,7 @@ function getTimbanganMonthlyData(monthKey, currency) {
     return { income, expense, diff, txCount };
 }
 
-function generateTimbanganScaleSvg(income, expense, diff, currency) {
+function calculateScaleTiltDy(income, expense, diff) {
     const total = income + expense;
     const maxTilt = 16;
     let dy = 0;
@@ -4474,6 +4486,103 @@ function generateTimbanganScaleSvg(income, expense, diff, currency) {
         } else if (diff < 0) {
             dy = Math.min(-3, Math.max(-maxTilt, Math.round(ratio * maxTilt)));
         }
+    }
+    return dy;
+}
+
+function applyScaleTilt(dy) {
+    currentScaleTiltDy = dy;
+    const pivotY = 42;
+    const leftY = pivotY + dy;
+    const rightY = pivotY - dy;
+    const stringLen = 48;
+    const leftSaucerY = leftY + stringLen;
+    const rightSaucerY = rightY + stringLen;
+
+    const beam = document.getElementById('timbangan-beam-line');
+    const leftJoint = document.getElementById('timbangan-left-joint');
+    const rightJoint = document.getElementById('timbangan-right-joint');
+    const leftStr1 = document.getElementById('timbangan-left-str1');
+    const leftStr2 = document.getElementById('timbangan-left-str2');
+    const leftSaucer = document.getElementById('timbangan-left-saucer');
+    const rightStr1 = document.getElementById('timbangan-right-str1');
+    const rightStr2 = document.getElementById('timbangan-right-str2');
+    const rightSaucer = document.getElementById('timbangan-right-saucer');
+
+    if (beam) {
+        beam.setAttribute('y1', leftY.toFixed(2));
+        beam.setAttribute('y2', rightY.toFixed(2));
+    }
+    if (leftJoint) leftJoint.setAttribute('cy', leftY.toFixed(2));
+    if (rightJoint) rightJoint.setAttribute('cy', rightY.toFixed(2));
+    if (leftStr1) {
+        leftStr1.setAttribute('y1', leftY.toFixed(2));
+        leftStr1.setAttribute('y2', leftSaucerY.toFixed(2));
+    }
+    if (leftStr2) {
+        leftStr2.setAttribute('y1', leftY.toFixed(2));
+        leftStr2.setAttribute('y2', leftSaucerY.toFixed(2));
+    }
+    if (leftSaucer) {
+        leftSaucer.setAttribute('d', `M 37 ${leftSaucerY.toFixed(2)} Q 65 ${(leftSaucerY + 12).toFixed(2)} 93 ${leftSaucerY.toFixed(2)}`);
+    }
+    if (rightStr1) {
+        rightStr1.setAttribute('y1', rightY.toFixed(2));
+        rightStr1.setAttribute('y2', rightSaucerY.toFixed(2));
+    }
+    if (rightStr2) {
+        rightStr2.setAttribute('y1', rightY.toFixed(2));
+        rightStr2.setAttribute('y2', rightSaucerY.toFixed(2));
+    }
+    if (rightSaucer) {
+        rightSaucer.setAttribute('d', `M 227 ${rightSaucerY.toFixed(2)} Q 255 ${(rightSaucerY + 12).toFixed(2)} 283 ${rightSaucerY.toFixed(2)}`);
+    }
+}
+
+function cancelScaleTiltAnimation() {
+    if (scaleAnimId) {
+        cancelAnimationFrame(scaleAnimId);
+        scaleAnimId = null;
+    }
+}
+
+function animateScaleTilt(fromDy, toDy, duration = 450) {
+    cancelScaleTiltAnimation();
+
+    if (Math.abs(fromDy - toDy) < 0.05) {
+        applyScaleTilt(toDy);
+        return;
+    }
+
+    applyScaleTilt(fromDy);
+    const startTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
+    function step(now) {
+        const currentTime = (typeof now === 'number' && now > 0) ? now : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(1, Math.max(0, elapsed / duration));
+        // Ease-out cubic: perlambatan halus saat menuju posisi akhir
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const currentDy = fromDy + (toDy - fromDy) * ease;
+        applyScaleTilt(currentDy);
+
+        if (progress < 1) {
+            scaleAnimId = requestAnimationFrame(step);
+        } else {
+            scaleAnimId = null;
+            applyScaleTilt(toDy);
+        }
+    }
+
+    scaleAnimId = requestAnimationFrame(step);
+}
+
+function generateTimbanganScaleSvg(incomeOrDy, expense, diff, currency) {
+    let dy = 0;
+    if (typeof expense === 'number') {
+        dy = calculateScaleTiltDy(incomeOrDy, expense, diff);
+    } else if (typeof incomeOrDy === 'number') {
+        dy = incomeOrDy;
     }
 
     const pivotX = 160;
@@ -4488,26 +4597,26 @@ function generateTimbanganScaleSvg(income, expense, diff, currency) {
     const rightSaucerY = rightY + stringLen;
 
     return `
-        <svg viewBox="0 0 320 180" class="timbangan-svg" role="img" aria-label="Gambar timbangan garis">
+        <svg viewBox="0 0 320 180" class="timbangan-svg" role="img" aria-label="Gambar timbangan garis" id="timbangan-scale-svg">
             <!-- Stand dan Tiang Utama -->
             <line x1="110" y1="160" x2="210" y2="160" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
             <line x1="${pivotX}" y1="160" x2="${pivotX}" y2="${pivotY}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
             
-            <!-- Lengan Timbangan (Beam) miring statis tanpa animasi -->
-            <line x1="${leftX}" y1="${leftY}" x2="${rightX}" y2="${rightY}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            <!-- Lengan Timbangan (Beam) -->
+            <line id="timbangan-beam-line" x1="${leftX}" y1="${leftY}" x2="${rightX}" y2="${rightY}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
             <circle cx="${pivotX}" cy="${pivotY}" r="4.5" fill="var(--surface)" stroke="currentColor" stroke-width="2" />
-            <circle cx="${leftX}" cy="${leftY}" r="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.8" />
-            <circle cx="${rightX}" cy="${rightY}" r="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.8" />
+            <circle id="timbangan-left-joint" cx="${leftX}" cy="${leftY}" r="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.8" />
+            <circle id="timbangan-right-joint" cx="${rightX}" cy="${rightY}" r="3" fill="var(--surface)" stroke="currentColor" stroke-width="1.8" />
 
             <!-- Piring Kiri (Pemasukan) -->
-            <line x1="${leftX}" y1="${leftY}" x2="${leftX - 25}" y2="${leftSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
-            <line x1="${leftX}" y1="${leftY}" x2="${leftX + 25}" y2="${leftSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M ${leftX - 28} ${leftSaucerY} Q ${leftX} ${leftSaucerY + 12} ${leftX + 28} ${leftSaucerY}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            <line id="timbangan-left-str1" x1="${leftX}" y1="${leftY}" x2="${leftX - 25}" y2="${leftSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
+            <line id="timbangan-left-str2" x1="${leftX}" y1="${leftY}" x2="${leftX + 25}" y2="${leftSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
+            <path id="timbangan-left-saucer" d="M ${leftX - 28} ${leftSaucerY} Q ${leftX} ${leftSaucerY + 12} ${leftX + 28} ${leftSaucerY}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
 
             <!-- Piring Kanan (Pengeluaran) -->
-            <line x1="${rightX}" y1="${rightY}" x2="${rightX - 25}" y2="${rightSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
-            <line x1="${rightX}" y1="${rightY}" x2="${rightX + 25}" y2="${rightSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M ${rightX - 28} ${rightSaucerY} Q ${rightX} ${rightSaucerY + 12} ${rightX + 28} ${rightSaucerY}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            <line id="timbangan-right-str1" x1="${rightX}" y1="${rightY}" x2="${rightX - 25}" y2="${rightSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
+            <line id="timbangan-right-str2" x1="${rightX}" y1="${rightY}" x2="${rightX + 25}" y2="${rightSaucerY}" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" />
+            <path id="timbangan-right-saucer" d="M ${rightX - 28} ${rightSaucerY} Q ${rightX} ${rightSaucerY + 12} ${rightX + 28} ${rightSaucerY}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
         </svg>
     `;
 }
@@ -4529,6 +4638,9 @@ function renderTimbanganScale() {
     const { income, expense, diff, txCount } = getTimbanganMonthlyData(selectedTimbanganMonth, currentTimbanganCurrency);
 
     if (txCount === 0) {
+        cancelScaleTiltAnimation();
+        currentScaleTiltDy = 0;
+        isScaleJustOpened = false;
         timbanganScaleContainer.innerHTML = `
             <div class="empty-state">
                 <p class="empty-state-text">Belum ada transaksi pada bulan ini.</p>
@@ -4545,7 +4657,7 @@ function renderTimbanganScale() {
         return;
     }
 
-    const svgHtml = generateTimbanganScaleSvg(income, expense, diff, currentTimbanganCurrency);
+    const targetDy = calculateScaleTiltDy(income, expense, diff);
 
     let verdictClass = 'is-surplus';
     let verdictText = '';
@@ -4560,24 +4672,54 @@ function renderTimbanganScale() {
         verdictText = `Surplus ${currencyFormatter.format(0, currentTimbanganCurrency)}`;
     }
 
-    timbanganScaleContainer.innerHTML = `
-        <div class="timbangan-svg-wrap">
-            ${svgHtml}
-        </div>
-        <div class="timbangan-pan-amounts">
-            <div class="timbangan-pan-box pan-left">
-                <span class="pan-title">Pemasukan</span>
-                <strong class="pan-amount tabular-nums">+${currencyFormatter.format(income, currentTimbanganCurrency)}</strong>
+    let fromDy = 0;
+    if (isScaleJustOpened) {
+        fromDy = 0;
+        isScaleJustOpened = false;
+    } else {
+        fromDy = currentScaleTiltDy;
+    }
+
+    const existingSvg = document.getElementById('timbangan-scale-svg');
+    const existingPanAmounts = timbanganScaleContainer.querySelector('.timbangan-pan-amounts');
+    const existingVerdictBox = timbanganScaleContainer.querySelector('.timbangan-verdict-box');
+
+    if (existingSvg && existingPanAmounts && existingVerdictBox) {
+        const panLeftVal = existingPanAmounts.querySelector('.pan-left .pan-amount');
+        const panRightVal = existingPanAmounts.querySelector('.pan-right .pan-amount');
+        if (panLeftVal) panLeftVal.textContent = `+${currencyFormatter.format(income, currentTimbanganCurrency)}`;
+        if (panRightVal) panRightVal.textContent = `−${currencyFormatter.format(expense, currentTimbanganCurrency)}`;
+
+        existingVerdictBox.className = `timbangan-verdict-box ${verdictClass}`;
+        const verdictTextEl = existingVerdictBox.querySelector('.timbangan-verdict-text');
+        if (verdictTextEl) verdictTextEl.textContent = verdictText;
+        applyScaleTilt(fromDy);
+    } else {
+        timbanganScaleContainer.innerHTML = `
+            <div class="timbangan-svg-wrap">
+                ${generateTimbanganScaleSvg(fromDy)}
             </div>
-            <div class="timbangan-pan-box pan-right">
-                <span class="pan-title">Pengeluaran</span>
-                <strong class="pan-amount tabular-nums">−${currencyFormatter.format(expense, currentTimbanganCurrency)}</strong>
+            <div class="timbangan-pan-amounts">
+                <div class="timbangan-pan-box pan-left">
+                    <span class="pan-title">Pemasukan</span>
+                    <strong class="pan-amount tabular-nums">+${currencyFormatter.format(income, currentTimbanganCurrency)}</strong>
+                </div>
+                <div class="timbangan-pan-box pan-right">
+                    <span class="pan-title">Pengeluaran</span>
+                    <strong class="pan-amount tabular-nums">−${currencyFormatter.format(expense, currentTimbanganCurrency)}</strong>
+                </div>
             </div>
-        </div>
-        <div class="timbangan-verdict-box ${verdictClass}">
-            <p class="timbangan-verdict-text tabular-nums">${verdictText}</p>
-        </div>
-    `;
+            <div class="timbangan-verdict-box ${verdictClass}">
+                <p class="timbangan-verdict-text tabular-nums">${verdictText}</p>
+            </div>
+        `;
+    }
+
+    if (currentActiveTab === 'timbangan') {
+        animateScaleTilt(fromDy, targetDy);
+    } else {
+        applyScaleTilt(targetDy);
+    }
 }
 
 function populateTimbanganCalcOptions() {

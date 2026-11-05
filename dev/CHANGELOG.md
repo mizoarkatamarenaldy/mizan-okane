@@ -12,6 +12,13 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 
 
 
+## 2026-11-05: Animasi Timbangan (Desktop)
+- Ditambah: Animasi halus pergerakan lengan timbangan Bulan Ini menggunakan requestAnimationFrame dengan perlambatan kubik (ease-out cubic) dari posisi seimbang (datar) saat halaman Timbangan dibuka (`desktop/src/js/app.js`).
+- Ditambah: Transisi kemiringan dinamis dari posisi lama ke posisi baru saat berganti bulan pada pemilih bulan, mengubah pilihan mata uang, atau saat data transaksi diperbarui (`desktop/src/js/app.js`).
+- Diubah: `renderTimbanganScale` memperbarui nilai nominal piringan timbangan dan teks ringkasan (verdict) langsung pada DOM SVG yang ada tanpa membuang dan membuat ulang elemen SVG setiap render (`desktop/src/js/app.js`).
+- Diubah: Deteksi pembukaan tab Timbangan pada `switchTab` untuk memicu animasi awal dan membatalkan animasi jika berpindah ke halaman lain (`desktop/src/js/app.js`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Animasi Timbangan (Desktop)" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-05: Kotlin 10I: Perbaikan label navigasi Timbangan (belum dibuild)
 - Diperbaiki: Menyesuaikan tinggi bar navigasi bawah dari 60.dp menjadi 72.dp dan merapikan perataan vertikal pada komponen navigasi agar label "Timbangan" tampil utuh tanpa terpotong batas layout (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/BottomNavigationBar.kt`).
 - Diperbaiki: Menyelaraskan garis dasar (baseline) teks label seluruh 5 tab navigasi bawah (Beranda, Riwayat, Timbangan, Statistik, Pengaturan) menggunakan perataan bawah `Arrangement.Bottom` dan padding bawah 8.dp yang seragam (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/BottomNavigationBar.kt`).

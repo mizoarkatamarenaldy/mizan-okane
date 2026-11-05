@@ -154,6 +154,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Login Google Tauri: loopback
 - [x] Perbaikan Tauri: fitur form reqwest
 - [x] Form transaksi ikut filter dompet
+- [x] Animasi Timbangan (Desktop)
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

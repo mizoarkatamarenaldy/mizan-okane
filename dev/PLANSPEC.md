@@ -2801,3 +2801,29 @@ Cek manual:
 - Pindah ke tab Beranda, Riwayat, Statistik, Pengaturan: label "Timbangan" tetap utuh dan semua label sejajar di garis dasar yang sama.
 - Coba dengan navigasi gesture dan navigasi 3 tombol: label tidak tertutup area sistem.
 - Coba mode gelap dan mode terang: tampilan sama benar.
+
+## Animasi Timbangan (Desktop)
+
+Tujuan: Membuat gambar timbangan di halaman Timbangan bergerak halus saat ditampilkan atau saat nilainya berubah, supaya terasa hidup dan sesuai identitas "Mizan".
+
+Tempat dan tampilan:
+- Halaman Timbangan di desktop/src, pada gambar timbangan Bulan Ini (pemasukan vs pengeluaran) yang sudah ada.
+- Tidak ada teks, tombol, atau kartu baru.
+
+Aturan:
+- Saat halaman Timbangan dibuka, lengan timbangan bergerak dari posisi seimbang (datar) ke posisi miring sesuai kondisi yang sudah ada sekarang.
+- Saat nilai berubah (ganti bulan lewat navigasi bulan, atau data transaksi berubah), lengan bergerak dari posisi lama ke posisi baru, bukan lompat langsung.
+- Arah dan besar kemiringan memakai logika yang sudah ada. Fitur ini tidak mengubah cara kemiringan dihitung.
+- Animasi hanya berlaku di gambar timbangan Bulan Ini. Elemen lain di halaman Timbangan dan halaman lain tidak dianimasikan.
+- Izin dari pemilik: boleh menambah animasi pada gambar timbangan sesuai spek ini, walau animasinya tidak tercantum di dev/DESIGN.md. Dilarang menambah animasi di tempat lain, dan dilarang menambah warna, font, atau bayangan baru.
+- Tidak ada pustaka animasi baru. Pakai CSS atau JavaScript yang sudah ada di proyek.
+- Fitur ini sengaja TIDAK mengubah logika perhitungan, tampilan nominal, dan Kalkulator "Timbang sebelum beli".
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka halaman Timbangan dari halaman lain: lengan bergerak halus ke posisi miring yang sesuai, tanpa lompat.
+- Di Timbangan, ganti bulan lewat navigasi bulan: lengan bergerak dari posisi lama ke posisi baru.
+- Tambah satu transaksi pengeluaran besar lalu buka Timbangan: kemiringan sesuai dan animasinya jalan.
+- Buka halaman lain (Beranda, Riwayat, Statistik, Pengaturan): tidak ada animasi baru.
