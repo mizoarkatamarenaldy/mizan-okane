@@ -12,6 +12,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-06: Kotlin 10O: Perbaikan widget gagal dimuat
+- Diperbaiki: Menggunakan `ImageProvider(R.drawable.bg_widget)` pada modifier `.background(...)` kartu widget di `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt` baris 169 (sekarang baris 216) alih-alih resource ID mentah `R.drawable.bg_widget` yang sebelumnya salah dipetakan ke overload `@ColorRes` Int sehingga melempar exception `Resources$NotFoundException` saat RemoteViews di-inflate oleh launcher HP Infinix Note 30 dan memunculkan tulisan "Masalah memuat widget" (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
+- Diperbaiki: Membungkus inisialisasi basis data Room `AppDatabase.getInstance` dan pembacaan/kalkulasi ringkasan saldo di `provideGlance` dalam blok proteksi `try ... catch (_: Throwable)` pada `mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt` baris 58-140 (sekarang baris 60-205) dengan fallback ke keadaan data kosong yang aman (`+Rp 0`, `−Rp 0`, `Rp 0`) serta label default agar widget tidak melempar exception dan tidak crash saat cold boot atau ketika data kosong/gagal dibaca (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/widget/BalanceSummaryWidget.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 10O: Perbaikan widget gagal dimuat" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-06: Animasi Timbangan gravitasi dan seret (Desktop)
 - Ditambah: Gerak pegas teredam fisik (damping ratio 0.28 dan stiffness 65) pada lengan timbangan bulan ini di desktop yang dimulai dari posisi kemiringan acak saat halaman Timbangan dibuka, lalu berayun naik turun dan meredam hingga berhenti di sudut akhir sesuai berat pemasukan vs pengeluaran (`desktop/src/js/app.js`).
 - Ditambah: Interaksi seret pointer (mouse dan sentuh) pada gambar timbangan yang mengikuti posisi kursor/jari secara responsif dalam batas sudut maksimum Timbangan, mendukung seretan beruntun tanpa patah atau menumpuk animasi, serta berayun dengan redaman saat dilepas hingga kembali ke sudut akhir (`desktop/src/js/app.js`, `desktop/src/css/style.css`).

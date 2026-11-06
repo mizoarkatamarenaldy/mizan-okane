@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.ImageProvider
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -55,88 +56,134 @@ private val ExpenseColor = ColorProvider(day = ColorExpense, night = ColorExpens
 class BalanceSummaryWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val db = AppDatabase.getInstance(context)
-
-        val isDemo = try {
-            db.metaDao().get("demo_mode") == "true"
-        } catch (_: Exception) {
-            false
+        val currentMonthKey = try {
+            getCurrentYearMonthString()
+        } catch (_: Throwable) {
+            ""
+        }
+        val monthLabel = try {
+            if (currentMonthKey.isNotBlank()) formatMonthYear(currentMonthKey) else ""
+        } catch (_: Throwable) {
+            ""
         }
 
-        val transactions = if (isDemo) {
-            val jsonStr = try { db.metaDao().get("demo_transactions") } catch (_: Exception) { null }
-            if (jsonStr.isNullOrBlank()) {
-                emptyList()
+        val (incomeStr, expenseStr, balanceStr) = try {
+            val db = AppDatabase.getInstance(context)
+
+            val isDemo = try {
+                db.metaDao().get("demo_mode") == "true"
+            } catch (_: Throwable) {
+                false
+            }
+
+            val transactions = if (isDemo) {
+                val jsonStr = try { db.metaDao().get("demo_transactions") } catch (_: Throwable) { null }
+                if (jsonStr.isNullOrBlank()) {
+                    emptyList()
+                } else {
+                    try {
+                        JsonBackupManager.json.decodeFromString(
+                            ListSerializer(TransactionDto.serializer()),
+                            jsonStr
+                        ).map { it.toEntity() }
+                    } catch (_: Throwable) {
+                        emptyList()
+                    }
+                }
             } else {
                 try {
-                    JsonBackupManager.json.decodeFromString(
-                        ListSerializer(TransactionDto.serializer()),
-                        jsonStr
-                    ).map { it.toEntity() }
-                } catch (_: Exception) {
+                    db.transactionDao().getAll()
+                } catch (_: Throwable) {
                     emptyList()
                 }
             }
-        } else {
-            try {
-                db.transactionDao().getAll()
-            } catch (_: Exception) {
-                emptyList()
-            }
-        }
 
-        val rawWallets = if (isDemo) {
-            val jsonStr = try { db.metaDao().get("demo_wallets") } catch (_: Exception) { null }
-            if (jsonStr.isNullOrBlank()) {
-                DefaultData.DEFAULT_WALLETS
+            val rawWallets = if (isDemo) {
+                val jsonStr = try { db.metaDao().get("demo_wallets") } catch (_: Throwable) { null }
+                if (jsonStr.isNullOrBlank()) {
+                    DefaultData.DEFAULT_WALLETS
+                } else {
+                    try {
+                        JsonBackupManager.json.decodeFromString(
+                            ListSerializer(WalletDto.serializer()),
+                            jsonStr
+                        ).map { it.toEntity() }.sortedBy { it.order }
+                    } catch (_: Throwable) {
+                        DefaultData.DEFAULT_WALLETS
+                    }
+                }
             } else {
                 try {
-                    JsonBackupManager.json.decodeFromString(
-                        ListSerializer(WalletDto.serializer()),
-                        jsonStr
-                    ).map { it.toEntity() }.sortedBy { it.order }
-                } catch (_: Exception) {
-                    DefaultData.DEFAULT_WALLETS
+                    db.walletDao().getAll()
+                } catch (_: Throwable) {
+                    emptyList()
                 }
             }
-        } else {
-            try {
-                db.walletDao().getAll()
-            } catch (_: Exception) {
-                emptyList()
+            val wallets = if (rawWallets.isEmpty()) DefaultData.DEFAULT_WALLETS else rawWallets
+            val activeCurrencies = getActiveCurrencies(wallets)
+
+            val berandaSummary = getBerandaMonthSummary(
+                transactions = transactions,
+                targetMonthKey = currentMonthKey,
+                activeCurrencies = activeCurrencies,
+                wallets = wallets
+            )
+
+            val incStr = activeCurrencies.joinToString("  ") { c ->
+                val inc = berandaSummary.incomeByCurrency[c] ?: 0L
+                "+${Uang.formatCurrency(inc, c)}"
             }
+
+            val expStr = activeCurrencies.joinToString("  ") { c ->
+                val exp = berandaSummary.expenseByCurrency[c] ?: 0L
+                "−${Uang.formatCurrency(exp, c)}"
+            }
+
+            val balStr = activeCurrencies.joinToString("  ") { c ->
+                val bal = berandaSummary.totalBalanceByCurrency[c] ?: 0L
+                Uang.formatCurrency(bal, c)
+            }
+
+            Triple(incStr, expStr, balStr)
+        } catch (_: Throwable) {
+            val fallbackWallets = DefaultData.DEFAULT_WALLETS
+            val fallbackCurrencies = getActiveCurrencies(fallbackWallets)
+            val fallbackSummary = getBerandaMonthSummary(
+                transactions = emptyList(),
+                targetMonthKey = currentMonthKey,
+                activeCurrencies = fallbackCurrencies,
+                wallets = fallbackWallets
+            )
+            val incStr = fallbackCurrencies.joinToString("  ") { c ->
+                val inc = fallbackSummary.incomeByCurrency[c] ?: 0L
+                "+${Uang.formatCurrency(inc, c)}"
+            }
+            val expStr = fallbackCurrencies.joinToString("  ") { c ->
+                val exp = fallbackSummary.expenseByCurrency[c] ?: 0L
+                "−${Uang.formatCurrency(exp, c)}"
+            }
+            val balStr = fallbackCurrencies.joinToString("  ") { c ->
+                val bal = fallbackSummary.totalBalanceByCurrency[c] ?: 0L
+                Uang.formatCurrency(bal, c)
+            }
+            Triple(incStr, expStr, balStr)
         }
-        val wallets = if (rawWallets.isEmpty()) DefaultData.DEFAULT_WALLETS else rawWallets
 
-        val currentMonthKey = getCurrentYearMonthString()
-        val monthLabel = formatMonthYear(currentMonthKey)
-        val activeCurrencies = getActiveCurrencies(wallets)
-
-        val berandaSummary = getBerandaMonthSummary(
-            transactions = transactions,
-            targetMonthKey = currentMonthKey,
-            activeCurrencies = activeCurrencies,
-            wallets = wallets
-        )
-
-        val incomeStr = activeCurrencies.joinToString("  ") { c ->
-            val inc = berandaSummary.incomeByCurrency[c] ?: 0L
-            "+${Uang.formatCurrency(inc, c)}"
+        val incomeLabel = try {
+            context.getString(R.string.label_pemasukan)
+        } catch (_: Throwable) {
+            "Pemasukan"
         }
-
-        val expenseStr = activeCurrencies.joinToString("  ") { c ->
-            val exp = berandaSummary.expenseByCurrency[c] ?: 0L
-            "−${Uang.formatCurrency(exp, c)}"
+        val expenseLabel = try {
+            context.getString(R.string.label_pengeluaran)
+        } catch (_: Throwable) {
+            "Pengeluaran"
         }
-
-        val balanceStr = activeCurrencies.joinToString("  ") { c ->
-            val bal = berandaSummary.totalBalanceByCurrency[c] ?: 0L
-            Uang.formatCurrency(bal, c)
+        val saldoLabel = try {
+            context.getString(R.string.label_saldo)
+        } catch (_: Throwable) {
+            "Saldo"
         }
-
-        val incomeLabel = context.getString(R.string.label_pemasukan)
-        val expenseLabel = context.getString(R.string.label_pengeluaran)
-        val saldoLabel = context.getString(R.string.label_saldo)
 
         provideContent {
             BalanceSummaryWidgetContent(
@@ -166,7 +213,7 @@ fun BalanceSummaryWidgetContent(
         modifier = GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
-            .background(R.drawable.bg_widget)
+            .background(ImageProvider(R.drawable.bg_widget))
             .cornerRadius(8.dp)
             .padding(14.dp)
             .clickable(actionStartActivity<MainActivity>())

@@ -596,3 +596,27 @@ Cek manual:
 - Seret dan lepas tiga kali berturut-turut dengan cepat: gerak tetap halus, tidak patah, dan akhirnya berhenti di sudut yang benar.
 - Pindah ke halaman lain lalu kembali ke Timbangan: animasi buka berjalan lagi dan tidak ada error di konsol.
 - Saat berat kedua sisi sama: lengan berayun lalu berhenti lurus.
+
+## Kotlin 10O: Perbaikan widget gagal dimuat
+
+Tujuan: Widget ringkasan saldo di layar utama HP Infinix Note 30 menampilkan tulisan "Masalah memuat widget" dan tidak menampilkan isinya. Cari penyebabnya di kode, lalu perbaiki supaya widget tampil normal.
+
+Tempat dan tampilan:
+- Tidak ada elemen tampilan baru.
+
+Aturan:
+- Buka hanya bagian "Widget Kotlin: ringkasan saldo" di dev/PLANSPEC.md.
+- Telusuri dari kode di mobile/kotlin/: kelas widget (BalanceSummaryWidget.kt), kelas receiver widget, deklarasi receiver di AndroidManifest.xml, file XML appwidget-provider di res/xml, dan dependency Glance di build.gradle.kts.
+- Periksa hal berikut dan perbaiki yang salah: XML appwidget-provider punya android:initialLayout yang valid; receiver di manifest memakai nama kelas yang benar, punya intent-filter APPWIDGET_UPDATE, dan punya meta-data android.appwidget.provider yang menunjuk file XML yang benar; versi dependency Glance cocok satu sama lain; provideGlance tidak melempar exception.
+- Kalau pembacaan data di provideGlance gagal atau datanya kosong, widget tidak boleh crash. Tampilkan keadaan yang sama dengan data kosong.
+- Perbaiki hanya penyebab yang ditemukan. Tulis penyebabnya (nama file dan baris) di entri CHANGELOG dan di laporan akhir.
+- Tidak mengubah logika hitung ringkasan saldo, tampilan widget, atau format data.
+- Tidak mengubah desktop/ dan mobile/capacitor/. Tidak menjalankan ./gradlew atau perintah build apa pun.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Mizo build ulang APK, hapus widget lama dari layar utama Infinix Note 30, lalu pasang lagi dari daftar widget. Hasil yang diharapkan: widget menampilkan ringkasan saldo, tanpa tulisan "Masalah memuat widget".
+- Dengan widget terpasang, tambah satu transaksi di aplikasi. Hasil yang diharapkan: angka di widget ikut berubah.
+- Restart HP. Hasil yang diharapkan: widget tetap tampil normal.
