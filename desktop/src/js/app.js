@@ -4445,9 +4445,40 @@ function updateTimbanganCurrencyUI() {
     }
 }
 
+function updateTimbanganMonthNavUI() {
+    if (!selectedTimbanganMonth) {
+        selectedTimbanganMonth = getLocalYearMonthString();
+    }
+    const currentMonth = getLocalYearMonthString();
+    if (selectedTimbanganMonth > currentMonth) {
+        selectedTimbanganMonth = currentMonth;
+    }
+
+    if (timbanganMonthLabel) {
+        const [yStr, mStr] = selectedTimbanganMonth.split('-');
+        const mNum = parseInt(mStr, 10);
+        const monthName = INDO_MONTHS_SHORT[mNum - 1] || '';
+        timbanganMonthLabel.textContent = `${monthName} ${yStr}`;
+    }
+
+    if (btnTimbanganNextMonth) {
+        const isCurrentOrFuture = selectedTimbanganMonth >= currentMonth;
+        btnTimbanganNextMonth.disabled = isCurrentOrFuture;
+        if (isCurrentOrFuture) {
+            btnTimbanganNextMonth.setAttribute('aria-disabled', 'true');
+        } else {
+            btnTimbanganNextMonth.removeAttribute('aria-disabled');
+        }
+    }
+}
+
 function shiftTimbanganMonth(delta) {
     if (!selectedTimbanganMonth) {
         selectedTimbanganMonth = getLocalYearMonthString();
+    }
+    const currentMonth = getLocalYearMonthString();
+    if (delta > 0 && selectedTimbanganMonth >= currentMonth) {
+        return;
     }
     const [yStr, mStr] = selectedTimbanganMonth.split('-');
     let y = parseInt(yStr, 10);
@@ -4459,7 +4490,12 @@ function shiftTimbanganMonth(delta) {
         m = 1;
         y++;
     }
-    selectedTimbanganMonth = `${y}-${String(m).padStart(2, '0')}`;
+    const nextMonthStr = `${y}-${String(m).padStart(2, '0')}`;
+    if (delta > 0 && nextMonthStr > currentMonth) {
+        selectedTimbanganMonth = currentMonth;
+    } else {
+        selectedTimbanganMonth = nextMonthStr;
+    }
     renderTimbangan();
 }
 
@@ -4821,16 +4857,7 @@ function generateTimbanganScaleSvg(incomeOrDy, expense, diff, currency) {
 function renderTimbanganScale() {
     if (!timbanganScaleContainer) return;
 
-    if (!selectedTimbanganMonth) {
-        selectedTimbanganMonth = getLocalYearMonthString();
-    }
-
-    if (timbanganMonthLabel) {
-        const [yStr, mStr] = selectedTimbanganMonth.split('-');
-        const mNum = parseInt(mStr, 10);
-        const monthName = INDO_MONTHS_SHORT[mNum - 1] || '';
-        timbanganMonthLabel.textContent = `${monthName} ${yStr}`;
-    }
+    updateTimbanganMonthNavUI();
 
     const { income, expense, diff, txCount } = getTimbanganMonthlyData(selectedTimbanganMonth, currentTimbanganCurrency);
 
@@ -5321,6 +5348,7 @@ function updateAdjustDialogDiffUI(appBal, curr) {
 
 function renderTimbangan() {
     updateTimbanganCurrencyUI();
+    updateTimbanganMonthNavUI();
     renderTimbanganScale();
     renderTimbanganEquilibrium();
     populateTimbanganCalcOptions();
@@ -10186,6 +10214,7 @@ async function init() {
         selectedTimbanganMonth = getLocalYearMonthString();
         currentHistoryMonthFilter = selectedBerandaMonth;
         updateStatsMonthNavUI();
+        updateTimbanganMonthNavUI();
         initDateSelectOptions();
         init24TimeSelectOptions();
         resetForm(); // Set default date, kategori, dan dompet

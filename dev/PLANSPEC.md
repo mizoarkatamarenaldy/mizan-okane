@@ -676,3 +676,30 @@ Cek manual:
 - Kecilkan lalu besarkan jendela. Timbangan ikut menyesuaikan, tidak terpotong, tidak menimpa teks, dan halaman tidak muncul scroll.
 - Pilih bulan yang berbeda sampai timbangan miring ke kiri, ke kanan, dan seimbang. Ketiga kondisi tampil benar dan animasinya tetap jalan.
 - Mode gelap dan mode terang sama-sama rapi.
+
+## Perbaikan UI PC 16: Batas Bulan Timbangan
+
+Tujuan: Menyamakan navigasi bulan di halaman Timbangan versi desktop dengan Beranda, Riwayat, dan Statistik, yang sudah tidak bisa membuka bulan setelah bulan kalender saat ini. Timbangan satu-satunya halaman yang masih bisa membuka bulan depan.
+
+Tempat dan tampilan:
+- Halaman Timbangan versi desktop (desktop/src), kartu "Timbangan Bulan Ini", navigasi bulan dengan tombol panah kiri dan kanan di samping label bulan (contoh: "Nov 2026").
+- Tombol panah kanan (bulan berikutnya) nonaktif ketika bulan yang ditampilkan sama dengan bulan kalender saat ini.
+- Gaya dan cara menonaktifkan tombol sama persis dengan navigasi bulan di Beranda, Riwayat, atau Statistik. Tiru yang sudah ada di sana, jangan buat cara atau gaya baru.
+- Tombol panah kiri (bulan sebelumnya) tidak berubah.
+
+Aturan:
+- Bulan saat ini diambil dari tanggal perangkat, dengan cara yang sama seperti di halaman lain.
+- Bulan terjauh yang bisa ditampilkan adalah bulan saat ini. Bulan-bulan sebelumnya tetap bisa dibuka tanpa batas.
+- Contoh: jika sekarang November 2026, pengguna bisa melihat November 2026 dan bulan sebelumnya, tetapi tidak bisa melihat Desember 2026.
+- Bulan yang tampil pertama kali saat halaman dibuka tidak berubah dari perilaku sekarang.
+- Perubahan hanya pada navigasi bulan di halaman Timbangan. Halaman lain tidak diubah.
+- Tidak mengubah apa pun di mobile/.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Timbangan di bulan berjalan. Label bulan menunjukkan bulan ini dan tombol panah kanan tampil nonaktif, sama seperti di Beranda. Klik tombol itu, tidak ada yang berubah.
+- Klik panah kiri satu kali. Label pindah ke bulan sebelumnya dan tombol panah kanan aktif kembali.
+- Dari bulan sebelumnya, klik panah kanan. Label kembali ke bulan berjalan dan tombol panah kanan nonaktif lagi.
+- Bandingkan tombol nonaktif di Timbangan dengan di Beranda. Tampilannya sama di mode gelap dan mode terang.

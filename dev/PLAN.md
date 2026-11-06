@@ -169,6 +169,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Kotlin 10O: Perbaikan widget gagal dimuat
 - [x] Perbaikan UI PC 14: Field Harga Barang Timbangan
 - [x] Perbaikan UI PC 15: Ukuran Timbangan
+- [x] Perbaikan UI PC 16: Batas Bulan Timbangan
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

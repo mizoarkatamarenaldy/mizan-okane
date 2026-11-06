@@ -12,6 +12,10 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-06: Perbaikan UI PC 16: Batas Bulan Timbangan
+- Diperbaiki: Menyamakan navigasi bulan di kartu "Timbangan Bulan Ini" pada halaman Timbangan desktop (`desktop/src/index.html`, `desktop/src/js/app.js`) dengan Beranda, Riwayat, dan Statistik agar tombol panah kanan (bulan berikutnya) nonaktif ketika bulan yang ditampilkan sama dengan bulan kalender saat ini, mencegah navigasi ke bulan setelah bulan berjalan, mempertahankan tombol panah kiri untuk melihat bulan-bulan sebelumnya tanpa batas, serta menyelaraskan gaya dan atribut nonaktif (`disabled`, `aria-disabled="true"`) secara konsisten.
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Perbaikan UI PC 16: Batas Bulan Timbangan" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-06: Perbaikan UI PC 15: Ukuran Timbangan
 - Diperbaiki: Memperbesar gambar timbangan SVG di kartu "Timbangan Bulan Ini" pada halaman Timbangan desktop (`desktop/src/css/style.css`) agar mengisi ruang kosong antara header kartu dan bagian angka ringkasan pemasukan/pengeluaran secara responsif dan pas, memusatkan gambar timbangan secara vertikal dan horizontal pada area tersebut tanpa mengubah proporsi (rasio 320:180), menjaga agar gambar tidak menimpa teks maupun terpotong pada berbagai ukuran jendela desktop, serta memastikan halaman tetap pas tanpa scroll.
 - Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Perbaikan UI PC 15: Ukuran Timbangan" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
