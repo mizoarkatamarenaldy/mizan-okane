@@ -620,3 +620,31 @@ Cek manual:
 - Mizo build ulang APK, hapus widget lama dari layar utama Infinix Note 30, lalu pasang lagi dari daftar widget. Hasil yang diharapkan: widget menampilkan ringkasan saldo, tanpa tulisan "Masalah memuat widget".
 - Dengan widget terpasang, tambah satu transaksi di aplikasi. Hasil yang diharapkan: angka di widget ikut berubah.
 - Restart HP. Hasil yang diharapkan: widget tetap tampil normal.
+
+## Perbaikan UI PC 14: Field Harga Barang Timbangan
+
+Tujuan: Memperbaiki field "Harga Barang (Rp)" di kartu "Timbang Sebelum Beli" pada halaman Timbangan versi desktop, karena tampilannya tabrakan dengan label dan field di bawahnya.
+
+Tempat dan tampilan:
+- Halaman Timbangan versi desktop (desktop/src), kartu "Timbang Sebelum Beli", field "Harga Barang (Rp)".
+- Saat ini awalan "Rp" tampil lebih besar dari teks lain dan berada di luar kotak input. Angka "0" turun ke bawah awalan. Kotak input menimpa label "Kategori Pengeluaran" di bawahnya.
+- Setelah diperbaiki, awalan "Rp" dan angka berada di dalam satu kotak input, sejajar secara vertikal di tengah kotak.
+- Ukuran font awalan "Rp" sama dengan ukuran font angka di dalam input.
+- Tinggi kotak input sama dengan tinggi dropdown "Kategori Pengeluaran" dan "Dompet Sumber Dana".
+- Jarak antara label, kotak input, dan label berikutnya sama dengan jarak antar field lain di kartu itu. Tidak ada elemen yang saling menimpa.
+- Lebar kotak input sama dengan lebar dropdown di bawahnya.
+
+Aturan:
+- Perbaikan hanya pada CSS dan susunan elemen field Harga Barang. Cara kerja input tidak berubah: pemisah ribuan, format angka, dan simulasi tetap seperti sekarang.
+- Dibandingkan dengan field uang di form transaksi desktop, gaya field ini harus terasa konsisten. Pakai gaya yang sudah ada, jangan buat gaya baru.
+- Tidak mengubah halaman lain, kartu "Timbangan Bulan Ini", navigasi bulan, atau ukuran timbangan.
+- Tidak mengubah apa pun di mobile/.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Timbangan di desktop dengan jendela lebar. Field Harga Barang tampil satu kotak utuh, "Rp" dan "0" sejajar, tidak menimpa label "Kategori Pengeluaran".
+- Ketik 1500000 di field itu. Tampil "1.500.000", posisi "Rp" tidak bergeser, dan hasil simulasi di bawah tetap benar.
+- Kecilkan lalu besarkan jendela desktop. Field tidak tabrakan dengan elemen lain di lebar mana pun.
+- Mode gelap dan mode terang sama-sama rapi.

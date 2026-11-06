@@ -2825,6 +2825,62 @@ p {
     border-color: var(--accent);
 }
 
+.timbangan-calc-form .amount-input-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input, 6px);
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+    cursor: text;
+}
+
+.timbangan-calc-form .amount-input-wrapper:focus-within {
+    border-color: var(--accent);
+}
+
+.timbangan-calc-form .amount-currency-prefix {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 6px;
+    user-select: none;
+    flex-shrink: 0;
+    line-height: normal;
+}
+
+.timbangan-calc-form .tx-amount-large {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: var(--text) !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    outline: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    flex: 1;
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    line-height: normal !important;
+    font-family: inherit;
+}
+
+.timbangan-calc-form .tx-amount-large:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
 .timbangan-calc-results {
     margin-top: 14px;
     padding-top: 14px;
@@ -6477,20 +6533,20 @@ body.modal-open {
     }
 
     #page-timbangan .timbangan-calc-form .amount-input-wrapper {
-        min-height: 40px;
         height: 40px;
+        min-height: 40px;
         padding: 0 10px;
         box-sizing: border-box;
     }
 
     #page-timbangan .timbangan-calc-form .amount-currency-prefix {
-        font-size: 18px;
+        font-size: 14px;
         margin-right: 6px;
     }
 
     #page-timbangan .timbangan-calc-form .tx-amount-large {
-        font-size: 22px !important;
-        line-height: 1.2 !important;
+        font-size: 14px !important;
+        line-height: normal !important;
     }
 
     #page-timbangan .calc-select {
