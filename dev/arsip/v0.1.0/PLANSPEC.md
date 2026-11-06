@@ -2531,3 +2531,32 @@ Cek manual:
 - Desktop punya data di Drive. Di APK tekan "Sinkron sekarang": tidak ada error, data desktop muncul di APK dengan nominal yang sama seperti di desktop, dan teks "belum pernah sinkron" berganti waktu sinkron terakhir.
 - Tambah satu transaksi di APK, sinkron, lalu sinkron di desktop: transaksi muncul di desktop dengan nominal yang benar.
 
+
+# Belum dipastikan
+
+## Rollover budget
+(opsional per kategori)
+
+## APK rilis: unggah APK ke GitHub Releases
+Catatan: ditunda sampai Konversi Kotlin selesai. Yang dirilis nanti APK hasil Kotlin, bukan APK Capacitor. Login Google native dikerjakan sebagai bagian Konversi Kotlin.
+(dikerjakan pemilik setelah dua perbaikan APK di atas selesai dan APK dibuild ulang; APK tidak dimasukkan ke repo lewat git add)
+
+## Persiapan rilis publik
+(dikerjakan paling akhir, karena butuh link unduh, screenshot, dan fitur final; README berisi cara pakai, cara install, catatan peringatan "belum diverifikasi Google", dan cara hapus data; pastikan tidak ada keystore, token, atau data asli di repo)
+
+## Konversi Kotlin
+
+Tujuan: Menulis ulang versi mobile (khusus Android) memakai Kotlin di folder mobile/, menggantikan versi Capacitor. Tidak memakai Kotlin Multiplatform. Item ini baru dicatat supaya tidak lupa dan belum dikerjakan.
+
+Aturan:
+- Item ini baru boleh dikerjakan setelah "Konversi Tauri" selesai.
+- Item ini menyentuh "Keputusan terkunci" (bagian Bentuk PWA, penyimpanan, dan APK dengan Capacitor). Sebelum dikerjakan, pemilik harus memberi prompt tersendiri dengan klausa "Izin dari pemilik" yang menyebut persis bagian mana yang boleh diubah.
+- Item ini juga mencakup login Google native dan rilis APK. Spek rincinya wajib menulis nasib item "APK Item A" dan "APK rilis" di dev/PLAN.md.
+- Format file di Google Drive harus tetap sama dengan dev/SCHEMA.md supaya data desktop dan mobile saling cocok.
+- Spek rinci (apa yang dikonversi, nasib versi PWA dan Capacitor, jalur login Google, nasib data di IndexedDB dan Drive) ditulis pemilik bersama Claude sebelum item dikerjakan, lalu menggantikan bagian ini.
+
+Data:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
+
+Cek manual:
+- Belum ditentukan. Ditulis saat spek rinci dibuat.
