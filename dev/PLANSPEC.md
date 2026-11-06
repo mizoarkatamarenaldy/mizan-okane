@@ -566,3 +566,33 @@ Cek manual:
 - Goyang HP tiga kali berturut-turut dengan cepat: gerak tetap halus, tidak patah, dan akhirnya berhenti di sudut yang benar.
 - Pindah ke halaman lain lalu goyang HP: tidak ada gerak dan tidak ada error. Kembali ke Timbangan: animasi buka berjalan lagi.
 - Saat berat kedua sisi sama: lengan berayun lalu berhenti lurus.
+
+## Animasi Timbangan gravitasi dan seret (Desktop)
+
+Tujuan: Timbangan di desktop terasa seperti timbangan fisik. Saat halaman dibuka, lengannya naik turun lalu berhenti di sisi yang paling berat. Saat lengan diseret lalu dilepas, lengannya berayun lalu berhenti lagi di sisi yang paling berat.
+
+Tempat dan tampilan:
+- Halaman Timbangan di desktop/src. Tidak ada tombol, kartu, atau teks baru. Yang berubah hanya gerak lengan dan piringan Timbangan.
+
+Aturan:
+- Saat halaman Timbangan dibuka, lengan mulai dari posisi miring acak lalu berayun naik turun dengan ayunan yang makin mengecil, dan berhenti di sudut akhir sesuai berat. Sudut akhir sama dengan sudut yang dipakai animasi Timbangan sekarang.
+- Ayunan memakai gerak pegas teredam (gravitasi dan redaman), bukan gerak linear. Lengan boleh melewati sudut akhir sedikit lalu kembali, sampai diam.
+- Lengan bisa diseret dengan pointer (mouse atau sentuh). Selama diseret, lengan mengikuti pointer dalam batas sudut maksimum Timbangan.
+- Saat dilepas, lengan berayun dengan redaman lalu berhenti di sudut akhir yang sama sesuai berat.
+- Seret baru saat ayunan masih jalan melanjutkan dari posisi lengan saat itu, tanpa patah atau menumpuk animasi.
+- Piringan tetap menggantung dan mengikuti gerak lengan.
+- Event pointer hanya dipasang selama halaman Timbangan terbuka dan dilepas saat halaman ditutup.
+- Sudut akhir tetap dihitung dari berat seperti sekarang. Fitur ini tidak mengubah cara berat dihitung.
+- Fitur ini sengaja TIDAK menambah suara, tidak menambah tombol, dan tidak mengubah halaman selain Timbangan.
+- Izin dari pemilik: interaksi seret ini boleh ditambahkan di desktop/src walaupun belum ada di versi lain. Jangan ubah mobile/.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Timbangan saat sisi pemasukan lebih berat: lengan berayun naik turun beberapa kali lalu berhenti miring ke sisi pemasukan.
+- Buka Timbangan saat sisi pengeluaran lebih berat: lengan berhenti miring ke sisi pengeluaran.
+- Seret lengan ke sisi yang ringan lalu lepas: lengan berayun, lalu berhenti lagi di sisi yang berat.
+- Seret dan lepas tiga kali berturut-turut dengan cepat: gerak tetap halus, tidak patah, dan akhirnya berhenti di sudut yang benar.
+- Pindah ke halaman lain lalu kembali ke Timbangan: animasi buka berjalan lagi dan tidak ada error di konsol.
+- Saat berat kedua sisi sama: lengan berayun lalu berhenti lurus.

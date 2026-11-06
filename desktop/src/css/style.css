@@ -2709,6 +2709,14 @@ p {
     max-height: 180px;
     display: block;
     color: var(--text);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+.timbangan-svg.is-dragging {
+    cursor: grabbing;
 }
 
 .timbangan-pan-amounts {

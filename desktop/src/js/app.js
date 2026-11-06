@@ -262,6 +262,22 @@ let selectedTimbanganMonth = '';
 let currentScaleTiltDy = 0;
 let scaleAnimId = null;
 let isScaleJustOpened = false;
+let isDraggingScale = false;
+let dragPointerId = null;
+let dragSide = 'left';
+let dragStartY = 0;
+let dragStartDy = 0;
+let dragLastTime = 0;
+let dragLastDy = 0;
+let dragVelocity = 0;
+let timbanganPointerAttached = false;
+let currentTimbanganSvgEl = null;
+let scaleSpringState = {
+    currentDy: 0,
+    velocity: 0,
+    targetDy: 0,
+    lastTime: 0
+};
 
 const THEME_STORAGE_KEY = 'mizan-theme';
 const VALID_THEMES = ['system', 'light', 'dark'];
@@ -376,6 +392,7 @@ function switchTab(tabId) {
         isScaleJustOpened = true;
     } else if (tabId !== 'timbangan' && !wasTimbanganHidden) {
         cancelScaleTiltAnimation();
+        detachTimbanganPointerEvents();
     }
 
     currentActiveTab = tabId;
@@ -4555,35 +4572,205 @@ function cancelScaleTiltAnimation() {
     }
 }
 
-function animateScaleTilt(fromDy, toDy, duration = 450) {
+function animateScaleTiltSpring(fromDy, toDy, initialVelocity = 0) {
     cancelScaleTiltAnimation();
 
-    if (Math.abs(fromDy - toDy) < 0.05) {
+    scaleSpringState.currentDy = fromDy;
+    scaleSpringState.velocity = initialVelocity;
+    scaleSpringState.targetDy = toDy;
+    scaleSpringState.lastTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
+    applyScaleTilt(fromDy);
+
+    if (Math.abs(fromDy - toDy) < 0.04 && Math.abs(initialVelocity) < 0.08) {
         applyScaleTilt(toDy);
         return;
     }
 
-    applyScaleTilt(fromDy);
-    const startTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const k = 65;
+    const damping = 4.51486; // 2 * 0.28 * Math.sqrt(65)
+    const subStep = 0.005;
 
     function step(now) {
         const currentTime = (typeof now === 'number' && now > 0) ? now : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(1, Math.max(0, elapsed / duration));
-        // Ease-out cubic: perlambatan halus saat menuju posisi akhir
-        const ease = 1 - Math.pow(1 - progress, 3);
-        const currentDy = fromDy + (toDy - fromDy) * ease;
-        applyScaleTilt(currentDy);
+        let dt = (currentTime - scaleSpringState.lastTime) / 1000;
+        scaleSpringState.lastTime = currentTime;
 
-        if (progress < 1) {
-            scaleAnimId = requestAnimationFrame(step);
-        } else {
+        if (dt > 0.1) dt = 0.1;
+        if (dt < 0) dt = 0;
+
+        let remaining = dt;
+        while (remaining > 0) {
+            const h = Math.min(remaining, subStep);
+            const displacement = scaleSpringState.currentDy - scaleSpringState.targetDy;
+            const force = -k * displacement - damping * scaleSpringState.velocity;
+            scaleSpringState.velocity += force * h;
+            scaleSpringState.currentDy += scaleSpringState.velocity * h;
+            remaining -= h;
+        }
+
+        applyScaleTilt(scaleSpringState.currentDy);
+
+        const dist = Math.abs(scaleSpringState.currentDy - scaleSpringState.targetDy);
+        const spd = Math.abs(scaleSpringState.velocity);
+
+        if (dist < 0.08 && spd < 0.3) {
+            applyScaleTilt(scaleSpringState.targetDy);
+            scaleSpringState.velocity = 0;
             scaleAnimId = null;
-            applyScaleTilt(toDy);
+        } else {
+            scaleAnimId = requestAnimationFrame(step);
         }
     }
 
     scaleAnimId = requestAnimationFrame(step);
+}
+
+function animateScaleTilt(fromDy, toDy) {
+    animateScaleTiltSpring(fromDy, toDy, 0);
+}
+
+function onScalePointerDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+    cancelScaleTiltAnimation();
+
+    const svg = document.getElementById('timbangan-scale-svg');
+    if (!svg) return;
+
+    const rect = svg.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const midX = rect.width / 2;
+
+    isDraggingScale = true;
+    dragPointerId = e.pointerId;
+    dragSide = clickX < midX ? 'left' : 'right';
+    dragStartY = e.clientY;
+    dragStartDy = currentScaleTiltDy;
+    dragLastTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    dragLastDy = currentScaleTiltDy;
+    dragVelocity = 0;
+
+    svg.classList.add('is-dragging');
+    try {
+        svg.setPointerCapture(e.pointerId);
+    } catch (_) {}
+}
+
+function onScalePointerMove(e) {
+    if (!isDraggingScale || e.pointerId !== dragPointerId) return;
+
+    const svg = document.getElementById('timbangan-scale-svg');
+    if (!svg) return;
+
+    const rect = svg.getBoundingClientRect();
+    const svgHeight = rect.height || 180;
+    const scaleY = 180 / svgHeight;
+
+    const deltaY = (e.clientY - dragStartY) * scaleY;
+    const rawDy = dragSide === 'left' ? (dragStartDy + deltaY) : (dragStartDy - deltaY);
+
+    const maxTilt = 16;
+    const clampedDy = Math.max(-maxTilt, Math.min(maxTilt, rawDy));
+
+    if (rawDy !== clampedDy) {
+        dragStartY = e.clientY;
+        dragStartDy = clampedDy;
+    }
+
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const dt = (now - dragLastTime) / 1000;
+    if (dt > 0.005) {
+        const instantVel = (clampedDy - dragLastDy) / dt;
+        dragVelocity = dragVelocity * 0.3 + instantVel * 0.7;
+        dragLastTime = now;
+        dragLastDy = clampedDy;
+    }
+
+    applyScaleTilt(clampedDy);
+}
+
+function endScaleDrag(e) {
+    if (!isDraggingScale) return;
+
+    const svg = document.getElementById('timbangan-scale-svg');
+    if (svg) {
+        svg.classList.remove('is-dragging');
+        try {
+            if (dragPointerId !== null) {
+                svg.releasePointerCapture(dragPointerId);
+            }
+        } catch (_) {}
+    }
+
+    isDraggingScale = false;
+    dragPointerId = null;
+
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (now - dragLastTime > 80) {
+        dragVelocity = 0;
+    }
+
+    const clampedVel = Math.max(-80, Math.min(80, dragVelocity));
+    const { income, expense, diff } = getTimbanganMonthlyData(selectedTimbanganMonth, currentTimbanganCurrency);
+    const targetDy = calculateScaleTiltDy(income, expense, diff);
+
+    animateScaleTiltSpring(currentScaleTiltDy, targetDy, clampedVel);
+}
+
+function onScalePointerUp(e) {
+    if (e.pointerId !== dragPointerId) return;
+    endScaleDrag(e);
+}
+
+function onScalePointerCancel(e) {
+    if (e.pointerId !== dragPointerId) return;
+    endScaleDrag(e);
+}
+
+function onWindowBlurDuringTimbangan() {
+    if (isDraggingScale) {
+        endScaleDrag();
+    }
+}
+
+function attachTimbanganPointerEvents() {
+    const svg = document.getElementById('timbangan-scale-svg');
+    if (!svg) return;
+    if (timbanganPointerAttached && currentTimbanganSvgEl === svg) return;
+
+    detachTimbanganPointerEvents();
+
+    svg.addEventListener('pointerdown', onScalePointerDown);
+    svg.addEventListener('pointermove', onScalePointerMove);
+    svg.addEventListener('pointerup', onScalePointerUp);
+    svg.addEventListener('pointercancel', onScalePointerCancel);
+    svg.addEventListener('lostpointercapture', onScalePointerCancel);
+    window.addEventListener('blur', onWindowBlurDuringTimbangan);
+
+    currentTimbanganSvgEl = svg;
+    timbanganPointerAttached = true;
+}
+
+function detachTimbanganPointerEvents() {
+    if (currentTimbanganSvgEl) {
+        currentTimbanganSvgEl.removeEventListener('pointerdown', onScalePointerDown);
+        currentTimbanganSvgEl.removeEventListener('pointermove', onScalePointerMove);
+        currentTimbanganSvgEl.removeEventListener('pointerup', onScalePointerUp);
+        currentTimbanganSvgEl.removeEventListener('pointercancel', onScalePointerCancel);
+        currentTimbanganSvgEl.removeEventListener('lostpointercapture', onScalePointerCancel);
+        currentTimbanganSvgEl.classList.remove('is-dragging');
+        try {
+            if (dragPointerId !== null) {
+                currentTimbanganSvgEl.releasePointerCapture(dragPointerId);
+            }
+        } catch (_) {}
+    }
+    window.removeEventListener('blur', onWindowBlurDuringTimbangan);
+    currentTimbanganSvgEl = null;
+    timbanganPointerAttached = false;
+    isDraggingScale = false;
+    dragPointerId = null;
 }
 
 function generateTimbanganScaleSvg(incomeOrDy, expense, diff, currency) {
@@ -4607,6 +4794,7 @@ function generateTimbanganScaleSvg(incomeOrDy, expense, diff, currency) {
 
     return `
         <svg viewBox="0 0 320 180" class="timbangan-svg" role="img" aria-label="Gambar timbangan garis" id="timbangan-scale-svg">
+            <rect width="320" height="180" fill="transparent" />
             <!-- Stand dan Tiang Utama -->
             <line x1="110" y1="160" x2="210" y2="160" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
             <line x1="${pivotX}" y1="160" x2="${pivotX}" y2="${pivotY}" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
@@ -4648,6 +4836,7 @@ function renderTimbanganScale() {
 
     if (txCount === 0) {
         cancelScaleTiltAnimation();
+        detachTimbanganPointerEvents();
         currentScaleTiltDy = 0;
         isScaleJustOpened = false;
         timbanganScaleContainer.innerHTML = `
@@ -4683,7 +4872,13 @@ function renderTimbanganScale() {
 
     let fromDy = 0;
     if (isScaleJustOpened) {
-        fromDy = 0;
+        const sign = Math.random() < 0.5 ? 1 : -1;
+        let initialDy = sign * (10 + Math.random() * 5);
+        if (Math.abs(initialDy - targetDy) < 5) {
+            initialDy = -initialDy;
+        }
+        fromDy = initialDy;
+        currentScaleTiltDy = fromDy;
         isScaleJustOpened = false;
     } else {
         fromDy = currentScaleTiltDy;
@@ -4725,7 +4920,10 @@ function renderTimbanganScale() {
     }
 
     if (currentActiveTab === 'timbangan') {
-        animateScaleTilt(fromDy, targetDy);
+        attachTimbanganPointerEvents();
+        if (!isDraggingScale) {
+            animateScaleTiltSpring(fromDy, targetDy, 0);
+        }
     } else {
         applyScaleTilt(targetDy);
     }

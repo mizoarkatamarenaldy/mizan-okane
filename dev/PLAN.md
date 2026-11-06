@@ -165,6 +165,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Kotlin 10L: Perbaikan kursor input nominal
 - [x] Kotlin 10M: Transisi menu
 - [x] Kotlin 10N: Animasi Timbangan gravitasi dan goyang
+- [x] Animasi Timbangan gravitasi dan seret (Desktop)
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.

@@ -12,6 +12,12 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-06: Animasi Timbangan gravitasi dan seret (Desktop)
+- Ditambah: Gerak pegas teredam fisik (damping ratio 0.28 dan stiffness 65) pada lengan timbangan bulan ini di desktop yang dimulai dari posisi kemiringan acak saat halaman Timbangan dibuka, lalu berayun naik turun dan meredam hingga berhenti di sudut akhir sesuai berat pemasukan vs pengeluaran (`desktop/src/js/app.js`).
+- Ditambah: Interaksi seret pointer (mouse dan sentuh) pada gambar timbangan yang mengikuti posisi kursor/jari secara responsif dalam batas sudut maksimum Timbangan, mendukung seretan beruntun tanpa patah atau menumpuk animasi, serta berayun dengan redaman saat dilepas hingga kembali ke sudut akhir (`desktop/src/js/app.js`, `desktop/src/css/style.css`).
+- Diubah: Memasang event listener pointer dan window blur hanya selama halaman Timbangan aktif dan melepasnya secara bersih saat berpindah ke halaman lain (`desktop/src/js/app.js`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Animasi Timbangan gravitasi dan seret (Desktop)" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-06: Kotlin 10N: Animasi Timbangan gravitasi dan goyang
 - Ditambah: Animasi timbangan fisik berbasis gerak pegas teredam (`spring` dengan damping ratio 0.28 dan stiffness 65) pada gambar timbangan Kotlin, dimulai dari kemiringan acak saat dibuka lalu berayun naik turun beberapa kali sebelum diam di sudut keseimbangan sesuai berat (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
 - Ditambah: Respon sensor akselerometer (`Sensor.TYPE_ACCELEROMETER`) yang mengayunkan lengan timbangan mengikuti kuat goyangan HP dengan filter pemisah gravitasi dan ambang batas getaran lemah, mendukung goyangan beruntun yang mulus dari posisi saat itu, serta melepas listener saat berpindah halaman atau aplikasi ke latar belakang (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
