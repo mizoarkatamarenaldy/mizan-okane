@@ -648,3 +648,31 @@ Cek manual:
 - Ketik 1500000 di field itu. Tampil "1.500.000", posisi "Rp" tidak bergeser, dan hasil simulasi di bawah tetap benar.
 - Kecilkan lalu besarkan jendela desktop. Field tidak tabrakan dengan elemen lain di lebar mana pun.
 - Mode gelap dan mode terang sama-sama rapi.
+
+## Perbaikan UI PC 15: Ukuran Timbangan
+
+Tujuan: Memperbesar gambar timbangan di kartu "Timbangan Bulan Ini" pada halaman Timbangan versi desktop, supaya mengisi ruang kosong di kartu dan terlihat pas.
+
+Tempat dan tampilan:
+- Halaman Timbangan versi desktop (desktop/src), kartu "Timbangan Bulan Ini" di sisi kanan.
+- Saat ini gambar timbangan terlalu kecil dan ada banyak ruang kosong di sekitarnya, antara header kartu (judul dan navigasi bulan) dan bagian di bawahnya (angka Pemasukan, Pengeluaran, dan kotak Defisit atau Surplus).
+- Setelah diperbaiki, gambar timbangan diperbesar sampai mengisi ruang kosong itu, berada di tengah secara horizontal dan vertikal pada area antara header kartu dan angka Pemasukan dan Pengeluaran.
+- Proporsi gambar timbangan tidak berubah (tidak melar atau gepeng).
+- Ukuran gambar mengikuti ukuran area kartu, jadi tetap pas saat jendela desktop dibesarkan atau dikecilkan.
+- Gambar tidak terpotong, tidak menimpa header kartu, dan tidak menimpa angka Pemasukan dan Pengeluaran di bawahnya.
+- Halaman tetap tanpa scroll seperti hasil "Perbaikan UI PC 4: Timbangan tanpa scroll".
+
+Aturan:
+- Perubahan hanya pada ukuran dan penempatan gambar timbangan lewat CSS atau atribut ukuran gambarnya.
+- Animasi timbangan (miring, gravitasi, seret) tetap berfungsi dan perilakunya tidak berubah.
+- Tidak mengubah kartu "Timbang Sebelum Beli" di kiri, navigasi bulan, kartu Equilibrium, atau teks dan angka di kartu kanan.
+- Tidak mengubah apa pun di mobile/.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Timbangan di desktop dengan jendela lebar. Timbangan terlihat besar dan mengisi ruang kartu, tidak ada ruang kosong yang mencolok di atas atau di bawahnya.
+- Kecilkan lalu besarkan jendela. Timbangan ikut menyesuaikan, tidak terpotong, tidak menimpa teks, dan halaman tidak muncul scroll.
+- Pilih bulan yang berbeda sampai timbangan miring ke kiri, ke kanan, dan seimbang. Ketiga kondisi tampil benar dan animasinya tetap jalan.
+- Mode gelap dan mode terang sama-sama rapi.

@@ -6614,18 +6614,20 @@ body.modal-open {
     #page-timbangan .timbangan-svg-wrap {
         max-width: 100%;
         width: 100%;
-        margin: 4px auto 8px;
+        margin: 0;
         display: flex;
         justify-content: center;
         align-items: center;
-        flex: 0 1 auto;
+        flex: 1 1 0%;
+        min-height: 0;
     }
 
     #page-timbangan .timbangan-svg {
-        height: clamp(80px, 15vh, 130px);
+        aspect-ratio: 320 / 180;
         width: auto;
+        height: auto;
         max-width: 100%;
-        max-height: none;
+        max-height: 100%;
         display: block;
     }
 

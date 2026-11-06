@@ -12,6 +12,10 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-06: Perbaikan UI PC 15: Ukuran Timbangan
+- Diperbaiki: Memperbesar gambar timbangan SVG di kartu "Timbangan Bulan Ini" pada halaman Timbangan desktop (`desktop/src/css/style.css`) agar mengisi ruang kosong antara header kartu dan bagian angka ringkasan pemasukan/pengeluaran secara responsif dan pas, memusatkan gambar timbangan secara vertikal dan horizontal pada area tersebut tanpa mengubah proporsi (rasio 320:180), menjaga agar gambar tidak menimpa teks maupun terpotong pada berbagai ukuran jendela desktop, serta memastikan halaman tetap pas tanpa scroll.
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Perbaikan UI PC 15: Ukuran Timbangan" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-06: Perbaikan UI PC 14: Field Harga Barang Timbangan
 - Diperbaiki: Field "Harga Barang (Rp)" pada kartu "Timbang Sebelum Beli" di halaman Timbangan desktop (`desktop/src/css/style.css`), menyatukan awalan "Rp" dan angka input ke dalam satu kotak input utuh dengan perataan vertikal di tengah, menyamakan ukuran font awalan "Rp" (14px, semibold) dengan angka input, menyesuaikan tinggi kotak (40px di PC, 44px di mobile/layar sempit) serta lebarnya agar persis sama dengan dropdown "Kategori Pengeluaran" dan "Dompet Sumber Dana", dan merapikan jarak antar-elemen agar tidak saling menimpa pada semua ukuran jendela.
 - Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Perbaikan UI PC 14: Field Harga Barang Timbangan" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).

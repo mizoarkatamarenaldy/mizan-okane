@@ -168,6 +168,7 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Animasi Timbangan gravitasi dan seret (Desktop)
 - [x] Kotlin 10O: Perbaikan widget gagal dimuat
 - [x] Perbaikan UI PC 14: Field Harga Barang Timbangan
+- [x] Perbaikan UI PC 15: Ukuran Timbangan
 
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.
