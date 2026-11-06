@@ -4,14 +4,15 @@
 - Di awal sesi, baca dev/RULES.md dan dev/PLAN.md. Lalu baca dev/PLANSPEC.md hanya di bagian item yang dikerjakan, jangan seluruh file.
 - Spek fitur baru WAJIB ditulis di dev/PLANSPEC.md dengan judul sama seperti item di dev/PLAN.md. Di dev/PLAN.md hanya boleh ada satu baris checkbox plus judul singkat, tanpa kurung penjelasan dan tanpa sub-poin.
 - Saat mengerjakan item, ikuti spek di dev/PLANSPEC.md. Kalau spek dan PLAN.md berbeda, spek yang berlaku.
-- Kerjakan SATU tahap per sesi. Khusus Tahap 5 dan item di "Rencana setelah Tahap 5", kerjakan SATU fitur atau item per sesi. Jangan lompat ke tahap, fitur, atau item lain.
+- Kerjakan SATU fitur atau item per sesi. Jangan lompat ke fitur atau item lain.
 - Jangan ubah file di luar tahap yang sedang dikerjakan.
 - Dilarang menjalankan `npm run build`, `npx cap sync`, `npx cap copy`, atau perintah build apa pun. Folder mobile/capacitor/www/ dan mobile/capacitor/android/ hanya dibangun oleh pemilik. Dilarang `git add` pada kedua folder itu. Kalau keduanya muncul di `git status --short`, berhenti dan laporkan.
 - Bagian "Keputusan terkunci" tidak boleh diubah tanpa izin pemilik.
 - Jangan pernah menaruh data transaksi asli, token, kunci, atau file `.env` di repo. Repo ini publik, isinya hanya kode dan dokumen.
-- Di akhir tahap atau fitur, centang tahap atau fitur itu di dev/PLAN.md dan tambahkan satu entri di paling atas `dev/CHANGELOG.md` sesuai format di file itu. Tahap 5 baru dicentang setelah semua fiturnya tercentang. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
+- Di akhir tahap atau fitur, centang tahap atau fitur itu di dev/PLAN.md dan tambahkan satu entri di paling atas `dev/CHANGELOG.md` sesuai format di file itu. Item induk baru dicentang setelah semua sub-itemnya tercentang. Jangan ubah entri lama. Kalau tidak yakin tanggalnya, tulis "tidak tercatat", jangan menebak.
 - Di awal sesi, baca hanya 5 entri paling atas dev/CHANGELOG.md, jangan seluruh file.
-- Baca hanya dev/CHANGELOG.md dan dev/PLANSPEC.md yang aktif. Folder dev/arsip/ tidak dibaca, kecuali Mizo memintanya atau fitur yang dikerjakan menyentuh fitur lama; dalam kasus itu buka hanya bagian yang terkait.
+- Baca hanya dev/CHANGELOG.md dan dev/PLANSPEC.md yang aktif. Arsip ada di dev/arsip/vX.Y.Z/, tidak dibaca kecuali Mizan memintanya atau fitur yang dikerjakan menyentuh fitur lama; dalam kasus itu buka hanya bagian yang terkait.
+- Aturan rilis, berlaku hanya kalau Mizo memintanya lewat prompt: pindahkan dev/CHANGELOG.md lalu dev/PLANSPEC.md ke dev/arsip/vX.Y.Z/ dengan `git mv`, satu pemindahan per commit. Lalu buat file aktif baru berjudul versi berikutnya, berisi hanya entri dan spek setelah tag rilis itu. Agent tidak boleh memutuskan sendiri kapan rilis.
 - Untuk tugas tampilan, baca dev/DESIGN.md dulu dan ikuti. Jangan menambah warna, font, bayangan, atau animasi di luar dev/DESIGN.md.
 
 ## Alur commit dan push

@@ -1,5 +1,7 @@
 # PLAN.md: mizan-okane
 
+Spek tiap versi yang sudah rilis ada di dev/arsip/vX.Y.Z/PLANSPEC.md.
+
 WAJIB baca dev/RULES.md dulu sebelum mengerjakan apa pun. Spek lengkap tiap item ada di dev/PLANSPEC.md, desain ada di dev/DESIGN.md.
 
 Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Drive.
@@ -15,15 +17,12 @@ Aplikasi money manager pribadi. Jalan di HP dan PC, data sinkron lewat Google Dr
 - Harus ada tombol ekspor JSON manual sebagai cadangan.
 - Android: aplikasi native Kotlin (Jetpack Compose, Room), ditulis ulang di mobile/kotlin/. Capacitor tidak dilanjutkan dan APK Capacitor tidak dirilis. mobile/capacitor/ dibekukan sebagai acuan sampai Konversi Kotlin selesai. Login Google di APK memakai jalur native Android, sedangkan data tetap di Drive `appDataFolder`. Dirilis lewat GitHub Releases, bukan Play Store. Kotlin khusus Android, Tauri khusus Windows, tanpa KMP. Versi PWA di GitHub Pages tetap ada sebagai preview dan sumber kode untuk desktop.
 
-## Versi 1: fitur minimal
-Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
-
-## Tahap
-- [x] **Tahap 1: Lokal dulu**
-- [x] **Tahap 2: Jadi PWA**
-- [x] **Tahap 3: Login Google dan sinkron Drive**
-- [x] **Tahap 4: Aturan konflik data**
-- [x] **Tahap 5: Fitur tambahan**
+## v0.1.0 (dirilis 22 Okt 2026)
+- [x] Tahap 1: Lokal dulu
+- [x] Tahap 2: Jadi PWA
+- [x] Tahap 3: Login Google dan sinkron Drive
+- [x] Tahap 4: Aturan konflik data
+- [x] Tahap 5: Fitur tambahan
   - [x] Ekspor CSV
   - [x] Jam:menit pada transaksi
   - [x] Perbaikan: login Google lebih mulus
@@ -98,9 +97,6 @@ Catat pemasukan dan pengeluaran, kategori, lihat riwayat. Itu saja.
   - [x] Ikon sub kategori
   - [x] Perbaikan: dialog Pilih Ikon muncul sendiri di Pengaturan
   - [x] Kategori Equilibrium
-
-## Rencana setelah Tahap 5
-Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh prompt dengan klausa "Izin dari pemilik".
 - [x] Pemisahan folder
 - [x] Revisi UI PC
 - [x] Perbaikan UI PC: Riwayat dan Timbangan
@@ -114,12 +110,12 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Perbaikan UI PC 9: Form Transaksi Lanjutan
 - [x] Perbaikan UI PC 10: Kolom Form Transaksi
 - [x] Perbaikan UI PC 11: Dropdown Kategori
-- [x] **Perbaikan UI PC 12: Dropdown Dompet**
-- [x] **Perbaikan UI PC 13: Dropdown Dompet Transfer**
-- [x] **Perbaikan UI Mobile 1: Form Transaksi Layar Penuh**
-- [x] **Perbaikan UI Mobile 2: Dropdown Kustom Mobile**
+- [x] Perbaikan UI PC 12: Dropdown Dompet
+- [x] Perbaikan UI PC 13: Dropdown Dompet Transfer
+- [x] Perbaikan UI Mobile 1: Form Transaksi Layar Penuh
+- [x] Perbaikan UI Mobile 2: Dropdown Kustom Mobile
 - [x] Konversi Tauri
-- [ ] Konversi Kotlin
+- [x] Konversi Kotlin
   - [x] Kotlin 1: Kerangka
   - [x] Kotlin 2: Data
   - [x] Kotlin 3: Beranda, Riwayat, form transaksi
@@ -139,20 +135,20 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
   - [x] Kotlin 8B: Sinkron Drive
   - [x] Kotlin 10G: Perbaikan format file sinkron
   - [x] Kotlin 10H: Perbaikan overflow sinkron
-  - [x] Kotlin 9D: Audit data dan reset
-  - [x] Kotlin 9B: Audit dompet, kategori, budget
-  - [x] Kotlin 9C: Audit Timbangan dan Statistik
-  - [x] Kotlin 9A: Audit Beranda, Riwayat, Form Transaksi, Komponen Umum
-  - [x] Kotlin 9E: Audit Lintas File
-  - [x] Kotlin 11: Form transaksi ikut filter dompet
-  - [x] Kotlin 10I: Perbaikan label navigasi Timbangan
-- [ ] APK rilis
 - [x] APK Item A: login Google native
-- [ ] Persiapan rilis publik
 - [x] Saran catatan lama
 - [x] Perbaikan Tauri: popup login Google
 - [x] Login Google Tauri: loopback
 - [x] Perbaikan Tauri: fitur form reqwest
+
+## v0.2.0 (dirilis 6 Nov 2026)
+- [x] Kotlin 9D: Audit data dan reset
+- [x] Kotlin 9B: Audit dompet, kategori, budget
+- [x] Kotlin 9C: Audit Timbangan dan Statistik
+- [x] Kotlin 9A: Audit Beranda, Riwayat, Form Transaksi, Komponen Umum
+- [x] Kotlin 9E: Audit Lintas File
+- [x] Kotlin 11: Form transaksi ikut filter dompet
+- [x] Kotlin 10I: Perbaikan label navigasi Timbangan
 - [x] Form transaksi ikut filter dompet
 - [x] Animasi Timbangan (Desktop)
 - [x] Animasi Timbangan (Kotlin)
@@ -171,6 +167,11 @@ Kerjakan berurutan dari atas. Item yang menyentuh "Keputusan terkunci" butuh pro
 - [x] Perbaikan UI PC 15: Ukuran Timbangan
 - [x] Perbaikan UI PC 16: Batas Bulan Timbangan
 
+## v0.3.0 (sedang dikerjakan)
+- [ ] APK rilis
+- [ ] Persiapan rilis publik
+- [x] Susun ulang dokumen dev per versi
+
 ## Ditunda
 Tidak dikerjakan sampai pemilik memintanya.
-- [ ] Rollover budget
+- [ ] Rollover budget
