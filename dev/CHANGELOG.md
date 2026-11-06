@@ -12,6 +12,11 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-06: Kotlin 10N: Animasi Timbangan gravitasi dan goyang
+- Ditambah: Animasi timbangan fisik berbasis gerak pegas teredam (`spring` dengan damping ratio 0.28 dan stiffness 65) pada gambar timbangan Kotlin, dimulai dari kemiringan acak saat dibuka lalu berayun naik turun beberapa kali sebelum diam di sudut keseimbangan sesuai berat (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
+- Ditambah: Respon sensor akselerometer (`Sensor.TYPE_ACCELEROMETER`) yang mengayunkan lengan timbangan mengikuti kuat goyangan HP dengan filter pemisah gravitasi dan ambang batas getaran lemah, mendukung goyangan beruntun yang mulus dari posisi saat itu, serta melepas listener saat berpindah halaman atau aplikasi ke latar belakang (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/TimbanganScreen.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 10N: Animasi Timbangan gravitasi dan goyang" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-06: Kotlin 10M: Transisi menu
 - Diubah: Mengganti animasi fade antar tab bar navigasi bawah dengan animasi geser horizontal (`slideIntoContainer` dan `slideOutOfContainer`) berdurasi 250 ms sesuai arah relatif tab (masuk dari kanan ke kiri saat menuju tab di kanan, dan sebaliknya), tanpa fade atau perubahan skala, serta memberikan latar `bg` dari token `MizanTheme.colors.bg` pada layar agar tidak tembus pandang saat transisi (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/MainActivity.kt`).
 - Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 10M: Transisi menu" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).

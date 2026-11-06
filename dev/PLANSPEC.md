@@ -537,3 +537,32 @@ Cek manual:
 - Ketuk tab yang sedang aktif: tidak ada animasi.
 - Matikan animasi sistem Android (Opsi Pengembang, skala animasi mati), pindah tab: instan.
 - Buka form transaksi dari tab mana pun: transisinya sama seperti sebelum item ini.
+
+## Kotlin 10N: Animasi Timbangan gravitasi dan goyang
+
+Tujuan: Timbangan di Kotlin terasa seperti timbangan fisik. Saat halaman dibuka, lengannya naik turun lalu berhenti di sisi yang paling berat. Saat HP digoyang, lengannya ikut bergerak lalu berhenti lagi di sisi yang paling berat.
+
+Tempat dan tampilan:
+- Halaman Timbangan di mobile/kotlin/. Tidak ada tombol, kartu, atau teks baru. Yang berubah hanya gerak lengan dan piringan Timbangan.
+
+Aturan:
+- Saat halaman Timbangan dibuka, lengan mulai dari posisi miring acak lalu berayun naik turun dengan ayunan yang makin mengecil, dan berhenti di sudut akhir sesuai berat. Sudut akhir sama dengan sudut yang dipakai animasi Timbangan sekarang.
+- Ayunan memakai gerak pegas teredam (gravitasi dan redaman), bukan gerak linear. Lengan boleh melewati sudut akhir sedikit lalu kembali, sampai diam.
+- Saat HP digoyang (dibaca dari sensor akselerometer), lengan terayun mengikuti kuat goyangan, lalu meredam dan berhenti di sudut akhir yang sama sesuai berat.
+- Goyangan yang lemah di bawah ambang tidak memicu gerak. Goyangan beruntun tidak boleh membuat animasi menumpuk atau patah, gerak baru melanjutkan dari posisi lengan saat itu.
+- Piringan tetap menggantung dan mengikuti gerak lengan.
+- Pendengar sensor hanya aktif selama halaman Timbangan terbuka. Sensor dilepas saat halaman ditutup atau aplikasi ke latar belakang.
+- Sudut akhir tetap dihitung dari berat seperti sekarang. Fitur ini tidak mengubah cara berat dihitung.
+- Fitur ini sengaja TIDAK menambah izin Android baru, tidak menambah suara atau getar, dan tidak mengubah halaman selain Timbangan.
+- Izin dari pemilik: fitur ini hanya ada di Kotlin dan boleh berbeda dari versi web di desktop/src. Jangan ubah desktop/ dan mobile/capacitor/.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Buka Timbangan saat sisi pemasukan lebih berat: lengan berayun naik turun beberapa kali lalu berhenti miring ke sisi pemasukan.
+- Buka Timbangan saat sisi pengeluaran lebih berat: lengan berhenti miring ke sisi pengeluaran.
+- Buka Timbangan lalu goyang HP: lengan terayun, lalu berhenti lagi di sudut yang sama seperti sebelum digoyang.
+- Goyang HP tiga kali berturut-turut dengan cepat: gerak tetap halus, tidak patah, dan akhirnya berhenti di sudut yang benar.
+- Pindah ke halaman lain lalu goyang HP: tidak ada gerak dan tidak ada error. Kembali ke Timbangan: animasi buka berjalan lagi.
+- Saat berat kedua sisi sama: lengan berayun lalu berhenti lurus.

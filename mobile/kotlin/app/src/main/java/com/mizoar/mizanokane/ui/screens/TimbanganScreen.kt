@@ -1,9 +1,15 @@
 package com.mizoar.mizanokane.ui.screens
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.SystemClock
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.EaseOutCubic
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -34,12 +40,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +57,9 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -83,6 +94,8 @@ import com.mizoar.mizanokane.ui.components.CustomDropdown
 import com.mizoar.mizanokane.ui.components.DropdownOption
 import com.mizoar.mizanokane.ui.theme.MizanTheme
 import java.util.UUID
+import kotlin.random.Random
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
@@ -1047,19 +1060,188 @@ private fun TimbanganScaleCanvas(
         calculateScaleTiltDy(income, expense, diff)
     }
 
-    val animatedDy = remember { Animatable(0f) }
+    // Posisi miring acak saat awal dibuka
+    val initialDy = remember {
+        val sign = if (Random.nextBoolean()) 1f else -1f
+        var tilt = sign * (10f + Random.nextFloat() * 5f)
+        if (kotlin.math.abs(tilt - targetDy) < 5f) {
+            tilt = -tilt
+        }
+        tilt
+    }
+
+    val animatedDy = remember { Animatable(initialDy) }
+
+    // Gerak pegas teredam (gravitasi dan redaman)
+    val scaleSpringSpec = remember {
+        spring<Float>(
+            dampingRatio = 0.28f,
+            stiffness = 65f
+        )
+    }
 
     LaunchedEffect(targetDy) {
         animatedDy.animateTo(
             targetValue = targetDy.toFloat(),
-            animationSpec = tween(
-                durationMillis = 450,
-                easing = EaseOutCubic
-            )
+            animationSpec = scaleSpringSpec
         )
     }
 
-    val dy = animatedDy.value
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
+    val currentTargetDy by rememberUpdatedState(targetDy)
+    var shakeJob by remember { mutableStateOf<Job?>(null) }
+
+    val sensorEventListener = remember {
+        object : SensorEventListener {
+            private var gravityX = 0f
+            private var gravityY = 0f
+            private var gravityZ = 0f
+            private var hasGravityInit = false
+
+            private var lastShakeTimestamp = 0L
+            private var peakAcceleration = 0f
+            private var alternateDirection = 1f
+
+            override fun onSensorChanged(event: SensorEvent?) {
+                if (event == null) return
+                val x = event.values[0]
+                val y = event.values[1]
+                val z = event.values[2]
+
+                if (!hasGravityInit) {
+                    gravityX = x
+                    gravityY = y
+                    gravityZ = z
+                    hasGravityInit = true
+                    return
+                }
+
+                // Filter low-pass untuk gravitasi
+                val alpha = 0.8f
+                gravityX = alpha * gravityX + (1f - alpha) * x
+                gravityY = alpha * gravityY + (1f - alpha) * y
+                gravityZ = alpha * gravityZ + (1f - alpha) * z
+
+                // Filter high-pass untuk akselerasi dinamis goyangan
+                val linearX = x - gravityX
+                val linearY = y - gravityY
+                val linearZ = z - gravityZ
+
+                val dynamicAccel = kotlin.math.sqrt(
+                    linearX * linearX + linearY * linearY + linearZ * linearZ
+                )
+
+                // Ambang batas: goyangan lemah di bawah ambang tidak memicu gerak
+                val threshold = 3.6f
+                if (dynamicAccel < threshold) {
+                    return
+                }
+
+                val now = SystemClock.uptimeMillis()
+                val timeDiff = now - lastShakeTimestamp
+
+                val strength = dynamicAccel - threshold
+
+                // Arah ayunan mengikuti goyangan horizontal jika dominan, atau bergantian
+                val direction = if (kotlin.math.abs(linearX) >= 1.2f) {
+                    if (linearX > 0f) 1f else -1f
+                } else {
+                    alternateDirection = -alternateDirection
+                    alternateDirection
+                }
+
+                if (timeDiff >= 200L) {
+                    // Goyangan baru dalam rangkaian
+                    lastShakeTimestamp = now
+                    peakAcceleration = dynamicAccel
+
+                    val impulseMagnitude = (strength * 10f).coerceIn(15f, 180f)
+                    val impulse = direction * impulseMagnitude
+
+                    val currentVel = animatedDy.velocity
+                    val newVel = (currentVel * 0.5f + impulse).coerceIn(-220f, 220f)
+
+                    shakeJob?.cancel()
+                    shakeJob = coroutineScope.launch {
+                        animatedDy.animateTo(
+                            targetValue = currentTargetDy.toFloat(),
+                            animationSpec = scaleSpringSpec,
+                            initialVelocity = newVel
+                        )
+                    }
+                } else if (dynamicAccel > peakAcceleration) {
+                    // Puncak akselerasi lebih tinggi pada ayunan yang sedang berlangsung
+                    val extraStrength = dynamicAccel - peakAcceleration
+                    peakAcceleration = dynamicAccel
+
+                    if (extraStrength >= 1.2f) {
+                        val boostImpulse = direction * (extraStrength * 8f).coerceIn(10f, 100f)
+                        val currentVel = animatedDy.velocity
+                        val newVel = (currentVel + boostImpulse * 0.6f).coerceIn(-220f, 220f)
+
+                        shakeJob?.cancel()
+                        shakeJob = coroutineScope.launch {
+                            animatedDy.animateTo(
+                                targetValue = currentTargetDy.toFloat(),
+                                animationSpec = scaleSpringSpec,
+                                initialVelocity = newVel
+                            )
+                        }
+                    }
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+        val accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        var isRegistered = false
+
+        val registerSensor: () -> Unit = {
+            if (!isRegistered && sensorManager != null && accelerometer != null) {
+                sensorManager.registerListener(
+                    sensorEventListener,
+                    accelerometer,
+                    SensorManager.SENSOR_DELAY_GAME
+                )
+                isRegistered = true
+            }
+        }
+
+        val unregisterSensor: () -> Unit = {
+            if (isRegistered && sensorManager != null) {
+                sensorManager.unregisterListener(sensorEventListener)
+                isRegistered = false
+            }
+        }
+
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> registerSensor()
+                Lifecycle.Event.ON_PAUSE -> unregisterSensor()
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            registerSensor()
+        }
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            unregisterSensor()
+            shakeJob?.cancel()
+        }
+    }
+
+    val dy = animatedDy.value.coerceIn(-26f, 26f)
 
     Canvas(
         modifier = modifier
