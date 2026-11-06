@@ -17,6 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -267,7 +272,13 @@ fun MizanApp(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            composable(Screen.Beranda.route) {
+            composable(
+                route = Screen.Beranda.route,
+                enterTransition = { tabEnterTransition() },
+                exitTransition = { tabExitTransition() },
+                popEnterTransition = { tabEnterTransition() },
+                popExitTransition = { tabExitTransition() }
+            ) {
                 BerandaScreen(
                     repository = repository,
                     selectedMonth = berandaMonth,
@@ -291,10 +302,19 @@ fun MizanApp(
                     onEditTransactionClick = { txId ->
                         formInitialWalletId = null
                         navController.navigate("${Screen.TransactionForm.route}/$txId")
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MizanTheme.colors.bg)
                 )
             }
-            composable(Screen.Riwayat.route) {
+            composable(
+                route = Screen.Riwayat.route,
+                enterTransition = { tabEnterTransition() },
+                exitTransition = { tabExitTransition() },
+                popEnterTransition = { tabEnterTransition() },
+                popExitTransition = { tabExitTransition() }
+            ) {
                 RiwayatScreen(
                     repository = repository,
                     selectedMonth = riwayatMonthFilter,
@@ -315,28 +335,55 @@ fun MizanApp(
                     onEditTransactionClick = { txId ->
                         formInitialWalletId = null
                         navController.navigate("${Screen.TransactionForm.route}/$txId")
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MizanTheme.colors.bg)
                 )
             }
-            composable(Screen.Timbangan.route) {
+            composable(
+                route = Screen.Timbangan.route,
+                enterTransition = { tabEnterTransition() },
+                exitTransition = { tabExitTransition() },
+                popEnterTransition = { tabEnterTransition() },
+                popExitTransition = { tabExitTransition() }
+            ) {
                 TimbanganScreen(
                     repository = repository,
                     onNavigateToTransactionForm = {
                         formInitialWalletId = null
                         navController.navigate(Screen.TransactionForm.route)
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MizanTheme.colors.bg)
                 )
             }
-            composable(Screen.Statistik.route) {
+            composable(
+                route = Screen.Statistik.route,
+                enterTransition = { tabEnterTransition() },
+                exitTransition = { tabExitTransition() },
+                popEnterTransition = { tabEnterTransition() },
+                popExitTransition = { tabExitTransition() }
+            ) {
                 StatistikScreen(
                     repository = repository,
                     onNavigateToTransactionForm = {
                         formInitialWalletId = null
                         navController.navigate(Screen.TransactionForm.route)
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MizanTheme.colors.bg)
                 )
             }
-            composable(Screen.Pengaturan.route) {
+            composable(
+                route = Screen.Pengaturan.route,
+                enterTransition = { tabEnterTransition() },
+                exitTransition = { tabExitTransition() },
+                popEnterTransition = { tabEnterTransition() },
+                popExitTransition = { tabExitTransition() }
+            ) {
                 PengaturanScreen(
                     onTampilanClick = {
                         navController.navigate(Screen.SubmenuTampilan.route)
@@ -361,7 +408,10 @@ fun MizanApp(
                     },
                     onZonaBahayaClick = {
                         navController.navigate(Screen.SubmenuBahaya.route)
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MizanTheme.colors.bg)
                 )
             }
             composable(Screen.SubmenuTampilan.route) {
@@ -522,5 +572,51 @@ private fun DemoModeBanner(
                 )
             )
         }
+    }
+}
+
+private val BottomNavOrder = listOf(
+    Screen.Beranda.route,
+    Screen.Riwayat.route,
+    Screen.Timbangan.route,
+    Screen.Statistik.route,
+    Screen.Pengaturan.route
+)
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.tabEnterTransition(): EnterTransition? {
+    val fromRoute = initialState.destination.route ?: return null
+    val toRoute = targetState.destination.route ?: return null
+    val fromIndex = BottomNavOrder.indexOf(fromRoute)
+    val toIndex = BottomNavOrder.indexOf(toRoute)
+    if (fromIndex == -1 || toIndex == -1 || fromIndex == toIndex) return null
+    return if (toIndex > fromIndex) {
+        slideIntoContainer(
+            towards = AnimatedContentTransitionScope.SlideDirection.Left,
+            animationSpec = tween(durationMillis = 250)
+        )
+    } else {
+        slideIntoContainer(
+            towards = AnimatedContentTransitionScope.SlideDirection.Right,
+            animationSpec = tween(durationMillis = 250)
+        )
+    }
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.tabExitTransition(): ExitTransition? {
+    val fromRoute = initialState.destination.route ?: return null
+    val toRoute = targetState.destination.route ?: return null
+    val fromIndex = BottomNavOrder.indexOf(fromRoute)
+    val toIndex = BottomNavOrder.indexOf(toRoute)
+    if (fromIndex == -1 || toIndex == -1 || fromIndex == toIndex) return null
+    return if (toIndex > fromIndex) {
+        slideOutOfContainer(
+            towards = AnimatedContentTransitionScope.SlideDirection.Left,
+            animationSpec = tween(durationMillis = 250)
+        )
+    } else {
+        slideOutOfContainer(
+            towards = AnimatedContentTransitionScope.SlideDirection.Right,
+            animationSpec = tween(durationMillis = 250)
+        )
     }
 }

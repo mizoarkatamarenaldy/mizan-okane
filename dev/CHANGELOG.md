@@ -12,6 +12,10 @@ Catat setiap fitur atau perbaikan yang selesai. Entri terbaru di atas.
 - Diubah: ...
 ```
 
+## 2026-11-06: Kotlin 10M: Transisi menu
+- Diubah: Mengganti animasi fade antar tab bar navigasi bawah dengan animasi geser horizontal (`slideIntoContainer` dan `slideOutOfContainer`) berdurasi 250 ms sesuai arah relatif tab (masuk dari kanan ke kiri saat menuju tab di kanan, dan sebaliknya), tanpa fade atau perubahan skala, serta memberikan latar `bg` dari token `MizanTheme.colors.bg` pada layar agar tidak tembus pandang saat transisi (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/MainActivity.kt`).
+- Diubah: Menambahkan rencana, spesifikasi, dan mencentang item "Kotlin 10M: Transisi menu" di `dev/PLAN.md` dan `dev/PLANSPEC.md` (`dev/PLAN.md`, `dev/PLANSPEC.md`).
+
 ## 2026-11-05: Kotlin 10L: Perbaikan kursor input nominal
 - Diperbaiki: Menggunakan `TextFieldValue` dengan seleksi kursor selalu berada di akhir teks (`TextRange(formatted.length)`) pada komponen `AmountInputField` sehingga kursor tidak lagi melompat ke tengah angka saat titik pemisah ribuan muncul ketika mengetik atau menghapus nominal transaksi, transfer, penyesuaian saldo, dan simulasi timbangan (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/components/AmountInputField.kt`).
 - Diperbaiki: Memperbaiki posisi kursor pada ketiga kolom input budget (edit inline budget kategori, edit inline budget sub kategori, dan form modal atur budget) di `KelolaBudgetScreen` menggunakan `TextFieldValue` agar kursor konsisten tetap di akhir angka (`mobile/kotlin/app/src/main/java/com/mizoar/mizanokane/ui/screens/KelolaBudgetScreen.kt`).

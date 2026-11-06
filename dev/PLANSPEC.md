@@ -507,3 +507,33 @@ Cek manual:
 - Dari "100.000|", tekan hapus satu kali. Hasil: "10.000|", kursor di akhir.
 - Ulangi di kolom nominal lain (transfer, budget, penyesuaian saldo) dan hasilnya sama.
 
+## Kotlin 10M: Transisi menu
+
+Tujuan: mengganti animasi fade bawaan saat pindah antar menu di bar navigasi bawah versi Kotlin dengan animasi geser horizontal. Fade bawaan membuat dua halaman sempat tampak bertumpuk sehingga terasa aneh.
+
+Izin dari pemilik: item ini boleh menambah animasi transisi antar tab di mobile/kotlin/, walaupun dev/DESIGN.md menetapkan MOTION 1 dan RULES.md melarang animasi di luar DESIGN.md serta fitur yang tidak ada di web. Izin ini hanya untuk transisi antar tab yang dijelaskan di bawah, tidak untuk animasi lain. dev/DESIGN.md tidak diubah.
+
+Tempat dan tampilan:
+- Berlaku hanya saat pindah antar item di bar navigasi bawah (sesuai item yang ada di kode).
+- Urutan tab diambil dari urutan item di bar navigasi bawah, dari kiri ke kanan.
+- Pindah ke tab di kanan: halaman baru masuk dari kanan, halaman lama keluar ke kiri. Pindah ke tab di kiri: sebaliknya.
+- Durasi 250 ms, easing standar bawaan Compose. Tanpa fade, tanpa perubahan skala.
+- Halaman yang bergeser memakai warna latar bg dari token DESIGN.md supaya halaman di belakangnya tidak tembus pandang saat bergeser.
+
+Aturan:
+- Arah geser ditentukan oleh posisi tab asal dibanding tab tujuan, bukan oleh jarak. Pindah dari tab pertama langsung ke tab terakhir tetap satu geseran, tidak melewati tab di tengah.
+- Mengetuk tab yang sedang aktif tidak memicu animasi.
+- Tombol back Android yang kembali ke tab sebelumnya memakai aturan arah yang sama.
+- Kalau animasi sistem Android dimatikan, pindah tab terjadi instan tanpa animasi.
+- Yang diubah hanya animasi transisinya. Logika navigasi, penyimpanan posisi scroll, dan isi tiap halaman tidak berubah.
+- Sengaja TIDAK dilakukan: mengubah transisi layar non-tab (form transaksi, dialog, submenu Pengaturan), menyentuh animasi Timbangan yang sudah ada, atau mengubah desktop/.
+
+Data:
+- Tidak ada perubahan struktur data, sinkron Drive, ekspor, atau impor.
+
+Cek manual:
+- Di Beranda, ketuk tab di kanannya: halaman baru masuk dari kanan, halaman lama keluar ke kiri, tanpa fade, tanpa halaman bertumpuk.
+- Dari tab paling kanan, ketuk tab paling kiri: satu geseran ke arah kanan layar (halaman baru masuk dari kiri), tidak melewati tab di tengah.
+- Ketuk tab yang sedang aktif: tidak ada animasi.
+- Matikan animasi sistem Android (Opsi Pengembang, skala animasi mati), pindah tab: instan.
+- Buka form transaksi dari tab mana pun: transisinya sama seperti sebelum item ini.
